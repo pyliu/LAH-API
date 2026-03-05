@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tomcat 戰情面板 (Vue3 完全體)</title>
+    
+    <!-- 離線資源引入 (Vue 3, Tailwind, Lucide) -->
+    <script src="./offline/tailwindcss.js"></script>
+    <script src="./offline/vue.global.prod.js"></script>
+    <script src="./offline/lucide.min.js"></script>
+
+    <!-- Tailwind 佈景與動畫設定 -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.3s ease-out forwards',
+                        'scale-in': 'scaleIn 0.2s ease-out forwards',
+                        'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        scaleIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- 系統級樣式修正 -->
+    <style>
+        * { transition: background-color 0.2s ease, border-color 0.2s ease; }
+        
+        /* 自訂捲軸 */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        .dark ::webkit-scrollbar-track { background: #0f172a; }
+        ::webkit-scrollbar-track { background: #f1f5f9; }
+        .dark ::webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        [v-cloak] { display: none; }
+        html { scroll-behavior: smooth; }
+
+        /* 縮放容器設定 */
+        #zoom-wrapper {
+            transform-origin: top center;
+            transition: zoom 0.2s ease-out;
+        }
+
+        /* 核心修復：解決 Chrome 在 zoom 下 Flexbox 與捲動圖層重疊的 Bug */
+        .zoom-layer-fix {
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            isolation: isolate;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans overflow-hidden">
+
+    <div id="app" v-cloak class="h-screen overflow-y-auto relative">
+        <div id="zoom-wrapper" :style="{ zoom: zoomLevel }">
+            
+            <!-- 👑 固定頂端導覽列 (Sticky Header) -->
+            <header class="sticky top-0 z-30 w-full bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm zoom-layer-fix">
+                <div class="max-w-7xl mx-auto px-4 md:px-8 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-blue-600 rounded-lg mr-3 shadow-lg shadow-blue-500/20">
+                            <i data-lucide="server" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-black text-slate-800 dark:text-white tracking-tight leading-none">Tomcat 戰情面板</h1>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">Ops Management Dashboard</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 w-full md:w-auto">
+                        <!-- API 設定 -->
+                        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl flex items-center gap-1 shadow-sm flex-1 md:flex-none">
+                            <div class="relative flex-1 md:flex-none">
+                                <i data-lucide="activity" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" v-model="apiUrl" placeholder="Server IP" class="pl-8 pr-3 py-1.5 bg-transparent text-xs focus:ring-0 outline-none w-full md:w-40">
+                            </div>
+                            <div class="w-px h-4 bg-slate-200 dark:bg-slate-800 mx-1"></div>
+                            <div class="relative flex-1 md:flex-none">
+                                <i data-lucide="settings" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input type="password" v-model="apiKey" placeholder="Key" class="pl-8 pr-3 py-1.5 bg-transparent text-xs focus:ring-0 outline-none w-full md:w-32">
+                            </div>
+                        </div>
+
+                        <!-- 主題切換 -->
+                        <button @click="toggleTheme" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all shadow-sm">
+                            <i :data-lucide="isDarkMode ? 'sun' : 'moon'" class="w-4 h-4 text-amber-500 dark:text-yellow-400"></i>
+                        </button>
+                        
+                        <!-- 縮放控制 UI -->
+                        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl flex items-center gap-1 shadow-sm">
+                            <button @click="changeZoom(-0.05)" class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" title="縮小">
+                                <i data-lucide="zoom-out" class="w-3.5 h-3.5 text-slate-500"></i>
+                            </button>
+                            <button @click="resetZoom" class="px-2 py-1 text-[10px] font-black text-slate-500 dark:text-slate-400 hover:text-blue-500 transition-colors uppercase" title="重設縮放">
+                                {{ Math.round(zoomLevel * 100) }}%
+                            </button>
+                            <button @click="changeZoom(0.05)" class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" title="放大">
+                                <i data-lucide="zoom-in" class="w-3.5 h-3.5 text-slate-500"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 主要網格佈局 -->
+            <main class="max-w-7xl mx-auto px-4 md:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- 👑 左側邊欄 (Sticky + 動態防護高度) -->
+                <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-[100px] zoom-layer-fix overflow-y-auto pr-2" :style="{ maxHeight: logContainerHeight }">
+                    
+                    <!-- 1. 狀態卡片 -->
+                    <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-5 dark:opacity-10 pointer-events-none">
+                            <i data-lucide="activity" class="w-24 h-24"></i>
+                        </div>
+                        <div class="mb-6 flex justify-between items-start">
+                            <div :class="['inline-flex items-center px-4 py-1.5 rounded-full border transition-all shadow-sm', statusColors.bg]">
+                                <div :class="['w-2 h-2 rounded-full mr-2', statusColors.dot]"></div>
+                                <span class="font-bold tracking-wide uppercase text-[10px]">{{ statusData?.Status || 'Checking...' }}</span>
+                            </div>
+                            <button @click="fetchStatus" class="p-1.5 text-slate-400 hover:text-blue-500 transition-colors">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="space-y-4 text-xs">
+                            <div class="flex justify-between items-center border-b border-slate-50 dark:border-slate-800 pb-2">
+                                <span class="text-slate-400 font-medium">Service Name</span>
+                                <span class="font-bold text-slate-700 dark:text-slate-300 truncate max-w-[150px]">{{ statusData?.DisplayName || statusData?.ServiceName || '--' }}</span>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <span class="text-slate-400 font-medium text-[10px] uppercase">Installation Path</span>
+                                <span class="font-mono text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-950 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800 truncate" :title="statusData?.TomcatDir">
+                                    {{ statusData?.TomcatDir || '--' }}
+                                </span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 🚀 2. 資源監控卡片 (整合 CPU/RAM) -->
+                    <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+                        <h2 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center">
+                            <i data-lucide="cpu" class="w-3.5 h-3.5 mr-2"></i> Resource Monitor
+                        </h2>
+                        <div class="space-y-4">
+                            <!-- 系統 CPU -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-1.5">
+                                    <span class="text-slate-400 font-medium">System CPU</span>
+                                    <span class="font-mono font-bold text-slate-700 dark:text-slate-300">{{ statusData?.SysCpu || 0 }}%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                    <div class="bg-blue-500 h-1.5 rounded-full transition-all duration-500" :style="{ width: (statusData?.SysCpu || 0) + '%' }"></div>
+                                </div>
+                            </div>
+                            <!-- 系統 RAM -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-1.5">
+                                    <span class="text-slate-400 font-medium">System RAM</span>
+                                    <span class="font-mono font-bold text-slate-700 dark:text-slate-300">{{ formatBytes(statusData?.SysMemUsed) }} / {{ formatBytes(statusData?.SysMemTotal) }}</span>
+                                </div>
+                                <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                    <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" :style="{ width: (statusData?.SysMemPct || 0) + '%' }"></div>
+                                </div>
+                            </div>
+                            <hr class="border-slate-100 dark:border-slate-800" />
+                            <!-- Tomcat 資源 -->
+                            <div class="flex justify-between items-center text-xs pt-1">
+                                <span class="text-slate-400 font-medium flex items-center"><i data-lucide="cpu" class="w-3 h-3 mr-1.5 text-slate-500"></i>Tomcat CPU</span>
+                                <span class="font-mono font-bold text-blue-600 dark:text-blue-400">{{ statusData?.TomcatCpu || 0 }}%</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs pb-1">
+                                <span class="text-slate-400 font-medium flex items-center"><i data-lucide="memory-stick" class="w-3 h-3 mr-1.5 text-slate-500"></i>Tomcat RAM</span>
+                                <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">{{ formatBytes(statusData?.TomcatMemUsed) }}</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 3. Tomcat 維運操作 -->
+                    <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+                        <h2 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">Operations</h2>
+                        <div class="space-y-2">
+                            <button @click="handleAction('restartTomcat')" :disabled="isOperating" class="w-full flex items-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-blue-600 hover:text-white border border-slate-100 dark:border-slate-700 rounded-xl transition-all group disabled:opacity-50">
+                                <i data-lucide="rotate-cw" class="w-4 h-4 mr-3 text-blue-600 dark:text-blue-400 group-hover:text-white transition-colors"></i>
+                                <span class="text-sm font-bold">重啟 Tomcat 服務</span>
+                            </button>
+                            <button @click="handleAction('cleanCache')" :disabled="isOperating" class="w-full flex items-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-amber-500 hover:text-white border border-slate-100 dark:border-slate-700 rounded-xl transition-all group disabled:opacity-50">
+                                <i data-lucide="trash-2" class="w-4 h-4 mr-3 text-amber-600 dark:text-amber-500 group-hover:text-white transition-colors"></i>
+                                <span class="text-sm font-bold">清空暫存 (work/temp)</span>
+                            </button>
+                            <button @click="handleAction('cleanDumps')" :disabled="isOperating" class="w-full flex items-center justify-between p-3 bg-blue-50/50 dark:bg-blue-900/20 hover:bg-blue-600 hover:text-white border border-blue-100 dark:border-blue-500/20 rounded-xl transition-all group disabled:opacity-50">
+                                <div class="flex items-center">
+                                    <i data-lucide="hard-drive" class="w-4 h-4 mr-3 text-blue-600 dark:text-blue-400 group-hover:text-white"></i>
+                                    <span class="text-sm font-bold text-blue-900 dark:text-blue-100 group-hover:text-white">清理 JVM 崩潰檔</span>
+                                </div>
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- 4. 系統操作 -->
+                    <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+                        <h2 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">System Admin</h2>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button @click="handleAction('restartAgent')" :disabled="isOperating" class="flex flex-col items-center justify-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-100 dark:border-slate-700 rounded-xl transition-all disabled:opacity-50">
+                                <i data-lucide="refresh-cw" class="w-4 h-4 mb-2 text-slate-500"></i>
+                                <span class="text-[10px] font-bold">重啟 Agent</span>
+                            </button>
+                            <button @click="handleAction('rebootOS')" :disabled="isOperating" class="flex flex-col items-center justify-center p-3 bg-red-50 dark:bg-red-950/20 hover:bg-red-600 hover:text-white border border-red-100 dark:border-red-900/30 rounded-xl transition-all group disabled:opacity-50">
+                                <i data-lucide="power" class="w-4 h-4 mb-2 text-red-600 group-hover:text-white"></i>
+                                <span class="text-[10px] font-bold text-red-900 dark:text-red-200 group-hover:text-white">系統重啟</span>
+                            </button>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- 👑 右側：日誌檢視區域 (動態高度計算 + Sticky 固定) -->
+                <div class="lg:col-span-8 flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm lg:sticky lg:top-[100px] overflow-hidden zoom-layer-fix" :style="{ height: logContainerHeight }">
+                    
+                    <!-- 固定頁籤 -->
+                    <div class="relative z-20 flex-none flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 zoom-layer-fix">
+                        <div class="flex space-x-1 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
+                            <button @click="currentLogType = 'tomcat'" :class="currentLogType === 'tomcat' ? 'bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-sm border border-slate-200 dark:border-blue-500/30' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'" class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center">
+                                <i data-lucide="file-text" class="w-3.5 h-3.5 mr-2"></i> Tomcat 日誌
+                            </button>
+                            <button @click="currentLogType = 'agent'" :class="currentLogType === 'agent' ? 'bg-white dark:bg-emerald-600 text-emerald-600 dark:text-white shadow-sm border border-slate-200 dark:border-emerald-500/30' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'" class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center">
+                                <i data-lucide="terminal" class="w-3.5 h-3.5 mr-2"></i> Agent 日誌
+                            </button>
+                        </div>
+
+                        <button @click="fetchLogs" :disabled="isRefreshingLogs || isOperating" class="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-white transition-all disabled:opacity-50">
+                            <i data-lucide="refresh-cw" :class="{'animate-spin': isRefreshingLogs}" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <!-- 終端機顯示區 -->
+                    <div ref="logContainer" class="flex-1 min-h-0 bg-slate-50 dark:bg-[#0a0f18] p-4 font-mono text-xs shadow-inner relative leading-relaxed overflow-y-auto zoom-layer-fix">
+                        <div v-if="logs.length === 0 && !isRefreshingLogs" class="h-full flex items-center justify-center text-slate-400 flex-col opacity-50">
+                            <i data-lucide="terminal" class="w-16 h-16 mb-4"></i>
+                            <p class="font-black tracking-[0.2em] uppercase">No Data Received</p>
+                        </div>
+                        <div v-else class="space-y-1">
+                            <div v-for="(log, idx) in logs" :key="idx" :class="getLogColor(log)" class="break-all whitespace-pre-wrap">
+                                <span class="opacity-30 mr-3 select-none inline-block w-8 text-right">{{ (idx + 1) }}</span>{{ log }}
+                            </div>
+                        </div>
+                        
+                        <!-- 載入中遮罩 -->
+                        <div v-if="isRefreshingLogs && logs.length === 0" class="absolute inset-0 bg-white/50 dark:bg-[#0a0f18]/80 flex items-center justify-center backdrop-blur-sm">
+                            <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- 🚀 倒數與自動重連全螢幕遮罩 -->
+        <div v-if="reconnectState.active" class="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-slate-900/90 backdrop-blur-md px-4 animate-scale-in">
+            <!-- 脈衝動畫器 -->
+            <div class="relative flex items-center justify-center mb-10 w-40 h-40">
+                <div class="absolute w-full h-full border-4 border-blue-500/20 rounded-full animate-ping-slow"></div>
+                <div class="absolute w-32 h-32 border-4 border-blue-400/40 rounded-full animate-spin border-t-transparent border-b-transparent duration-1000"></div>
+                <div class="absolute w-24 h-24 border-4 border-blue-600/60 rounded-full flex items-center justify-center bg-slate-900">
+                    <span class="text-4xl font-black text-white tabular-nums">{{ reconnectState.secondsLeft }}</span>
+                </div>
+            </div>
+            
+            <h2 class="text-3xl font-black text-white mb-3 tracking-widest text-center">{{ reconnectState.message }}</h2>
+            <p class="text-slate-400 max-w-md text-center text-sm mb-10 font-medium leading-relaxed">
+                系統正在背景嘗試自動重新連線<br>若長時間無回應或倒數結束，請確認伺服器網路狀態。
+            </p>
+            
+            <button v-if="reconnectState.secondsLeft <= 0 || reconnectState.secondsLeft <= (reconnectState.maxTime / 2)" 
+                @click="cancelReconnection" 
+                class="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all font-bold text-sm border border-slate-700 shadow-lg flex items-center">
+                <i data-lucide="x" class="w-4 h-4 mr-2"></i> 取消等待
+            </button>
+        </div>
+
+        <!-- Confirm Modal -->
+        <div v-if="modal.show" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm px-4">
+            <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-8 max-w-md w-full animate-scale-in text-center">
+                <div :class="modal.danger ? 'bg-red-100 dark:bg-red-900/30 text-red-600' : 'bg-amber-100 dark:bg-yellow-900/30 text-amber-600 dark:text-yellow-500'" class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-xl font-bold text-slate-800 dark:text-white mb-2">{{ modal.title }}</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-300 mb-8 leading-relaxed">{{ modal.message }}</p>
+                <div class="flex gap-3">
+                    <button @click="modal.show = false" class="flex-1 py-3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-all text-xs">取消</button>
+                    <button @click="executeModalAction" :class="modal.danger ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'" class="flex-1 py-3 text-white rounded-xl font-bold shadow-lg transition-all text-xs">確定執行</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast 通知 -->
+        <div class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3">
+            <div v-for="t in toasts" :key="t.id" :class="getToastColor(t.type)" class="flex items-center px-6 py-4 rounded-2xl shadow-2xl text-white font-bold animate-fade-in-up border border-white/10 backdrop-blur-md min-w-[280px]">
+                <i :data-lucide="t.type === 'success' ? 'check-circle' : (t.type === 'error' ? 'x-circle' : 'info')" class="w-5 h-5 mr-3"></i>
+                <div class="flex-1 text-xs">{{ t.message }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🚀 Vue 3 核心邏輯 -->
+    <script>
+        const { createApp, ref, reactive, computed, watch, onMounted, onUpdated, nextTick } = Vue;
+
+        createApp({
+            setup() {
+                // 1. 動態高度與縮放系統 (解決破版與捲動軸)
+                const viewportHeight = ref(window.innerHeight);
+                const updateHeight = () => { viewportHeight.value = window.innerHeight; };
+
+                const zoomLevel = ref(Math.max(1.0, parseFloat(localStorage.getItem('tomcatUiZoom')) || 1.0));
+                const changeZoom = (delta) => {
+                    let newZoom = zoomLevel.value + delta;
+                    if (newZoom >= 1.0 && newZoom <= 1.5) {
+                        zoomLevel.value = parseFloat(newZoom.toFixed(2));
+                        localStorage.setItem('tomcatUiZoom', zoomLevel.value);
+                    }
+                };
+                const resetZoom = () => {
+                    zoomLevel.value = 1.0;
+                    localStorage.setItem('tomcatUiZoom', 1.0);
+                };
+
+                const logContainerHeight = computed(() => {
+                    const effectiveHeight = viewportHeight.value / zoomLevel.value;
+                    return Math.max(400, effectiveHeight - 140) + 'px';
+                });
+
+                // 2. 主題切換系統
+                const isDarkMode = ref(localStorage.getItem('tomcatTheme') !== 'light');
+                const toggleTheme = () => {
+                    isDarkMode.value = !isDarkMode.value;
+                    localStorage.setItem('tomcatTheme', isDarkMode.value ? 'dark' : 'light');
+                    updateThemeClass();
+                };
+                const updateThemeClass = () => {
+                    if (isDarkMode.value) document.documentElement.classList.add('dark');
+                    else document.documentElement.classList.remove('dark');
+                    nextTick(() => lucide.createIcons());
+                };
+
+                // 3. API 設定與資料狀態
+                const apiUrl = ref(localStorage.getItem('tomcatApiUrl') || 'http://localhost:8888');
+                const apiKey = ref(localStorage.getItem('tomcatApiKey') || '');
+                watch(apiUrl, val => localStorage.setItem('tomcatApiUrl', val));
+                watch(apiKey, val => localStorage.setItem('tomcatApiKey', val));
+
+                const statusData = ref(null);
+                const logs = ref([]);
+                const currentLogType = ref('tomcat');
+                const isOperating = ref(false);
+                const isRefreshingLogs = ref(false);
+                const logContainer = ref(null);
+                
+                // 4. UI 互動狀態
+                const toasts = ref([]);
+                let toastIdCounter = 0;
+                const modal = reactive({ show: false, title: '', message: '', danger: false, actionKey: null });
+
+                // 自動重連狀態控制器
+                const reconnectState = reactive({
+                    active: false, message: '', secondsLeft: 0, maxTime: 0, intervalId: null
+                });
+
+                const scrollToBottom = () => {
+                    nextTick(() => { if (logContainer.value) logContainer.value.scrollTop = logContainer.value.scrollHeight; });
+                };
+
+                // 工具：位元組轉換
+                const formatBytes = (bytes) => {
+                    if (!bytes || bytes === 0) return '0 MB';
+                    const k = 1024, sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                };
+
+                // 5. 核心 API 呼叫與靜默探測
+                const callApi = async (endpoint, method = 'GET') => {
+                    const baseUrl = apiUrl.value.replace(/\/$/, '');
+                    try {
+                        const response = await fetch(`${baseUrl}${endpoint}`, {
+                            method, headers: { 'X-API-KEY': apiKey.value, 'Accept': 'application/json' }
+                        });
+                        const result = await response.json();
+                        if (!response.ok) throw new Error(result.message || `HTTP ${response.status}`);
+                        return result;
+                    } catch (error) { throw error; }
+                };
+
+                const checkConnectionSilent = async () => {
+                    const baseUrl = apiUrl.value.replace(/\/$/, '');
+                    try {
+                        const response = await fetch(`${baseUrl}/tomcat/status`, {
+                            method: 'GET', headers: { 'X-API-KEY': apiKey.value, 'Accept': 'application/json' }
+                        });
+                        return response.ok;
+                    } catch (e) { return false; }
+                };
+
+                // 6. 倒數與自動重連邏輯
+                const startReconnection = (type) => {
+                    reconnectState.active = true;
+                    let pollThreshold = 0;
+                    
+                    if (type === 'restartAgent') {
+                        reconnectState.message = 'API Agent 重新啟動中...';
+                        reconnectState.secondsLeft = 10;
+                        reconnectState.maxTime = 10;
+                        pollThreshold = 6; 
+                    } else if (type === 'rebootOS') {
+                        reconnectState.message = '伺服器正在重新啟動...';
+                        reconnectState.secondsLeft = 60;
+                        reconnectState.maxTime = 60;
+                        pollThreshold = 30;
+                    }
+
+                    if (reconnectState.intervalId) clearInterval(reconnectState.intervalId);
+                    nextTick(() => lucide.createIcons());
+
+                    reconnectState.intervalId = setInterval(async () => {
+                        if (reconnectState.secondsLeft > 0) reconnectState.secondsLeft--;
+                        if (reconnectState.secondsLeft <= pollThreshold) {
+                            if (reconnectState.secondsLeft % 2 === 0 || reconnectState.secondsLeft <= 0) {
+                                const isOk = await checkConnectionSilent();
+                                if (isOk) {
+                                    clearInterval(reconnectState.intervalId);
+                                    reconnectState.active = false;
+                                    isOperating.value = false;
+                                    showToast('連線已恢復，系統狀態更新中！', 'success');
+                                    fetchStatus(); fetchLogs();
+                                }
+                            }
+                        }
+                    }, 1000);
+                };
+
+                const cancelReconnection = () => {
+                    if (reconnectState.intervalId) clearInterval(reconnectState.intervalId);
+                    reconnectState.active = false;
+                    isOperating.value = false;
+                    showToast('已手動取消等待連線。', 'info');
+                };
+
+                // 7. 資料抓取
+                const fetchStatus = async () => {
+                    try {
+                        const res = await callApi('/tomcat/status');
+                        if (res.success) statusData.value = res.data;
+                    } catch (error) { 
+                        statusData.value = { Status: 'Disconnected', SysCpu: 0, SysMemPct: 0, TomcatCpu: 0, TomcatMemUsed: 0 }; 
+                    }
+                };
+
+                const fetchLogs = async () => {
+                    isRefreshingLogs.value = true;
+                    const endpoint = currentLogType.value === 'tomcat' ? '/tomcat/logs?lines=100' : '/server/logs?lines=100';
+                    try {
+                        const res = await callApi(endpoint);
+                        logs.value = (res.success && res.data) ? res.data : [res.message || '無資料'];
+                        scrollToBottom();
+                    } catch (error) { logs.value = [`[ERROR] ${error.message}`]; } 
+                    finally { isRefreshingLogs.value = false; }
+                };
+
+                watch(logs, () => scrollToBottom(), { deep: true });
+                watch(currentLogType, () => fetchLogs());
+
+                // 8. 狀態渲染輔助函數
+                const showToast = (message, type = 'info') => {
+                    const id = toastIdCounter++;
+                    toasts.value.push({ id, message, type });
+                    nextTick(() => lucide.createIcons());
+                    setTimeout(() => { toasts.value = toasts.value.filter(t => t.id !== id); }, 3500);
+                };
+
+                const statusColors = computed(() => {
+                    const s = statusData.value?.Status?.toLowerCase() || '';
+                    if (s.includes('running')) return { bg: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-400/10 border-emerald-200 dark:border-emerald-400/20', dot: 'bg-emerald-500 animate-pulse' };
+                    if (s.includes('stopped')) return { bg: 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-400/10 border-red-200 dark:border-red-400/20', dot: 'bg-red-500' };
+                    return { bg: 'text-slate-400 bg-slate-100 dark:bg-slate-400/10 border-slate-200 dark:border-slate-400/20', dot: 'bg-current' };
+                });
+
+                const getLogColor = (line) => {
+                    const l = line.toUpperCase();
+                    if (l.includes('SEVERE') || l.includes('EXCEPTION') || l.includes('ERROR') || l.includes('!!!')) return 'text-red-500 font-medium';
+                    if (l.includes('WARNING') || l.includes('WARN')) return 'text-amber-500 dark:text-yellow-400';
+                    if (l.includes('INFO') || l.includes('>>>')) return 'text-blue-500 dark:text-cyan-300';
+                    return 'text-slate-600 dark:text-slate-300';
+                };
+
+                const getToastColor = (type) => {
+                    if (type === 'success') return 'bg-emerald-600';
+                    if (type === 'error') return 'bg-red-600';
+                    return 'bg-blue-600';
+                };
+
+                // 9. 操作 Modal 綁定
+                const actionConfigs = {
+                    restartTomcat: { title: "重啟 Tomcat", msg: "確定要強制重新啟動 Tomcat 服務嗎？這可能會導致線上用戶連線短暫中斷。", danger: true, endpoint: '/tomcat/restart' },
+                    cleanCache: { title: "清理快取", msg: "確定要清空 work 與 temp 目錄嗎？建議在 Tomcat 關閉或重啟前後執行此操作。", danger: false, endpoint: '/tomcat/clean-cache' },
+                    cleanDumps: { title: "清理 Dump", msg: "這將掃描並刪除 Tomcat 根目錄下所有龐大的 hs_err_pid 傾印檔以釋放硬碟空間，確定執行嗎？", danger: false, endpoint: '/tomcat/clean-crash-dumps' },
+                    restartAgent: { title: "重啟 Agent", msg: "這將會重新啟動背景的 PowerShell API Agent 腳本，前端將會短暫失去連線，確定執行嗎？", danger: false, endpoint: '/server/restart-script' },
+                    rebootOS: { title: "系統重啟", msg: "警告！這是極度危險的操作。Windows Server 將會在 5 秒後強制重啟，所有未儲存的資料將會遺失。你確定要這樣做嗎？", danger: true, endpoint: '/server/restart-computer' }
+                };
+
+                const handleAction = (key) => {
+                    Object.assign(modal, { ...actionConfigs[key], show: true, actionKey: key });
+                    nextTick(() => lucide.createIcons());
+                };
+
+                const executeModalAction = async () => {
+                    const key = modal.actionKey;
+                    const endpoint = actionConfigs[key].endpoint;
+                    modal.show = false;
+                    isOperating.value = true;
+                    
+                    try {
+                        if (key === 'restartAgent' || key === 'rebootOS') {
+                            callApi(endpoint, 'POST').catch(() => {});
+                            startReconnection(key);
+                        } else {
+                            const res = await callApi(endpoint, 'POST');
+                            showToast(res.message, res.success ? 'success' : 'error');
+                            isOperating.value = false;
+                            fetchStatus();
+                        }
+                    } catch (e) { 
+                        showToast(e.message, 'error'); 
+                        isOperating.value = false;
+                        fetchStatus();
+                    }
+                };
+
+                onMounted(() => {
+                    window.addEventListener('resize', updateHeight);
+                    updateThemeClass();
+                    fetchStatus();
+                    fetchLogs();
+                    setInterval(() => {
+                        if (!reconnectState.active && !isOperating.value) {
+                            fetchStatus();
+                        }
+                    }, 15000);
+                });
+
+                onUpdated(() => lucide.createIcons());
+
+                return {
+                    zoomLevel, changeZoom, resetZoom, logContainerHeight,
+                    apiUrl, apiKey, statusData, logs, currentLogType, isOperating, isRefreshingLogs, logContainer,
+                    modal, toasts, statusColors, isDarkMode, formatBytes,
+                    fetchStatus, fetchLogs, handleAction, executeModalAction, getLogColor, getToastColor, toggleTheme,
+                    reconnectState, cancelReconnection
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
