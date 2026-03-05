@@ -56,7 +56,7 @@ $notifyIp           = Get-EnvString "NOTIFY_IP" "220.1.34.75"
 $notifyPort         = Get-EnvInt "NOTIFY_PORT" 80
 $notifyEndpoint     = Get-EnvString "NOTIFY_ENDPOINT" "/api/notification_json_api.php"
 $notifyUrl          = "http://$notifyIp$notifyEndpoint"
-$notifyChannels     = Get-EnvArray "NOTIFY_CHANNELS" @("HA10013859")
+$notifyChannels     = Get-EnvArray "NOTIFY_CHANNELS" @("val")
 
 $enableNotifyHealthCheck  = Get-EnvBool "ENABLE_NOTIFY_HEALTH_CHECK" $true
 $notifyTimeoutMs          = Get-EnvInt "NOTIFY_TIMEOUT_MS" 1000
