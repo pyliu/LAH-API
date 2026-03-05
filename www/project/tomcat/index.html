@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tomcat 戰情面板 (Vue3 完全體)</title>
+    <title>Tomcat 戰情面板 (Vue3)</title>
     
-    <!-- 離線資源引入 (Vue 3, Tailwind, Lucide) -->
+    <!-- 離線資源引入 (請確保同層有 offline 資料夾) -->
     <script src="./offline/tailwindcss.js"></script>
     <script src="./offline/vue.global.prod.js"></script>
     <script src="./offline/lucide.min.js"></script>
@@ -47,6 +47,9 @@
         .dark ::webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         ::webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         
+        /* 隱藏橫向捲軸但保留滾動功能 */
+        .hide-scroll::-webkit-scrollbar { height: 0px; }
+        
         [v-cloak] { display: none; }
         html { scroll-behavior: smooth; }
 
@@ -67,6 +70,7 @@
 <body class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans overflow-hidden">
 
     <div id="app" v-cloak class="h-screen overflow-y-auto relative">
+        <!-- 縮放層 -->
         <div id="zoom-wrapper" :style="{ zoom: zoomLevel }">
             
             <!-- 👑 固定頂端導覽列 (Sticky Header) -->
@@ -202,11 +206,26 @@
                                 <i data-lucide="trash-2" class="w-4 h-4 mr-3 text-amber-600 dark:text-amber-500 group-hover:text-white transition-colors"></i>
                                 <span class="text-sm font-bold">清空暫存 (work/temp)</span>
                             </button>
-                            <button @click="handleAction('cleanDumps')" :disabled="isOperating" class="w-full flex items-center justify-between p-3 bg-blue-50/50 dark:bg-blue-900/20 hover:bg-blue-600 hover:text-white border border-blue-100 dark:border-blue-500/20 rounded-xl transition-all group disabled:opacity-50">
+                            
+                            <!-- 下載打包日誌 -->
+                            <button @click="handleAction('downloadLogs')" :disabled="isOperating" class="w-full flex items-center justify-between p-3 bg-emerald-50/50 dark:bg-emerald-900/20 hover:bg-emerald-600 hover:text-white border border-emerald-100 dark:border-emerald-500/30 rounded-xl transition-all group disabled:opacity-50">
+                                <div class="flex items-center">
+                                    <i data-lucide="download-cloud" class="w-4 h-4 mr-3 text-emerald-600 dark:text-emerald-400 group-hover:text-white transition-colors"></i>
+                                    <span class="text-sm font-bold text-emerald-900 dark:text-emerald-100 group-hover:text-white">打包下載全部日誌</span>
+                                </div>
+                                <span class="text-[10px] bg-emerald-100 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-300 px-2 py-1 rounded">除錯專用</span>
+                            </button>
+
+                            <!-- 清理 JVM 崩潰檔 (動態隱藏：只有發現檔案時才出現) -->
+                            <button v-if="statusData?.HasCrashDumps" @click="handleAction('cleanDumps')" :disabled="isOperating" class="w-full flex items-center justify-between p-3 bg-blue-50/50 dark:bg-blue-900/20 hover:bg-blue-600 hover:text-white border border-blue-100 dark:border-blue-500/20 rounded-xl transition-all group disabled:opacity-50 animate-scale-in">
                                 <div class="flex items-center">
                                     <i data-lucide="hard-drive" class="w-4 h-4 mr-3 text-blue-600 dark:text-blue-400 group-hover:text-white"></i>
-                                    <span class="text-sm font-bold text-blue-900 dark:text-blue-100 group-hover:text-white">清理 JVM 崩潰檔</span>
+                                    <span class="text-sm font-bold text-blue-900 dark:text-blue-100 group-hover:text-white">發現 JVM 崩潰檔，點擊清理</span>
                                 </div>
+                                <span class="flex h-2 w-2 relative mr-1">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                </span>
                             </button>
                         </div>
                     </section>
@@ -227,23 +246,37 @@
                     </section>
                 </div>
 
-                <!-- 👑 右側：日誌檢視區域 (動態高度計算 + Sticky 固定) -->
+                <!-- 👑 右側：日誌檢視區域 -->
                 <div class="lg:col-span-8 flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm lg:sticky lg:top-[100px] overflow-hidden zoom-layer-fix" :style="{ height: logContainerHeight }">
                     
-                    <!-- 固定頁籤 -->
-                    <div class="relative z-20 flex-none flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 zoom-layer-fix">
-                        <div class="flex space-x-1 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
-                            <button @click="currentLogType = 'tomcat'" :class="currentLogType === 'tomcat' ? 'bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-sm border border-slate-200 dark:border-blue-500/30' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'" class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center">
-                                <i data-lucide="file-text" class="w-3.5 h-3.5 mr-2"></i> Tomcat 日誌
+                    <!-- 固定頁籤與控制項 -->
+                    <div class="relative z-20 flex-none flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 zoom-layer-fix gap-3 sm:gap-0">
+                        
+                        <!-- 🚀 新增：四分頁標籤 -->
+                        <div class="flex space-x-1 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800 overflow-x-auto hide-scroll max-w-full">
+                            <button @click="currentLogType = 'tomcat'" :class="currentLogType === 'tomcat' ? 'bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-sm border border-slate-200 dark:border-blue-500/30' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'" class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center whitespace-nowrap">
+                                <i data-lucide="file-text" class="w-3.5 h-3.5 mr-2"></i> Catalina
                             </button>
-                            <button @click="currentLogType = 'agent'" :class="currentLogType === 'agent' ? 'bg-white dark:bg-emerald-600 text-emerald-600 dark:text-white shadow-sm border border-slate-200 dark:border-emerald-500/30' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'" class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center">
-                                <i data-lucide="terminal" class="w-3.5 h-3.5 mr-2"></i> Agent 日誌
+                            <button @click="currentLogType = 'stdout'" :class="currentLogType === 'stdout' ? 'bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-sm border border-slate-200 dark:border-blue-500/30' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'" class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center whitespace-nowrap">
+                                <i data-lucide="align-left" class="w-3.5 h-3.5 mr-2"></i> StdOut
+                            </button>
+                            <button @click="currentLogType = 'stderr'" :class="currentLogType === 'stderr' ? 'bg-white dark:bg-red-600 text-red-600 dark:text-white shadow-sm border border-slate-200 dark:border-red-500/30' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'" class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center whitespace-nowrap">
+                                <i data-lucide="alert-octagon" class="w-3.5 h-3.5 mr-2"></i> StdErr
+                            </button>
+                            <button @click="currentLogType = 'agent'" :class="currentLogType === 'agent' ? 'bg-white dark:bg-emerald-600 text-emerald-600 dark:text-white shadow-sm border border-slate-200 dark:border-emerald-500/30' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'" class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center whitespace-nowrap">
+                                <i data-lucide="terminal" class="w-3.5 h-3.5 mr-2"></i> Agent
                             </button>
                         </div>
 
-                        <button @click="fetchLogs" :disabled="isRefreshingLogs || isOperating" class="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-white transition-all disabled:opacity-50">
-                            <i data-lucide="refresh-cw" :class="{'animate-spin': isRefreshingLogs}" class="w-4 h-4"></i>
-                        </button>
+                        <!-- 🚀 新增：載入控制按鈕 -->
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                            <button v-if="logs.length >= logLines && logs.length > 0" @click="loadMoreLogs" :disabled="isRefreshingLogs || isOperating" class="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800 rounded-lg transition-all flex items-center border border-blue-200 dark:border-blue-800 disabled:opacity-50">
+                                <i data-lucide="arrow-up-circle" class="w-3.5 h-3.5 mr-1.5"></i> 往上載入 100 行
+                            </button>
+                            <button @click="fetchLogs(false)" :disabled="isRefreshingLogs || isOperating" class="p-1.5 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white transition-all disabled:opacity-50 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                                <i data-lucide="refresh-cw" :class="{'animate-spin': isRefreshingLogs}" class="w-4 h-4"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- 終端機顯示區 -->
@@ -288,6 +321,27 @@
                 class="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all font-bold text-sm border border-slate-700 shadow-lg flex items-center">
                 <i data-lucide="x" class="w-4 h-4 mr-2"></i> 取消等待
             </button>
+        </div>
+
+        <!-- 🚀 打包下載全螢幕進度遮罩 (新增) -->
+        <div v-if="downloadState.active" class="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-slate-900/90 backdrop-blur-md px-4 animate-scale-in">
+            <div class="relative flex items-center justify-center mb-10 w-32 h-32">
+                <div class="absolute w-full h-full border-4 border-emerald-500/20 rounded-full animate-ping-slow"></div>
+                <div class="absolute w-24 h-24 border-4 border-emerald-400/40 rounded-full animate-spin border-t-transparent border-b-transparent duration-1000"></div>
+                <div class="absolute w-16 h-16 rounded-full flex items-center justify-center bg-slate-900 border border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+                    <i data-lucide="package" class="w-8 h-8 text-emerald-400 animate-pulse"></i>
+                </div>
+            </div>
+            
+            <h2 class="text-2xl font-black text-white mb-4 tracking-widest text-center">{{ downloadState.message }}</h2>
+            <div class="flex flex-col items-center gap-2">
+                <p class="text-emerald-400 max-w-md text-center text-sm font-medium leading-relaxed">
+                    正在伺服器端收集並壓縮所有 Tomcat 日誌...
+                </p>
+                <p class="text-slate-400 text-xs bg-slate-800 px-4 py-2 rounded-lg border border-slate-700">
+                    💡 依據日誌大小，打包過程可能需要數十秒鐘，請勿關閉視窗
+                </p>
+            </div>
         </div>
 
         <!-- Confirm Modal -->
@@ -364,6 +418,7 @@
                 const statusData = ref(null);
                 const logs = ref([]);
                 const currentLogType = ref('tomcat');
+                const logLines = ref(100); // 🚀 追蹤目前讀取的行數
                 const isOperating = ref(false);
                 const isRefreshingLogs = ref(false);
                 const logContainer = ref(null);
@@ -376,6 +431,11 @@
                 // 自動重連狀態控制器
                 const reconnectState = reactive({
                     active: false, message: '', secondsLeft: 0, maxTime: 0, intervalId: null
+                });
+
+                // 🚀 打包下載狀態控制器 (新增)
+                const downloadState = reactive({
+                    active: false, message: '準備打包作業...'
                 });
 
                 const scrollToBottom = () => {
@@ -443,7 +503,7 @@
                                     reconnectState.active = false;
                                     isOperating.value = false;
                                     showToast('連線已恢復，系統狀態更新中！', 'success');
-                                    fetchStatus(); fetchLogs();
+                                    fetchStatus(); fetchLogs(false);
                                 }
                             }
                         }
@@ -463,23 +523,48 @@
                         const res = await callApi('/tomcat/status');
                         if (res.success) statusData.value = res.data;
                     } catch (error) { 
-                        statusData.value = { Status: 'Disconnected', SysCpu: 0, SysMemPct: 0, TomcatCpu: 0, TomcatMemUsed: 0 }; 
+                        statusData.value = { Status: 'Disconnected', SysCpu: 0, SysMemPct: 0, TomcatCpu: 0, TomcatMemUsed: 0, HasCrashDumps: false }; 
                     }
                 };
 
-                const fetchLogs = async () => {
+                // 🚀 支援分頁與凍結視角的日誌抓取
+                const fetchLogs = async (preserveScroll = false) => {
                     isRefreshingLogs.value = true;
-                    const endpoint = currentLogType.value === 'tomcat' ? '/tomcat/logs?lines=100' : '/server/logs?lines=100';
+                    
+                    let endpoint = `/tomcat/logs?lines=${logLines.value}`;
+                    if (currentLogType.value === 'agent') {
+                        endpoint = `/server/logs?lines=${logLines.value}`;
+                    } else if (currentLogType.value === 'stdout' || currentLogType.value === 'stderr') {
+                        endpoint = `/tomcat/logs?type=${currentLogType.value}&lines=${logLines.value}`;
+                    } else {
+                        endpoint = `/tomcat/logs?type=catalina&lines=${logLines.value}`;
+                    }
+
                     try {
                         const res = await callApi(endpoint);
                         logs.value = (res.success && res.data) ? res.data : [res.message || '無資料'];
-                        scrollToBottom();
-                    } catch (error) { logs.value = [`[ERROR] ${error.message}`]; } 
-                    finally { isRefreshingLogs.value = false; }
+                        // 只有在初始載入或點擊重整時，才滾動到底部
+                        if (!preserveScroll) {
+                            scrollToBottom();
+                        }
+                    } catch (error) { 
+                        logs.value = [`[ERROR] ${error.message}`]; 
+                    } finally { 
+                        isRefreshingLogs.value = false; 
+                    }
                 };
 
-                watch(logs, () => scrollToBottom(), { deep: true });
-                watch(currentLogType, () => fetchLogs());
+                // 🚀 往上載入 100 行
+                const loadMoreLogs = () => {
+                    logLines.value += 100;
+                    fetchLogs(true); // 設定 preserveScroll 為 true，讓視窗維持在目前高度
+                };
+
+                // 切換分頁時，重置行數並強制捲動到底部
+                watch(currentLogType, () => {
+                    logLines.value = 100;
+                    fetchLogs(false);
+                });
 
                 // 8. 狀態渲染輔助函數
                 const showToast = (message, type = 'info') => {
@@ -515,6 +600,7 @@
                     restartTomcat: { title: "重啟 Tomcat", msg: "確定要強制重新啟動 Tomcat 服務嗎？這可能會導致線上用戶連線短暫中斷。", danger: true, endpoint: '/tomcat/restart' },
                     cleanCache: { title: "清理快取", msg: "確定要清空 work 與 temp 目錄嗎？建議在 Tomcat 關閉或重啟前後執行此操作。", danger: false, endpoint: '/tomcat/clean-cache' },
                     cleanDumps: { title: "清理 Dump", msg: "這將掃描並刪除 Tomcat 根目錄下所有龐大的 hs_err_pid 傾印檔以釋放硬碟空間，確定執行嗎？", danger: false, endpoint: '/tomcat/clean-crash-dumps' },
+                    downloadLogs: { title: "打包並下載全部日誌", msg: "系統即將把 Tomcat logs 資料夾下的所有日誌壓縮成 ZIP 檔並下載。依據日誌大小，打包過程可能需要幾十秒鐘，確定執行嗎？", danger: false, endpoint: '/tomcat/download-logs', isDownload: true },
                     restartAgent: { title: "重啟 Agent", msg: "這將會重新啟動背景的 PowerShell API Agent 腳本，前端將會短暫失去連線，確定執行嗎？", danger: false, endpoint: '/server/restart-script' },
                     rebootOS: { title: "系統重啟", msg: "警告！這是極度危險的操作。Windows Server 將會在 5 秒後強制重啟，所有未儲存的資料將會遺失。你確定要這樣做嗎？", danger: true, endpoint: '/server/restart-computer' }
                 };
@@ -526,12 +612,54 @@
 
                 const executeModalAction = async () => {
                     const key = modal.actionKey;
-                    const endpoint = actionConfigs[key].endpoint;
+                    const config = actionConfigs[key];
+                    const endpoint = config.endpoint;
                     modal.show = false;
                     isOperating.value = true;
                     
                     try {
-                        if (key === 'restartAgent' || key === 'rebootOS') {
+                        if (config.isDownload) {
+                            // 🚀 啟用下載進度遮罩
+                            downloadState.message = '正在執行壓縮打包作業...';
+                            downloadState.active = true;
+                            
+                            const baseUrl = apiUrl.value.replace(/\/$/, '');
+                            const response = await fetch(`${baseUrl}${endpoint}`, {
+                                method: 'GET',
+                                headers: { 'X-API-KEY': apiKey.value }
+                            });
+                            
+                            if (!response.ok) {
+                                const errData = await response.json().catch(() => ({}));
+                                throw new Error(errData.message || `HTTP ${response.status}`);
+                            }
+
+                            downloadState.message = '打包完成，正在下載檔案...';
+
+                            // 嘗試從 Header 擷取後端定義好的檔名
+                            let filename = 'tomcat_logs.zip';
+                            const disposition = response.headers.get('Content-Disposition');
+                            if (disposition && disposition.includes('filename=')) {
+                                const match = disposition.match(/filename="([^"]+)"/);
+                                if (match && match[1]) filename = match[1];
+                            }
+
+                            // 在背景將二進位資料轉為 Blob 並觸發瀏覽器下載機制
+                            const blob = await response.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                            a.remove();
+                            window.URL.revokeObjectURL(url);
+                            
+                            downloadState.active = false;
+                            showToast('日誌 ZIP 檔打包下載完成！', 'success');
+                            isOperating.value = false;
+                            fetchStatus();
+                        } else if (key === 'restartAgent' || key === 'rebootOS') {
                             callApi(endpoint, 'POST').catch(() => {});
                             startReconnection(key);
                         } else {
@@ -541,6 +669,7 @@
                             fetchStatus();
                         }
                     } catch (e) { 
+                        downloadState.active = false; // 發生錯誤時確保關閉遮罩
                         showToast(e.message, 'error'); 
                         isOperating.value = false;
                         fetchStatus();
@@ -551,7 +680,7 @@
                     window.addEventListener('resize', updateHeight);
                     updateThemeClass();
                     fetchStatus();
-                    fetchLogs();
+                    fetchLogs(false);
                     setInterval(() => {
                         if (!reconnectState.active && !isOperating.value) {
                             fetchStatus();
@@ -563,10 +692,10 @@
 
                 return {
                     zoomLevel, changeZoom, resetZoom, logContainerHeight,
-                    apiUrl, apiKey, statusData, logs, currentLogType, isOperating, isRefreshingLogs, logContainer,
+                    apiUrl, apiKey, statusData, logs, currentLogType, logLines, isOperating, isRefreshingLogs, logContainer,
                     modal, toasts, statusColors, isDarkMode, formatBytes,
-                    fetchStatus, fetchLogs, handleAction, executeModalAction, getLogColor, getToastColor, toggleTheme,
-                    reconnectState, cancelReconnection
+                    fetchStatus, fetchLogs, loadMoreLogs, handleAction, executeModalAction, getLogColor, getToastColor, toggleTheme,
+                    reconnectState, cancelReconnection, downloadState
                 };
             }
         }).mount('#app');
