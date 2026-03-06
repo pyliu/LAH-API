@@ -113,13 +113,14 @@
             </div>
         </header>
 
-        <main class="flex-1 overflow-hidden flex flex-col md:flex-row max-w-8xl mx-auto w-full">
+        <!-- [加入 relative 屬性以定位中央的覆蓋層] -->
+        <main class="flex-1 overflow-hidden flex flex-col md:flex-row max-w-8xl mx-auto w-full relative">
             <!-- Sidebar -->
             <aside class="w-full md:w-64 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-4 overflow-y-auto flex-shrink-0 transition-colors">
                 <div class="mb-6">
                     <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">伺服器全域操作</h3>
                     <div class="space-y-2">
-                        <!-- [更名] 檢視地政系統申請書按鈕 (僅地政系統顯示) -->
+                        <!-- [修復] 檢視地政系統申請書按鈕 (改回僅地政系統顯示) -->
                         <button v-if="isLandSystem" @click="fetchApplyForms" :disabled="loading || applyFormsLoading || (!isConfigValid && !isDemoMode)" class="w-full text-left px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-500 transition-all group disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
                             <div class="flex items-center justify-between">
                                 <span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-disabled:text-slate-400">檢視地政系統申請書</span>
@@ -129,7 +130,7 @@
                             <p class="text-xs text-slate-400 mt-1">瀏覽並派送今日產生的表單</p>
                         </button>
 
-                        <!-- 地政系統列印紀錄按鈕 (必須是地政系統，且有紀錄才顯示) -->
+                        <!-- [修復] 地政系統列印紀錄按鈕 (必須是地政系統且有紀錄才顯示) -->
                         <button v-if="isLandSystem && allPrintedRecords.length > 0" @click="showGlobalRecordModal = true" :disabled="loading || (!isConfigValid && !isDemoMode)" class="w-full text-left px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm hover:shadow-md hover:border-purple-300 dark:hover:border-purple-500 transition-all group disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
                             <div class="flex items-center justify-between">
                                 <span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-purple-600 dark:group-hover:text-purple-400 group-disabled:text-slate-400">地政系統列印紀錄</span>
@@ -306,7 +307,8 @@
                     </div>
                 </transition-group>
                 
-                <div v-else-if="!loading" class="flex flex-col items-center justify-center h-96 text-slate-400 dark:text-slate-600">
+                <!-- [隱藏條件加上 !showConnectionPrompt，避免與中央提示重疊] -->
+                <div v-else-if="!loading && !showConnectionPrompt" class="flex flex-col items-center justify-center h-96 text-slate-400 dark:text-slate-600">
                     <i class="fa-solid fa-ghost text-4xl mb-4"></i>
                     <p>找不到符合的印表機</p>
                 </div>
@@ -319,6 +321,45 @@
                     </div>
                 </div>
             </section>
+
+            <!-- [新增] 連線中斷 / 選擇伺服器 提示覆蓋層 (放置於 main 內，覆蓋側邊欄與主要內容) -->
+            <transition name="fade">
+                <div v-if="showConnectionPrompt && !loading" class="absolute inset-0 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-sm z-[40] flex items-center justify-center p-4">
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border border-slate-200 dark:border-slate-700 transform transition-all">
+                        <div class="mx-auto w-20 h-20 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                            <i class="fa-solid" :class="connectionFailed ? 'fa-network-wired text-red-500 text-4xl' : 'fa-server text-blue-500 text-4xl'"></i>
+                        </div>
+                        
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2 tracking-tight">
+                            {{ connectionFailed ? '無法連線至伺服器' : '尚未選擇伺服器' }}
+                        </h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-8 px-2">
+                            {{ connectionFailed ? 'API 伺服器沒有回應，請確認網路狀態、伺服器是否正常運作，或選擇其他伺服器。' : '請從下方選單選擇一台印表機伺服器以開始監控。' }}
+                        </p>
+
+                        <div class="space-y-5 text-left bg-slate-50 dark:bg-slate-900/50 p-5 rounded-xl border border-slate-100 dark:border-slate-700">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">目標伺服器</label>
+                                <div class="flex gap-2">
+                                    <div class="relative flex-1 group">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-server text-slate-400 group-focus-within:text-blue-500 transition-colors"></i></div>
+                                        <select v-model="currentServerId" @change="switchServer" :disabled="isDemoMode" class="w-full pl-9 pr-8 py-2.5 text-sm rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none cursor-pointer shadow-sm">
+                                            <option value="" disabled>請選擇伺服器...</option>
+                                            <option v-for="srv in servers" :key="srv.id" :value="srv.id">{{ srv.name }} ({{ srv.ip }})</option>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"><i class="fa-solid fa-chevron-down text-xs text-slate-400"></i></div>
+                                    </div>
+                                    <button @click="openServerManager" :disabled="isDemoMode" class="bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 px-4 py-2.5 rounded-lg transition-all border border-slate-300 dark:border-slate-600 shadow-sm hover:shadow" title="管理伺服器列表"><i class="fa-solid fa-gear"></i></button>
+                                </div>
+                            </div>
+
+                            <button @click="fetchPrinters(true)" :disabled="loading || (!currentServerId && !isDemoMode)" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-sm font-bold transition-all shadow-lg hover:shadow-xl shadow-blue-500/30 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i class="fa-solid fa-rotate-right" :class="{'fa-spin': loading}"></i> {{ connectionFailed ? '重新嘗試連線' : '確認連線' }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </transition>
         </main>
 
         <!-- 1. Server Manager Modal -->
@@ -683,6 +724,9 @@
                 // 介面縮放 (Root Font Size)
                 const uiScale = ref(parseInt(localStorage.getItem('ps_ui_scale')) || 100);
 
+                // [新增] 連線失敗狀態
+                const connectionFailed = ref(false);
+
                 const changeScale = (delta) => {
                     uiScale.value = Math.max(80, Math.min(150, uiScale.value + delta));
                     applyScale();
@@ -813,8 +857,12 @@
                 };
 
                 const isConfigValid = computed(() => isDemoMode.value || (config.value.ip && config.value.key));
+                
+                // [新增] 是否顯示連線提示 UI (未選擇伺服器 或 連線斷線時)
+                const showConnectionPrompt = computed(() => !isConfigValid.value || connectionFailed.value);
 
                 watch(currentServerId, (newId) => {
+                    connectionFailed.value = false; // 切換伺服器時重置失敗狀態
                     const srv = servers.value.find(s => s.id === newId);
                     if (srv) { 
                         config.value.ip = srv.ip; config.value.key = srv.key; 
@@ -925,6 +973,7 @@
                             lastUpdated.value = new Date().toLocaleString();
                             if (showToast) success("Demo 連線成功");
                             loading.value = false;
+                            connectionFailed.value = false; // 測試模式成功
                             const l = document.getElementById('init-loading'); if(l) { l.classList.add('fade-out'); setTimeout(()=>l.remove(),500); }
                         }, 800);
                         return;
@@ -933,7 +982,8 @@
                         const res = await axios.get(getApiUrl('/printers'), { headers: { 'X-API-KEY': config.value.key } });
                         if (res.data.success) {
                             printers.value = res.data.data;
-                            isLandSystem.value = res.data.isLandSystem === true; // [更新] 同步後端地政系統旗標
+                            connectionFailed.value = false; // 連線成功，解除錯誤狀態
+                            isLandSystem.value = res.data.isLandSystem === true; // [修復] 同步後端地政系統旗標
                             
                             applyDefaultSortFallback(); 
 
@@ -944,8 +994,15 @@
                                 const updatedP = printers.value.find(x => x.Name === selectedPrinter.value.Name);
                                 if (updatedP) selectedPrinter.value = updatedP;
                             }
-                        } else { error(res.data.message); }
-                    } catch (err) { error("連線失敗"); autoRefresh.value = false; }
+                        } else { 
+                            connectionFailed.value = true; // 業務邏輯失敗也算連線有問題
+                            error(res.data.message); 
+                        }
+                    } catch (err) { 
+                        connectionFailed.value = true; // 捕捉到 HTTP 錯誤 (如 Timeout / 404 / 斷線)
+                        error("連線失敗"); 
+                        autoRefresh.value = false; // 發生錯誤時停用自動更新，避免無限發送無效請求干擾伺服器
+                    }
                     finally { 
                         loading.value = false;
                         const l = document.getElementById('init-loading'); if(l) { l.classList.add('fade-out'); setTimeout(()=>l.remove(),500); }
@@ -1314,8 +1371,8 @@
                     config, servers, currentServerId, showServerModal, editingServer, printers, loading, lastUpdated, autoRefresh, darkMode, isConfigValid, isDemoMode,
                     searchQuery, filterStatus, filterLocation, uniqueLocations, filteredPrinters, errorCount, sortBy, sortDesc, refreshInterval, validateInterval, countdown,
                     countAll, countReady, countIssue, countError, countWarning,
-                    uiScale, changeScale,
-                    isLandSystem, // [新增] 匯出地政系統旗標
+                    uiScale, changeScale, connectionFailed, showConnectionPrompt, // [新增] 匯出連線狀態與防護提示旗標
+                    isLandSystem, // [修復] 匯出地政系統旗標，消除 Vue Warning
                     allPrintedRecords, showGlobalRecordModal, globalRecordSearchQuery, filteredGlobalRecords,
                     showApplyFormsModal, applyFormsLoading, applyFormsData, applyFormsSearchQuery, applyFormTargetPrinter, filteredApplyForms, fetchApplyForms, // 導出申請單相關變數
                     getStatusColor, toggleDarkMode, openServerManager, saveServer, removeServer, useServer, resetEdit, editServer, switchServer,
