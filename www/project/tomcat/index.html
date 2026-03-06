@@ -59,7 +59,7 @@
             isolation: isolate;
         }
         
-        /* 穩定 Icon 容器 */
+        /* 穩定 Icon 容器：防止 Lucide 替換 i 標籤時 Vue 崩潰 */
         .icon-box { display: inline-flex; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -140,7 +140,7 @@
                 <!-- 左側：狀態與資源 (Sticky) -->
                 <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-[100px] zoom-layer-fix overflow-y-auto pr-2" :style="{ maxHeight: logContainerHeight }">
                     
-                    <!-- 狀態卡片 -->
+                    <!-- 1. 狀態卡片 -->
                     <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm relative overflow-hidden">
                         <div class="mb-6 flex justify-between items-start">
                             <div :class="['inline-flex items-center px-4 py-1.5 rounded-full border transition-all shadow-sm', statusColors.bg]">
@@ -174,7 +174,7 @@
                         </div>
                     </section>
 
-                    <!-- 資源監控 -->
+                    <!-- 2. 資源監控 -->
                     <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
                         <h2 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center">
                             <span class="icon-box"><i data-lucide="cpu" class="w-3.5 h-3.5 mr-2"></i></span> 資源監控 (Resource)
@@ -214,7 +214,7 @@
                         </div>
                     </section>
 
-                    <!-- 維運操作 -->
+                    <!-- 3. 維運操作 -->
                     <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
                         <h2 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">維運操作 (Operations)</h2>
                         <div class="space-y-2">
@@ -246,22 +246,25 @@
                     <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
                         <h2 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">系統資源 (Resources)</h2>
                         <div class="space-y-2">
-                            <a href="./server/Tomcat_API_Agent.ps1" download target="_blank" class="w-full flex items-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 border border-slate-100 dark:border-slate-700 rounded-xl transition-all group">
+                            <!-- 移除了 download 屬性 -->
+                            <a href="./server/Tomcat_API_Agent.ps1" target="_blank" class="w-full flex items-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 border border-slate-100 dark:border-slate-700 rounded-xl transition-all group">
                                 <span class="icon-box mr-3 text-blue-500"><i data-lucide="file-code" class="w-4 h-4"></i></span>
                                 <span class="text-xs font-bold">伺服器服務腳本 (.ps1)</span>
                             </a>
-                            <a href="./server/Tomcat_API_部署說明手冊.pdf" download target="_blank" class="w-full flex items-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 border border-slate-100 dark:border-slate-700 rounded-xl transition-all group">
+                            <!-- 移除了 download 屬性 -->
+                            <a href="./server/Tomcat_API_部署說明手冊.pdf" target="_blank" class="w-full flex items-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 border border-slate-100 dark:border-slate-700 rounded-xl transition-all group">
                                 <span class="icon-box mr-3 text-emerald-500"><i data-lucide="book-open" class="w-4 h-4"></i></span>
                                 <span class="text-xs font-bold">部署說明文件 (.pdf)</span>
                             </a>
-                            <a href="./server/Tomcat_API_介面測試集.pdf" download target="_blank" class="w-full flex items-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 border border-slate-100 dark:border-slate-700 rounded-xl transition-all group">
+                            <!-- 移除了 download 屬性 -->
+                            <a href="./server/Tomcat_API_介面測試集.pdf" target="_blank" class="w-full flex items-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 border border-slate-100 dark:border-slate-700 rounded-xl transition-all group">
                                 <span class="icon-box mr-3 text-amber-500"><i data-lucide="test-tube" class="w-4 h-4"></i></span>
                                 <span class="text-xs font-bold">API 介面測試集 (.pdf)</span>
                             </a>
                         </div>
                     </section>
 
-                    <!-- 系統管理 -->
+                    <!-- 5. 系統管理 -->
                     <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm text-center">
                         <div class="grid grid-cols-2 gap-2">
                             <button @click="handleAction('restartAgent')" :disabled="isOperating || isConnectionError" class="flex flex-col items-center justify-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 border border-slate-100 rounded-xl transition-all disabled:opacity-50">
@@ -322,7 +325,7 @@
                 <p class="text-sm text-slate-500 dark:text-slate-400 mb-8">請輸入目標 API 伺服器網址與授權金鑰。</p>
                 <div class="space-y-4 text-left">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">網址 (需含 http:// 與 Port [預設18888])</label>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">網址 (需含 http:// 與 Port [預設 18888])</label>
                         <input type="text" v-model="setupModal.url" placeholder="例如: http://192.168.1.100:18888" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono text-slate-800 dark:text-slate-200">
                     </div>
                     <div>
@@ -341,13 +344,14 @@
             </div>
         </div>
 
-        <!-- 全螢幕遮罩組件 -->
+        <!-- 🚀 全螢幕遮罩組件 (重連、下載) -->
         <div v-if="reconnectState.active" class="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-slate-900/90 backdrop-blur-md px-4 animate-scale-in text-center">
              <div class="relative flex items-center justify-center mb-10 w-40 h-40">
                 <div class="absolute w-full h-full border-4 border-blue-500/20 rounded-full animate-ping-slow"></div>
                 <div class="absolute w-24 h-24 border-4 border-blue-600/60 rounded-full flex items-center justify-center bg-slate-900 text-4xl font-black text-white tabular-nums">{{ reconnectState.secondsLeft }}</div>
             </div>
             <h2 class="text-3xl font-black text-white mb-3">{{ reconnectState.message }}</h2>
+            <p class="text-slate-400 text-sm mb-10">系統將在倒數結束前自動探測連線。</p>
             <button v-if="reconnectState.secondsLeft <= 30" @click="cancelReconnection" class="px-6 py-2.5 bg-slate-800 text-slate-300 rounded-xl font-bold text-sm border border-slate-700 flex items-center hover:bg-slate-700 transition-all">
                 <span class="icon-box mr-2"><i data-lucide="x" class="w-4 h-4"></i></span>取消等待
             </button>
@@ -361,6 +365,7 @@
             <h2 class="text-2xl font-black text-white mb-4">{{ downloadState.message }}</h2>
         </div>
 
+        <!-- 確認 Modal -->
         <div v-if="modal.show" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm px-4 text-center">
             <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-2xl p-8 max-w-md w-full animate-scale-in">
                 <div :class="modal.danger ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'" class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -369,12 +374,13 @@
                 <h2 class="text-xl font-bold text-slate-800 dark:text-white mb-2">{{ modal.title }}</h2>
                 <p class="text-sm text-slate-500 dark:text-slate-300 mb-8 leading-relaxed">{{ modal.message }}</p>
                 <div class="flex gap-3">
-                    <button @click="modal.show = false" class="flex-1 py-3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 rounded-xl font-bold text-xs hover:bg-slate-200 transition-all">取消</button>
+                    <button @click="modal.show = false" class="flex-1 py-3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 rounded-xl font-bold text-xs hover:bg-slate-200 dark:hover:bg-slate-600 transition-all">取消</button>
                     <button @click="executeModalAction" :class="modal.danger ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'" class="flex-1 py-3 text-white rounded-xl font-bold text-xs shadow-lg transition-all">確定執行</button>
                 </div>
             </div>
         </div>
 
+        <!-- Toast 通知 -->
         <div class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3">
             <div v-for="t in toasts" :key="t.id" :class="getToastColor(t.type)" class="flex items-center px-6 py-4 rounded-2xl shadow-2xl text-white font-bold animate-fade-in-up border border-white/10 backdrop-blur-md min-w-[280px]">
                 <span class="icon-box mr-3"><i :data-lucide="t.type === 'success' ? 'check-circle' : (t.type === 'error' ? 'x-circle' : 'info')" class="w-5 h-5"></i></span>
@@ -388,10 +394,10 @@
 
         createApp({
             setup() {
-                // 1. 動態高度與縮放系統
+                // 1. 動態高度與縮放系統 (視覺基準提升 20%)
                 const viewportHeight = ref(window.innerHeight);
                 const updateHeight = () => { viewportHeight.value = window.innerHeight; };
-                const baseZoomFactor = 1.2; // 🚀 視覺基準提升 20%
+                const baseZoomFactor = 1.2; 
                 const zoomLevel = ref(parseFloat(localStorage.getItem('tomcatUiZoom')) || 1.0); 
                 
                 const changeZoom = (delta) => {
@@ -456,15 +462,17 @@
 
                 const callApi = async (endpoint, method = 'GET', force = false) => {
                     if (!apiUrl.value) throw new Error('伺服器網址未設定');
-                    if (setupModal.show && !force) return { success: false }; 
+                    if (setupModal.show && !force) return { success: false, message: '正在設定中' }; 
+
                     const baseUrl = apiUrl.value.replace(/\/$/, '');
                     const response = await fetch(baseUrl + endpoint, {
                         method: method,
                         headers: { 'X-API-KEY': apiKey.value, 'Accept': 'application/json' }
                     });
-                    if (response.status === 401) throw new Error('金鑰驗證失敗 (401)');
+
+                    if (response.status === 401) throw new Error('金鑰驗證失敗 (401 Unauthorized)');
                     const result = await response.json();
-                    if (!response.ok) throw new Error(result.message || '連線錯誤');
+                    if (!response.ok) throw new Error(result.message || '連線發生錯誤');
                     return result;
                 };
 
@@ -485,13 +493,14 @@
                     apiKey.value = setupModal.key;
                     localStorage.setItem('tomcatApiUrl', apiUrl.value);
                     localStorage.setItem('tomcatApiKey', apiKey.value);
+
                     try {
                         const res = await callApi('/tomcat/status', 'GET', true); 
                         if (res.success) {
                             statusData.value = res.data;
                             isConnectionError.value = false;
                             setupModal.show = false; 
-                            showToast('連線成功！', 'success');
+                            showToast('連線成功！已儲存設定。', 'success');
                             nextTick(() => { fetchLogs(false); });
                         } else { throw new Error(res.message); }
                     } catch (error) {
@@ -529,8 +538,10 @@
                 const fetchLogs = async (preserveScroll = false) => {
                     if (isConnectionError.value || !apiUrl.value || setupModal.show) return;
                     isRefreshingLogs.value = true;
+                    
                     const typeParam = currentLogType.value === 'tomcat' ? 'catalina' : currentLogType.value;
                     const endpoint = currentLogType.value === 'agent' ? '/server/logs?lines=' + logLines.value : '/tomcat/logs?lines=' + logLines.value + '&type=' + typeParam;
+                    
                     try {
                         const res = await callApi(endpoint);
                         if (res.success) { logs.value = res.data; }
@@ -620,7 +631,7 @@
                         if (config.isDownload) {
                             downloadState.message = '正在執行壓縮打包作業...'; downloadState.active = true;
                             const res = await fetch(apiUrl.value.replace(/\/$/, '') + config.endpoint, { headers: { 'X-API-KEY': apiKey.value } });
-                            if (!res.ok) throw new Error('下載失敗');
+                            if (!res.ok) throw new Error('下載日誌失敗，請檢查伺服器日誌');
                             const blob = await res.blob();
                             const url = window.URL.createObjectURL(blob);
                             const a = document.createElement('a'); a.href = url; a.download = 'tomcat_logs.zip'; a.click();
@@ -645,8 +656,12 @@
                 onMounted(() => {
                     window.addEventListener('resize', updateHeight);
                     updateThemeClass();
-                    if (!apiUrl.value) { isInitialLoading.value = false; openSetupModal(); }
-                    else { triggerManualCheck(); }
+                    if (!apiUrl.value) { 
+                        isInitialLoading.value = false;
+                        openSetupModal(); 
+                    } else { 
+                        triggerManualCheck(); 
+                    }
                     setInterval(() => {
                         if (!reconnectState.active && !isOperating.value && !setupModal.show) { fetchStatus(); }
                     }, 15000);
