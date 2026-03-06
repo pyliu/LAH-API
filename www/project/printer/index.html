@@ -752,12 +752,12 @@
                 // [新增] 紀錄派送列印狀態
                 const printDispatching = ref({ active: false, message: '' });
 
+                // [新增] 重印與派送列印的雙面列印選項 (預設 0 = 單面)
+                const reprintDuplex = ref("0");
+
                 const showPreviewModal = ref(false);
                 const previewPdfUrl = ref('');
                 const previewFileName = ref('');
-
-                // [新增] 重印與派送列印的雙面列印選項 (預設 0 = 單面)
-                const reprintDuplex = ref("0");
 
                 watch(showRecordModal, (newVal) => {
                     if (!newVal) reprintDuplex.value = "0";
@@ -986,7 +986,7 @@
                 const restartSpooler = () => { if(confirm("重啟 Spooler？")) performAction(`/service/restart-spooler`, "服務重啟中"); };
                 const selfHeal = () => { if(confirm("執行深度自癒？")) performAction(`/service/self-heal`, "自癒流程啟動"); };
                 
-                // [更新] 高風險操作：封裝重啟與重連機制
+                // [更新] 高風險操作：封裝重啟與重連機制 (修正超時誤判問題)
                 const executeRestart = async (type, endpoint, confirmMsg, initMessage) => {
                     if (!confirm(confirmMsg)) return;
                     if (isDemoMode.value) return toast("Demo 模式無法執行此操作", "#f59e0b");
@@ -999,8 +999,11 @@
                         axios.get(getApiUrl(endpoint), { headers: { 'X-API-KEY': config.value.key } }).catch(() => {});
                     } catch (e) {}
 
-                    // 依序等待的秒數：5秒、15秒、30秒
-                    const delays = [5000, 15000, 30000]; 
+                    // 針對不同重啟類型，設定不同的等待時間
+                    // API 重啟較快，伺服器重啟需要較久
+                    const delays = type === 'script' 
+                        ? [6000, 10000, 15000]       // 腳本重啟：6秒、10秒、15秒
+                        : [30000, 60000, 120000];   // 實體伺服器重啟：30秒、60秒、120秒
 
                     for (let i = 0; i < delays.length; i++) {
                         restarting.value.message = `等待伺服器準備中... (${delays[i]/1000} 秒後嘗試第 ${i+1} 次連線)`;
@@ -1010,14 +1013,15 @@
                         restarting.value.message = `正在進行第 ${i+1} 次連線測試...`;
                         
                         try {
-                            const res = await axios.get(getApiUrl('/printers'), { 
+                            // [優化] 改用輕量級的 API (/server/logs) 探測，避免 /printers WMI 查詢超時
+                            const res = await axios.get(getApiUrl('/server/logs?lines=1'), { 
                                 headers: { 'X-API-KEY': config.value.key },
-                                timeout: 5000 // 探測超時設定為 5 秒
+                                timeout: 8000 // 探測超時放寬為 8 秒
                             });
                             
-                            if (res.data && res.data.success) {
-                                restarting.value.message = "連線成功！正在重新載入系統資料...";
-                                await fetchPrinters(false); // 重新取得完整印表機資料
+                            if (res.data) {
+                                restarting.value.message = "連線成功！正在重新載入印表機狀態...";
+                                await fetchPrinters(false); // 確定活著後，再重新取得完整資料 (無 timeout 限制)
                                 success("系統已重新連線");
                                 if (autoRefresh.value) startPolling(); // 恢復自動更新
                                 setTimeout(() => { restarting.value.active = false; }, 1500);

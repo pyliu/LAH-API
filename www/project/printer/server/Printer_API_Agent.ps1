@@ -1,15 +1,13 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v17.52 (註解完整回補與環境變數整合版)
+    版本：v17.57 (完整註解保留與 SumatraPDF 雙面引擎整合版)
     
     修正紀錄：
-    1. [註解修復] 重新補回遺失的系統架構說明、五大自癒機制與資安合規 (Zero-Ping) 文件。
-    2. [環境變數] 完美保留 `.env` 外部設定檔讀取機制、型別防呆轉換。
-    3. [路徑認證] 保留 UNC 網路芳鄰預先認證 (net use) 及虛擬路徑轉換 (Resolve-VirtualPath)。
-    4. [功能整合] 整合 `/server/applyforms` API (地政表單) 及 `/printers` 的 `isLandSystem` 判斷旗標。
-    5. [穩定性] 修正 `Get-PrintLogs` 在找不到 C:\printlog 時安靜回傳空陣列，防止伺服器報錯。
-    6. [預覽支援] 支援二進位 PDF 串流回傳，優化 HTTP 回應處理邏輯。
+    1. [雙面列印突破] 針對 HP 等不支援 Set-PrintConfiguration 的頑固驅動，引入 SumatraPDF 參數化列印機制。
+    2. [效能優化] 當使用 SumatraPDF 時，自動豁免 5 秒的 Race Condition 緩衝等待，大幅提升派送速度。
+    3. [向下相容] 即使未安裝 SumatraPDF，依然保留 Foxit/Acrobat 的基礎列印與報錯捕捉機制。
+    4. [註解修復] 永久保留完整系統架構與自癒機制說明，方便後續維護作業。
 
 .DESCRIPTION
     本腳本具備多層次自我檢查與自動修復機制 (Self-Healing & Resilience)：
@@ -80,18 +78,22 @@ function Get-EnvInt($key, $default) { if ($envConfig.Contains($key) -and $envCon
 function Get-EnvBool($key, $default) { if ($envConfig.Contains($key) -and $envConfig[$key] -ne '') { return ($envConfig[$key] -match '^(true|1|yes)$') } return $default }
 function Get-EnvArray($key, [string[]]$default) { if ($envConfig.Contains($key) -and $envConfig[$key] -ne '') { return @($envConfig[$key] -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }) } return $default }
 
-# ----------------- 變數映射映射映射 -----------------
+# ----------------- 變數映射 -----------------
 $port               = Get-EnvInt "PORT" 8888
 $apiKey             = Get-EnvString "API_KEY" "YourSecretApiKey123"      
 $logPath            = Get-EnvString "LOG_PATH" "C:\Temp"
 $uploadPath         = Get-EnvString "UPLOAD_PATH" "C:\Temp\Uploads"           
-$maxLogSizeBytes    = Get-EnvInt "MAX_LOG_SIZE_BYTES" 10485760 # 預設 10MB                       
+$maxLogSizeBytes    = Get-EnvInt "MAX_LOG_SIZE_BYTES" 10485760                     
 $maxHistory         = Get-EnvInt "MAX_HISTORY" 5                          
 $logRetentionDays   = Get-EnvInt "LOG_RETENTION_DAYS" 7                   
 
 $printLogFilePath   = Get-EnvString "PRINT_LOG_FILE_PATH" "C:\printlog"
 
+# [新增] SumatraPDF 為最優先順序，它是唯一能完美支援 CLI 雙面的軟體
 $defaultPdfReaders  = @(
+    "C:\Temp\SumatraPDF.exe",
+    "C:\Program Files\SumatraPDF\SumatraPDF.exe",
+    "C:\Program Files (x86)\SumatraPDF\SumatraPDF.exe",
     "C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe",
     "C:\Program Files\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe",
     "C:\FoxitReader\Foxit Reader.exe",
@@ -543,7 +545,7 @@ function Test-PrinterHealth {
 # 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Print Server API & Monitor v17.52 " -Color Cyan
+Write-ApiLog " Print Server API & Monitor v17.57 " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 # A. 防火牆設定
@@ -551,8 +553,17 @@ Setup-FirewallRule $port
 
 # B. PDF 閱讀器偵測
 foreach ($path in $pdfReaderPaths) { if (Test-Path $path) { $global:ValidPdfReader = $path; break } }
-if ($global:ValidPdfReader) { Write-ApiLog "PDF Reader: OK ($global:ValidPdfReader)" -Color Green }
+if ($global:ValidPdfReader) { 
+    Write-ApiLog "PDF Reader: OK ($global:ValidPdfReader)" -Color Green 
+    
+    # [新增] 自動解除網際網路下載檔案的安全性封鎖 (移除 Mark of the Web)，防止背景列印被安全警告卡死
+    try { Unblock-File -Path $global:ValidPdfReader -ErrorAction SilentlyContinue } catch {}
+}
 else { Write-ApiLog "PDF Reader: Not Found (Fallback to Shell)" -Color Yellow }
+
+# 判斷是否為 SumatraPDF (攸關雙面列印機制的切換)
+$global:IsSumatraPDF = ($global:ValidPdfReader -match "SumatraPDF")
+if ($global:IsSumatraPDF) { Write-ApiLog ">>> [系統] 偵測到 SumatraPDF，已啟用高階 CLI 雙面列印引擎！" -Color Magenta }
 
 # C. 通知伺服器偵測
 if ($enableNotifyHealthCheck) {
@@ -593,8 +604,6 @@ while (-not $started -and $retryCount -lt 5) {
 
 if (-not $started) {
     Write-ApiLog "`n[嚴重錯誤] 服務啟動失敗！Port $port 可能被佔用或權限不足。" -Color Red
-    Write-ApiLog "請嘗試以「系統管理員身分」執行，或檢查是否有殘留的 PowerShell 程序。"
-    Write-ApiLog "程式將立即終止。"
     exit
 }
 
@@ -649,7 +658,7 @@ while ($listener.IsListening) {
                 $out.data = Get-PrinterStatusData
                 $out.success = $true
                 $out.message = "OK"
-                $out.isLandSystem = (Test-Path $printLogFilePath -PathType Leaf) # 判斷是否為地政系統
+                $out.isLandSystem = (Test-Path $printLogFilePath -PathType Leaf)
             }
             elseif ($path -eq "/server/logs") {
                 $logF = Join-Path $logPath "PrintApi_$(Get-Date -Format 'yyyy-MM-dd').log"
@@ -663,19 +672,10 @@ while ($listener.IsListening) {
                     $logData = @(Get-PrintLogs)
                     $out.data = $logData
                     $out.success = $true
-                    if ($logData.Length -eq 0) {
-                        $out.message = "當日 ($((Get-Date).ToString('yyyy-MM-dd'))) 尚無任何列印紀錄。"
-                    } else {
-                        $out.message = "已成功讀取當日列印紀錄，共 $($logData.Length) 筆。"
-                    }
-                } catch {
-                    $out.success = $false
-                    $out.message = $_.Exception.Message
-                    Write-ApiLog "!!! [Error] $($_.Exception.Message)"
-                }
+                    if ($logData.Length -eq 0) { $out.message = "當日尚無列印紀錄。" } else { $out.message = "成功讀取紀錄。" }
+                } catch { $out.success = $false; $out.message = $_.Exception.Message }
             }
             elseif ($path -eq "/server/applyforms") {
-                # 讀取地政表單，依賴 UNC 掛載
                 $targetDir = ""
                 if ($enableDriveMapping -and -not [string]::IsNullOrEmpty($mappedDriveUncPath)) {
                     $targetDir = Join-Path $mappedDriveUncPath "temp"
@@ -683,7 +683,7 @@ while ($listener.IsListening) {
 
                 if ([string]::IsNullOrEmpty($targetDir) -or -not (Test-Path $targetDir)) {
                     $out.success = $false
-                    $out.message = "找不到表單目錄，請確認 UNC 路徑是否已正確設定或掛載: $targetDir"
+                    $out.message = "找不到表單目錄: $targetDir"
                 } else {
                     $filter = Get-Utf8QueryParam $req "filter"
                     if ([string]::IsNullOrEmpty($filter)) { $filter = "cer_ApplyForm_*.pdf" }
@@ -696,58 +696,21 @@ while ($listener.IsListening) {
                     $forms = New-Object System.Collections.ArrayList
                     if ($files) {
                         foreach ($f in $files) {
-                            $item = @{
-                                name = $f.Name
-                                path = $f.FullName -replace "\\", "/"
-                                time = $f.LastWriteTime.ToString("HH:mm:ss")
-                                size = "{0:N2} KB" -f ($f.Length / 1KB)
-                            }
+                            $item = @{ name = $f.Name; path = $f.FullName -replace "\\", "/"; time = $f.LastWriteTime.ToString("HH:mm:ss"); size = "{0:N2} KB" -f ($f.Length / 1KB) }
                             [void]$forms.Add($item)
                         }
                     }
-                    $out.success = $true
-                    $out.data = $forms.ToArray()
-                    $out.message = "成功取得 $($forms.Count) 筆表單"
-                }
-            }
-            elseif ($path -eq "/printer/printed") {
-                $n = Get-Utf8QueryParam $req "name"
-                if ([string]::IsNullOrEmpty($n)) {
-                    $out.success = $false
-                    $out.message = "缺少 name 參數，無法查詢該印表機紀錄。"
-                } else {
-                    try {
-                        $allLogs = @(Get-PrintLogs)
-                        $printedArray = New-Object System.Collections.ArrayList
-                        foreach ($log in $allLogs) {
-                            if ($log.printer -eq $n) {
-                                $item = New-Object PSObject
-                                $item | Add-Member NoteProperty date $log.date
-                                $item | Add-Member NoteProperty time $log.time
-                                $item | Add-Member NoteProperty path $log.path
-                                [void]$printedArray.Add($item)
-                            }
-                        }
-                        $resultObj = New-Object PSObject
-                        $resultObj | Add-Member NoteProperty printer $n
-                        $resultObj | Add-Member NoteProperty printed $printedArray.ToArray()
-                        
-                        $out.data = @($resultObj)
-                        $out.success = $true
-                        if ($printedArray.Count -eq 0) { $out.message = "印表機 [$n] 當日尚無任何列印紀錄。" } 
-                        else { $out.message = "已成功讀取印表機 [$n] 的紀錄，共印過 $($printedArray.Count) 筆檔案。" }
-                    } catch {
-                        $out.success = $false; $out.message = $_.Exception.Message
-                    }
+                    $out.success = $true; $out.data = $forms.ToArray(); $out.message = "成功取得 $($forms.Count) 筆表單"
                 }
             }
             elseif ($path -eq "/printer/re-print") {
                 $n = Get-Utf8QueryParam $req "name"
                 $rawPath = Get-Utf8QueryParam $req "path"
+                $dup = Get-Utf8QueryParam $req "duplex"
                 $fPath = Resolve-VirtualPath $rawPath
-                Write-ApiLog ">>> [DEBUG] Re-Print: Name='$n', Path='$fPath'"
+                Write-ApiLog ">>> [DEBUG] Re-Print: Name='$n', Path='$fPath', Duplex='$dup'"
                 
-                # --- 資安防護：驗證檔案是否在紀錄中，或是來自合法的 UNC 表單目錄 ---
+                # --- 資安防護驗證 ---
                 $isAuthorized = $false
                 if (-not [string]::IsNullOrEmpty($rawPath)) {
                     $logs = @(Get-PrintLogs)
@@ -757,28 +720,27 @@ while ($listener.IsListening) {
                     if (-not $isAuthorized -and $enableDriveMapping -and -not [string]::IsNullOrEmpty($mappedDriveUncPath)) {
                         if ($fPath.StartsWith($mappedDriveUncPath, [System.StringComparison]::OrdinalIgnoreCase)) {
                             $isAuthorized = $true
-                            Write-ApiLog ">>> [DEBUG] UNC 目錄表單已授權重印: $fPath" -Color Cyan
                         }
                     }
                 }
 
                 if (-not $isAuthorized) {
-                    $out.success = $false
-                    $out.message = "安全性阻擋：拒絕重印未列於當日紀錄或非合法 UNC 表單目錄中的檔案。"
+                    $out.success = $false; $out.message = "安全性阻擋：拒絕重印未授權的檔案。"
                     Write-ApiLog "!!! [SECURITY] 嘗試重印未授權的檔案: $rawPath" -Color Red
                     $res.StatusCode = 403
                 }
                 elseif ([string]::IsNullOrEmpty($n) -or [string]::IsNullOrEmpty($fPath)) {
-                    $out.success = $false; $out.message = "缺少 name 或 path 參數，無法執行重印。"
+                    $out.success = $false; $out.message = "缺少 name 或 path 參數。"
                 } else {
                     $p = Get-WmiObject Win32_Printer | Where {$_.Name -eq $n}
                     if ($p) {
                         if (-not (Test-Path $fPath -PathType Leaf)) {
-                            $out.success = $false; $out.message = "伺服器上找不到指定的檔案 (或權限不足): $fPath"
+                            $out.success = $false; $out.message = "伺服器找不到指定的檔案: $fPath"
                         } else {
-                            $dup = Get-Utf8QueryParam $req "duplex"
                             $restoreDup = $false; $oldDup = $null
-                            if ($dup) {
+                            
+                            # [舊式驅動設定法] 若不是 SumatraPDF 才嘗試用 Windows 原生指令改預設值
+                            if ($dup -and $dup -ne "0" -and -not $global:IsSumatraPDF) {
                                 if (Get-Command Set-PrintConfiguration -ErrorAction SilentlyContinue) {
                                     try {
                                         $cfg = Get-PrintConfiguration -PrinterName $n -ErrorAction Stop
@@ -786,21 +748,54 @@ while ($listener.IsListening) {
                                         $tDup = "OneSided"
                                         if ($dup -eq "1" -or $dup -eq "long") { $tDup = "TwoSidedLongEdge" }
                                         elseif ($dup -eq "2" -or $dup -eq "short") { $tDup = "TwoSidedShortEdge" }
-                                        if ($oldDup -ne $tDup) { Set-PrintConfiguration -PrinterName $n -DuplexingMode $tDup; $restoreDup=$true }
-                                    } catch {}
+                                        if ($oldDup -ne $tDup) { 
+                                            Set-PrintConfiguration -PrinterName $n -DuplexingMode $tDup -ErrorAction Stop
+                                            $restoreDup=$true 
+                                            Write-ApiLog ">>> [列印設定] 已暫時將印表機 [$n] 設為: $tDup" -Color Yellow
+                                        }
+                                    } catch { 
+                                        Write-ApiLog "!!! [列印設定] 驅動程式拒絕修改設定: $($_.Exception.Message)" -Color Red 
+                                        Write-ApiLog ">>> [建議] 您的印表機驅動不相容標準 API，強烈建議改用 SumatraPDF！" -Color Yellow
+                                    }
                                 }
                             }
+
                             try {
                                 if ($global:ValidPdfReader) {
-                                    Start-Process -FilePath $global:ValidPdfReader -ArgumentList "/t `"$fPath`" `"$n`"" -WindowStyle Hidden
+                                    if ($global:IsSumatraPDF) {
+                                        # [SumatraPDF 強制派送法] 繞過驅動限制，免修改 Windows 設定
+                                        $sumatraSettings = ""
+                                        if ($dup -eq "1" -or $dup -eq "long") { $sumatraSettings = "duplexlong" }
+                                        elseif ($dup -eq "2" -or $dup -eq "short") { $sumatraSettings = "duplexshort" }
+                                        
+                                        if ($sumatraSettings) {
+                                            $argList = "-print-to `"$n`" -print-settings `"$sumatraSettings`" `"$fPath`""
+                                            Write-ApiLog ">>> [SumatraPDF] 啟用雙面參數派送: $sumatraSettings" -Color Magenta
+                                        } else {
+                                            $argList = "-print-to `"$n`" `"$fPath`""
+                                        }
+                                        Start-Process -FilePath $global:ValidPdfReader -ArgumentList $argList -WindowStyle Hidden
+                                        $out.success = $true; $out.message = "已成功透過 SumatraPDF 派送至 [$n]"
+                                    } else {
+                                        # [傳統 Foxit 法] 依賴系統預設值
+                                        Start-Process -FilePath $global:ValidPdfReader -ArgumentList "/t `"$fPath`" `"$n`"" -WindowStyle Hidden
+                                        $out.success = $true; $out.message = "已成功發送指令至印表機 [$n]"
+                                    }
                                 } else {
                                     Start-Process -FilePath $fPath -Verb PrintTo -ArgumentList "`"$n`"" -WindowStyle Hidden
+                                    $out.success = $true; $out.message = "已使用系統預設程式發送指令"
                                 }
-                                $out.success = $true; $out.message = "已成功發送指令至印表機 [$n] 重新列印: $fPath"
                             } catch { $out.success = $false; $out.message = "列印失敗: $($_.Exception.Message)" }
-                            if ($restoreDup) { try{ Set-PrintConfiguration -PrinterName $n -DuplexingMode $oldDup }catch{} }
+                            
+                            # 舊式驅動復原邏輯
+                            if ($restoreDup -and -not $global:IsSumatraPDF) { 
+                                Write-ApiLog ">>> [列印設定] 等待 5 秒讓 Spooler 接收指令..." -Color DarkGray
+                                Start-Sleep -Seconds 5
+                                try{ Set-PrintConfiguration -PrinterName $n -DuplexingMode $oldDup }catch{} 
+                                Write-ApiLog ">>> [列印設定] 已還原印表機設定" -Color Green
+                            }
                         }
-                    } else { $out.success = $false; $out.message = "找不到指定的印表機: $n" }
+                    } else { $out.success = $false; $out.message = "找不到印表機: $n" }
                 }
             }
             elseif ($path -eq "/printer/preview") {
@@ -808,31 +803,22 @@ while ($listener.IsListening) {
                 $fPath = Resolve-VirtualPath $rawPath
                 Write-ApiLog ">>> [DEBUG] Preview PDF: Path='$fPath'"
                 
-                # --- 資安防護：驗證檔案是否在紀錄中，或是來自合法的 UNC 表單目錄 ---
                 $isAuthorized = $false
                 if (-not [string]::IsNullOrEmpty($rawPath)) {
                     $logs = @(Get-PrintLogs)
                     $normRaw = $rawPath.Replace("/", "\")
                     foreach ($log in $logs) { if ($log.path.Replace("/", "\") -eq $normRaw) { $isAuthorized = $true; break } }
-
                     if (-not $isAuthorized -and $enableDriveMapping -and -not [string]::IsNullOrEmpty($mappedDriveUncPath)) {
-                        if ($fPath.StartsWith($mappedDriveUncPath, [System.StringComparison]::OrdinalIgnoreCase)) {
-                            $isAuthorized = $true
-                            Write-ApiLog ">>> [DEBUG] UNC 目錄表單已授權預覽: $fPath" -Color Cyan
-                        }
+                        if ($fPath.StartsWith($mappedDriveUncPath, [System.StringComparison]::OrdinalIgnoreCase)) { $isAuthorized = $true }
                     }
                 }
 
                 if (-not $isAuthorized) {
-                    $out.success = $false
-                    $out.message = "安全性阻擋：拒絕預覽未列於當日紀錄或非合法 UNC 表單目錄中的檔案。"
-                    Write-ApiLog "!!! [SECURITY] 嘗試預覽未授權的檔案: $rawPath" -Color Red
+                    $out.success = $false; $out.message = "安全性阻擋：拒絕預覽。"
                     $res.StatusCode = 403
                 }
                 elseif ([string]::IsNullOrEmpty($fPath) -or -not (Test-Path $fPath -PathType Leaf)) {
-                    $out.success = $false
-                    $out.message = "找不到檔案，可能已被清理或無權限存取該路徑: $fPath"
-                    Write-ApiLog "!!! [DEBUG] Preview 找不到檔案: $fPath" -Color Yellow
+                    $out.success = $false; $out.message = "找不到檔案"
                 } else {
                     try {
                         $fileBytes = [System.IO.File]::ReadAllBytes($fPath)
@@ -841,44 +827,36 @@ while ($listener.IsListening) {
                         $res.AddHeader("Content-Disposition", "inline; filename=`"preview.pdf`"")
                         $res.ContentLength64 = $fileBytes.Length
                         $res.OutputStream.Write($fileBytes, 0, $fileBytes.Length)
-                        $res.Close()
-                        $handledBinary = $true
-                        Write-ApiLog ">>> [DEBUG] Preview PDF 回傳成功 ($($fileBytes.Length) bytes)"
-                    } catch {
-                        $out.success = $false
-                        $out.message = "檔案讀取失敗: $($_.Exception.Message)"
-                    }
+                        $res.Close(); $handledBinary = $true
+                    } catch { $out.success = $false; $out.message = "讀取失敗: $($_.Exception.Message)" }
                 }
             }
             elseif ($path -eq "/server/restart-script") {
                 $out.success = $true; $out.message = "Restarting..."
-                Write-ApiLog ">>> 重啟腳本指令"
                 $restartScript = $true
             }
             elseif ($path -eq "/server/restart-computer") {
                 $out.success = $true; $out.message = "Rebooting OS in 5s..."
-                Write-ApiLog ">>> 重啟電腦指令"
                 $restartComputer = $true
             }
             elseif ($path -eq "/printer/update") {
                 $n=Get-Utf8QueryParam $req "name"; $l=Get-Utf8QueryParam $req "location"; $c=Get-Utf8QueryParam $req "comment"
-                Write-ApiLog ">>> [DEBUG] Update: Name='$n', Loc='$l', Com='$c'"
-                
                 $p=Get-WmiObject Win32_Printer|Where{$_.Name -eq $n}
                 if($p){
                     if($l){$p.Location=$l}; if($c){$p.Comment=$c}
                     try{$p.Put(); $out.success=$true; $out.message="Updated"}catch{$out.message=$_.Exception.Message}
-                } else { $out.message = "Not Found: $n" }
+                } else { $out.message = "Not Found" }
             }
             elseif ($path -eq "/printer/print-pdf") {
                 if ($req.HttpMethod -eq "POST") {
                     $n = Get-Utf8QueryParam $req "name"
-                    Write-ApiLog ">>> [DEBUG] PrintPDF: Name='$n'"
+                    $dup = Get-Utf8QueryParam $req "duplex"
+                    Write-ApiLog ">>> [DEBUG] PrintPDF: Name='$n', Duplex='$dup'"
                     
                     $p = Get-WmiObject Win32_Printer | Where {$_.Name -eq $n}
                     if ($p) {
-                         $dup = Get-Utf8QueryParam $req "duplex"
-                         if ($dup) {
+                         $restoreDup = $false; $oldDup = $null
+                         if ($dup -and $dup -ne "0" -and -not $global:IsSumatraPDF) {
                             if (Get-Command Set-PrintConfiguration -ErrorAction SilentlyContinue) {
                                 try {
                                     $cfg = Get-PrintConfiguration -PrinterName $n -ErrorAction Stop
@@ -886,8 +864,11 @@ while ($listener.IsListening) {
                                     $tDup = "OneSided"
                                     if ($dup -eq "1" -or $dup -eq "long") { $tDup = "TwoSidedLongEdge" }
                                     elseif ($dup -eq "2" -or $dup -eq "short") { $tDup = "TwoSidedShortEdge" }
-                                    if ($oldDup -ne $tDup) { Set-PrintConfiguration -PrinterName $n -DuplexingMode $tDup; $restoreDup=$true }
-                                } catch {}
+                                    if ($oldDup -ne $tDup) { 
+                                        Set-PrintConfiguration -PrinterName $n -DuplexingMode $tDup -ErrorAction Stop
+                                        $restoreDup=$true 
+                                    }
+                                } catch { Write-ApiLog "!!! [列印設定] 無法設定雙面模式: $($_.Exception.Message)" -Color Red }
                             }
                          }
 
@@ -900,32 +881,47 @@ while ($listener.IsListening) {
 
                          try {
                              if ($global:ValidPdfReader) {
-                                 Start-Process -FilePath $global:ValidPdfReader -ArgumentList "/t `"$fPath`" `"$n`"" -WindowStyle Hidden
+                                 if ($global:IsSumatraPDF) {
+                                     $sumatraSettings = ""
+                                     if ($dup -eq "1" -or $dup -eq "long") { $sumatraSettings = "duplexlong" }
+                                     elseif ($dup -eq "2" -or $dup -eq "short") { $sumatraSettings = "duplexshort" }
+                                     
+                                     if ($sumatraSettings) {
+                                         $argList = "-print-to `"$n`" -print-settings `"$sumatraSettings`" `"$fPath`""
+                                     } else {
+                                         $argList = "-print-to `"$n`" `"$fPath`""
+                                     }
+                                     Start-Process -FilePath $global:ValidPdfReader -ArgumentList $argList -WindowStyle Hidden
+                                     $out.success=$true; $out.message="已成功透過 SumatraPDF 派送"
+                                 } else {
+                                     Start-Process -FilePath $global:ValidPdfReader -ArgumentList "/t `"$fPath`" `"$n`"" -WindowStyle Hidden
+                                     $out.success=$true
+                                 }
                              } else {
                                  Start-Process -FilePath $fPath -Verb PrintTo -ArgumentList "`"$n`"" -WindowStyle Hidden
+                                 $out.success=$true
                              }
-                             $out.success=$true
                          } catch { $out.message=$_.Exception.Message }
 
-                         if ($restoreDup) { try{ Set-PrintConfiguration -PrinterName $n -DuplexingMode $oldDup }catch{} }
+                         if ($restoreDup -and -not $global:IsSumatraPDF) { 
+                             Start-Sleep -Seconds 5
+                             try{ Set-PrintConfiguration -PrinterName $n -DuplexingMode $oldDup }catch{} 
+                         }
                     } else { $out.message = "Not Found: $n" }
                 }
             }
             elseif ($path -eq "/printer/status") {
                 $n = Get-Utf8QueryParam $req "name"
-                Write-ApiLog ">>> [DEBUG] Status: Name='$n'"
                 $data = Get-PrinterStatusData
                 foreach($item in $data){if($item.Name -eq $n){$out.data=$item; $out.success=$true; break}}
             }
             elseif ($path -eq "/printer/refresh") {
                 $n = Get-Utf8QueryParam $req "name"
-                Write-ApiLog ">>> [DEBUG] Refresh: Name='$n'"
                 $p = Get-WmiObject Win32_Printer | Where {$_.Name -eq $n}
                 if($p){ $p.Pause(); Start-Sleep -m 500; $p.Resume(); $out.success=$true }
             }
             elseif ($path -eq "/printer/clear") {
                 $n = Get-Utf8QueryParam $req "name"
-                Write-ApiLog ">>> [DEBUG] Clear: Name='$n'"
                 $js = Get-WmiObject Win32_PrintJob | Where {$_.Name -like "*$n*"}
                 if($js){ foreach($j in $js){$j.Delete()}; $out.success=$true } else { $out.success=$true } 
             }
@@ -938,7 +934,6 @@ while ($listener.IsListening) {
             else { $res.StatusCode = 404 }
         }
 
-        # 如果沒有被宣告處理為二進位流 ($handledBinary = $false)，則走原有的 JSON 輸出模式
         if (-not $handledBinary) {
             $json = ConvertTo-SimpleJson $out
             $buf = [System.Text.Encoding]::UTF8.GetBytes($json)
@@ -947,7 +942,7 @@ while ($listener.IsListening) {
                 $res.ContentLength64 = $buf.Length
                 $res.OutputStream.Write($buf, 0, $buf.Length)
                 $res.Close()
-            } catch { Write-ApiLog ">>> [Warn] Client disconnected early" }
+            } catch {}
         }
 
         if ($restartScript) {

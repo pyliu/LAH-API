@@ -16,7 +16,7 @@ LOG_RETENTION_DAYS=7
 PRINT_LOG_FILE_PATH=C:\printlog
 
 # PDF 閱讀器路徑 (多組請用逗號 , 分隔)
-PDF_READER_PATHS=C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe, C:\Program Files\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe, C:\FoxitReader\Foxit Reader.exe, C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe, C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe
+PDF_READER_PATHS=C:\Temp\SumatraPDF.exe, C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe, C:\Program Files\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe, C:\FoxitReader\Foxit Reader.exe, C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe, C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe
 
 # --- 3. 網路磁碟機 (UNC) 認證對應 ---
 ENABLE_DRIVE_MAPPING=true
