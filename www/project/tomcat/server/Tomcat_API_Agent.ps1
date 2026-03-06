@@ -298,6 +298,25 @@ while ($listener.IsListening) {
                 $out.success = $true; $out.message = "Tomcat 重啟成功"
             } catch { $out.message = "重啟失敗: $($_.Exception.Message)" }
         }
+        elseif ($path -eq "/tomcat/clean-cache") {
+            try {
+                $w = Join-Path $tomcatDir "work"; $t = Join-Path $tomcatDir "temp"
+                if (Test-Path $w) { Get-ChildItem -Path $w -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue }
+                if (Test-Path $t) { Get-ChildItem -Path $t -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue }
+                $out.success = $true; $out.message = "快取目錄 (work/temp) 已清空"
+                Write-ApiLog "已執行 Tomcat 快取清理" -Color Cyan
+            } catch { $out.message = "清理失敗: $($_.Exception.Message)" }
+        } 
+        elseif ($path -eq "/tomcat/clean-crash-dumps") {
+            try {
+                $dumps = Get-ChildItem -Path $tomcatDir -Filter "hs_err_pid*" -File
+                if ($dumps) {
+                    $sz = 0; foreach ($f in $dumps) { $sz += $f.Length; Remove-Item $f.FullName -Force }
+                    $out.success = $true; $out.message = "已刪除 $($dumps.Count) 個 Dump 檔，釋放 $([math]::Round($sz/1MB,2)) MB 空間"
+                    Write-ApiLog "清理了 $($dumps.Count) 個 JVM Crash Dumps" -Color Green
+                } else { $out.success = $true; $out.message = "未發現 Dump 檔案" }
+            } catch { $out.message = "刪除失敗: $($_.Exception.Message)" }
+        }
         elseif ($path -eq "/tomcat/download-logs") {
             try {
                 $zipName = "tomcat_logs_$(Get-Date -Format 'yyyyMMdd_HHmmss').zip"
@@ -310,6 +329,23 @@ while ($listener.IsListening) {
                 $res.Close(); $handledBinary = $true
             } catch { $out.message = "備份日誌失敗" }
         }
+        elseif ($path -eq "/server/logs") {
+            $logDate = Get-Date -Format "yyyy-MM-dd"
+            $targetFile = Join-Path $logPath "TomcatApi_$logDate.log"
+            if (Test-Path $targetFile) {
+                $cnt = 100; $l = Get-Utf8QueryParam $req "lines"; if ($l -match "^\d+$") { $cnt = [int]$l }
+                try {
+                    $out.data = Get-Content $targetFile -Tail $cnt -Encoding Default -ErrorAction Stop
+                    $out.success = $true
+                } catch { $out.message = "讀取錯誤: $($_.Exception.Message)" }
+            } else { $out.message = "找不到今日的 Agent 日誌檔案" }
+        }
+        elseif ($path -eq "/server/restart-script") {
+            $out.success = $true; $out.message = "Agent 腳本即將重啟..."; $restartScript = $true
+        }
+        elseif ($path -eq "/server/restart-computer") {
+            $out.success = $true; $out.message = "伺服器即將重新啟動..."; $restartComputer = $true
+        }
         else { $res.StatusCode = 404 }
 
         if (-not $handledBinary) {
@@ -318,5 +354,12 @@ while ($listener.IsListening) {
         }
 
         if ($restartScript) { Start-Sleep -Seconds 1; try { $listener.Abort() } catch {}; Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""; [System.Environment]::Exit(0) }
+        if ($restartComputer) {
+            Write-ApiLog ">>> 伺服器即將關機重啟..." -Color Red
+            try { $listener.Abort() } catch {}
+            if ($enableAdminNotifications) { Send-SysAdminNotify -content "API：收到管理員指令，伺服器即將在 5 秒後重新啟動。" -title "系統操作" }
+            Start-Process "shutdown.exe" -ArgumentList "/r /t 5 /f /d p:4:1"
+            [System.Environment]::Exit(0)
+        }
     } catch { $contextTask = $null }
 }
