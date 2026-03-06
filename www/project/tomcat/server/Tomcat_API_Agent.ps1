@@ -255,6 +255,9 @@ while ($listener.IsListening) {
         $context = $listener.EndGetContext($contextTask); $contextTask = $null
         $req = $context.Request; $res = $context.Response; $path = $req.Url.AbsolutePath.ToLower()
         
+        # ?? 補回這行：記錄每一次前端發送過來的請求
+        Write-ApiLog ">>> [請求] $($req.RemoteEndPoint) $path"
+        
         $res.AddHeader("Access-Control-Allow-Origin", "*")
         $res.AddHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         $res.AddHeader("Access-Control-Allow-Headers", "*") 
@@ -269,15 +272,48 @@ while ($listener.IsListening) {
         elseif ($path -eq "/tomcat/status") {
             try {
                 $svc = Get-Service | Where-Object { $_.Name -eq $tomcatServiceName -or $_.DisplayName -eq $tomcatServiceName } | Select-Object -First 1
-                $sysOs = Get-WmiObject Win32_OperatingSystem
-                $memTotal = [math]::Round($sysOs.TotalVisibleMemorySize * 1024)
-                $memFree = [math]::Round($sysOs.FreePhysicalMemory * 1024)
-                $cpu = (Get-WmiObject Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average
-                $hasDumps = (Get-ChildItem -Path $tomcatDir -Filter "hs_err_pid*" -File -ErrorAction SilentlyContinue).Count -gt 0
+                if (-not $svc) { throw "找不到服務: $tomcatServiceName" }
+
+                $sysCpu = 0; $sysMemTotal = 0; $sysMemUsed = 0; $sysMemPct = 0; $tomcatCpuPct = 0; $tomcatMemBytes = 0
                 
-                $out.data = @{ "Status"=$svc.Status.ToString(); "ServiceName"=$svc.Name; "DisplayName"=$svc.DisplayName; "TomcatDir"=$tomcatDir; "SysCpu"=[math]::Round($cpu,1); "SysMemUsed"=($memTotal-$memFree); "SysMemTotal"=$memTotal; "SysMemPct"=[math]::Round((($memTotal-$memFree)/$memTotal)*100,1); "HasCrashDumps"=$hasDumps }
-                $out.success = $true
-            } catch { $out.message = "狀態讀取失敗" }
+                # 掃描是否存在 JVM 崩潰檔
+                $hasCrashDumps = $false
+                try {
+                    $dumps = Get-ChildItem -Path $tomcatDir -Filter "hs_err_pid*" -File -ErrorAction SilentlyContinue
+                    if ($dumps -and $dumps.Count -gt 0) { $hasCrashDumps = $true }
+                } catch {}
+
+                try {
+                    $sysOs = Get-WmiObject Win32_OperatingSystem
+                    $sysMemTotal = [math]::Round($sysOs.TotalVisibleMemorySize * 1024)
+                    $sysMemFree = [math]::Round($sysOs.FreePhysicalMemory * 1024)
+                    $sysMemUsed = $sysMemTotal - $sysMemFree
+                    if ($sysMemTotal -gt 0) { $sysMemPct = [math]::Round(($sysMemUsed / $sysMemTotal) * 100, 1) }
+                    
+                    $sysProcessor = Get-WmiObject Win32_Processor | Measure-Object -Property LoadPercentage -Average
+                    $sysCpu = [math]::Round($sysProcessor.Average, 1)
+
+                    # ?? 這裡補回遺失的 Tomcat 專屬 PID 資源監控邏輯
+                    if ($svc.Status -eq 'Running') {
+                        $svcWmi = Get-WmiObject Win32_Service -Filter "Name='$($svc.Name)'"
+                        if ($svcWmi -and $svcWmi.ProcessId -gt 0) {
+                            $tProc = Get-Process -Id $svcWmi.ProcessId -ErrorAction SilentlyContinue
+                            if ($tProc) {
+                                $tomcatMemBytes = $tProc.WorkingSet64
+                                $perf = Get-WmiObject Win32_PerfFormattedData_PerfProc_Process -Filter "IDProcess=$($svcWmi.ProcessId)" -ErrorAction SilentlyContinue
+                                if ($perf) {
+                                    $processorCount = $env:NUMBER_OF_PROCESSORS
+                                    if (-not $processorCount -or $processorCount -eq 0) { $processorCount = 1 }
+                                    $tomcatCpuPct = [math]::Round(($perf.PercentProcessorTime / $processorCount), 1)
+                                }
+                            }
+                        }
+                    }
+                } catch { Write-ApiLog "獲取效能數據失敗: $($_.Exception.Message)" -Color Yellow }
+
+                $out.data = @{ "ServiceName"=$svc.Name; "DisplayName"=$svc.DisplayName; "Status"=$svc.Status.ToString(); "TomcatDir"=$tomcatDir; "SysCpu"=$sysCpu; "SysMemTotal"=$sysMemTotal; "SysMemUsed"=$sysMemUsed; "SysMemPct"=$sysMemPct; "TomcatCpu"=$tomcatCpuPct; "TomcatMemUsed"=$tomcatMemBytes; "HasCrashDumps"=$hasCrashDumps }
+                $out.success = $true; $out.message = "OK"
+            } catch { $out.message = "狀態讀取失敗: $($_.Exception.Message)" }
         }
         elseif ($path -eq "/tomcat/logs") {
             $logDate = Get-Date -Format "yyyy-MM-dd"

@@ -242,21 +242,18 @@
                         </div>
                     </section>
 
-                    <!-- 🚀 系統資源下載連結 -->
+                    <!-- 4. 系統資源下載連結 -->
                     <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
                         <h2 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">系統資源 (Resources)</h2>
                         <div class="space-y-2">
-                            <!-- 移除了 download 屬性 -->
                             <a href="./server/Tomcat_API_Agent.ps1" target="_blank" class="w-full flex items-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 border border-slate-100 dark:border-slate-700 rounded-xl transition-all group">
                                 <span class="icon-box mr-3 text-blue-500"><i data-lucide="file-code" class="w-4 h-4"></i></span>
                                 <span class="text-xs font-bold">伺服器服務腳本 (.ps1)</span>
                             </a>
-                            <!-- 移除了 download 屬性 -->
                             <a href="./server/Tomcat_API_部署說明手冊.pdf" target="_blank" class="w-full flex items-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 border border-slate-100 dark:border-slate-700 rounded-xl transition-all group">
                                 <span class="icon-box mr-3 text-emerald-500"><i data-lucide="book-open" class="w-4 h-4"></i></span>
                                 <span class="text-xs font-bold">部署說明文件 (.pdf)</span>
                             </a>
-                            <!-- 移除了 download 屬性 -->
                             <a href="./server/Tomcat_API_介面測試集.pdf" target="_blank" class="w-full flex items-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 border border-slate-100 dark:border-slate-700 rounded-xl transition-all group">
                                 <span class="icon-box mr-3 text-amber-500"><i data-lucide="test-tube" class="w-4 h-4"></i></span>
                                 <span class="text-xs font-bold">API 介面測試集 (.pdf)</span>
@@ -293,22 +290,33 @@
                                 <span class="icon-box mr-1.5"><i data-lucide="arrow-up-circle" class="w-3.5 h-3.5"></i></span> 載入前 100 行
                             </button>
                             <button @click="triggerManualCheck" :disabled="isRefreshingLogs || isOperating || isConnectionError" class="p-1.5 text-slate-500 hover:text-blue-600 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 transition-all">
-                                <span class="icon-box"><i data-lucide="refresh-cw" :class="{'animate-spin': isRefreshingLogs}" class="w-4 h-4"></i></span>
+                                <span class="icon-box"><i data-lucide="refresh-cw" class="w-4 h-4"></i></span>
                             </button>
                         </div>
                     </div>
-                    <div ref="logContainer" class="flex-1 min-h-0 bg-slate-50 dark:bg-[#0a0f18] p-4 font-mono text-xs shadow-inner relative leading-relaxed overflow-y-auto zoom-layer-fix">
-                        <div v-if="logs.length === 0 && !isRefreshingLogs" class="h-full flex items-center justify-center text-slate-400 flex-col opacity-50">
-                            <span class="icon-box mb-4 opacity-20"><i data-lucide="terminal" class="w-16 h-16"></i></span>
-                            <p class="font-black tracking-[0.2em] uppercase">{{ isConnectionError ? '連線異常 (Connection Error)' : '目前尚無資料 (No Data)' }}</p>
-                        </div>
-                        <div v-else class="space-y-1">
-                            <div v-for="(log, idx) in logs" :key="idx" :class="getLogColor(log)" class="break-all whitespace-pre-wrap"><span class="opacity-30 mr-3 select-none inline-block w-8 text-right">{{ (idx + 1) }}</span>{{ log }}</div>
+                    
+                    <!-- 終端機顯示區 (重新設計層級，解決捲動與遮罩問題) -->
+                    <div class="relative flex-1 min-h-0">
+                        <!-- 捲動區獨立 -->
+                        <div ref="logContainer" class="absolute inset-0 bg-slate-50 dark:bg-[#0a0f18] p-4 font-mono text-xs shadow-inner leading-relaxed overflow-y-auto zoom-layer-fix">
+                            <div v-if="logs.length === 0 && !isRefreshingLogs" class="h-full flex items-center justify-center text-slate-400 flex-col opacity-50">
+                                <span class="icon-box mb-4 opacity-20"><i data-lucide="terminal" class="w-16 h-16"></i></span>
+                                <p class="font-black tracking-[0.2em] uppercase">{{ isConnectionError ? '連線異常 (Connection Error)' : '目前尚無資料 (No Data)' }}</p>
+                            </div>
+                            <div v-else class="space-y-1">
+                                <div v-for="(log, idx) in logs" :key="idx" :class="getLogColor(log)" class="break-all whitespace-pre-wrap"><span class="opacity-30 mr-3 select-none inline-block w-8 text-right">{{ (idx + 1) }}</span>{{ log }}</div>
+                            </div>
                         </div>
                         
-                        <!-- 載入中遮罩 -->
-                        <div v-if="isRefreshingLogs && logs.length === 0" class="absolute inset-0 bg-white/50 dark:bg-[#0a0f18]/80 flex items-center justify-center backdrop-blur-sm">
-                            <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 shadow-lg"></div>
+                        <!-- 🚀 載入中遮罩 (獨立於捲動區外層，確保 100% 絕對置中覆蓋) -->
+                        <div v-if="isRefreshingLogs" class="absolute inset-0 z-50 bg-white/50 dark:bg-[#0a0f18]/60 backdrop-blur-sm flex items-center justify-center transition-all duration-300">
+                            <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-8 py-6 rounded-2xl shadow-2xl flex flex-col items-center animate-scale-in">
+                                <div class="relative w-12 h-12 mb-4">
+                                    <div class="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-700"></div>
+                                    <div class="absolute inset-0 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
+                                </div>
+                                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 tracking-widest uppercase">正在同步資料</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -344,7 +352,7 @@
             </div>
         </div>
 
-        <!-- 🚀 全螢幕遮罩組件 (重連、下載) -->
+        <!-- 全螢幕遮罩組件 (重連、下載) -->
         <div v-if="reconnectState.active" class="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-slate-900/90 backdrop-blur-md px-4 animate-scale-in text-center">
              <div class="relative flex items-center justify-center mb-10 w-40 h-40">
                 <div class="absolute w-full h-full border-4 border-blue-500/20 rounded-full animate-ping-slow"></div>
@@ -363,6 +371,7 @@
                 <span class="icon-box text-emerald-400 animate-pulse"><i data-lucide="package" class="w-12 h-12"></i></span>
             </div>
             <h2 class="text-2xl font-black text-white mb-4">{{ downloadState.message }}</h2>
+            <p class="text-slate-400 text-xs">壓縮作業正在執行，請勿關閉網頁。</p>
         </div>
 
         <!-- 確認 Modal -->
@@ -374,7 +383,7 @@
                 <h2 class="text-xl font-bold text-slate-800 dark:text-white mb-2">{{ modal.title }}</h2>
                 <p class="text-sm text-slate-500 dark:text-slate-300 mb-8 leading-relaxed">{{ modal.message }}</p>
                 <div class="flex gap-3">
-                    <button @click="modal.show = false" class="flex-1 py-3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 rounded-xl font-bold text-xs hover:bg-slate-200 dark:hover:bg-slate-600 transition-all">取消</button>
+                    <button @click="modal.show = false" class="flex-1 py-3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 rounded-xl font-bold text-xs hover:bg-slate-200 transition-all">取消</button>
                     <button @click="executeModalAction" :class="modal.danger ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'" class="flex-1 py-3 text-white rounded-xl font-bold text-xs shadow-lg transition-all">確定執行</button>
                 </div>
             </div>
@@ -394,10 +403,10 @@
 
         createApp({
             setup() {
-                // 1. 動態高度與縮放系統 (視覺基準提升 20%)
+                // 動態高度與縮放系統
                 const viewportHeight = ref(window.innerHeight);
                 const updateHeight = () => { viewportHeight.value = window.innerHeight; };
-                const baseZoomFactor = 1.2; 
+                const baseZoomFactor = 1.2; // 視覺基準提升 20%
                 const zoomLevel = ref(parseFloat(localStorage.getItem('tomcatUiZoom')) || 1.0); 
                 
                 const changeZoom = (delta) => {
@@ -530,9 +539,25 @@
 
                 const triggerManualCheck = async () => {
                     if (!apiUrl.value) { openSetupModal(); return; }
-                    await fetchStatus();
-                    if (isConnectionError.value) { openSetupModal(); }
-                    else { fetchLogs(false); }
+                    
+                    // 🚀 1. 點擊按鈕時，立刻強制顯示右側的毛玻璃遮罩
+                    isRefreshingLogs.value = true;
+                    nextTick(() => { lucide.createIcons(); });
+
+                    // 🚀 2. 探測伺服器狀態 (加入 600ms 最小延遲，確保毛玻璃動畫能被肉眼清楚看見)
+                    await Promise.all([
+                        fetchStatus(),
+                        new Promise(resolve => setTimeout(resolve, 600))
+                    ]);
+
+                    if (isConnectionError.value) { 
+                        // ❌ 如果依舊斷線：關閉遮罩，並彈出設定視窗
+                        isRefreshingLogs.value = false;
+                        openSetupModal(); 
+                    } else { 
+                        // ✅ 如果連線恢復：繼續去抓取日誌 (fetchLogs 內部抓完後會自動關閉遮罩)
+                        await fetchLogs(false); 
+                    }
                 };
 
                 const fetchLogs = async (preserveScroll = false) => {
@@ -543,7 +568,12 @@
                     const endpoint = currentLogType.value === 'agent' ? '/server/logs?lines=' + logLines.value : '/tomcat/logs?lines=' + logLines.value + '&type=' + typeParam;
                     
                     try {
-                        const res = await callApi(endpoint);
+                        // 🚀 使用 Promise.all 保證至少顯示 600ms，讓毛玻璃動畫能被看到
+                        const [res] = await Promise.all([
+                            callApi(endpoint),
+                            new Promise(resolve => setTimeout(resolve, 600))
+                        ]);
+
                         if (res.success) { logs.value = res.data; }
                         if (!preserveScroll) { scrollToBottom(); }
                     } catch (e) {
