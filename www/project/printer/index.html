@@ -394,6 +394,15 @@
                         </button>
                     </div>
                     
+                    <div class="px-4 sm:px-6 py-2 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 flex justify-end items-center gap-2">
+                        <label class="text-sm font-medium text-slate-600 dark:text-slate-300">列印模式:</label>
+                        <select v-model="reprintDuplex" class="py-1 px-2 rounded border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-slate-800 dark:text-white text-sm outline-none cursor-pointer">
+                            <option value="0">單面</option>
+                            <option value="1">雙面 (長邊)</option>
+                            <option value="2">雙面 (短邊)</option>
+                        </select>
+                    </div>
+                    
                     <div class="overflow-y-auto p-4 sm:p-6 space-y-3 bg-slate-50 dark:bg-slate-900/50 flex-1">
                         <div v-if="!sortedSinglePrinterRecords || sortedSinglePrinterRecords.length === 0" class="text-center text-slate-500 py-8">
                             <i class="fa-solid fa-folder-open text-3xl mb-2 text-slate-300 dark:text-slate-600"></i>
@@ -431,13 +440,21 @@
                         </button>
                     </div>
                     
-                    <div class="px-4 sm:px-6 py-3 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
-                        <div class="relative w-full">
+                    <div class="px-4 sm:px-6 py-3 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row gap-3">
+                        <div class="relative w-full flex-1">
                             <span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-search"></i></span>
                             <input type="text" v-model="globalRecordSearchQuery" placeholder="搜尋檔名、印表機、備註或時間..." class="w-full pl-10 pr-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-slate-800 dark:text-white focus:ring-purple-500 focus:border-purple-500 shadow-sm transition-colors text-sm outline-none">
                             <button v-if="globalRecordSearchQuery" @click="globalRecordSearchQuery = ''" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
                                 <i class="fa-solid fa-circle-xmark text-lg"></i>
                             </button>
+                        </div>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <label class="text-sm font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">列印模式:</label>
+                            <select v-model="reprintDuplex" class="py-1.5 px-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-slate-800 dark:text-white text-sm outline-none cursor-pointer">
+                                <option value="0">單面</option>
+                                <option value="1">雙面 (長邊)</option>
+                                <option value="2">雙面 (短邊)</option>
+                            </select>
                         </div>
                     </div>
                     
@@ -502,13 +519,23 @@
                             </button>
                         </div>
                         
-                        <div class="flex items-center gap-2">
-                            <label class="text-sm font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">派送目標:</label>
-                            <div class="relative flex-1 max-w-sm">
-                                <span class="absolute left-3 top-1.5 text-slate-400"><i class="fa-solid fa-print"></i></span>
-                                <select v-model="applyFormTargetPrinter" class="w-full pl-9 pr-8 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors text-sm outline-none cursor-pointer">
-                                    <option value="">請選擇要派送列印的目標設備...</option>
-                                    <option v-for="p in printers" :key="p.Name" :value="p.Name">{{ p.Name }} ({{ p.Status }}){{ p.Comment ? ' - ' + p.Comment : '' }}</option>
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                            <div class="flex items-center gap-2 flex-1 w-full max-w-md">
+                                <label class="text-sm font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">派送目標:</label>
+                                <div class="relative flex-1">
+                                    <span class="absolute left-3 top-1.5 text-slate-400"><i class="fa-solid fa-print"></i></span>
+                                    <select v-model="applyFormTargetPrinter" class="w-full pl-9 pr-8 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors text-sm outline-none cursor-pointer">
+                                        <option value="">請選擇要派送列印的目標設備...</option>
+                                        <option v-for="p in printers" :key="p.Name" :value="p.Name">{{ p.Name }} ({{ p.Status }}){{ p.Comment ? ' - ' + p.Comment : '' }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-sm font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">模式:</label>
+                                <select v-model="reprintDuplex" class="py-1.5 px-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-slate-800 dark:text-white text-sm outline-none cursor-pointer">
+                                    <option value="0">單面</option>
+                                    <option value="1">雙面 (長邊)</option>
+                                    <option value="2">雙面 (短邊)</option>
                                 </select>
                             </div>
                         </div>
@@ -617,6 +644,23 @@
             </div>
         </transition>
 
+        <!-- 10. 派送列印中防護 Modal -->
+        <transition name="fade">
+            <div v-if="printDispatching.active" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4 transition-all">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center border border-slate-200 dark:border-slate-700 flex flex-col items-center">
+                    <i class="fa-solid fa-print fa-bounce text-5xl text-blue-500 mb-6 mt-2"></i>
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-3">正在派送列印</h2>
+                    <p class="text-sm font-medium text-slate-600 dark:text-slate-400">{{ printDispatching.message }}</p>
+                    
+                    <div class="mt-6 flex justify-center gap-3">
+                        <div class="w-2.5 h-2.5 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                        <div class="w-2.5 h-2.5 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.15s"></div>
+                        <div class="w-2.5 h-2.5 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.3s"></div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
     </div>
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
@@ -705,16 +749,26 @@
                 const restarting = ref({ active: false, message: '', attempt: 0, type: '' });
                 const reloadPage = () => window.location.reload();
 
+                // [新增] 紀錄派送列印狀態
+                const printDispatching = ref({ active: false, message: '' });
+
                 const showPreviewModal = ref(false);
                 const previewPdfUrl = ref('');
                 const previewFileName = ref('');
 
+                // [新增] 重印與派送列印的雙面列印選項 (預設 0 = 單面)
+                const reprintDuplex = ref("0");
+
+                watch(showRecordModal, (newVal) => {
+                    if (!newVal) reprintDuplex.value = "0";
+                });
+
                 watch(showGlobalRecordModal, (newVal) => {
-                    if (!newVal) globalRecordSearchQuery.value = '';
+                    if (!newVal) { globalRecordSearchQuery.value = ''; reprintDuplex.value = "0"; }
                 });
 
                 watch(showApplyFormsModal, (newVal) => {
-                    if (!newVal) applyFormsSearchQuery.value = '';
+                    if (!newVal) { applyFormsSearchQuery.value = ''; reprintDuplex.value = "0"; }
                 });
 
                 const closePreviewModal = () => {
@@ -1004,8 +1058,17 @@
                 const submitPdf = async () => {
                     if (!fileInput.value.files[0]) return error("請選擇檔案");
                     uploading.value = true;
+                    
+                    // 開啟派送防護 Modal
+                    printDispatching.value = { active: true, message: `正在將檔案傳送至 [${selectedPrinter.value.Name}]，請稍候...` };
+                    
                     if (isDemoMode.value) {
-                        setTimeout(() => { success("[Demo] PDF 已列印"); showPdfModal.value = false; uploading.value = false; }, 1000);
+                        setTimeout(() => { 
+                            success("[Demo] PDF 已列印"); 
+                            showPdfModal.value = false; 
+                            uploading.value = false; 
+                            printDispatching.value.active = false;
+                        }, 1000);
                         return;
                     }
                     try {
@@ -1013,7 +1076,10 @@
                         const res = await axios.post(url, fileInput.value.files[0], { headers: { 'X-API-KEY': config.value.key, 'Content-Type': 'application/pdf' } });
                         if (res.data.success) { success("PDF 已傳送"); showPdfModal.value = false; setTimeout(() => fetchSinglePrinter(selectedPrinter.value.Name), 1000); }
                         else error(res.data.message);
-                    } catch(e) { error(e.message); } finally { uploading.value = false; }
+                    } catch(e) { error(e.message); } finally { 
+                        uploading.value = false; 
+                        printDispatching.value.active = false; // 關閉派送防護 Modal
+                    }
                 };
 
                 const openRecordModal = (p) => { selectedPrinter.value = p; showRecordModal.value = true; };
@@ -1060,14 +1126,20 @@
                 const reprintFile = async (printerName, path) => {
                     if (isDemoMode.value) return toast("Demo 模式無法重印檔案", "#f59e0b");
                     if (!printerName) return error("必須選擇目標印表機才能重印！");
-                    if (!confirm(`確定要將此檔案送至 [${printerName}] 重新列印嗎？`)) return;
+                    
+                    const modeText = reprintDuplex.value === '1' ? '雙面 (長邊翻轉)' : (reprintDuplex.value === '2' ? '雙面 (短邊翻轉)' : '單面');
+                    if (!confirm(`確定要將此檔案送至 [${printerName}] 重新列印嗎？\n\n列印模式：${modeText}`)) return;
                     
                     recordActionLoading.value = true;
+                    
+                    // 開啟派送防護 Modal
+                    printDispatching.value = { active: true, message: `正在將檔案派送至 [${printerName}]，請稍候...` };
+
                     try {
                         const url = getApiUrl(`/printer/re-print`);
                         const res = await axios.get(url, {
                             headers: { 'X-API-KEY': config.value.key },
-                            params: { name: printerName, path: path }
+                            params: { name: printerName, path: path, duplex: reprintDuplex.value } // 加上 duplex 參數
                         });
                         if (res.data.success) {
                             success("已成功發送重印指令");
@@ -1079,6 +1151,7 @@
                         error("重印請求失敗: " + err.message);
                     } finally {
                         recordActionLoading.value = false;
+                        printDispatching.value.active = false; // 關閉派送防護 Modal
                     }
                 };
 
@@ -1246,9 +1319,10 @@
                     showEditModal, editTarget, editLocation, editComment, saving, openEditModal, submitEdit, 
                     showPdfModal, selectedPrinter, pdfDuplex, uploading, fileInput, openPdfModal, submitPdf,
                     showRecordModal, openRecordModal, recordActionLoading, getFileName, previewFile, reprintFile, sortedSinglePrinterRecords,
+                    reprintDuplex, // 導出雙面設定
                     showPreviewModal, previewPdfUrl, previewFileName, closePreviewModal,
                     showLogModal, logData, logsLoading, showLogs, fetchLogs, downloadFiles, handleDownload,
-                    showAdvancedOps, restarting, reloadPage
+                    showAdvancedOps, restarting, reloadPage, printDispatching
                 };
             }
         }).mount('#app');
