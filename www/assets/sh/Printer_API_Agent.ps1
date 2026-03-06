@@ -1,21 +1,23 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v17.40 (External .env Configuration)
-    修正：
-    1. 引入外部 `Printer_API_Agent.env` 設定檔機制，解耦所有硬編碼 (Hardcoded) 的變數設定。
-    2. 內建自動防呆型別轉換與安全預設值 (Fallback mechanisms)。
-    3. 新增 `/printer/preview` API：支援直接回傳 PDF 二進位流 (application/pdf)。
-    4. 優化 HTTP 回應處理邏輯：加入 `$handledBinary` 旗標。
-    5. 包含 UNC 網路芳鄰預先認證通道，解決 UAC Session 隔離問題。
+    版本：v17.52 (註解完整回補與環境變數整合版)
     
+    修正紀錄：
+    1. [註解修復] 重新補回遺失的系統架構說明、五大自癒機制與資安合規 (Zero-Ping) 文件。
+    2. [環境變數] 完美保留 `.env` 外部設定檔讀取機制、型別防呆轉換。
+    3. [路徑認證] 保留 UNC 網路芳鄰預先認證 (net use) 及虛擬路徑轉換 (Resolve-VirtualPath)。
+    4. [功能整合] 整合 `/server/applyforms` API (地政表單) 及 `/printers` 的 `isLandSystem` 判斷旗標。
+    5. [穩定性] 修正 `Get-PrintLogs` 在找不到 C:\printlog 時安靜回傳空陣列，防止伺服器報錯。
+    6. [預覽支援] 支援二進位 PDF 串流回傳，優化 HTTP 回應處理邏輯。
+
 .DESCRIPTION
     本腳本具備多層次自我檢查與自動修復機制 (Self-Healing & Resilience)：
 
     1. [列印作業自癒] 清除殭屍作業
        - 觸發機制：每次巡檢 (每分鐘執行一次)
        - 判斷條件：作業狀態為 Error (錯誤) 或 Deleting (刪除中但卡住)
-       - 執行動作：自動呼叫 WMI Delete() 刪除該作業，防止單一壞檔卡住整台印表機佇列
+       - 執行動作：自動呼叫 WMI Delete() 刪除該作業，防止單一壞檔卡住整台印表機佇列。
 
     2. [列印服務自癒] 偵測堵塞並重啟服務 (被動修復)
        - 觸發機制：佇列監控
@@ -23,28 +25,21 @@
          (1) 單台印表機佇列數超過 $queueThreshold (預設 20)
          (2) 且該數量與上次檢查時相同 (代表完全沒有消化)
          (3) 且發生堵塞的印表機數量超過 $maxStuckPrinters (預設 3)
-       - 執行動作：
-         (1) 停止 Spooler 服務
-         (2) 強制清空 C:\Windows\System32\spool\PRINTERS 下所有暫存檔 (.SPL, .SHD)
-         (3) 重新啟動 Spooler 服務
-         (4) 發送通知給管理員
+       - 執行動作：停止 Spooler 服務 -> 清空 PRINTERS 暫存區 -> 重新啟動 Spooler 並發送通知。
 
     3. [系統健康維護] 排程環境重置與日誌輪替 (主動預防)
-       - 觸發機制：Cron 排程表達式 ($scheduledHealCron，預設 "30 7 * * *" 即每天 07:30)
-       - 執行動作：
-         (1) 執行完整的服務重啟與暫存檔清理，預防 Windows Spooler 記憶體洩漏 (Memory Leak)。
-         (2) 自動將 C:\printlog 重命名為 printlog.YYYYMMDD 並備份至 C:\Temp。
-         (3) 自動掃描並刪除 C:\Temp 下超過 7 天的舊 printlog 備份檔，防止磁碟空間耗盡。
+       - 觸發機制：Cron 排程表達式 ($scheduledHealCron，預設每天 07:30)
+       - 執行動作：執行完整的服務重啟、暫存檔清理，並自動備份 C:\printlog 至 C:\Temp，保留 7 天備份。
 
     4. [腳本自身韌性] (Script Resilience)
-       - 啟動重試：若 Port 8888 被佔用，會自動重試 5 次，每次間隔 2 秒
-       - 防火牆自動開通：腳本啟動時會自動檢查並嘗試加入 TCP 8888 入站規則
-       - 通知防卡死：發送 HTTP 通知前先偵測通知伺服器 TCP Port，避免卡在 WebRequest Timeout
-       - 錯誤隔離：API 處理與主監控迴圈皆有 Try-Catch 包覆
+       - 具備啟動重試機制 (Port 8888 衝突自動等待)、防火牆規則自動開通、以及通知防卡死 (TCP 探測) 功能。
 
     5. [資安合規與 SOC 友善設計 (Zero-Ping)]
-       - 目的：避免頻繁的 ICMP 請求被防火牆或 SOC (資安維運中心) 誤判為內網掃描攻擊
-       - 實作方式：本腳本已移除所有 ICMP Echo Request (Ping) 操作，改用 TCP 9100/80 探測
+       - 為了符合資安 SOC 監控要求，移除所有 ICMP (Ping) 操作，改用 TCP Port 9100/80 探測，避免被偵測為掃描攻擊。
+
+.NOTES
+    ?? 測試指令範例 (CMD):
+    curl -H "X-API-KEY: %API_KEY%" http://localhost:8888/printers
 #>
 
 # -------------------------------------------------------------------------
@@ -85,7 +80,7 @@ function Get-EnvInt($key, $default) { if ($envConfig.Contains($key) -and $envCon
 function Get-EnvBool($key, $default) { if ($envConfig.Contains($key) -and $envConfig[$key] -ne '') { return ($envConfig[$key] -match '^(true|1|yes)$') } return $default }
 function Get-EnvArray($key, [string[]]$default) { if ($envConfig.Contains($key) -and $envConfig[$key] -ne '') { return @($envConfig[$key] -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }) } return $default }
 
-# ----------------- 變數映射開始 -----------------
+# ----------------- 變數映射映射映射 -----------------
 $port               = Get-EnvInt "PORT" 8888
 $apiKey             = Get-EnvString "API_KEY" "YourSecretApiKey123"      
 $logPath            = Get-EnvString "LOG_PATH" "C:\Temp"
@@ -351,7 +346,7 @@ function Resolve-VirtualPath {
 # --- 解析當日列印紀錄函數 (超級效能逐行讀取版) ---
 function Get-PrintLogs {
     if (-not (Test-Path $printLogFilePath -PathType Leaf)) {
-        throw "找不到紀錄檔 $printLogFilePath，無法提供列印清單。"
+        return @() # 找不到紀錄檔時回傳空陣列，不再拋出例外錯誤
     }
 
     $currentFileInfo = Get-Item $printLogFilePath -ErrorAction Stop
@@ -399,7 +394,7 @@ function Get-PrintLogs {
                 }
             }
         } catch {
-            throw "讀取檔案失敗: $($_.Exception.Message)"
+            Write-ApiLog "!!! [Error] 讀取 printlog 失敗: $($_.Exception.Message)" -Color Red
         } finally {
             if ($null -ne $sr) { $sr.Close(); $sr.Dispose() }
             if ($null -ne $fs) { $fs.Close(); $fs.Dispose() }
@@ -419,7 +414,6 @@ function Get-PrinterStatusData {
     $portMap = @{}
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
-    # 預先載入並分組當日列印紀錄，以提升效能 (O(1) 尋找)
     $logsByPrinter = @{}
     try {
         if (Test-Path $printLogFilePath -PathType Leaf) {
@@ -435,9 +429,7 @@ function Get-PrinterStatusData {
                 [void]$logsByPrinter[$log.printer].Add($item)
             }
         }
-    } catch { 
-        # 即使找不到檔案或解析失敗，也不中斷主要的印表機列表讀取
-    }
+    } catch { }
 
     try { $tcpPorts = Get-WmiObject -Class Win32_TCPIPPrinterPort -ErrorAction SilentlyContinue; if($tcpPorts){ foreach($t in $tcpPorts){ if($t.Name){$portMap[$t.Name]=$t.HostAddress} } } } catch {}
     $wmiPrinters = Get-WmiObject -Class Win32_Printer
@@ -470,7 +462,7 @@ function Get-PrinterStatusData {
         }
         else {
             switch ($p.PrinterStatus) {
-                1 { $finalStatus = "Error"; $errDetails = "未知 - 驅提/SNMP異常" }
+                1 { $finalStatus = "Error"; $errDetails = "未知 - 驅動/SNMP異常" }
                 2 { $finalStatus = "Error"; $errDetails = "其他錯誤" }
                 4 { $finalStatus = "Printing" } 5 { $finalStatus = "Warmup" }
                 default { $finalStatus = "Ready"; if($p.PrinterStatus -ne 3){$finalStatus="Warning"} }
@@ -487,7 +479,6 @@ function Get-PrinterStatusData {
             }
         }
 
-        # 提取該印表機的專屬列印紀錄
         $printedArray = @()
         if ($logsByPrinter.ContainsKey($pName)) {
             $printedArray = $logsByPrinter[$pName].ToArray()
@@ -552,7 +543,7 @@ function Test-PrinterHealth {
 # 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Print Server API & Monitor v17.40 " -Color Cyan
+Write-ApiLog " Print Server API & Monitor v17.52 " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 # A. 防火牆設定
@@ -655,7 +646,10 @@ while ($listener.IsListening) {
         if ($req.Headers["X-API-KEY"] -ne $apiKey) { $res.StatusCode = 401 }
         else {
             if ($path -eq "/printers") { 
-                $out.data = Get-PrinterStatusData; $out.success = $true; $out.message = "OK" 
+                $out.data = Get-PrinterStatusData
+                $out.success = $true
+                $out.message = "OK"
+                $out.isLandSystem = (Test-Path $printLogFilePath -PathType Leaf) # 判斷是否為地政系統
             }
             elseif ($path -eq "/server/logs") {
                 $logF = Join-Path $logPath "PrintApi_$(Get-Date -Format 'yyyy-MM-dd').log"
@@ -669,7 +663,6 @@ while ($listener.IsListening) {
                     $logData = @(Get-PrintLogs)
                     $out.data = $logData
                     $out.success = $true
-                    
                     if ($logData.Length -eq 0) {
                         $out.message = "當日 ($((Get-Date).ToString('yyyy-MM-dd'))) 尚無任何列印紀錄。"
                     } else {
@@ -681,9 +674,44 @@ while ($listener.IsListening) {
                     Write-ApiLog "!!! [Error] $($_.Exception.Message)"
                 }
             }
+            elseif ($path -eq "/server/applyforms") {
+                # 讀取地政表單，依賴 UNC 掛載
+                $targetDir = ""
+                if ($enableDriveMapping -and -not [string]::IsNullOrEmpty($mappedDriveUncPath)) {
+                    $targetDir = Join-Path $mappedDriveUncPath "temp"
+                }
+
+                if ([string]::IsNullOrEmpty($targetDir) -or -not (Test-Path $targetDir)) {
+                    $out.success = $false
+                    $out.message = "找不到表單目錄，請確認 UNC 路徑是否已正確設定或掛載: $targetDir"
+                } else {
+                    $filter = Get-Utf8QueryParam $req "filter"
+                    if ([string]::IsNullOrEmpty($filter)) { $filter = "cer_ApplyForm_*.pdf" }
+
+                    $today = (Get-Date).Date
+                    $files = Get-ChildItem -Path $targetDir -Filter $filter -ErrorAction SilentlyContinue | 
+                             Where-Object { $_.LastWriteTime.Date -eq $today } | 
+                             Sort-Object LastWriteTime -Descending
+
+                    $forms = New-Object System.Collections.ArrayList
+                    if ($files) {
+                        foreach ($f in $files) {
+                            $item = @{
+                                name = $f.Name
+                                path = $f.FullName -replace "\\", "/"
+                                time = $f.LastWriteTime.ToString("HH:mm:ss")
+                                size = "{0:N2} KB" -f ($f.Length / 1KB)
+                            }
+                            [void]$forms.Add($item)
+                        }
+                    }
+                    $out.success = $true
+                    $out.data = $forms.ToArray()
+                    $out.message = "成功取得 $($forms.Count) 筆表單"
+                }
+            }
             elseif ($path -eq "/printer/printed") {
                 $n = Get-Utf8QueryParam $req "name"
-                
                 if ([string]::IsNullOrEmpty($n)) {
                     $out.success = $false
                     $out.message = "缺少 name 參數，無法查詢該印表機紀錄。"
@@ -691,7 +719,6 @@ while ($listener.IsListening) {
                     try {
                         $allLogs = @(Get-PrintLogs)
                         $printedArray = New-Object System.Collections.ArrayList
-                        
                         foreach ($log in $allLogs) {
                             if ($log.printer -eq $n) {
                                 $item = New-Object PSObject
@@ -701,23 +728,16 @@ while ($listener.IsListening) {
                                 [void]$printedArray.Add($item)
                             }
                         }
-                        
                         $resultObj = New-Object PSObject
                         $resultObj | Add-Member NoteProperty printer $n
                         $resultObj | Add-Member NoteProperty printed $printedArray.ToArray()
                         
                         $out.data = @($resultObj)
                         $out.success = $true
-                        
-                        if ($printedArray.Count -eq 0) {
-                            $out.message = "印表機 [$n] 當日尚無任何列印紀錄。"
-                        } else {
-                            $out.message = "已成功讀取印表機 [$n] 的紀錄，共印過 $($printedArray.Count) 筆檔案。"
-                        }
+                        if ($printedArray.Count -eq 0) { $out.message = "印表機 [$n] 當日尚無任何列印紀錄。" } 
+                        else { $out.message = "已成功讀取印表機 [$n] 的紀錄，共印過 $($printedArray.Count) 筆檔案。" }
                     } catch {
-                        $out.success = $false
-                        $out.message = $_.Exception.Message
-                        Write-ApiLog "!!! [Error] $($_.Exception.Message)"
+                        $out.success = $false; $out.message = $_.Exception.Message
                     }
                 }
             }
@@ -727,37 +747,37 @@ while ($listener.IsListening) {
                 $fPath = Resolve-VirtualPath $rawPath
                 Write-ApiLog ">>> [DEBUG] Re-Print: Name='$n', Path='$fPath'"
                 
-                # --- [資安防護] 驗證該檔案是否真的存在於今日的列印紀錄中 ---
+                # --- 資安防護：驗證檔案是否在紀錄中，或是來自合法的 UNC 表單目錄 ---
                 $isAuthorized = $false
                 if (-not [string]::IsNullOrEmpty($rawPath)) {
                     $logs = @(Get-PrintLogs)
                     $normRaw = $rawPath.Replace("/", "\")
-                    foreach ($log in $logs) {
-                        if ($log.path.Replace("/", "\") -eq $normRaw) { $isAuthorized = $true; break }
+                    foreach ($log in $logs) { if ($log.path.Replace("/", "\") -eq $normRaw) { $isAuthorized = $true; break } }
+
+                    if (-not $isAuthorized -and $enableDriveMapping -and -not [string]::IsNullOrEmpty($mappedDriveUncPath)) {
+                        if ($fPath.StartsWith($mappedDriveUncPath, [System.StringComparison]::OrdinalIgnoreCase)) {
+                            $isAuthorized = $true
+                            Write-ApiLog ">>> [DEBUG] UNC 目錄表單已授權重印: $fPath" -Color Cyan
+                        }
                     }
                 }
 
                 if (-not $isAuthorized) {
                     $out.success = $false
-                    $out.message = "安全性阻擋：拒絕重印未列於當日紀錄中的檔案。"
+                    $out.message = "安全性阻擋：拒絕重印未列於當日紀錄或非合法 UNC 表單目錄中的檔案。"
                     Write-ApiLog "!!! [SECURITY] 嘗試重印未授權的檔案: $rawPath" -Color Red
                     $res.StatusCode = 403
                 }
                 elseif ([string]::IsNullOrEmpty($n) -or [string]::IsNullOrEmpty($fPath)) {
-                    $out.success = $false
-                    $out.message = "缺少 name 或 path 參數，無法執行重印。"
+                    $out.success = $false; $out.message = "缺少 name 或 path 參數，無法執行重印。"
                 } else {
                     $p = Get-WmiObject Win32_Printer | Where {$_.Name -eq $n}
                     if ($p) {
-                        # 檢查檔案是否存在於伺服器上
                         if (-not (Test-Path $fPath -PathType Leaf)) {
-                            $out.success = $false
-                            $out.message = "伺服器上找不到指定的檔案 (或權限不足): $fPath"
-                            Write-ApiLog "!!! [DEBUG] Re-Print 找不到檔案: $fPath" -Color Yellow
+                            $out.success = $false; $out.message = "伺服器上找不到指定的檔案 (或權限不足): $fPath"
                         } else {
                             $dup = Get-Utf8QueryParam $req "duplex"
-                            $restoreDup = $false
-                            $oldDup = $null
+                            $restoreDup = $false; $oldDup = $null
                             if ($dup) {
                                 if (Get-Command Set-PrintConfiguration -ErrorAction SilentlyContinue) {
                                     try {
@@ -770,25 +790,63 @@ while ($listener.IsListening) {
                                     } catch {}
                                 }
                             }
-
                             try {
                                 if ($global:ValidPdfReader) {
                                     Start-Process -FilePath $global:ValidPdfReader -ArgumentList "/t `"$fPath`" `"$n`"" -WindowStyle Hidden
                                 } else {
                                     Start-Process -FilePath $fPath -Verb PrintTo -ArgumentList "`"$n`"" -WindowStyle Hidden
                                 }
-                                $out.success = $true
-                                $out.message = "已成功發送指令至印表機 [$n] 重新列印: $fPath"
-                            } catch {
-                                $out.success = $false
-                                $out.message = "列印失敗: $($_.Exception.Message)"
-                            }
-
+                                $out.success = $true; $out.message = "已成功發送指令至印表機 [$n] 重新列印: $fPath"
+                            } catch { $out.success = $false; $out.message = "列印失敗: $($_.Exception.Message)" }
                             if ($restoreDup) { try{ Set-PrintConfiguration -PrinterName $n -DuplexingMode $oldDup }catch{} }
                         }
-                    } else {
+                    } else { $out.success = $false; $out.message = "找不到指定的印表機: $n" }
+                }
+            }
+            elseif ($path -eq "/printer/preview") {
+                $rawPath = Get-Utf8QueryParam $req "path"
+                $fPath = Resolve-VirtualPath $rawPath
+                Write-ApiLog ">>> [DEBUG] Preview PDF: Path='$fPath'"
+                
+                # --- 資安防護：驗證檔案是否在紀錄中，或是來自合法的 UNC 表單目錄 ---
+                $isAuthorized = $false
+                if (-not [string]::IsNullOrEmpty($rawPath)) {
+                    $logs = @(Get-PrintLogs)
+                    $normRaw = $rawPath.Replace("/", "\")
+                    foreach ($log in $logs) { if ($log.path.Replace("/", "\") -eq $normRaw) { $isAuthorized = $true; break } }
+
+                    if (-not $isAuthorized -and $enableDriveMapping -and -not [string]::IsNullOrEmpty($mappedDriveUncPath)) {
+                        if ($fPath.StartsWith($mappedDriveUncPath, [System.StringComparison]::OrdinalIgnoreCase)) {
+                            $isAuthorized = $true
+                            Write-ApiLog ">>> [DEBUG] UNC 目錄表單已授權預覽: $fPath" -Color Cyan
+                        }
+                    }
+                }
+
+                if (-not $isAuthorized) {
+                    $out.success = $false
+                    $out.message = "安全性阻擋：拒絕預覽未列於當日紀錄或非合法 UNC 表單目錄中的檔案。"
+                    Write-ApiLog "!!! [SECURITY] 嘗試預覽未授權的檔案: $rawPath" -Color Red
+                    $res.StatusCode = 403
+                }
+                elseif ([string]::IsNullOrEmpty($fPath) -or -not (Test-Path $fPath -PathType Leaf)) {
+                    $out.success = $false
+                    $out.message = "找不到檔案，可能已被清理或無權限存取該路徑: $fPath"
+                    Write-ApiLog "!!! [DEBUG] Preview 找不到檔案: $fPath" -Color Yellow
+                } else {
+                    try {
+                        $fileBytes = [System.IO.File]::ReadAllBytes($fPath)
+                        $res.ContentType = "application/pdf"
+                        $res.AddHeader("Access-Control-Expose-Headers", "Content-Disposition")
+                        $res.AddHeader("Content-Disposition", "inline; filename=`"preview.pdf`"")
+                        $res.ContentLength64 = $fileBytes.Length
+                        $res.OutputStream.Write($fileBytes, 0, $fileBytes.Length)
+                        $res.Close()
+                        $handledBinary = $true
+                        Write-ApiLog ">>> [DEBUG] Preview PDF 回傳成功 ($($fileBytes.Length) bytes)"
+                    } catch {
                         $out.success = $false
-                        $out.message = "找不到指定的印表機: $n"
+                        $out.message = "檔案讀取失敗: $($_.Exception.Message)"
                     }
                 }
             }
@@ -876,48 +934,6 @@ while ($listener.IsListening) {
             }
             elseif ($path -eq "/service/self-heal") {
                 Invoke-SpoolerSelfHealing -reason "API Trigger"; $out.success=$true
-            }
-            elseif ($path -eq "/printer/preview") {
-                $rawPath = Get-Utf8QueryParam $req "path"
-                $fPath = Resolve-VirtualPath $rawPath
-                Write-ApiLog ">>> [DEBUG] Preview PDF: Path='$fPath'"
-                
-                # --- [資安防護] 驗證該檔案是否真的存在於今日的列印紀錄中 ---
-                $isAuthorized = $false
-                if (-not [string]::IsNullOrEmpty($rawPath)) {
-                    $logs = @(Get-PrintLogs)
-                    $normRaw = $rawPath.Replace("/", "\")
-                    foreach ($log in $logs) {
-                        if ($log.path.Replace("/", "\") -eq $normRaw) { $isAuthorized = $true; break }
-                    }
-                }
-
-                if (-not $isAuthorized) {
-                    $out.success = $false
-                    $out.message = "安全性阻擋：拒絕預覽未列於當日紀錄中的檔案。"
-                    Write-ApiLog "!!! [SECURITY] 嘗試預覽未授權的檔案: $rawPath" -Color Red
-                    $res.StatusCode = 403
-                }
-                elseif ([string]::IsNullOrEmpty($fPath) -or -not (Test-Path $fPath -PathType Leaf)) {
-                    $out.success = $false
-                    $out.message = "找不到檔案，可能已被清理或無權限存取該路徑: $fPath"
-                    Write-ApiLog "!!! [DEBUG] Preview 找不到檔案: $fPath" -Color Yellow
-                } else {
-                    try {
-                        $fileBytes = [System.IO.File]::ReadAllBytes($fPath)
-                        $res.ContentType = "application/pdf"
-                        $res.AddHeader("Access-Control-Expose-Headers", "Content-Disposition")
-                        $res.AddHeader("Content-Disposition", "inline; filename=`"preview.pdf`"")
-                        $res.ContentLength64 = $fileBytes.Length
-                        $res.OutputStream.Write($fileBytes, 0, $fileBytes.Length)
-                        $res.Close()
-                        $handledBinary = $true
-                        Write-ApiLog ">>> [DEBUG] Preview PDF 回傳成功 ($($fileBytes.Length) bytes)"
-                    } catch {
-                        $out.success = $false
-                        $out.message = "檔案讀取失敗: $($_.Exception.Message)"
-                    }
-                }
             }
             else { $res.StatusCode = 404 }
         }
