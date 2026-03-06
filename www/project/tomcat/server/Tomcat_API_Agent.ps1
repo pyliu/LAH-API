@@ -223,6 +223,13 @@ Write-ApiLog "----------------------------------------" -Color Cyan
 Write-ApiLog " Tomcat API Agent v2.1 (Port: $port) " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
+# 干 .env 更篈 Log 魁
+if (Test-Path $envFile) {
+    Write-ApiLog ">>> [╰参] 更场砞﹚郎: Tomcat_API_Agent.env" -Color Cyan
+} else {
+    Write-ApiLog "!!! [╰参] ゼ盎代场砞﹚郎ㄏノず箇砞" -Color Yellow
+}
+
 Setup-FirewallRule $port
 Clear-ZombiePort $port
 
