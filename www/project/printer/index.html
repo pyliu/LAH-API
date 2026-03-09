@@ -250,6 +250,7 @@
                     <div class="flex gap-2 flex-wrap justify-start mt-2 xl:mt-0">
                          <button @click="filterStatus = ''" :class="filterStatus === '' ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">全部 ({{ countAll }})</button>
                          <button @click="filterStatus = 'Ready'" :class="filterStatus === 'Ready' ? 'bg-emerald-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">就緒 ({{ countReady }})</button>
+                         <button @click="filterStatus = 'ReadyWarning'" :class="filterStatus === 'ReadyWarning' ? 'bg-teal-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">就緒+警告 ({{ countReadyWarning }})</button>
                          <button @click="filterStatus = 'Issue'" :class="filterStatus === 'Issue' ? 'bg-orange-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">異常+警告 ({{ countIssue }})</button>
                          <button @click="filterStatus = 'Error'" :class="filterStatus === 'Error' ? 'bg-red-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">異常 ({{ countError }})</button>
                          <button @click="filterStatus = 'Warning'" :class="filterStatus === 'Warning' ? 'bg-amber-500 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">警告 ({{ countWarning }})</button>
@@ -269,24 +270,26 @@
                                     </div>
                                 </div>
                                 <div class="text-right flex-shrink-0 ml-2">
-                                    <div class="text-2xl font-bold" :class="p.Jobs > 0 ? (p.Jobs > 20 ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400') : 'text-slate-400 dark:text-slate-600'">{{ p.Jobs }}</div>
-                                    <div class="text-[0.625rem] text-slate-400 dark:text-slate-500 uppercase">佇列數</div>
-                                </div>
+                                <div class="text-2xl font-bold" :class="p.Jobs > 0 ? (p.Jobs > 20 ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400') : 'text-slate-400 dark:text-slate-600'">{{ p.Jobs }}</div>
+                                <div class="text-[0.625rem] text-slate-400 dark:text-slate-500 uppercase">佇列數</div>
                             </div>
-                            
-                            <!-- [更新] 碳粉不足等 Warning 改為黃色警示，其他 Error 保持紅色 -->
-                            <div v-if="p.ErrorDetails" class="mb-3 text-xs px-2 py-1.5 rounded border flex items-start gap-2 transition-colors"
-                                 :class="p.Status.includes('Warning') ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-900/50' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-100 dark:border-red-900/50'">
-                                <i class="fa-solid mt-0.5" :class="p.Status.includes('Warning') ? 'fa-circle-exclamation' : 'fa-triangle-exclamation'"></i>
-                                <span>{{ p.ErrorDetails }}</span>
-                            </div>
+                        </div>
+                        
+                        <!-- [修改] 備註欄位移至警示上方，放大 1.5 倍 (text-lg)，並設計成醒目的歸屬名牌 -->
+                        <div v-if="p.Comment" class="mb-3 text-lg font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700/50 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 flex items-center gap-2">
+                            <i class="fa-solid fa-user-tag text-blue-500 dark:text-blue-400"></i>
+                            <span>{{ p.Comment }}</span>
+                        </div>
 
-                            <div v-if="p.Comment" class="mb-3 text-xs text-slate-500 dark:text-slate-400 italic">
-                                <i class="fa-regular fa-comment-dots mr-1"></i>{{ p.Comment }}
-                            </div>
-                            
-                            <div class="grid grid-cols-2 gap-y-1 text-xs text-slate-500 dark:text-slate-400 mb-4 border-t border-slate-100 dark:border-slate-700 pt-2">
-                                <div v-if="p.Location" class="truncate" :title="p.Location"><i class="fa-solid fa-location-dot w-4"></i> {{ p.Location }}</div>
+                        <!-- [更新] 碳粉不足等 Warning 改為黃色警示，其他 Error 保持紅色 -->
+                        <div v-if="p.ErrorDetails" class="mb-3 text-xs px-2 py-1.5 rounded border flex items-start gap-2 transition-colors"
+                             :class="p.Status.includes('Warning') ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-900/50' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-100 dark:border-red-900/50'">
+                            <i class="fa-solid mt-0.5" :class="p.Status.includes('Warning') ? 'fa-circle-exclamation' : 'fa-triangle-exclamation'"></i>
+                            <span>{{ p.ErrorDetails }}</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-y-1 text-xs text-slate-500 dark:text-slate-400 mb-4 border-t border-slate-100 dark:border-slate-700 pt-2">
+                            <div v-if="p.Location" class="truncate" :title="p.Location"><i class="fa-solid fa-location-dot w-4"></i> {{ p.Location }}</div>
                                 <div v-if="p.ShareName" class="truncate" :title="p.ShareName"><i class="fa-solid fa-share-nodes w-4"></i> {{ p.ShareName }}</div>
                                 <div v-if="p.Driver" class="truncate col-span-2" :title="p.Driver"><i class="fa-solid fa-microchip w-4"></i> {{ p.Driver }}</div>
                                 <div v-if="p.PortName" class="truncate"><i class="fa-solid fa-plug w-4"></i> {{ p.PortName }}</div>
@@ -1287,6 +1290,7 @@
                 const countIssue = computed(() => printers.value.filter(p => p.Status === 'Error' || p.Status?.includes('Warning')).length);
                 const countError = computed(() => printers.value.filter(p => p.Status === 'Error').length);
                 const countWarning = computed(() => printers.value.filter(p => p.Status?.includes('Warning')).length);
+                const countReadyWarning = computed(() => printers.value.filter(p => p.Status === 'Ready' || p.Status?.includes('Warning')).length);
 
                 const allPrintedRecords = computed(() => {
                     const records = [];
@@ -1324,6 +1328,7 @@
                                        (p.Comment || '').toLowerCase().includes(searchQuery.value.toLowerCase());
                         let matchS = true;
                         if (filterStatus.value === 'Ready') matchS = p.Status === 'Ready';
+                        else if (filterStatus.value === 'ReadyWarning') matchS = p.Status === 'Ready' || p.Status?.includes('Warning');
                         else if (filterStatus.value === 'Error') matchS = p.Status === 'Error';
                         else if (filterStatus.value === 'Warning') matchS = p.Status?.includes('Warning');
                         else if (filterStatus.value === 'Issue') matchS = p.Status === 'Error' || p.Status?.includes('Warning');
@@ -1384,7 +1389,7 @@
                 return {
                     config, servers, currentServerId, showServerModal, editingServer, printers, loading, lastUpdated, autoRefresh, darkMode, isConfigValid, isDemoMode,
                     searchQuery, filterStatus, filterLocation, uniqueLocations, filteredPrinters, errorCount, sortBy, sortDesc, refreshInterval, validateInterval, countdown,
-                    countAll, countReady, countIssue, countError, countWarning,
+                    countAll, countReady, countIssue, countError, countWarning, countReadyWarning,
                     uiScale, changeScale, connectionFailed, showConnectionPrompt, // 匯出連線狀態與防護提示旗標
                     isLandSystem, // 匯出地政系統旗標，消除 Vue Warning
                     allPrintedRecords, showGlobalRecordModal, globalRecordSearchQuery, filteredGlobalRecords,
