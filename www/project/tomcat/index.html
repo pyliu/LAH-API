@@ -280,12 +280,17 @@
                 <div class="lg:col-span-8 flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm lg:sticky lg:top-[100px] overflow-hidden zoom-layer-fix" :style="{ height: logContainerHeight }">
                     <div class="relative z-20 flex-none flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 zoom-layer-fix gap-3 sm:gap-0">
                         <div class="flex space-x-1 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800 overflow-x-auto hide-scroll max-w-full">
-                            <button v-for="tab in ['tomcat','stdout','stderr','agent']" :key="tab" @click="currentLogType = tab" :class="currentLogType === tab ? 'bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'" class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center capitalize whitespace-nowrap">
+                            <button v-for="tab in ['stdout','stderr','catalina','agent']" :key="tab" @click="currentLogType = tab" :class="currentLogType === tab ? 'bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'" class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center capitalize whitespace-nowrap">
                                 <span class="icon-box mr-1.5"><i :data-lucide="tab === 'agent' ? 'terminal' : 'file-text'" class="w-3.5 h-3.5"></i></span>
-                                {{ tab === 'tomcat' ? 'Catalina' : (tab === 'stdout' ? 'StdOut' : (tab === 'stderr' ? 'StdErr' : 'Agent')) }}
+                                {{ tab === 'catalina' ? 'Catalina' : (tab === 'stdout' ? 'StdOut' : (tab === 'stderr' ? 'StdErr' : 'Agent')) }}
                             </button>
                         </div>
                         <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                            <div v-if="lastUpdated" class="hidden sm:flex items-center text-[10px] text-slate-500 dark:text-slate-400 font-mono mr-1 px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700">
+                                <span class="icon-box mr-1"><i data-lucide="clock" class="w-3 h-3"></i></span>
+                                {{ lastUpdated }}
+                            </div>
+                            
                             <button v-if="logs.length >= logLines && logs.length > 0" @click="loadMoreLogs" :disabled="isRefreshingLogs || isOperating || isConnectionError" class="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 rounded-lg transition-all flex items-center border border-blue-200 disabled:opacity-50">
                                 <span class="icon-box mr-1.5"><i data-lucide="arrow-up-circle" class="w-3.5 h-3.5"></i></span> 載入前 100 行
                             </button>
@@ -295,20 +300,25 @@
                         </div>
                     </div>
                     
-                    <!-- 終端機顯示區 (重新設計層級，解決捲動與遮罩問題) -->
+                    <!-- 終端機顯示區 -->
                     <div class="relative flex-1 min-h-0">
-                        <!-- 捲動區獨立 -->
+                        <!-- 捲動區 -->
                         <div ref="logContainer" class="absolute inset-0 bg-slate-50 dark:bg-[#0a0f18] p-4 font-mono text-xs shadow-inner leading-relaxed overflow-y-auto zoom-layer-fix">
                             <div v-if="logs.length === 0 && !isRefreshingLogs" class="h-full flex items-center justify-center text-slate-400 flex-col opacity-50">
                                 <span class="icon-box mb-4 opacity-20"><i data-lucide="terminal" class="w-16 h-16"></i></span>
                                 <p class="font-black tracking-[0.2em] uppercase">{{ isConnectionError ? '連線異常 (Connection Error)' : '目前尚無資料 (No Data)' }}</p>
                             </div>
                             <div v-else class="space-y-1">
-                                <div v-for="(log, idx) in logs" :key="idx" :class="getLogColor(log)" class="break-all whitespace-pre-wrap"><span class="opacity-30 mr-3 select-none inline-block w-8 text-right">{{ (idx + 1) }}</span>{{ log }}</div>
+                                <!-- 🚀 日誌渲染區：包含智慧型發生時間顯示 -->
+                                <div v-for="(logItem, idx) in logs" :key="idx" :class="getLogColor(logItem.text)" class="break-all whitespace-pre-wrap">
+                                    <span class="opacity-30 mr-3 select-none inline-block w-8 text-right">{{ (idx + 1) }}</span>
+                                    <span v-if="logItem.time" class="text-blue-600/70 dark:text-blue-400/70 mr-2 select-none font-bold">[{{ logItem.time }}]</span>
+                                    <span>{{ logItem.text }}</span>
+                                </div>
                             </div>
                         </div>
                         
-                        <!-- 🚀 載入中遮罩 (獨立於捲動區外層，確保 100% 絕對置中覆蓋) -->
+                        <!-- 載入中遮罩 -->
                         <div v-if="isRefreshingLogs" class="absolute inset-0 z-50 bg-white/50 dark:bg-[#0a0f18]/60 backdrop-blur-sm flex items-center justify-center transition-all duration-300">
                             <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-8 py-6 rounded-2xl shadow-2xl flex flex-col items-center animate-scale-in">
                                 <div class="relative w-12 h-12 mb-4">
@@ -446,12 +456,17 @@
                 const setupModal = reactive({ show: false, url: '', key: '', testing: false });
 
                 const statusData = ref(null);
-                const logs = ref([]);
-                const currentLogType = ref('tomcat');
+                const logs = ref([]); 
+                
+                // 🚀 預設顯示 stdout 頁籤
+                const currentLogType = ref('stdout');
+                
                 const logLines = ref(100); 
                 const isOperating = ref(false);
                 const isRefreshingLogs = ref(false);
                 const logContainer = ref(null);
+                
+                const lastUpdated = ref('');
                 
                 const toasts = ref([]);
                 let toastIdCounter = 0;
@@ -540,44 +555,101 @@
                 const triggerManualCheck = async () => {
                     if (!apiUrl.value) { openSetupModal(); return; }
                     
-                    // 🚀 1. 點擊按鈕時，立刻強制顯示右側的毛玻璃遮罩
                     isRefreshingLogs.value = true;
                     nextTick(() => { lucide.createIcons(); });
 
-                    // 🚀 2. 探測伺服器狀態 (加入 600ms 最小延遲，確保毛玻璃動畫能被肉眼清楚看見)
                     await Promise.all([
                         fetchStatus(),
                         new Promise(resolve => setTimeout(resolve, 600))
                     ]);
 
                     if (isConnectionError.value) { 
-                        // ❌ 如果依舊斷線：關閉遮罩，並彈出設定視窗
                         isRefreshingLogs.value = false;
                         openSetupModal(); 
                     } else { 
-                        // ✅ 如果連線恢復：繼續去抓取日誌 (fetchLogs 內部抓完後會自動關閉遮罩)
                         await fetchLogs(false); 
                     }
+                };
+
+                // 🚀 檢查字串是否已經包含原生時間戳，避免重複產生
+                const hasBuiltInTime = (line) => {
+                    return /^(\[?\d{4}-\d{2}-\d{2}|\d{2}-[a-zA-Z]{3}-\d{4}|\d{1,2}\s+[\u4e00-\u9fa5a-zA-Z]+\s+\d{4}|\d{4}\/\d{2}\/\d{2}|[A-Za-z]{3}\s+\d{1,2},\s+\d{4}|[\u4e00-\u9fa5]{2,3}\s+\d{1,2},\s+\d{4}|\[系統提示\])/.test(line);
                 };
 
                 const fetchLogs = async (preserveScroll = false) => {
                     if (isConnectionError.value || !apiUrl.value || setupModal.show) return;
                     isRefreshingLogs.value = true;
+                    nextTick(() => { lucide.createIcons(); });
                     
                     const typeParam = currentLogType.value === 'tomcat' ? 'catalina' : currentLogType.value;
                     const endpoint = currentLogType.value === 'agent' ? '/server/logs?lines=' + logLines.value : '/tomcat/logs?lines=' + logLines.value + '&type=' + typeParam;
                     
                     try {
-                        // 🚀 使用 Promise.all 保證至少顯示 600ms，讓毛玻璃動畫能被看到
                         const [res] = await Promise.all([
                             callApi(endpoint),
                             new Promise(resolve => setTimeout(resolve, 600))
                         ]);
 
-                        if (res.success) { logs.value = res.data; }
+                        const fetchTime = new Date().toLocaleTimeString('zh-TW', { hour12: false });
+
+                        if (res.success) { 
+                            const newLines = res.data;
+                            let nextLogs = [];
+                            
+                            // 🚀 智慧型發生時間：比對狀態，若為新出現的日誌才標上當前時間
+                            if (logs.value.length === 0 || typeof logs.value[0] !== 'object') {
+                                nextLogs = newLines.map(text => ({ 
+                                    text, 
+                                    time: hasBuiltInTime(text) ? '' : fetchTime 
+                                }));
+                            } else {
+                                const oldLogs = logs.value;
+                                const sigSize = Math.min(5, oldLogs.length);
+                                const oldSig = oldLogs.slice(oldLogs.length - sigSize).map(l => l.text).join('\n');
+                                let foundMatch = false;
+                                
+                                // 嘗試對齊尾端找出新舊重疊處
+                                for (let i = 0; i <= newLines.length - sigSize; i++) {
+                                    const newSig = newLines.slice(i, i + sigSize).join('\n');
+                                    if (newSig === oldSig) {
+                                        const oldStartIdx = oldLogs.length - (i + sigSize);
+                                        for (let j = 0; j < newLines.length; j++) {
+                                            if (j < i + sigSize && oldStartIdx + j >= 0) {
+                                                // 保留舊行的原有時間紀錄
+                                                nextLogs.push({
+                                                    time: oldLogs[oldStartIdx + j].time,
+                                                    text: newLines[j]
+                                                });
+                                            } else {
+                                                // 為新增的行數加上擷取時間
+                                                nextLogs.push({
+                                                    time: hasBuiltInTime(newLines[j]) ? '' : fetchTime,
+                                                    text: newLines[j]
+                                                });
+                                            }
+                                        }
+                                        foundMatch = true;
+                                        break;
+                                    }
+                                }
+                                
+                                // 若無法對齊 (如讀取更多歷史紀錄或被清空重啟)
+                                if (!foundMatch) {
+                                    nextLogs = newLines.map(text => ({ 
+                                        text, 
+                                        time: hasBuiltInTime(text) ? '' : fetchTime 
+                                    }));
+                                }
+                            }
+                            
+                            logs.value = nextLogs;
+                            lastUpdated.value = fetchTime;
+                        } else {
+                            logs.value = [{ text: `[系統提示] ${res.message}`, time: '' }];
+                        }
                         if (!preserveScroll) { scrollToBottom(); }
                     } catch (e) {
-                        logs.value = ['[ERROR] ' + e.message];
+                        logs.value = [{ text: `[ERROR] ${e.message}`, time: '' }];
                     } finally {
                         isRefreshingLogs.value = false;
                         nextTick(() => { lucide.createIcons(); });
@@ -585,7 +657,13 @@
                 };
 
                 const loadMoreLogs = () => { logLines.value += 100; fetchLogs(true); };
-                watch(currentLogType, () => { logLines.value = 100; fetchLogs(false); });
+                
+                // 🚀 當切換頁籤時，先清空目前日誌，重置行數並觸發讀取
+                watch(currentLogType, () => { 
+                    logs.value = [];
+                    logLines.value = 100; 
+                    fetchLogs(false); 
+                });
 
                 const showToast = (message, type = 'info') => {
                     const id = toastIdCounter++;
@@ -629,7 +707,9 @@
                 });
 
                 const getLogColor = (l) => {
+                    if (!l) return 'text-slate-600 dark:text-slate-300';
                     const line = l.toUpperCase();
+                    if (line.includes('[系統提示]')) return 'text-purple-500 dark:text-purple-400 font-bold';
                     if (line.includes('SEVERE') || line.includes('ERROR') || line.includes('EXCEPTION') || line.includes('!!!')) return 'text-red-500 font-bold';
                     if (line.includes('WARNING') || line.includes('WARN')) return 'text-amber-500';
                     if (line.includes('INFO') || line.includes('>>>')) return 'text-blue-500 dark:text-blue-400';
@@ -702,7 +782,7 @@
                     zoomLevel, changeZoom, resetZoom, logContainerHeight, apiUrl, apiKey, statusData, logs, currentLogType, logLines, isOperating, isRefreshingLogs, logContainer,
                     modal, toasts, statusColors, isDarkMode, formatBytes, fetchStatus, fetchLogs, loadMoreLogs, handleAction, executeModalAction, getLogColor, getToastColor, toggleTheme,
                     reconnectState, cancelReconnection, downloadState, isConnectionError, setupModal, openSetupModal, saveSetup, triggerManualCheck,
-                    isInitialLoading
+                    isInitialLoading, lastUpdated
                 };
             }
         }).mount('#app');

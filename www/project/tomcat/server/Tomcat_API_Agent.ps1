@@ -319,21 +319,48 @@ while ($listener.IsListening) {
             $logDate = Get-Date -Format "yyyy-MM-dd"
             $reqType = Get-Utf8QueryParam $req "type"
             $targetFile = $null
-            if ($reqType -eq "stdout") {
-                $f = Get-ChildItem -Path "$tomcatDir\logs" -Filter "*stdout*$logDate.log" | Sort-Object LastWriteTime -Descending
-                if ($f) { $targetFile = $f[0].FullName }
-            } elseif ($reqType -eq "stderr") {
-                $f = Get-ChildItem -Path "$tomcatDir\logs" -Filter "*stderr*$logDate.log" | Sort-Object LastWriteTime -Descending
-                if ($f) { $targetFile = $f[0].FullName }
+            $searchPattern = ""
+
+            if ($reqType -eq "stdout") { $searchPattern = "*stdout*" }
+            elseif ($reqType -eq "stderr") { $searchPattern = "*stderr*" }
+            else { $searchPattern = "catalina*" }
+
+            # 1. 先找今天的日誌
+            $f = Get-ChildItem -Path "$tomcatDir\logs" -Filter "$searchPattern$logDate.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+            if ($f) { 
+                $targetFile = $f[0].FullName 
             } else {
-                $targetFile = Join-Path $tomcatDir "logs\catalina.$logDate.log"
-                if (-not (Test-Path $targetFile)) { $targetFile = Join-Path $tomcatDir "logs\catalina.out" }
+                # 2. 若今天沒有，退而求其次找目錄下最新的那份
+                $f = Get-ChildItem -Path "$tomcatDir\logs" -Filter "$searchPattern*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+                if ($f) { $targetFile = $f[0].FullName }
+            }
+
+            # 3. 針對 catalina 特例 (catalina.out) 若都找不到
+            if (-not $targetFile -and $reqType -ne "stdout" -and $reqType -ne "stderr") {
+                if (Test-Path "$tomcatDir\logs\catalina.out") { $targetFile = Join-Path $tomcatDir "logs\catalina.out" }
             }
 
             if ($targetFile -and (Test-Path $targetFile)) {
                 $cnt = 100; $l = Get-Utf8QueryParam $req "lines"; if ($l -match "^\d+$") { $cnt = [int]$l }
-                $out.data = Get-Content $targetFile -Tail $cnt -Encoding Default; $out.success = $true
-            } else { $out.message = "找不到日誌" }
+                try {
+                    $logData = Get-Content $targetFile -Tail $cnt -Encoding Default -ErrorAction Stop
+                    
+                    # 如果找到的日誌不是今天的，在前端插入友善提示
+                    if ($targetFile -notmatch $logDate -and $targetFile -notmatch "catalina\.out") {
+                        $leaf = Split-Path $targetFile -Leaf
+                        $logData = @("[系統提示] Tomcat 尚未產生今日 ($logDate) 的日誌。") + @(">>> 目前為您顯示最新的一份歷史日誌: $leaf") + @("---------------------------------------------------------") + $logData
+                    }
+                    
+                    $out.data = $logData
+                    $out.success = $true
+                } catch { 
+                    $out.message = "讀取檔案失敗: $($_.Exception.Message)" 
+                    Write-ApiLog "!!! 讀取日誌失敗 ($reqType): $($_.Exception.Message)" -Color Yellow
+                }
+            } else { 
+                $out.message = "伺服器找不到 [$reqType] 相關的日誌檔案" 
+                Write-ApiLog "!!! 找不到日誌 ($reqType): 目錄內無匹配檔案" -Color Yellow
+            }
         }
         elseif ($path -eq "/tomcat/restart") {
             try {
@@ -375,13 +402,31 @@ while ($listener.IsListening) {
         elseif ($path -eq "/server/logs") {
             $logDate = Get-Date -Format "yyyy-MM-dd"
             $targetFile = Join-Path $logPath "TomcatApi_$logDate.log"
-            if (Test-Path $targetFile) {
+            
+            # 若找不到今天的 Agent 日誌，自動找最新的一份
+            if (-not (Test-Path $targetFile)) {
+                $f = Get-ChildItem -Path $logPath -Filter "TomcatApi_*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+                if ($f) { $targetFile = $f[0].FullName }
+            }
+
+            if ($targetFile -and (Test-Path $targetFile)) {
                 $cnt = 100; $l = Get-Utf8QueryParam $req "lines"; if ($l -match "^\d+$") { $cnt = [int]$l }
                 try {
-                    $out.data = Get-Content $targetFile -Tail $cnt -Encoding Default -ErrorAction Stop
+                    $logData = Get-Content $targetFile -Tail $cnt -Encoding Default -ErrorAction Stop
+                    if ($targetFile -notmatch $logDate) {
+                        $leaf = Split-Path $targetFile -Leaf
+                        $logData = @("[系統提示] Agent 尚未產生今日 ($logDate) 的日誌。") + @(">>> 目前為您顯示最新的一份歷史日誌: $leaf") + @("---------------------------------------------------------") + $logData
+                    }
+                    $out.data = $logData
                     $out.success = $true
-                } catch { $out.message = "讀取錯誤: $($_.Exception.Message)" }
-            } else { $out.message = "找不到今日的 Agent 日誌檔案" }
+                } catch { 
+                    $out.message = "讀取錯誤: $($_.Exception.Message)" 
+                    Write-ApiLog "!!! 讀取 Agent 日誌失敗: $($_.Exception.Message)" -Color Yellow
+                }
+            } else { 
+                $out.message = "找不到今日的 Agent 日誌檔案" 
+                Write-ApiLog "!!! 找不到 Agent 日誌: 目錄內無匹配檔案" -Color Yellow
+            }
         }
         elseif ($path -eq "/server/restart-script") {
             $out.success = $true; $out.message = "Agent 腳本即將重啟..."; $restartScript = $true
