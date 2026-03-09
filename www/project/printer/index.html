@@ -93,7 +93,7 @@
                     <button @click="openServerManager" :disabled="isDemoMode" class="bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="管理伺服器列表"><i class="fa-solid fa-gear"></i></button>
 
                     <button @click="fetchPrinters(true)" :disabled="loading || (!currentServerId && !isDemoMode)" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-blue-500/20 disabled:shadow-none">
-                        <i class="fa-solid fa-rotate" :class="{'fa-spin': loading}"></i><span class="hidden sm:inline">連線</span>
+                        <i class="fa-solid fa-rotate" :class="{'fa-spin': loading}"></i><span class="hidden sm:inline">{{ isConnected ? '立即更新' : '嘗試連線' }}</span>
                     </button>
                     
                     <div class="flex items-center ml-2 border-l border-slate-300 dark:border-slate-600 pl-3 gap-2">
@@ -718,7 +718,8 @@
                 const isDemoMode = ref(new URLSearchParams(window.location.search).get('demo') === '1');
                 const config = ref({ ip: '', key: '' });
                 const autoRefresh = ref(localStorage.getItem('ps_auto_refresh') === 'true');
-                const refreshInterval = ref(parseInt(localStorage.getItem('ps_refresh_interval')) || 60);
+                // [修改] 預設更新時間改為 180 秒
+                const refreshInterval = ref(parseInt(localStorage.getItem('ps_refresh_interval')) || 180);
                 const darkMode = ref(localStorage.getItem('ps_dark_mode') === 'true');
                 const countdown = ref(0);
                 const showAdvancedOps = ref(false);
@@ -875,8 +876,11 @@
 
                 const isConfigValid = computed(() => isDemoMode.value || (config.value.ip && config.value.key));
                 
-                // [新增] 是否顯示連線提示 UI (未選擇伺服器 或 連線斷線時)
+                // 是否顯示連線提示 UI (未選擇伺服器 或 連線斷線時)
                 const showConnectionPrompt = computed(() => !isConfigValid.value || connectionFailed.value);
+
+                // [新增] 判斷目前是否處於已連線狀態 (用於切換按鈕文字)
+                const isConnected = computed(() => isConfigValid.value && !connectionFailed.value && lastUpdated.value !== '');
 
                 watch(currentServerId, (newId) => {
                     connectionFailed.value = false; // 切換伺服器時重置失敗狀態
@@ -994,6 +998,10 @@
 
                             lastUpdated.value = new Date().toLocaleString();
                             if (showToast) success("Demo 連線成功");
+                            
+                            // [新增] 成功連線後，自動開啟自動更新功能
+                            if (!autoRefresh.value) autoRefresh.value = true;
+
                             loading.value = false;
                             connectionFailed.value = false; // 測試模式成功
                             const l = document.getElementById('init-loading'); if(l) { l.classList.add('fade-out'); setTimeout(()=>l.remove(),500); }
@@ -1013,6 +1021,9 @@
                             if (printers.value.length > 0 && printers.value[0].LastUpdated) lastUpdated.value = printers.value[0].LastUpdated;
                             if (showToast) success("連線成功");
                             
+                            // [新增] 成功連線後，自動開啟自動更新功能
+                            if (!autoRefresh.value) autoRefresh.value = true;
+
                             if (showRecordModal.value && selectedPrinter.value) {
                                 const updatedP = printers.value.find(x => x.Name === selectedPrinter.value.Name);
                                 if (updatedP) selectedPrinter.value = updatedP;
@@ -1396,7 +1407,7 @@
                     config, servers, currentServerId, showServerModal, editingServer, printers, loading, lastUpdated, autoRefresh, darkMode, isConfigValid, isDemoMode,
                     searchQuery, filterStatus, filterLocation, uniqueLocations, filteredPrinters, errorCount, sortBy, sortDesc, refreshInterval, validateInterval, countdown,
                     countAll, countReady, countIssue, countError, countWarning, countReadyWarning,
-                    uiScale, changeScale, connectionFailed, showConnectionPrompt, // 匯出連線狀態與防護提示旗標
+                    uiScale, changeScale, connectionFailed, showConnectionPrompt, isConnected, // [新增] 匯出 isConnected
                     isLandSystem, // 匯出地政系統旗標，消除 Vue Warning
                     allPrintedRecords, showGlobalRecordModal, globalRecordSearchQuery, filteredGlobalRecords,
                     showApplyFormsModal, applyFormsLoading, applyFormsData, applyFormsSearchQuery, applyFormTargetPrinter, filteredApplyForms, fetchApplyForms, // 導出申請單相關變數
