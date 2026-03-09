@@ -838,9 +838,13 @@
                 ];
                 let pollTimer = null;
 
-                // [新增核心邏輯] 將碳粉不足的錯誤狀態降級為警告
+                // [核心邏輯] 狀態動態調整攔截器
                 const processPrinterData = (p) => {
-                    if (p.Status === 'Error' && p.ErrorDetails && (p.ErrorDetails.includes('碳粉') || p.ErrorDetails.includes('Toner'))) {
+                    if (p.ErrorDetails && p.ErrorDetails.includes('無回應')) {
+                        // 將 "無回應" 強制歸類為異常 (Error)
+                        p.Status = 'Error';
+                    } else if (p.Status === 'Error' && p.ErrorDetails && (p.ErrorDetails.includes('碳粉') || p.ErrorDetails.includes('Toner'))) {
+                        // 將 "碳粉不足" 降級為警告 (Warning)
                         p.Status = 'Warning';
                     }
                     return p;
