@@ -483,7 +483,11 @@ while ($listener.IsListening) {
             $res.ContentType = "application/json"; $res.OutputStream.Write($buf, 0, $buf.Length); $res.Close()
         }
 
-        if ($restartScript) { Start-Sleep -Seconds 1; try { $listener.Abort() } catch {}; Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""; [System.Environment]::Exit(0) }
+        if ($restartScript) { 
+            Write-ApiLog ">>> 收到 API 指令：Agent 腳本即將重啟..." -Color Yellow
+            if ($enableAdminNotifications) { Send-SysAdminNotify -title "系統操作通知" -content "管理員已透過 API 觸發 Agent 腳本重啟作業。" }
+            Start-Sleep -Seconds 1; try { $listener.Abort() } catch {}; Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""; [System.Environment]::Exit(0) 
+        }
         if ($restartComputer) {
             Write-ApiLog ">>> 伺服器即將關機重啟..." -Color Red
             try { $listener.Abort() } catch {}
