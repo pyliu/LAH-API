@@ -264,8 +264,17 @@
                             <div class="flex justify-between items-start mb-2">
                                 <div class="overflow-hidden">
                                     <h3 class="font-bold text-slate-800 dark:text-slate-100 text-lg truncate pr-2" :title="p.Name">{{ p.Name }}</h3>
-                                    <div class="flex items-center gap-2 mt-1">
+                                    <!-- [修改] 加上 flex-wrap 防止太長，並將警示訊息移入此行 -->
+                                    <div class="flex flex-wrap items-center gap-2 mt-1">
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :class="getStatusColor(p.Status)"><i class="fa-solid fa-circle text-[0.5rem] mr-1.5"></i>{{ p.Status }}</span>
+                                        
+                                        <!-- [新增] 警示/錯誤訊息移至燈號右邊、IP 前面 -->
+                                        <span v-if="p.ErrorDetails" class="inline-flex items-center px-1.5 py-0.5 rounded border text-[0.625rem] sm:text-xs font-medium transition-colors"
+                                             :class="p.Status.includes('Warning') ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800'">
+                                            <i class="fa-solid mr-1" :class="p.Status.includes('Warning') ? 'fa-circle-exclamation' : 'fa-triangle-exclamation'"></i>
+                                            {{ p.ErrorDetails }}
+                                        </span>
+
                                         <span v-if="p.IP" class="text-xs font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded"><i class="fa-solid fa-network-wired mr-1"></i>{{ p.IP }}</span>
                                     </div>
                                 </div>
@@ -279,13 +288,6 @@
                         <div v-if="p.Comment" class="mb-3 text-lg font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700/50 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 flex items-center gap-2">
                             <i class="fa-solid fa-user-tag text-blue-500 dark:text-blue-400"></i>
                             <span>{{ p.Comment }}</span>
-                        </div>
-
-                        <!-- [更新] 碳粉不足等 Warning 改為黃色警示，其他 Error 保持紅色 -->
-                        <div v-if="p.ErrorDetails" class="mb-3 text-xs px-2 py-1.5 rounded border flex items-start gap-2 transition-colors"
-                             :class="p.Status.includes('Warning') ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-900/50' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-100 dark:border-red-900/50'">
-                            <i class="fa-solid mt-0.5" :class="p.Status.includes('Warning') ? 'fa-circle-exclamation' : 'fa-triangle-exclamation'"></i>
-                            <span>{{ p.ErrorDetails }}</span>
                         </div>
                         
                         <div class="grid grid-cols-2 gap-y-1 text-xs text-slate-500 dark:text-slate-400 mb-4 border-t border-slate-100 dark:border-slate-700 pt-2">
