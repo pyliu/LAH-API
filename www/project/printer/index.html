@@ -113,14 +113,13 @@
             </div>
         </header>
 
-        <!-- [加入 relative 屬性以定位中央的覆蓋層] -->
         <main class="flex-1 overflow-hidden flex flex-col md:flex-row max-w-8xl mx-auto w-full relative">
             <!-- Sidebar -->
             <aside class="w-full md:w-64 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-4 overflow-y-auto flex-shrink-0 transition-colors">
                 <div class="mb-6">
                     <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">伺服器全域操作</h3>
                     <div class="space-y-2">
-                        <!-- [修復] 檢視地政系統申請書按鈕 (改回僅地政系統顯示) -->
+                        <!-- 檢視地政系統申請書按鈕 -->
                         <button v-if="isLandSystem" @click="fetchApplyForms" :disabled="loading || applyFormsLoading || (!isConfigValid && !isDemoMode)" class="w-full text-left px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-500 transition-all group disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
                             <div class="flex items-center justify-between">
                                 <span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-disabled:text-slate-400">檢視地政系統申請書</span>
@@ -130,7 +129,7 @@
                             <p class="text-xs text-slate-400 mt-1">瀏覽並派送今日產生的表單</p>
                         </button>
 
-                        <!-- [修復] 地政系統列印紀錄按鈕 (必須是地政系統且有紀錄才顯示) -->
+                        <!-- 地政系統列印紀錄按鈕 (若無紀錄則隱藏) -->
                         <button v-if="isLandSystem && allPrintedRecords.length > 0" @click="showGlobalRecordModal = true" :disabled="loading || (!isConfigValid && !isDemoMode)" class="w-full text-left px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm hover:shadow-md hover:border-purple-300 dark:hover:border-purple-500 transition-all group disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
                             <div class="flex items-center justify-between">
                                 <span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-purple-600 dark:group-hover:text-purple-400 group-disabled:text-slate-400">地政系統列印紀錄</span>
@@ -156,13 +155,11 @@
                             <div v-if="showAdvancedOps" class="space-y-2 p-3 bg-slate-100 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <div class="text-[0.625rem] text-slate-400 text-center mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i>請謹慎操作</div>
                                 
-                                <!-- [移入] 重啟 Spooler -->
                                 <button @click="restartSpooler" :disabled="loading || (!isConfigValid && !isDemoMode)" class="w-full text-left px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded shadow-sm hover:border-blue-400 dark:hover:border-blue-500 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
                                     <div class="flex items-center justify-between"><span class="font-medium text-sm text-slate-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">重啟 Spooler</span><i class="fa-solid fa-arrows-rotate text-slate-400 group-hover:text-blue-500 text-xs"></i></div>
                                     <p class="text-[0.625rem] text-slate-500 dark:text-slate-400 mt-0.5">強制重啟列印服務</p>
                                 </button>
 
-                                <!-- [移入] 深度自癒修復 -->
                                 <button @click="selfHeal" :disabled="loading || (!isConfigValid && !isDemoMode)" class="w-full text-left px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded shadow-sm hover:border-red-400 dark:hover:border-red-500 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
                                     <div class="flex items-center justify-between"><span class="font-medium text-sm text-slate-700 dark:text-slate-200 group-hover:text-red-600 dark:group-hover:text-red-400">深度自癒修復</span><i class="fa-solid fa-suitcase-medical text-slate-400 group-hover:text-red-500 text-xs"></i></div>
                                     <p class="text-[0.625rem] text-slate-400 dark:text-slate-500 mt-0.5">清空暫存並重置環境</p>
@@ -277,9 +274,13 @@
                                 </div>
                             </div>
                             
-                            <div v-if="p.ErrorDetails" class="mb-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-xs px-2 py-1.5 rounded border border-red-100 dark:border-red-900/50 flex items-start gap-2">
-                                <i class="fa-solid fa-triangle-exclamation mt-0.5"></i><span>{{ p.ErrorDetails }}</span>
+                            <!-- [更新] 碳粉不足等 Warning 改為黃色警示，其他 Error 保持紅色 -->
+                            <div v-if="p.ErrorDetails" class="mb-3 text-xs px-2 py-1.5 rounded border flex items-start gap-2 transition-colors"
+                                 :class="p.Status.includes('Warning') ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-900/50' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-100 dark:border-red-900/50'">
+                                <i class="fa-solid mt-0.5" :class="p.Status.includes('Warning') ? 'fa-circle-exclamation' : 'fa-triangle-exclamation'"></i>
+                                <span>{{ p.ErrorDetails }}</span>
                             </div>
+
                             <div v-if="p.Comment" class="mb-3 text-xs text-slate-500 dark:text-slate-400 italic">
                                 <i class="fa-regular fa-comment-dots mr-1"></i>{{ p.Comment }}
                             </div>
@@ -307,7 +308,6 @@
                     </div>
                 </transition-group>
                 
-                <!-- [隱藏條件加上 !showConnectionPrompt，避免與中央提示重疊] -->
                 <div v-else-if="!loading && !showConnectionPrompt" class="flex flex-col items-center justify-center h-96 text-slate-400 dark:text-slate-600">
                     <i class="fa-solid fa-ghost text-4xl mb-4"></i>
                     <p>找不到符合的印表機</p>
@@ -322,7 +322,7 @@
                 </div>
             </section>
 
-            <!-- [新增] 連線中斷 / 選擇伺服器 提示覆蓋層 (放置於 main 內，覆蓋側邊欄與主要內容) -->
+            <!-- 連線中斷 / 選擇伺服器 提示覆蓋層 -->
             <transition name="fade">
                 <div v-if="showConnectionPrompt && !loading" class="absolute inset-0 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-sm z-[40] flex items-center justify-center p-4">
                     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border border-slate-200 dark:border-slate-700 transform transition-all">
@@ -343,7 +343,7 @@
                                 <div class="flex gap-2">
                                     <div class="relative flex-1 group">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-server text-slate-400 group-focus-within:text-blue-500 transition-colors"></i></div>
-                                        <select v-model="currentServerId" @change="switchServer" :disabled="isDemoMode" class="w-full pl-9 pr-8 py-2.5 text-sm rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none cursor-pointer shadow-sm">
+                                        <select v-model="currentServerId" @change="switchServer" :disabled="isDemoMode" class="w-full pl-9 pr-8 py-2.5 text-sm rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-50 transition-all appearance-none cursor-pointer shadow-sm">
                                             <option value="" disabled>請選擇伺服器...</option>
                                             <option v-for="srv in servers" :key="srv.id" :value="srv.id">{{ srv.name }} ({{ srv.ip }})</option>
                                         </select>
@@ -532,7 +532,7 @@
             </div>
         </transition>
 
-        <!-- 6. [更名] 檢視地政系統申請書 Modal -->
+        <!-- 6. 檢視地政系統申請書 Modal -->
         <transition name="fade">
             <div v-if="showApplyFormsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden transition-colors flex flex-col max-h-[85vh]">
@@ -833,6 +833,14 @@
                 ];
                 let pollTimer = null;
 
+                // [新增核心邏輯] 將碳粉不足的錯誤狀態降級為警告
+                const processPrinterData = (p) => {
+                    if (p.Status === 'Error' && p.ErrorDetails && (p.ErrorDetails.includes('碳粉') || p.ErrorDetails.includes('Toner'))) {
+                        p.Status = 'Warning';
+                    }
+                    return p;
+                };
+
                 const generateMockData = () => {
                     const locations = ['1F 櫃台', '2F 會議室', '3F 研發部', '3F 測試區', '4F 財務部'];
                     const statuses = ['Ready', 'Printing', 'Offline', 'Error', 'Warning'];
@@ -929,9 +937,11 @@
                         if (res.data.success) {
                             const idx = printers.value.findIndex(p => p.Name === name);
                             if (idx !== -1) {
-                                printers.value[idx] = res.data.data;
+                                // [套用過濾邏輯]
+                                const processed = processPrinterData(res.data.data);
+                                printers.value[idx] = processed;
                                 if (showRecordModal.value && selectedPrinter.value?.Name === name) {
-                                    selectedPrinter.value = res.data.data;
+                                    selectedPrinter.value = processed;
                                 }
                             }
                             if (res.data.data.LastUpdated) lastUpdated.value = res.data.data.LastUpdated;
@@ -956,13 +966,16 @@
                     
                     if (isDemoMode.value) {
                         setTimeout(() => {
-                            if (printers.value.length === 0) printers.value = generateMockData();
+                            if (printers.value.length === 0) printers.value = generateMockData().map(processPrinterData);
                             else {
                                 printers.value.forEach(p => {
                                     if (Math.random() > 0.7) {
-                                        const s = ['Ready', 'Printing', 'Offline'][Math.floor(Math.random()*3)];
+                                        const s = ['Ready', 'Printing', 'Offline', 'Error', 'Warning'][Math.floor(Math.random()*5)];
                                         p.Status = s; p.Jobs = s==='Printing' ? Math.floor(Math.random()*10) : 0;
+                                        // 測試展示：刻意產生碳粉不足的 Error 狀態來驗證我們的攔截器
+                                        p.ErrorDetails = s==='Error' ? '碳粉不足' : (s==='Warning' ? '碳粉存量低' : '');
                                     }
+                                    processPrinterData(p);
                                 });
                             }
                             
@@ -981,9 +994,10 @@
                     try {
                         const res = await axios.get(getApiUrl('/printers'), { headers: { 'X-API-KEY': config.value.key } });
                         if (res.data.success) {
-                            printers.value = res.data.data;
+                            // [套用過濾邏輯] 將每一台印表機送入判斷，若碳粉不足則降級為 Warning
+                            printers.value = res.data.data.map(processPrinterData);
                             connectionFailed.value = false; // 連線成功，解除錯誤狀態
-                            isLandSystem.value = res.data.isLandSystem === true; // [修復] 同步後端地政系統旗標
+                            isLandSystem.value = res.data.isLandSystem === true; // 同步後端地政系統旗標
                             
                             applyDefaultSortFallback(); 
 
@@ -1043,7 +1057,7 @@
                 const restartSpooler = () => { if(confirm("重啟 Spooler？")) performAction(`/service/restart-spooler`, "服務重啟中"); };
                 const selfHeal = () => { if(confirm("執行深度自癒？")) performAction(`/service/self-heal`, "自癒流程啟動"); };
                 
-                // [更新] 高風險操作：封裝重啟與重連機制 (修正超時誤判問題)
+                // 高風險操作：封裝重啟與重連機制 (修正超時誤判問題)
                 const executeRestart = async (type, endpoint, confirmMsg, initMessage) => {
                     if (!confirm(confirmMsg)) return;
                     if (isDemoMode.value) return toast("Demo 模式無法執行此操作", "#f59e0b");
@@ -1070,7 +1084,7 @@
                         restarting.value.message = `正在進行第 ${i+1} 次連線測試...`;
                         
                         try {
-                            // [優化] 改用輕量級的 API (/server/logs) 探測，避免 /printers WMI 查詢超時
+                            // 改用輕量級的 API (/server/logs) 探測，避免 /printers WMI 查詢超時
                             const res = await axios.get(getApiUrl('/server/logs?lines=1'), { 
                                 headers: { 'X-API-KEY': config.value.key },
                                 timeout: 8000 // 探測超時放寬為 8 秒
@@ -1216,7 +1230,7 @@
                     }
                 };
 
-                // [新增] 讀取申請單表單 (Apply Forms)
+                // 讀取申請單表單 (Apply Forms)
                 const fetchApplyForms = async () => {
                     if (isDemoMode.value) return toast("Demo 模式無法讀取實體目錄", "#f59e0b");
                     if (!isConfigValid.value) return error("請先確保 API 連線設定正確");
@@ -1238,7 +1252,7 @@
                     }
                 };
 
-                // [新增] 過濾申請單表單
+                // 過濾申請單表單
                 const filteredApplyForms = computed(() => {
                     if (!applyFormsSearchQuery.value) return applyFormsData.value;
                     const q = applyFormsSearchQuery.value.toLowerCase();
@@ -1371,8 +1385,8 @@
                     config, servers, currentServerId, showServerModal, editingServer, printers, loading, lastUpdated, autoRefresh, darkMode, isConfigValid, isDemoMode,
                     searchQuery, filterStatus, filterLocation, uniqueLocations, filteredPrinters, errorCount, sortBy, sortDesc, refreshInterval, validateInterval, countdown,
                     countAll, countReady, countIssue, countError, countWarning,
-                    uiScale, changeScale, connectionFailed, showConnectionPrompt, // [新增] 匯出連線狀態與防護提示旗標
-                    isLandSystem, // [修復] 匯出地政系統旗標，消除 Vue Warning
+                    uiScale, changeScale, connectionFailed, showConnectionPrompt, // 匯出連線狀態與防護提示旗標
+                    isLandSystem, // 匯出地政系統旗標，消除 Vue Warning
                     allPrintedRecords, showGlobalRecordModal, globalRecordSearchQuery, filteredGlobalRecords,
                     showApplyFormsModal, applyFormsLoading, applyFormsData, applyFormsSearchQuery, applyFormTargetPrinter, filteredApplyForms, fetchApplyForms, // 導出申請單相關變數
                     getStatusColor, toggleDarkMode, openServerManager, saveServer, removeServer, useServer, resetEdit, editServer, switchServer,
