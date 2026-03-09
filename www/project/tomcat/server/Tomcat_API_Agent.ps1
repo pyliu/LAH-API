@@ -210,6 +210,34 @@ function Clear-ZombiePort {
     } catch { Write-ApiLog "!!! 清除佔用異常: $($_.Exception.Message)" }
 }
 
+function Execute-ScheduledMaintenance {
+    Write-ApiLog ">>> [排程任務] 觸發定時維護 (清理快取與重啟服務)..." -Color Cyan
+    try {
+        Write-ApiLog " -> 正在停止 Tomcat 服務..."
+        Stop-Service -Name $tomcatServiceName -Force -ErrorAction SilentlyContinue
+        Start-Sleep -Seconds 5
+        
+        Write-ApiLog " -> 正在清理 work 與 temp 目錄..."
+        $w = Join-Path $tomcatDir "work"; $t = Join-Path $tomcatDir "temp"
+        if (Test-Path $w) { Get-ChildItem -Path $w -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue }
+        if (Test-Path $t) { Get-ChildItem -Path $t -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue }
+        
+        Write-ApiLog " -> 正在啟動 Tomcat 服務..."
+        Start-Service -Name $tomcatServiceName -ErrorAction Stop
+        
+        Write-ApiLog ">>> [排程任務] Tomcat 維護完成！" -Color Green
+        
+        if ($enableAdminNotifications) {
+            Send-SysAdminNotify -title "排程維護通知" -content "Tomcat 伺服器已完成每日定時重啟與快取清理作業。"
+        }
+    } catch {
+        Write-ApiLog "!!! [排程任務] 維護發生錯誤: $($_.Exception.Message)" -Color Red
+        if ($enableAdminNotifications) {
+            Send-SysAdminNotify -title "排程維護異常" -content "Tomcat 定時維護發生錯誤: $($_.Exception.Message)"
+        }
+    }
+}
+
 function Get-Utf8QueryParam { 
     param($request, $key)
     if ($request.Url.Query -match "[?&]$key=([^&]*)") { try { return [System.Uri]::UnescapeDataString($matches[1].Replace("+", "%20")) } catch { return $null } }
@@ -249,6 +277,20 @@ while ($listener.IsListening) {
         $now = Get-Date
         if ($now -ge $nextCleanup) { Cleanup-OldLogs; $nextCleanup = $now.AddHours(24) }
         
+        # ?? 新增：檢查並觸發每日定時排程維護 (解析 Cron 格式: 分 時 * * *)
+        if ($enableScheduledRestart -and $scheduledRestartCron -match "^(\d+)\s+(\d+)") {
+            $cronMin = [int]$matches[1]
+            $cronHour = [int]$matches[2]
+            # 檢查是否到達設定的小時與分鐘
+            if ($now.Hour -eq $cronHour -and $now.Minute -eq $cronMin) {
+                # 確保每天只執行一次
+                if ($null -eq $global:LastCronRunTime -or $global:LastCronRunTime.Date -ne $now.Date) {
+                    $global:LastCronRunTime = $now
+                    Execute-ScheduledMaintenance
+                }
+            }
+        }
+
         if ($null -eq $contextTask) { $contextTask = $listener.BeginGetContext($null, $null) }
         if (-not $contextTask.AsyncWaitHandle.WaitOne(1000)) { continue }
 
