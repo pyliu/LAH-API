@@ -286,9 +286,11 @@
                             </button>
                         </div>
                         <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                            <!-- 🚀 最後更新時間與無感同步指示器 -->
                             <div v-if="lastUpdated" class="hidden sm:flex items-center text-[10px] text-slate-500 dark:text-slate-400 font-mono mr-1 px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700">
                                 <span class="icon-box mr-1"><i data-lucide="clock" class="w-3 h-3"></i></span>
-                                {{ lastUpdated }}
+                                更新於 {{ lastUpdated }}
+                                <div v-if="isAutoSyncing" class="ml-2 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" title="背景同步中"></div>
                             </div>
                             
                             <button v-if="logs.length >= logLines && logs.length > 0" @click="loadMoreLogs" :disabled="isRefreshingLogs || isOperating || isConnectionError" class="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 rounded-lg transition-all flex items-center border border-blue-200 disabled:opacity-50">
@@ -302,14 +304,14 @@
                     
                     <!-- 終端機顯示區 -->
                     <div class="relative flex-1 min-h-0">
-                        <!-- 捲動區 -->
-                        <div ref="logContainer" class="absolute inset-0 bg-slate-50 dark:bg-[#0a0f18] p-4 font-mono text-xs shadow-inner leading-relaxed overflow-y-auto zoom-layer-fix">
-                            <div v-if="logs.length === 0 && !isRefreshingLogs" class="h-full flex items-center justify-center text-slate-400 flex-col opacity-50">
+                        <!-- 🚀 捲動區 (加入 scroll 事件監聽防捲動) -->
+                        <div ref="logContainer" @scroll="handleScroll" class="absolute inset-0 bg-slate-50 dark:bg-[#0a0f18] p-4 font-mono text-xs shadow-inner leading-relaxed overflow-y-auto zoom-layer-fix scroll-smooth">
+                            <div v-if="logs.length === 0 && !isRefreshingLogs && !isAutoSyncing" class="h-full flex items-center justify-center text-slate-400 flex-col opacity-50">
                                 <span class="icon-box mb-4 opacity-20"><i data-lucide="terminal" class="w-16 h-16"></i></span>
                                 <p class="font-black tracking-[0.2em] uppercase">{{ isConnectionError ? '連線異常 (Connection Error)' : '目前尚無資料 (No Data)' }}</p>
                             </div>
                             <div v-else class="space-y-1">
-                                <!-- 🚀 日誌渲染區：包含智慧型發生時間顯示 -->
+                                <!-- 日誌渲染區：包含智慧型發生時間顯示 -->
                                 <div v-for="(logItem, idx) in logs" :key="idx" :class="getLogColor(logItem.text)" class="break-all whitespace-pre-wrap">
                                     <span class="opacity-30 mr-3 select-none inline-block w-8 text-right">{{ (idx + 1) }}</span>
                                     <span v-if="logItem.time" class="text-blue-600/70 dark:text-blue-400/70 mr-2 select-none font-bold">[{{ logItem.time }}]</span>
@@ -318,7 +320,7 @@
                             </div>
                         </div>
                         
-                        <!-- 載入中遮罩 -->
+                        <!-- 載入中遮罩 (只有在手動刷新或首次載入時顯示，無感同步不顯示) -->
                         <div v-if="isRefreshingLogs" class="absolute inset-0 z-50 bg-white/50 dark:bg-[#0a0f18]/60 backdrop-blur-sm flex items-center justify-center transition-all duration-300">
                             <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-8 py-6 rounded-2xl shadow-2xl flex flex-col items-center animate-scale-in">
                                 <div class="relative w-12 h-12 mb-4">
@@ -464,9 +466,13 @@
                 const logLines = ref(100); 
                 const isOperating = ref(false);
                 const isRefreshingLogs = ref(false);
+                const isAutoSyncing = ref(false); // 控制背景同步時的綠色呼吸燈
                 const logContainer = ref(null);
                 
                 const lastUpdated = ref('');
+                
+                // 🚀 智慧型防滾動 (Smart Scroll) 狀態
+                const shouldAutoScroll = ref(true);
                 
                 const toasts = ref([]);
                 let toastIdCounter = 0;
@@ -474,8 +480,20 @@
                 const reconnectState = reactive({ active: false, message: '', secondsLeft: 0, maxTime: 0, intervalId: null });
                 const downloadState = reactive({ active: false, message: '' });
 
-                const scrollToBottom = () => {
-                    nextTick(() => { if (logContainer.value) logContainer.value.scrollTop = logContainer.value.scrollHeight; });
+                // 🚀 監聽捲動事件，判斷使用者是否正在往上翻閱
+                const handleScroll = (e) => {
+                    const { scrollTop, scrollHeight, clientHeight } = e.target;
+                    // 若距離底部小於 50px，則視為在最底部，允許自動捲動
+                    shouldAutoScroll.value = scrollHeight - scrollTop - clientHeight < 50;
+                };
+
+                // 🚀 只有在允許自動捲動，或是手動強制 (例如換頁籤) 時才捲到最底
+                const scrollToBottom = (force = false) => {
+                    nextTick(() => { 
+                        if (logContainer.value && (force || shouldAutoScroll.value)) {
+                            logContainer.value.scrollTop = logContainer.value.scrollHeight; 
+                        }
+                    });
                 };
 
                 const formatBytes = (bytes) => {
@@ -571,14 +589,18 @@
                     }
                 };
 
-                // 🚀 檢查字串是否已經包含原生時間戳，避免重複產生
+                // 檢查字串是否已經包含原生時間戳，避免重複產生
                 const hasBuiltInTime = (line) => {
                     return /^(\[?\d{4}-\d{2}-\d{2}|\d{2}-[a-zA-Z]{3}-\d{4}|\d{1,2}\s+[\u4e00-\u9fa5a-zA-Z]+\s+\d{4}|\d{4}\/\d{2}\/\d{2}|[A-Za-z]{3}\s+\d{1,2},\s+\d{4}|[\u4e00-\u9fa5]{2,3}\s+\d{1,2},\s+\d{4}|\[系統提示\])/.test(line);
                 };
 
-                const fetchLogs = async (preserveScroll = false) => {
+                // 🚀 fetchLogs 增加 isAutoRefresh 參數 (true 時不顯示大型遮罩)
+                const fetchLogs = async (isAutoRefresh = false) => {
                     if (isConnectionError.value || !apiUrl.value || setupModal.show) return;
-                    isRefreshingLogs.value = true;
+                    
+                    if (!isAutoRefresh) isRefreshingLogs.value = true;
+                    else isAutoSyncing.value = true;
+                    
                     nextTick(() => { lucide.createIcons(); });
                     
                     const typeParam = currentLogType.value === 'tomcat' ? 'catalina' : currentLogType.value;
@@ -587,7 +609,8 @@
                     try {
                         const [res] = await Promise.all([
                             callApi(endpoint),
-                            new Promise(resolve => setTimeout(resolve, 600))
+                            // 若是手動刷新，保證最少看 600ms 毛玻璃；若是背景同步則無需等待
+                            isAutoRefresh ? Promise.resolve() : new Promise(resolve => setTimeout(resolve, 600))
                         ]);
 
                         const fetchTime = new Date().toLocaleTimeString('zh-TW', { hour12: false });
@@ -596,8 +619,8 @@
                             const newLines = res.data;
                             let nextLogs = [];
                             
-                            // 🚀 智慧型發生時間：比對狀態，若為新出現的日誌才標上當前時間
-                            if (logs.value.length === 0 || typeof logs.value[0] !== 'object') {
+                            // 智慧型發生時間：比對狀態，若為新出現的日誌才標上當前時間
+                            if (logs.value.length === 0 || typeof logs.value[0] !== 'object' || !isAutoRefresh) {
                                 nextLogs = newLines.map(text => ({ 
                                     text, 
                                     time: hasBuiltInTime(text) ? '' : fetchTime 
@@ -647,21 +670,26 @@
                         } else {
                             logs.value = [{ text: `[系統提示] ${res.message}`, time: '' }];
                         }
-                        if (!preserveScroll) { scrollToBottom(); }
+                        
+                        // 捲動：若是手動刷新(非同步) 則強制往下滾；若是無感同步，則套用智慧防捲動邏輯
+                        scrollToBottom(!isAutoRefresh); 
+                        
                     } catch (e) {
                         logs.value = [{ text: `[ERROR] ${e.message}`, time: '' }];
                     } finally {
                         isRefreshingLogs.value = false;
+                        isAutoSyncing.value = false;
                         nextTick(() => { lucide.createIcons(); });
                     }
                 };
 
-                const loadMoreLogs = () => { logLines.value += 100; fetchLogs(true); };
+                const loadMoreLogs = () => { logLines.value += 100; fetchLogs(false); };
                 
-                // 🚀 當切換頁籤時，先清空目前日誌，重置行數並觸發讀取
+                // 當切換頁籤時，清空日誌，重置行數，並「強制」設定允許捲動
                 watch(currentLogType, () => { 
                     logs.value = [];
-                    logLines.value = 100; 
+                    logLines.value = 100;
+                    shouldAutoScroll.value = true; 
                     fetchLogs(false); 
                 });
 
@@ -772,14 +800,24 @@
                     } else { 
                         triggerManualCheck(); 
                     }
+                    
+                    // 🚀 狀態更新排程 (每 15 秒)
                     setInterval(() => {
                         if (!reconnectState.active && !isOperating.value && !setupModal.show) { fetchStatus(); }
                     }, 15000);
+
+                    // 🚀 日誌無感背景同步排程 (每 10 秒)
+                    setInterval(() => {
+                        if (!reconnectState.active && !isOperating.value && !setupModal.show && !isConnectionError.value) { 
+                            fetchLogs(true); 
+                        }
+                    }, 10000);
                 });
+                
                 onUpdated(() => lucide.createIcons());
 
                 return {
-                    zoomLevel, changeZoom, resetZoom, logContainerHeight, apiUrl, apiKey, statusData, logs, currentLogType, logLines, isOperating, isRefreshingLogs, logContainer,
+                    zoomLevel, changeZoom, resetZoom, logContainerHeight, apiUrl, apiKey, statusData, logs, currentLogType, logLines, isOperating, isRefreshingLogs, isAutoSyncing, logContainer, handleScroll,
                     modal, toasts, statusColors, isDarkMode, formatBytes, fetchStatus, fetchLogs, loadMoreLogs, handleAction, executeModalAction, getLogColor, getToastColor, toggleTheme,
                     reconnectState, cancelReconnection, downloadState, isConnectionError, setupModal, openSetupModal, saveSetup, triggerManualCheck,
                     isInitialLoading, lastUpdated
