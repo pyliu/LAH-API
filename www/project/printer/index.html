@@ -1375,23 +1375,79 @@
                         const matchL = filterLocation.value ? p.Location === filterLocation.value : true;
                         return matchQ && matchS && matchL;
                     }).sort((a,b) => {
-                        let valA = a[sortBy.value]||'', valB = b[sortBy.value]||'';
-                        if (sortBy.value === 'Status') {
-                             const getWeight = (s) => { s = (s || '').toLowerCase(); if (s === 'ready') return 50; if (s.includes('printing') || s.includes('warmup')) return 40; if (s.includes('warning')) return 30; if (s.includes('offline')) return 20; if (s.includes('error')) return 10; return 0; };
-                             const wA = getWeight(valA); const wB = getWeight(valB);
-                             if (wA !== wB) return sortDesc.value ? wB - wA : wA - wB; 
-                             return (a.Name || '').localeCompare(b.Name || '');
+                        // 狀態權重 (數值越小排越前面: Ready -> Warning -> Error -> Offline)
+                        const getStatusWeight = (s) => { 
+                            s = (s || '').toLowerCase(); 
+                            if (s === 'ready') return 1; 
+                            if (s.includes('printing') || s.includes('warmup')) return 2; 
+                            if (s.includes('warning')) return 3; 
+                            if (s.includes('error')) return 4; 
+                            if (s.includes('offline')) return 5; 
+                            return 6; 
+                        };
+
+                        // IP 數值化精準比較
+                        const cmpIp = (ip1, ip2) => {
+                            const aParts = (ip1 || '').split('.').map(Number);
+                            const bParts = (ip2 || '').split('.').map(Number);
+                            for (let i = 0; i < 4; i++) {
+                                const nA = isNaN(aParts[i]) ? 0 : aParts[i];
+                                const nB = isNaN(bParts[i]) ? 0 : bParts[i];
+                                if (nA !== nB) return nA - nB;
+                            }
+                            return 0;
+                        };
+
+                        // ==========================================
+                        // 【第一層】 主要排序 (依據右上角下拉選單)
+                        // ==========================================
+                        let cmp = 0;
+                        const pKey = sortBy.value;
+                        const pDesc = sortDesc.value;
+
+                        if (pKey === 'Jobs') {
+                            cmp = (a.Jobs || 0) - (b.Jobs || 0);
+                        } else if (pKey === 'Printed') {
+                            const pA = a.printed ? a.printed.length : 0;
+                            const pB = b.printed ? b.printed.length : 0;
+                            cmp = pA - pB;
+                        } else if (pKey === 'IP') {
+                            cmp = cmpIp(a.IP, b.IP);
+                        } else if (pKey === 'Status') {
+                            cmp = getStatusWeight(a.Status) - getStatusWeight(b.Status);
+                        } else {
+                            let valA = (a[pKey] || '').toString().toLowerCase();
+                            let valB = (b[pKey] || '').toString().toLowerCase();
+                            cmp = valA < valB ? -1 : (valA > valB ? 1 : 0);
                         }
-                        if(sortBy.value==='IP') {
-                             const iA=valA.split('.').map(Number), iB=valB.split('.').map(Number);
-                             if(iA.length===4 && iB.length===4) for(let i=0;i<4;i++) if(iA[i]!==iB[i]) return sortDesc.value ? iB[i]-iA[i] : iA[i]-iB[i];
+
+                        // 若主要條件有分出高下，直接回傳 (套用 ASC / DESC)
+                        if (cmp !== 0) {
+                            return pDesc ? -cmp : cmp;
                         }
-                        if(sortBy.value==='Jobs') return sortDesc.value ? valB-valA : valA-valB;
-                        if(sortBy.value==='Printed') {
-                             const pA = a.printed ? a.printed.length : 0; const pB = b.printed ? b.printed.length : 0;
-                             return sortDesc.value ? pB-pA : pA-pB;
-                        }
-                        return sortDesc.value ? (valA<valB?1:-1) : (valA>valB?1:-1);
+
+                        // ==========================================
+                        // 【第二層】 次要條件連鎖排序 (如果主要條件平手)
+                        // ==========================================
+                        
+                        // 0. 佇列數 DESC (越多越優先)
+                        if (a.Jobs !== b.Jobs) return (b.Jobs || 0) - (a.Jobs || 0);
+                        
+                        // 1. 地政系統列印紀錄 DESC (越多越優先)
+                        const pA = a.printed ? a.printed.length : 0;
+                        const pB = b.printed ? b.printed.length : 0;
+                        if (pA !== pB) return pB - pA;
+                        
+                        // 2. IP ASC (IP 越小越優先)
+                        const ipDiff = cmpIp(a.IP, b.IP);
+                        if (ipDiff !== 0) return ipDiff;
+                        
+                        // 3. 狀態 ASC (Ready 優先 -> Warning -> Error)
+                        const sDiff = getStatusWeight(a.Status) - getStatusWeight(b.Status);
+                        if (sDiff !== 0) return sDiff;
+                        
+                        // 4. 名稱 ASC (最後的保底排序)
+                        return (a.Name || '').localeCompare(b.Name || '');
                     });
                 });
                 const errorCount = computed(() => printers.value.filter(p => p.Status === 'Error' || p.Status?.includes('Warning')).length);
