@@ -248,10 +248,10 @@
                                     <option value="Name">名稱</option>
                                     <option value="Status">狀態</option>
                                     <option value="Jobs">佇列數</option>
-                                    <option value="Printed">已列印數</option>
                                     <option value="Location">位置</option>
                                     <option value="PortName">連接埠</option>
                                     <option value="Driver">驅動程式</option>
+                                    <option value="Printed">地政系統列印紀錄</option>
                                 </select>
                                 <span class="absolute right-3 top-3 text-slate-400 pointer-events-none"><i class="fa-solid fa-chevron-down text-xs"></i></span>
                             </div>
@@ -806,8 +806,11 @@
                 const searchQuery = ref('');
                 const filterStatus = ref('');
                 const filterLocation = ref('');
-                const sortBy = ref('Printed');
+                
+                // [修改] 預設排序改為 Jobs (佇列數)，並搭配 sortDesc = true (降冪 DESC)
+                const sortBy = ref('Jobs');
                 const sortDesc = ref(true);
+                
                 const servers = ref([]);
                 const currentServerId = ref('');
                 
@@ -1303,7 +1306,11 @@
                     applyFormsLoading.value = true; showApplyFormsModal.value = true; 
                     try {
                         const res = await axios.get(getApiUrl('/server/applyforms'), { headers: { 'X-API-KEY': config.value.key } });
-                        if (res.data.success) { applyFormsData.value = res.data.data; if (applyFormsData.value.length > 0) success(res.data.message); }
+                        if (res.data.success) { 
+                            applyFormsData.value = res.data.data; 
+                            // [修復] 加入預設文字，防止 res.data.message 為空字串時觸發 Toastify 預設彩蛋
+                            if (applyFormsData.value.length > 0) success(res.data.message || `成功取得 ${applyFormsData.value.length} 筆表單資料`); 
+                        }
                         else { error(res.data.message || "無法取得表單"); }
                     } catch (err) { error("API 請求失敗: " + err.message); } finally { applyFormsLoading.value = false; }
                 };
