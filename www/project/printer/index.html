@@ -74,7 +74,7 @@
                             <h1 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Print Server Monitor</h1>
                             <span v-if="isDemoMode" class="bg-red-500 text-white text-[0.625rem] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-sm">DEMO MODE</span>
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v4.12 (版面調整與更名版)</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v4.12 (WebSocket 即時推播版)</p>
                     </div>
                 </div>
 
@@ -129,12 +129,12 @@
                             <p class="text-xs text-slate-400 mt-1">瀏覽並派送今日產生的表單</p>
                         </button>
 
-                        <!-- 地政系統列印紀錄按鈕 (若無紀錄則隱藏) -->
+                        <!-- 地政系統列印紀錄按鈕 (無紀錄則隱藏，收到 WS 推播會自動顯示) -->
                         <button v-if="isLandSystem && allPrintedRecords.length > 0" @click="showGlobalRecordModal = true" :disabled="loading || (!isConfigValid && !isDemoMode)" class="w-full text-left px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm hover:shadow-md hover:border-purple-300 dark:hover:border-purple-500 transition-all group disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
                             <div class="flex items-center justify-between">
                                 <span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-purple-600 dark:group-hover:text-purple-400 group-disabled:text-slate-400">地政系統列印紀錄</span>
                                 <div class="flex items-center gap-2">
-                                    <span class="bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300 text-[0.625rem] px-2 py-0.5 rounded-full font-bold">{{ allPrintedRecords.length }}</span>
+                                    <span class="bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300 text-[0.625rem] px-2 py-0.5 rounded-full font-bold transition-all duration-300" :class="{'scale-125 bg-purple-200': flashHighlight}">{{ allPrintedRecords.length }}</span>
                                     <i class="fa-solid fa-list-ul text-slate-400 group-hover:text-purple-500 group-disabled:text-slate-300"></i>
                                 </div>
                             </div>
@@ -144,6 +144,17 @@
                         <button @click="showLogs" :disabled="loading || (!isConfigValid && !isDemoMode)" class="w-full text-left px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-500 transition-all group disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
                             <div class="flex items-center justify-between"><span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-disabled:text-slate-400">檢視系統日誌</span><i class="fa-solid fa-file-lines text-slate-400 group-hover:text-emerald-500 group-disabled:text-slate-300"></i></div>
                             <p class="text-xs text-slate-400 mt-1">查看最近 500 行紀錄</p>
+                        </button>
+
+                        <!-- [新增] 即時推播歷程按鈕 -->
+                        <button @click="showPushHistoryModal = true" :disabled="loading || (!isConfigValid && !isDemoMode)" class="w-full text-left px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500 transition-all group disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
+                            <div class="flex items-center justify-between"><span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-disabled:text-slate-400">即時推播歷程</span>
+                            <div class="flex items-center gap-2">
+                                <span v-if="pushHistory.length > 0" class="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 text-[0.625rem] px-2 py-0.5 rounded-full font-bold">{{ pushHistory.length }}</span>
+                                <i class="fa-solid fa-satellite-dish text-slate-400 group-hover:text-indigo-500 group-disabled:text-slate-300" :class="{'animate-pulse text-indigo-500': flashHighlight}"></i>
+                            </div>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">檢視最近 50 筆推播動態</p>
                         </button>
 
                         <button @click="showAdvancedOps = !showAdvancedOps" class="w-full py-2 text-xs text-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 border border-dashed border-slate-300 dark:border-slate-600 rounded hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all mt-4 mb-2 flex items-center justify-center gap-2">
@@ -264,11 +275,10 @@
                             <div class="flex justify-between items-start mb-2">
                                 <div class="overflow-hidden">
                                     <h3 class="font-bold text-slate-800 dark:text-slate-100 text-lg truncate pr-2" :title="p.Name">{{ p.Name }}</h3>
-                                    <!-- [修改] 加上 flex-wrap 防止太長，並將警示訊息移入此行 -->
+                                    
                                     <div class="flex flex-wrap items-center gap-2 mt-1">
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :class="getStatusColor(p.Status)"><i class="fa-solid fa-circle text-[0.5rem] mr-1.5"></i>{{ p.Status }}</span>
                                         
-                                        <!-- [新增] 警示/錯誤訊息移至燈號右邊、IP 前面 -->
                                         <span v-if="p.ErrorDetails" class="inline-flex items-center px-1.5 py-0.5 rounded border text-[0.625rem] sm:text-xs font-medium transition-colors"
                                              :class="p.Status.includes('Warning') ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800'">
                                             <i class="fa-solid mr-1" :class="p.Status.includes('Warning') ? 'fa-circle-exclamation' : 'fa-triangle-exclamation'"></i>
@@ -279,32 +289,33 @@
                                     </div>
                                 </div>
                                 <div class="text-right flex-shrink-0 ml-2">
-                                <div class="text-2xl font-bold" :class="p.Jobs > 0 ? (p.Jobs > 20 ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400') : 'text-slate-400 dark:text-slate-600'">{{ p.Jobs }}</div>
-                                <div class="text-[0.625rem] text-slate-400 dark:text-slate-500 uppercase">佇列數</div>
+                                    <div class="text-2xl font-bold" :class="p.Jobs > 0 ? (p.Jobs > 20 ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400') : 'text-slate-400 dark:text-slate-600'">{{ p.Jobs }}</div>
+                                    <div class="text-[0.625rem] text-slate-400 dark:text-slate-500 uppercase">佇列數</div>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <!-- [修改] 備註欄位移至警示上方，放大 1.5 倍 (text-lg)，並設計成醒目的歸屬名牌 -->
-                        <div v-if="p.Comment" class="mb-3 text-lg font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700/50 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 flex items-center gap-2">
-                            <i class="fa-solid fa-user-tag text-blue-500 dark:text-blue-400"></i>
-                            <span>{{ p.Comment }}</span>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-y-1 text-xs text-slate-500 dark:text-slate-400 mb-4 border-t border-slate-100 dark:border-slate-700 pt-2">
-                            <div v-if="p.Location" class="truncate" :title="p.Location"><i class="fa-solid fa-location-dot w-4"></i> {{ p.Location }}</div>
+                            
+                            <div v-if="p.Comment" class="mb-3 text-lg font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700/50 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 flex items-center gap-2">
+                                <i class="fa-solid fa-user-tag text-blue-500 dark:text-blue-400"></i>
+                                <span>{{ p.Comment }}</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-y-1 text-xs text-slate-500 dark:text-slate-400 mb-4 border-t border-slate-100 dark:border-slate-700 pt-2 mt-auto">
+                                <div v-if="p.Location" class="truncate" :title="p.Location"><i class="fa-solid fa-location-dot w-4"></i> {{ p.Location }}</div>
                                 <div v-if="p.ShareName" class="truncate" :title="p.ShareName"><i class="fa-solid fa-share-nodes w-4"></i> {{ p.ShareName }}</div>
                                 <div v-if="p.Driver" class="truncate col-span-2" :title="p.Driver"><i class="fa-solid fa-microchip w-4"></i> {{ p.Driver }}</div>
                                 <div v-if="p.PortName" class="truncate"><i class="fa-solid fa-plug w-4"></i> {{ p.PortName }}</div>
                             </div>
                             
                             <!-- 底部按鈕區 -->
-                            <div class="flex flex-wrap gap-2 mt-auto pt-2 border-t border-slate-100 dark:border-slate-700">
+                            <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-100 dark:border-slate-700">
                                 <button @click="refreshPrinter(p.Name)" :disabled="loading" class="flex-1 min-w-[60px] bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 text-xs py-2 rounded border border-slate-200 dark:border-slate-600 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-sync" :class="{'fa-spin': loading}"></i> 刷新</button>
                                 <button @click="openEditModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 text-xs py-2 rounded border border-yellow-200 dark:border-yellow-800 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-pen-to-square"></i> 編輯</button>
                                 <button v-if="p.Status === 'Ready'" @click="openPdfModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-300 text-xs py-2 rounded border border-blue-200 dark:border-blue-800 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-file-pdf"></i> 列印</button>
                                 
+                                <!-- [修改] 加入動畫屬性以視覺化推播效果 -->
                                 <button v-if="p.printed && p.printed.length > 0" @click="openRecordModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-purple-600 dark:text-purple-400 text-xs py-2 px-2 rounded border border-purple-200 dark:border-purple-800 transition-colors disabled:opacity-50 whitespace-nowrap font-medium flex items-center justify-center gap-1">
-                                    <i class="fa-solid fa-clock-rotate-left"></i> 紀錄 <span class="bg-purple-200 text-purple-800 dark:bg-purple-800 dark:text-purple-200 rounded-full px-1.5 py-0.5 text-[0.625rem] leading-none">{{ p.printed.length }}</span>
+                                    <i class="fa-solid fa-clock-rotate-left"></i> 紀錄 
+                                    <span class="bg-purple-200 text-purple-800 dark:bg-purple-800 dark:text-purple-200 rounded-full px-1.5 py-0.5 text-[0.625rem] leading-none transition-all duration-300" :class="{'scale-125 bg-purple-300': flashHighlight}">{{ p.printed.length }}</span>
                                 </button>
                                 
                                 <button @click="clearQueue(p.Name)" :disabled="loading" class="flex-1 min-w-[60px] bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-300 text-xs py-2 rounded border border-red-200 dark:border-red-800 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-trash"></i> 清除</button>
@@ -659,11 +670,50 @@
             </div>
         </transition>
 
+        <!-- 8.5 [新增] 即時推播歷程 Modal -->
+        <transition name="fade">
+            <div v-if="showPushHistoryModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden transition-colors flex flex-col max-h-[85vh]">
+                    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200 truncate pr-4">
+                            <i class="fa-solid fa-satellite-dish mr-2 text-indigo-500"></i>即時推播歷程 (最近 50 筆)
+                        </h3>
+                        <div class="flex items-center gap-3">
+                            <button @click="pushHistory = []" v-if="pushHistory.length > 0" class="text-sm text-slate-500 hover:text-red-500 transition-colors mr-2">
+                                <i class="fa-solid fa-trash-can mr-1"></i>清空
+                            </button>
+                            <button @click="showPushHistoryModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors flex-shrink-0">
+                                <i class="fa-solid fa-xmark text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-y-auto p-4 sm:p-6 space-y-3 bg-slate-50 dark:bg-slate-900/50 flex-1">
+                        <div v-if="pushHistory.length === 0" class="text-center text-slate-500 py-10">
+                            <i class="fa-solid fa-wind text-4xl mb-3 text-slate-300 dark:text-slate-600"></i>
+                            <p>目前尚無任何推播紀錄</p>
+                        </div>
+                        <div v-else v-for="item in pushHistory" :key="item.id" class="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-3 transition-colors hover:border-indigo-300 dark:hover:border-indigo-700">
+                            <div class="mt-1 flex-shrink-0">
+                                <i v-if="item.type === 'print'" class="fa-solid fa-file-pdf text-purple-500 text-lg"></i>
+                                <i v-else-if="item.type === 'queue'" class="fa-solid fa-layer-group text-sky-500 text-lg"></i>
+                            </div>
+                            <div class="flex-1 overflow-hidden">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ item.title }}</span>
+                                    <span class="text-xs text-slate-400 font-mono"><i class="fa-regular fa-clock mr-1"></i>{{ item.time }}</span>
+                                </div>
+                                <div class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{{ item.detail }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
         <!-- 9. 系統重啟與連線防護 Modal -->
         <transition name="fade">
             <div v-if="restarting.active" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 transition-all">
                 <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border border-slate-200 dark:border-slate-700 flex flex-col items-center relative overflow-hidden">
-                    <!-- 頂部進度條裝飾 -->
                     <div v-if="restarting.attempt <= 3 && !restarting.message.includes('無法自動')" class="absolute top-0 left-0 h-1 bg-blue-500 transition-all duration-1000 ease-in-out" :style="{ width: (restarting.attempt / 3 * 100) + '%' }"></div>
                     <div v-else-if="restarting.message.includes('無法自動')" class="absolute top-0 left-0 h-1 w-full bg-red-500"></div>
 
@@ -678,7 +728,6 @@
                         <p class="text-sm font-medium text-slate-600 dark:text-slate-300">{{ restarting.message }}</p>
                     </div>
                     
-                    <!-- 嘗試次數指示器 -->
                     <div v-if="restarting.attempt <= 3 && !restarting.message.includes('無法自動')" class="flex gap-2 mb-2">
                         <div v-for="i in 3" :key="i" class="w-2.5 h-2.5 rounded-full transition-colors duration-300" :class="restarting.attempt >= i ? 'bg-blue-500' : 'bg-slate-200 dark:bg-slate-700'"></div>
                     </div>
@@ -718,20 +767,28 @@
                 const isDemoMode = ref(new URLSearchParams(window.location.search).get('demo') === '1');
                 const config = ref({ ip: '', key: '' });
                 const autoRefresh = ref(localStorage.getItem('ps_auto_refresh') === 'true');
-                // [修改] 預設更新時間改為 180 秒
                 const refreshInterval = ref(parseInt(localStorage.getItem('ps_refresh_interval')) || 180);
                 const darkMode = ref(localStorage.getItem('ps_dark_mode') === 'true');
                 const countdown = ref(0);
                 const showAdvancedOps = ref(false);
 
-                // [新增] 紀錄目前連接的伺服器是否為地政系統
                 const isLandSystem = ref(false);
-
-                // 介面縮放 (Root Font Size)
                 const uiScale = ref(parseInt(localStorage.getItem('ps_ui_scale')) || 100);
-
-                // [新增] 連線失敗狀態
                 const connectionFailed = ref(false);
+                const flashHighlight = ref(false); // 控制新紀錄推播時的動畫特效
+
+                // [新增] 推播歷程紀錄邏輯
+                const pushHistory = ref([]);
+                const showPushHistoryModal = ref(false);
+                const addPushHistory = (type, title, detail) => {
+                    const time = new Date().toLocaleTimeString();
+                    pushHistory.value.unshift({ id: Date.now() + Math.random(), time, type, title, detail });
+                    if (pushHistory.value.length > 50) pushHistory.value.pop(); // 保持最多 50 筆
+                };
+
+                // WebSocket 相關變數
+                let ws = null;
+                let wsReconnectTimer = null;
 
                 const changeScale = (delta) => {
                     uiScale.value = Math.max(80, Math.min(150, uiScale.value + delta));
@@ -756,7 +813,6 @@
                 
                 const showServerModal = ref(false);
                 const editingServer = ref({ id: null, name: '', ip: '', key: '' });
-                
                 const showEditModal = ref(false);
                 const editTarget = ref(null);
                 const editLocation = ref('');
@@ -788,46 +844,30 @@
                 const showGlobalRecordModal = ref(false);
                 const globalRecordSearchQuery = ref('');
                 
-                // [新增] 申請單表單 (Apply Forms) 狀態
                 const showApplyFormsModal = ref(false);
                 const applyFormsLoading = ref(false);
                 const applyFormsData = ref([]);
                 const applyFormsSearchQuery = ref('');
                 const applyFormTargetPrinter = ref('');
 
-                // [新增] 紀錄系統重啟狀態與進度
                 const restarting = ref({ active: false, message: '', attempt: 0, type: '' });
                 const reloadPage = () => window.location.reload();
 
-                // [新增] 紀錄派送列印狀態
                 const printDispatching = ref({ active: false, message: '' });
-
-                // [新增] 重印與派送列印的雙面列印選項 (預設 0 = 單面)
                 const reprintDuplex = ref("0");
 
                 const showPreviewModal = ref(false);
                 const previewPdfUrl = ref('');
                 const previewFileName = ref('');
 
-                watch(showRecordModal, (newVal) => {
-                    if (!newVal) reprintDuplex.value = "0";
-                });
-
-                watch(showGlobalRecordModal, (newVal) => {
-                    if (!newVal) { globalRecordSearchQuery.value = ''; reprintDuplex.value = "0"; }
-                });
-
-                watch(showApplyFormsModal, (newVal) => {
-                    if (!newVal) { applyFormsSearchQuery.value = ''; reprintDuplex.value = "0"; }
-                });
+                watch(showRecordModal, (newVal) => { if (!newVal) reprintDuplex.value = "0"; });
+                watch(showGlobalRecordModal, (newVal) => { if (!newVal) { globalRecordSearchQuery.value = ''; reprintDuplex.value = "0"; } });
+                watch(showApplyFormsModal, (newVal) => { if (!newVal) { applyFormsSearchQuery.value = ''; reprintDuplex.value = "0"; } });
 
                 const closePreviewModal = () => {
                     showPreviewModal.value = false;
                     setTimeout(() => {
-                        if (previewPdfUrl.value) {
-                            URL.revokeObjectURL(previewPdfUrl.value);
-                            previewPdfUrl.value = '';
-                        }
+                        if (previewPdfUrl.value) { URL.revokeObjectURL(previewPdfUrl.value); previewPdfUrl.value = ''; }
                     }, 300);
                 };
                 
@@ -839,13 +879,10 @@
                 ];
                 let pollTimer = null;
 
-                // [核心邏輯] 狀態動態調整攔截器
                 const processPrinterData = (p) => {
                     if (p.ErrorDetails && p.ErrorDetails.includes('無回應')) {
-                        // 將 "無回應" 強制歸類為異常 (Error)
                         p.Status = 'Error';
                     } else if (p.Status === 'Error' && p.ErrorDetails && (p.ErrorDetails.includes('碳粉') || p.ErrorDetails.includes('Toner'))) {
-                        // 將 "碳粉不足" 降級為警告 (Warning)
                         p.Status = 'Warning';
                     }
                     return p;
@@ -865,9 +902,7 @@
                             ErrorDetails: s==='Error' ? '缺紙 (Tray 2)' : (s==='Warning' ? '碳粉存量低' : ''),
                             LastUpdated: new Date().toLocaleString(),
                             printed: Math.random() > 0.5 ? [
-                                { date: '2026-03-04', time: '08:15:22', path: 'C:/PDFPrint/report_q1.pdf' },
-                                { date: '2026-03-04', time: '09:30:10', path: '\\\\192.168.1.100\\share\\invoice_2026.pdf' },
-                                { date: '2026-03-04', time: '11:45:00', path: 'D:/LandDocs/Title_Transfer_001.pdf' }
+                                { date: '2026-03-04', time: '08:15:22', path: 'C:/PDFPrint/report_q1.pdf' }
                             ] : []
                         });
                     }
@@ -875,24 +910,131 @@
                 };
 
                 const isConfigValid = computed(() => isDemoMode.value || (config.value.ip && config.value.key));
-                
-                // 是否顯示連線提示 UI (未選擇伺服器 或 連線斷線時)
                 const showConnectionPrompt = computed(() => !isConfigValid.value || connectionFailed.value);
-
-                // [新增] 判斷目前是否處於已連線狀態 (用於切換按鈕文字)
                 const isConnected = computed(() => isConfigValid.value && !connectionFailed.value && lastUpdated.value !== '');
 
+                // 初始化 WebSocket (主動推播接收引擎)
+                const initWebSocket = () => {
+                    if (isDemoMode.value || !config.value.ip) return;
+                    
+                    if (ws) {
+                        ws.onclose = null; 
+                        ws.close();
+                    }
+
+                    const wsUrl = `ws://${config.value.ip}:8888/`;
+                    try {
+                        ws = new WebSocket(wsUrl);
+
+                        ws.onopen = () => {
+                            console.log('>>> [WebSocket] 雙向通道建立成功，等待背景推播...');
+                            if (wsReconnectTimer) clearInterval(wsReconnectTimer);
+                        };
+
+                        ws.onmessage = (event) => {
+                            try {
+                                const msg = JSON.parse(event.data);
+                                if (msg.type === 'PRINT_LOG_UPDATE') {
+                                    updateRecordsFromLogs(msg.data);
+                                } 
+                                // 接收並處理即時佇列數推播
+                                else if (msg.type === 'PRINTER_QUEUE_UPDATE') {
+                                    if (!msg.data) return;
+                                    
+                                    // [修改] 解析並比對哪些佇列發生了變動
+                                    let queueChanges = [];
+                                    msg.data.forEach(qInfo => {
+                                        const target = printers.value.find(p => p.Name === qInfo.Name);
+                                        if (target && target.Jobs !== qInfo.Jobs) {
+                                            queueChanges.push(`${qInfo.Name} (${target.Jobs} ➔ ${qInfo.Jobs})`);
+                                            target.Jobs = qInfo.Jobs;
+                                        }
+                                    });
+                                    
+                                    // [新增] 發現變動時，加入歷程並顯示 5 秒 Toast 通知
+                                    if (queueChanges.length > 0) {
+                                        let detailText = queueChanges.join('、');
+                                        addPushHistory('queue', '佇列數量更新', `變動細節: ${detailText}`);
+                                        
+                                        // 畫面 Toast 通知 (藍色，顯示 5 秒)
+                                        let toastMsg = queueChanges.length > 2 
+                                            ? `📡 佇列變動: ${queueChanges.length} 台設備數量已更新` 
+                                            : `📡 佇列變動: ${detailText}`;
+                                        toast(toastMsg, "#0ea5e9", 5000);
+                                    }
+                                }
+                            } catch (e) {}
+                        };
+
+                        ws.onclose = () => {
+                            console.log('>>> [WebSocket] 通道斷開，將於 5 秒後重連...');
+                            wsReconnectTimer = setTimeout(initWebSocket, 5000);
+                        };
+                        
+                        ws.onerror = (err) => { ws.close(); }
+                    } catch (e) {}
+                };
+
+                // 將收到的快取資料覆蓋進 Vue 記憶體，引發局部刷新
+                const updateRecordsFromLogs = (newLogs) => {
+                    let updatedCount = 0;
+                    let newFileNames = []; // [新增] 用來蒐集新列印出來的檔名
+
+                    printers.value.forEach(p => {
+                        const myLogs = newLogs.filter(log => log.printer === p.Name);
+                        if (!p.printed) p.printed = [];
+                        
+                        if (p.printed.length !== myLogs.length) {
+                            // [新增] 比對差異，抓出這批推播中「最新增加」的檔案名稱
+                            if (myLogs.length > p.printed.length) {
+                                const latestLog = myLogs[myLogs.length - 1]; // 取出最後一筆
+                                if (latestLog && latestLog.path) {
+                                    const fname = latestLog.path.split(/[\\/]/).pop();
+                                    newFileNames.push(`[${p.Name}] ${fname}`);
+                                }
+                            }
+                            
+                            p.printed = myLogs;
+                            updatedCount++;
+                        }
+                    });
+
+                    if (updatedCount > 0) {
+                        // [新增] 產生推播歷程與 5 秒紫色 Toast 通知
+                        let detailText = newFileNames.length > 0 ? newFileNames.join('、') : `有 ${updatedCount} 台印表機的紀錄更新`;
+                        addPushHistory('print', '新增列印紀錄', `最新列印: ${detailText}`);
+                        
+                        let toastMsg = newFileNames.length > 1 
+                            ? `⚡ 新增 ${newFileNames.length} 筆列印紀錄` 
+                            : `⚡ 最新列印: ${detailText}`;
+                        toast(toastMsg, "#8b5cf6", 5000); 
+                        
+                        // 觸發 UI 按鈕的高亮閃爍動畫
+                        flashHighlight.value = true;
+                        setTimeout(() => { flashHighlight.value = false; }, 500);
+
+                        if (showRecordModal.value && selectedPrinter.value) {
+                            const updatedP = printers.value.find(x => x.Name === selectedPrinter.value.Name);
+                            if (updatedP) selectedPrinter.value = updatedP;
+                        }
+                    }
+                };
+
                 watch(currentServerId, (newId) => {
-                    connectionFailed.value = false; // 切換伺服器時重置失敗狀態
+                    connectionFailed.value = false;
                     const srv = servers.value.find(s => s.id === newId);
                     if (srv) { 
                         config.value.ip = srv.ip; config.value.key = srv.key; 
                         localStorage.setItem('ps_last_server_id', newId); 
                         printers.value = []; 
                         fetchPrinters(true); 
+                        initWebSocket();
                         if (autoRefresh.value) startPolling();
                     }
-                    else { config.value.ip = ''; config.value.key = ''; printers.value = []; isLandSystem.value = false; }
+                    else { 
+                        config.value.ip = ''; config.value.key = ''; printers.value = []; isLandSystem.value = false; 
+                        if (ws) ws.close();
+                    }
                 });
                 watch(autoRefresh, (newVal) => { 
                     localStorage.setItem('ps_auto_refresh', newVal); 
@@ -950,7 +1092,6 @@
                         if (res.data.success) {
                             const idx = printers.value.findIndex(p => p.Name === name);
                             if (idx !== -1) {
-                                // [套用過濾邏輯]
                                 const processed = processPrinterData(res.data.data);
                                 printers.value[idx] = processed;
                                 if (showRecordModal.value && selectedPrinter.value?.Name === name) {
@@ -965,10 +1106,7 @@
                 const applyDefaultSortFallback = () => {
                     if (sortBy.value === 'Printed') {
                         const totalPrinted = printers.value.reduce((sum, p) => sum + (p.printed ? p.printed.length : 0), 0);
-                        if (totalPrinted === 0) {
-                            sortBy.value = 'IP';
-                            sortDesc.value = false;
-                        }
+                        if (totalPrinted === 0) { sortBy.value = 'IP'; sortDesc.value = false; }
                     }
                 };
 
@@ -985,25 +1123,19 @@
                                     if (Math.random() > 0.7) {
                                         const s = ['Ready', 'Printing', 'Offline', 'Error', 'Warning'][Math.floor(Math.random()*5)];
                                         p.Status = s; p.Jobs = s==='Printing' ? Math.floor(Math.random()*10) : 0;
-                                        // 測試展示：刻意產生碳粉不足的 Error 狀態來驗證我們的攔截器
-                                        p.ErrorDetails = s==='Error' ? '碳粉不足' : (s==='Warning' ? '碳粉存量低' : '');
+                                        p.ErrorDetails = s==='Error' ? '碳粉不足' : (s==='Warning' ? '無回應' : '');
                                     }
                                     processPrinterData(p);
                                 });
                             }
                             
-                            isLandSystem.value = true; // Demo 模式強制顯示為地政系統，方便預覽
-
+                            isLandSystem.value = true;
                             applyDefaultSortFallback(); 
-
                             lastUpdated.value = new Date().toLocaleString();
                             if (showToast) success("Demo 連線成功");
-                            
-                            // [新增] 成功連線後，自動開啟自動更新功能
                             if (!autoRefresh.value) autoRefresh.value = true;
-
-                            loading.value = false;
-                            connectionFailed.value = false; // 測試模式成功
+                            
+                            loading.value = false; connectionFailed.value = false; 
                             const l = document.getElementById('init-loading'); if(l) { l.classList.add('fade-out'); setTimeout(()=>l.remove(),500); }
                         }, 800);
                         return;
@@ -1011,44 +1143,32 @@
                     try {
                         const res = await axios.get(getApiUrl('/printers'), { headers: { 'X-API-KEY': config.value.key } });
                         if (res.data.success) {
-                            // [套用過濾邏輯] 將每一台印表機送入判斷，若碳粉不足則降級為 Warning
                             printers.value = res.data.data.map(processPrinterData);
-                            connectionFailed.value = false; // 連線成功，解除錯誤狀態
-                            isLandSystem.value = res.data.isLandSystem === true; // 同步後端地政系統旗標
+                            connectionFailed.value = false;
+                            isLandSystem.value = res.data.isLandSystem === true; 
                             
                             applyDefaultSortFallback(); 
 
                             if (printers.value.length > 0 && printers.value[0].LastUpdated) lastUpdated.value = printers.value[0].LastUpdated;
                             if (showToast) success("連線成功");
                             
-                            // [新增] 成功連線後，自動開啟自動更新功能
                             if (!autoRefresh.value) autoRefresh.value = true;
+
+                            if (!ws || ws.readyState !== WebSocket.OPEN) { initWebSocket(); }
 
                             if (showRecordModal.value && selectedPrinter.value) {
                                 const updatedP = printers.value.find(x => x.Name === selectedPrinter.value.Name);
                                 if (updatedP) selectedPrinter.value = updatedP;
                             }
-                        } else { 
-                            connectionFailed.value = true; // 業務邏輯失敗也算連線有問題
-                            error(res.data.message); 
-                        }
-                    } catch (err) { 
-                        connectionFailed.value = true; // 捕捉到 HTTP 錯誤 (如 Timeout / 404 / 斷線)
-                        error("連線失敗"); 
-                        autoRefresh.value = false; // 發生錯誤時停用自動更新，避免無限發送無效請求干擾伺服器
-                    }
+                        } else { connectionFailed.value = true; error(res.data.message); }
+                    } catch (err) { connectionFailed.value = true; error("連線失敗"); autoRefresh.value = false; }
                     finally { 
                         loading.value = false;
                         const l = document.getElementById('init-loading'); if(l) { l.classList.add('fade-out'); setTimeout(()=>l.remove(),500); }
                     }
                 };
 
-                const handleDownload = (e) => {
-                    if (isDemoMode.value) {
-                        e.preventDefault();
-                        toast("Demo 模式無法下載檔案", "#f59e0b");
-                    }
-                };
+                const handleDownload = (e) => { if (isDemoMode.value) { e.preventDefault(); toast("Demo 模式無法下載檔案", "#f59e0b"); } };
 
                 const performAction = async (endpoint, successMsg, targetName = null) => {
                     loading.value = true;
@@ -1077,67 +1197,47 @@
                 const restartSpooler = () => { if(confirm("重啟 Spooler？")) performAction(`/service/restart-spooler`, "服務重啟中"); };
                 const selfHeal = () => { if(confirm("執行深度自癒？")) performAction(`/service/self-heal`, "自癒流程啟動"); };
                 
-                // 高風險操作：封裝重啟與重連機制 (修正超時誤判問題)
                 const executeRestart = async (type, endpoint, confirmMsg, initMessage) => {
                     if (!confirm(confirmMsg)) return;
                     if (isDemoMode.value) return toast("Demo 模式無法執行此操作", "#f59e0b");
 
-                    stopPolling(); // 暫停背景更新，防止與重連測試衝突
+                    stopPolling(); 
+                    if(ws) ws.close(); 
                     restarting.value = { active: true, message: initMessage, attempt: 0, type: type };
                     
-                    try {
-                        // 發送重啟指令 (不強求回應，因為伺服器可能瞬間斷線)
-                        axios.get(getApiUrl(endpoint), { headers: { 'X-API-KEY': config.value.key } }).catch(() => {});
-                    } catch (e) {}
+                    try { axios.get(getApiUrl(endpoint), { headers: { 'X-API-KEY': config.value.key } }).catch(() => {}); } catch (e) {}
 
-                    // 針對不同重啟類型，設定不同的等待時間
-                    // API 重啟較快，伺服器重啟需要較久
-                    const delays = type === 'script' 
-                        ? [6000, 10000, 15000]       // 腳本重啟：6秒、10秒、15秒
-                        : [30000, 60000, 120000];   // 實體伺服器重啟：30秒、60秒、120秒
+                    const delays = type === 'script' ? [6000, 10000, 15000] : [30000, 60000, 120000];   
 
                     for (let i = 0; i < delays.length; i++) {
                         restarting.value.message = `等待伺服器準備中... (${delays[i]/1000} 秒後嘗試第 ${i+1} 次連線)`;
-                        await new Promise(resolve => setTimeout(resolve, delays[i])); // 延遲等待
+                        await new Promise(resolve => setTimeout(resolve, delays[i])); 
                         
                         restarting.value.attempt = i + 1;
                         restarting.value.message = `正在進行第 ${i+1} 次連線測試...`;
                         
                         try {
-                            // 改用輕量級的 API (/server/logs) 探測，避免 /printers WMI 查詢超時
-                            const res = await axios.get(getApiUrl('/server/logs?lines=1'), { 
-                                headers: { 'X-API-KEY': config.value.key },
-                                timeout: 8000 // 探測超時放寬為 8 秒
-                            });
-                            
+                            const res = await axios.get(getApiUrl('/server/logs?lines=1'), { headers: { 'X-API-KEY': config.value.key }, timeout: 8000 });
                             if (res.data) {
                                 restarting.value.message = "連線成功！正在重新載入印表機狀態...";
-                                await fetchPrinters(false); // 確定活著後，再重新取得完整資料 (無 timeout 限制)
+                                await fetchPrinters(false); 
                                 success("系統已重新連線");
-                                if (autoRefresh.value) startPolling(); // 恢復自動更新
+                                initWebSocket(); 
+                                if (autoRefresh.value) startPolling(); 
                                 setTimeout(() => { restarting.value.active = false; }, 1500);
-                                return; // 成功即跳出迴圈
+                                return; 
                             }
-                        } catch (err) {
-                            console.log(`連線測試 ${i+1} 失敗:`, err.message);
-                        }
+                        } catch (err) {}
                     }
-
-                    // 3 次都失敗
                     restarting.value.message = "無法自動重新連線，請確認伺服器狀態或手動重新整理網頁。";
                 };
 
                 const restartScript = () => executeRestart('script', '/server/restart-script', "確定要重啟 API 服務嗎？", "正在發送重啟 API 指令...");
-                
                 const restartServer = () => executeRestart('server', '/server/restart-computer', "警告：這將會重新啟動整台實體伺服器/虛擬機。所有服務將會中斷。確定要繼續嗎？", "正在發送伺服器重啟指令 (將在數秒後中斷連線)...");
 
                 const openEditModal = (p) => { editTarget.value = p; editLocation.value = p.Location||''; editComment.value = p.Comment||''; showEditModal.value = true; };
                 const submitEdit = async () => {
-                    if (isDemoMode.value) {
-                        editTarget.value.Location = editLocation.value;
-                        editTarget.value.Comment = editComment.value;
-                        showEditModal.value = false; success("[Demo] 更新成功"); return;
-                    }
+                    if (isDemoMode.value) { editTarget.value.Location = editLocation.value; editTarget.value.Comment = editComment.value; showEditModal.value = false; success("[Demo] 更新成功"); return; }
                     saving.value = true;
                     try {
                         const url = getApiUrl(`/printer/update?name=${encodeURIComponent(editTarget.value.Name)}&location=${encodeURIComponent(editLocation.value)}&comment=${encodeURIComponent(editComment.value)}`);
@@ -1153,152 +1253,77 @@
                 const submitPdf = async () => {
                     if (!fileInput.value.files[0]) return error("請選擇檔案");
                     uploading.value = true;
-                    
-                    // 開啟派送防護 Modal
                     printDispatching.value = { active: true, message: `正在將檔案傳送至 [${selectedPrinter.value.Name}]，請稍候...` };
-                    
-                    if (isDemoMode.value) {
-                        setTimeout(() => { 
-                            success("[Demo] PDF 已列印"); 
-                            showPdfModal.value = false; 
-                            uploading.value = false; 
-                            printDispatching.value.active = false;
-                        }, 1000);
-                        return;
-                    }
+                    if (isDemoMode.value) { setTimeout(() => { success("[Demo] PDF 已列印"); showPdfModal.value = false; uploading.value = false; printDispatching.value.active = false; }, 1000); return; }
                     try {
                         const url = getApiUrl(`/printer/print-pdf?name=${encodeURIComponent(selectedPrinter.value.Name)}&duplex=${pdfDuplex.value}`);
                         const res = await axios.post(url, fileInput.value.files[0], { headers: { 'X-API-KEY': config.value.key, 'Content-Type': 'application/pdf' } });
                         if (res.data.success) { success("PDF 已傳送"); showPdfModal.value = false; setTimeout(() => fetchSinglePrinter(selectedPrinter.value.Name), 1000); }
                         else error(res.data.message);
-                    } catch(e) { error(e.message); } finally { 
-                        uploading.value = false; 
-                        printDispatching.value.active = false; // 關閉派送防護 Modal
-                    }
+                    } catch(e) { error(e.message); } finally { uploading.value = false; printDispatching.value.active = false; }
                 };
 
                 const openRecordModal = (p) => { selectedPrinter.value = p; showRecordModal.value = true; };
-                
-                const getFileName = (path) => {
-                    if (!path) return "未知檔案";
-                    return path.split(/[\\/]/).pop();
-                };
+                const getFileName = (path) => { if (!path) return "未知檔案"; return path.split(/[\\/]/).pop(); };
 
                 const previewFile = async (path) => {
                     if (isDemoMode.value) return toast("Demo 模式無法預覽伺服器檔案", "#f59e0b");
-                    recordActionLoading.value = true;
-                    toast("向伺服器請求預覽資料...", "#3b82f6");
+                    recordActionLoading.value = true; toast("向伺服器請求預覽資料...", "#3b82f6");
                     try {
                         const url = getApiUrl(`/printer/preview`);
-                        const res = await axios.get(url, {
-                            headers: { 'X-API-KEY': config.value.key },
-                            params: { path: path },
-                            responseType: 'blob' 
-                        });
-                        
+                        const res = await axios.get(url, { headers: { 'X-API-KEY': config.value.key }, params: { path: path }, responseType: 'blob' });
                         if (res.headers['content-type'] && res.headers['content-type'].includes('application/pdf')) {
-                            const blobUrl = URL.createObjectURL(res.data);
-                            previewPdfUrl.value = blobUrl;
-                            previewFileName.value = getFileName(path);
-                            showPreviewModal.value = true;
-                            success("預覽載入完成");
+                            const blobUrl = URL.createObjectURL(res.data); previewPdfUrl.value = blobUrl; previewFileName.value = getFileName(path);
+                            showPreviewModal.value = true; success("預覽載入完成");
                         } else {
                             const text = await res.data.text();
-                            try {
-                                const errObj = JSON.parse(text);
-                                error(errObj.message || "預覽失敗");
-                            } catch {
-                                error("預覽失敗 (資料格式不符)");
-                            }
+                            try { const errObj = JSON.parse(text); error(errObj.message || "預覽失敗"); } catch { error("預覽失敗 (資料格式不符)"); }
                         }
-                    } catch (err) {
-                        error("無法取得預覽，請確認檔案是否存在");
-                    } finally {
-                        recordActionLoading.value = false;
-                    }
+                    } catch (err) { error("無法取得預覽，請確認檔案是否存在"); } finally { recordActionLoading.value = false; }
                 };
 
                 const reprintFile = async (printerName, path) => {
                     if (isDemoMode.value) return toast("Demo 模式無法重印檔案", "#f59e0b");
                     if (!printerName) return error("必須選擇目標印表機才能重印！");
-                    
                     const modeText = reprintDuplex.value === '1' ? '雙面 (長邊翻轉)' : (reprintDuplex.value === '2' ? '雙面 (短邊翻轉)' : '單面');
                     if (!confirm(`確定要將此檔案送至 [${printerName}] 重新列印嗎？\n\n列印模式：${modeText}`)) return;
                     
-                    recordActionLoading.value = true;
-                    
-                    // 開啟派送防護 Modal
-                    printDispatching.value = { active: true, message: `正在將檔案派送至 [${printerName}]，請稍候...` };
-
+                    recordActionLoading.value = true; printDispatching.value = { active: true, message: `正在將檔案派送至 [${printerName}]，請稍候...` };
                     try {
                         const url = getApiUrl(`/printer/re-print`);
-                        const res = await axios.get(url, {
-                            headers: { 'X-API-KEY': config.value.key },
-                            params: { name: printerName, path: path, duplex: reprintDuplex.value } // 加上 duplex 參數
-                        });
-                        if (res.data.success) {
-                            success("已成功發送重印指令");
-                            setTimeout(() => fetchSinglePrinter(printerName), 1000);
-                        } else {
-                            error(res.data.message);
-                        }
-                    } catch (err) {
-                        error("重印請求失敗: " + err.message);
-                    } finally {
-                        recordActionLoading.value = false;
-                        printDispatching.value.active = false; // 關閉派送防護 Modal
-                    }
+                        const res = await axios.get(url, { headers: { 'X-API-KEY': config.value.key }, params: { name: printerName, path: path, duplex: reprintDuplex.value } });
+                        if (res.data.success) { success("已成功發送重印指令"); setTimeout(() => fetchSinglePrinter(printerName), 1000); }
+                        else { error(res.data.message); }
+                    } catch (err) { error("重印請求失敗: " + err.message); } finally { recordActionLoading.value = false; printDispatching.value.active = false; }
                 };
 
-                // 讀取申請單表單 (Apply Forms)
                 const fetchApplyForms = async () => {
                     if (isDemoMode.value) return toast("Demo 模式無法讀取實體目錄", "#f59e0b");
                     if (!isConfigValid.value) return error("請先確保 API 連線設定正確");
-                    
-                    applyFormsLoading.value = true;
-                    showApplyFormsModal.value = true; // 立即開啟視窗讓使用者看到 Loading
+                    applyFormsLoading.value = true; showApplyFormsModal.value = true; 
                     try {
                         const res = await axios.get(getApiUrl('/server/applyforms'), { headers: { 'X-API-KEY': config.value.key } });
-                        if (res.data.success) {
-                            applyFormsData.value = res.data.data;
-                            if (applyFormsData.value.length > 0) success(res.data.message);
-                        } else {
-                            error(res.data.message || "無法取得表單");
-                        }
-                    } catch (err) {
-                        error("API 請求失敗: " + err.message);
-                    } finally {
-                        applyFormsLoading.value = false;
-                    }
+                        if (res.data.success) { applyFormsData.value = res.data.data; if (applyFormsData.value.length > 0) success(res.data.message); }
+                        else { error(res.data.message || "無法取得表單"); }
+                    } catch (err) { error("API 請求失敗: " + err.message); } finally { applyFormsLoading.value = false; }
                 };
 
-                // 過濾申請單表單
                 const filteredApplyForms = computed(() => {
                     if (!applyFormsSearchQuery.value) return applyFormsData.value;
                     const q = applyFormsSearchQuery.value.toLowerCase();
                     return applyFormsData.value.filter(f => {
-                        const fname = (f.name || '').toLowerCase();
-                        const t = (f.time || '').toLowerCase();
-                        return fname.includes(q) || t.includes(q);
+                        const fname = (f.name || '').toLowerCase(); const t = (f.time || '').toLowerCase(); return fname.includes(q) || t.includes(q);
                     });
                 });
 
                 const showLogs = () => { showLogModal.value = true; fetchLogs(); };
                 const fetchLogs = async () => {
                     logsLoading.value = true;
-                    if (isDemoMode.value) {
-                        setTimeout(() => {
-                            logData.value = `[${new Date().toLocaleTimeString()}] >>> [Demo] System Initialized\n[${new Date().toLocaleTimeString()}] >>> [Demo] Monitor Started\n... (Simulation)`;
-                            logsLoading.value = false;
-                        }, 500);
-                        return;
-                    }
+                    if (isDemoMode.value) { setTimeout(() => { logData.value = `[${new Date().toLocaleTimeString()}] >>> [Demo] System Initialized\n[${new Date().toLocaleTimeString()}] >>> [Demo] Monitor Started\n...`; logsLoading.value = false; }, 500); return; }
                     try {
                         const res = await axios.get(getApiUrl('/server/logs?lines=500'), { headers: { 'X-API-KEY': config.value.key } });
-                        if (res.data.success) {
-                            logData.value = Array.isArray(res.data.data) ? res.data.data.join('\n') : res.data.data;
-                            setTimeout(() => { const el = document.getElementById('logContent'); if(el) el.scrollTop = el.scrollHeight; }, 100);
-                        } else logData.value = res.data.message;
+                        if (res.data.success) { logData.value = Array.isArray(res.data.data) ? res.data.data.join('\n') : res.data.data; setTimeout(() => { const el = document.getElementById('logContent'); if(el) el.scrollTop = el.scrollHeight; }, 100); }
+                        else logData.value = res.data.message;
                     } catch(e) { logData.value = e.message; } finally { logsLoading.value = false; }
                 };
 
@@ -1313,26 +1338,18 @@
                     const records = [];
                     printers.value.forEach(p => {
                         if (p.printed && p.printed.length > 0) {
-                            p.printed.forEach(r => {
-                                records.push({ ...r, printerName: p.Name, printerComment: p.Comment });
-                            });
+                            p.printed.forEach(r => { records.push({ ...r, printerName: p.Name, printerComment: p.Comment }); });
                         }
                     });
-                    return records.sort((a, b) => {
-                        const timeA = a.time || '';
-                        const timeB = b.time || '';
-                        return timeB.localeCompare(timeA);
-                    });
+                    return records.sort((a, b) => { const timeA = a.time || ''; const timeB = b.time || ''; return timeB.localeCompare(timeA); });
                 });
 
                 const filteredGlobalRecords = computed(() => {
                     if (!globalRecordSearchQuery.value) return allPrintedRecords.value;
                     const q = globalRecordSearchQuery.value.toLowerCase();
                     return allPrintedRecords.value.filter(r => {
-                        const fname = getFileName(r.path).toLowerCase();
-                        const pname = (r.printerName || '').toLowerCase();
-                        const pcomment = (r.printerComment || '').toLowerCase();
-                        const t = (r.time || '').toLowerCase();
+                        const fname = getFileName(r.path).toLowerCase(); const pname = (r.printerName || '').toLowerCase();
+                        const pcomment = (r.printerComment || '').toLowerCase(); const t = (r.time || '').toLowerCase();
                         return fname.includes(q) || pname.includes(q) || t.includes(q) || pcomment.includes(q);
                     });
                 });
@@ -1340,9 +1357,7 @@
                 const uniqueLocations = computed(() => [...new Set(printers.value.map(p => p.Location).filter(l => l))].sort());
                 const filteredPrinters = computed(() => {
                     return printers.value.filter(p => {
-                        const matchQ = (p.Name || '').toLowerCase().includes(searchQuery.value.toLowerCase()) || 
-                                       (p.IP || '').includes(searchQuery.value) ||
-                                       (p.Comment || '').toLowerCase().includes(searchQuery.value.toLowerCase());
+                        const matchQ = (p.Name || '').toLowerCase().includes(searchQuery.value.toLowerCase()) || (p.IP || '').includes(searchQuery.value) || (p.Comment || '').toLowerCase().includes(searchQuery.value.toLowerCase());
                         let matchS = true;
                         if (filterStatus.value === 'Ready') matchS = p.Status === 'Ready';
                         else if (filterStatus.value === 'ReadyWarning') matchS = p.Status === 'Ready' || p.Status?.includes('Warning');
@@ -1354,17 +1369,8 @@
                     }).sort((a,b) => {
                         let valA = a[sortBy.value]||'', valB = b[sortBy.value]||'';
                         if (sortBy.value === 'Status') {
-                             const getWeight = (s) => {
-                                 s = (s || '').toLowerCase();
-                                 if (s === 'ready') return 50; 
-                                 if (s.includes('printing') || s.includes('warmup')) return 40;
-                                 if (s.includes('warning')) return 30;
-                                 if (s.includes('offline')) return 20;
-                                 if (s.includes('error')) return 10; 
-                                 return 0; 
-                             };
-                             const wA = getWeight(valA);
-                             const wB = getWeight(valB);
+                             const getWeight = (s) => { s = (s || '').toLowerCase(); if (s === 'ready') return 50; if (s.includes('printing') || s.includes('warmup')) return 40; if (s.includes('warning')) return 30; if (s.includes('offline')) return 20; if (s.includes('error')) return 10; return 0; };
+                             const wA = getWeight(valA); const wB = getWeight(valB);
                              if (wA !== wB) return sortDesc.value ? wB - wA : wA - wB; 
                              return (a.Name || '').localeCompare(b.Name || '');
                         }
@@ -1374,8 +1380,7 @@
                         }
                         if(sortBy.value==='Jobs') return sortDesc.value ? valB-valA : valA-valB;
                         if(sortBy.value==='Printed') {
-                             const pA = a.printed ? a.printed.length : 0;
-                             const pB = b.printed ? b.printed.length : 0;
+                             const pA = a.printed ? a.printed.length : 0; const pB = b.printed ? b.printed.length : 0;
                              return sortDesc.value ? pB-pA : pA-pB;
                         }
                         return sortDesc.value ? (valA<valB?1:-1) : (valA>valB?1:-1);
@@ -1392,31 +1397,37 @@
                     return b ? 'bg-amber-500' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400';
                 };
 
-                const toast = (text, bg="#3b82f6") => Toastify({text, duration:3000, gravity:"bottom", position:"right", style:{background:bg, borderRadius:"8px", fontSize:"14px"}}).showToast();
+                // [修改] 讓 Toast 支援自訂顯示時間 (預設維持 3000ms，推播可帶入 5000ms)
+                const toast = (text, bg="#3b82f6", duration=3000) => Toastify({text, duration:duration, gravity:"bottom", position:"right", style:{background:bg, borderRadius:"8px", fontSize:"14px"}}).showToast();
                 const success = (t) => toast(t, "#10b981"); const error = (t) => toast(t, "#ef4444");
 
                 onMounted(() => {
                     loadServers();
-                    applyScale(); // 初始化時套用縮放比例
+                    applyScale(); 
                     const loader = document.getElementById('init-loading');
                     if (loader) { loader.classList.add('fade-out'); setTimeout(() => loader.remove(), 500); }
-                    if (isConfigValid.value) { fetchPrinters(); if (autoRefresh.value) startPolling(); }
+                    if (isConfigValid.value) { 
+                        fetchPrinters(); 
+                        initWebSocket(); // 啟動 WebSocket 接收背景推播
+                        if (autoRefresh.value) startPolling(); 
+                    }
                 });
 
                 return {
                     config, servers, currentServerId, showServerModal, editingServer, printers, loading, lastUpdated, autoRefresh, darkMode, isConfigValid, isDemoMode,
                     searchQuery, filterStatus, filterLocation, uniqueLocations, filteredPrinters, errorCount, sortBy, sortDesc, refreshInterval, validateInterval, countdown,
                     countAll, countReady, countIssue, countError, countWarning, countReadyWarning,
-                    uiScale, changeScale, connectionFailed, showConnectionPrompt, isConnected, // [新增] 匯出 isConnected
-                    isLandSystem, // 匯出地政系統旗標，消除 Vue Warning
+                    uiScale, changeScale, connectionFailed, showConnectionPrompt, isConnected,
+                    isLandSystem, flashHighlight,
+                    pushHistory, showPushHistoryModal, // [新增] 匯出推播歷程變數供 HTML 模板使用
                     allPrintedRecords, showGlobalRecordModal, globalRecordSearchQuery, filteredGlobalRecords,
-                    showApplyFormsModal, applyFormsLoading, applyFormsData, applyFormsSearchQuery, applyFormTargetPrinter, filteredApplyForms, fetchApplyForms, // 導出申請單相關變數
+                    showApplyFormsModal, applyFormsLoading, applyFormsData, applyFormsSearchQuery, applyFormTargetPrinter, filteredApplyForms, fetchApplyForms, 
                     getStatusColor, toggleDarkMode, openServerManager, saveServer, removeServer, useServer, resetEdit, editServer, switchServer,
                     fetchPrinters, fetchSinglePrinter, clearQueue, refreshPrinter, restartSpooler, selfHeal, restartScript, restartServer, 
                     showEditModal, editTarget, editLocation, editComment, saving, openEditModal, submitEdit, 
                     showPdfModal, selectedPrinter, pdfDuplex, uploading, fileInput, openPdfModal, submitPdf,
                     showRecordModal, openRecordModal, recordActionLoading, getFileName, previewFile, reprintFile, sortedSinglePrinterRecords,
-                    reprintDuplex, // 導出雙面設定
+                    reprintDuplex, 
                     showPreviewModal, previewPdfUrl, previewFileName, closePreviewModal,
                     showLogModal, logData, logsLoading, showLogs, fetchLogs, downloadFiles, handleDownload,
                     showAdvancedOps, restarting, reloadPage, printDispatching
