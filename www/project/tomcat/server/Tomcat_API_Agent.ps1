@@ -210,6 +210,52 @@ function Clear-ZombiePort {
     } catch { Write-ApiLog "!!! 清除佔用異常: $($_.Exception.Message)" }
 }
 
+function Send-SysAdminNotify {
+    param(
+        [string]$title, 
+        [string]$content
+    )
+    
+    # 若環境變數設定不啟用通知，則直接跳出
+    if (-not $enableAdminNotifications) { return }
+    
+    try {
+        # 組合完整的通知 API 網址 (包含 IP, Port 與 Endpoint)
+        $url = "http://$notifyIp`:$notifyPort$notifyEndpoint"
+        
+        # 組合 JSON Payload
+        $body = @{
+            "title" = $title
+            "content" = $content
+            "channels" = $notifyChannels
+        }
+        $jsonBody = ConvertTo-SimpleJson $body
+        
+        # 建立 HTTP WebRequest (相容性最佳寫法)
+        $req = [System.Net.WebRequest]::Create($url)
+        $req.Method = "POST"
+        $req.ContentType = "application/json; charset=utf-8"
+        
+        # 設定逾時時間 (避免外部通知伺服器死機導致 Tomcat Agent 被卡住)
+        $req.Timeout = $notifyTimeoutMs
+        
+        # 寫入二進位資料並發送
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($jsonBody)
+        $req.ContentLength = $bytes.Length
+        $stream = $req.GetRequestStream()
+        $stream.Write($bytes, 0, $bytes.Length)
+        $stream.Close()
+        
+        # 接收回應 (在此不需要解析內容，只要沒噴錯就代表發送成功)
+        $res = $req.GetResponse()
+        $res.Close()
+        
+        Write-ApiLog " -> [通知系統] 已成功發送推播: $title" -Color DarkGray
+    } catch {
+        Write-ApiLog "!!! [通知系統] 推播發送失敗: $($_.Exception.Message)" -Color DarkYellow
+    }
+}
+
 function Execute-ScheduledMaintenance {
     Write-ApiLog ">>> [排程任務] 觸發定時維護 (清理快取與重啟服務)..." -Color Cyan
     try {
@@ -307,6 +353,10 @@ while ($listener.IsListening) {
 
         $out = @{ "success"=$false; "message"=""; "data"=$null }
         $handledBinary = $false
+        
+        # ?? 核心修正 1：每次 API 請求都將重啟旗標歸零，避免因錯誤殘留導致無窮迴圈
+        $restartScript = $false
+        $restartComputer = $false
 
         if ($req.Headers["X-API-KEY"] -ne $apiKey) {
             $res.StatusCode = 401; $out.message = "金鑰錯誤"
@@ -483,17 +533,30 @@ while ($listener.IsListening) {
             $res.ContentType = "application/json"; $res.OutputStream.Write($buf, 0, $buf.Length); $res.Close()
         }
 
+        # ?? 核心修正 2：加入 try-catch 保護執行區塊，就算推播失敗也能正常重啟
         if ($restartScript) { 
             Write-ApiLog ">>> 收到 API 指令：Agent 腳本即將重啟..." -Color Yellow
-            if ($enableAdminNotifications) { Send-SysAdminNotify -title "系統操作通知" -content "管理員已透過 API 觸發 Agent 腳本重啟作業。" }
-            Start-Sleep -Seconds 1; try { $listener.Abort() } catch {}; Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""; [System.Environment]::Exit(0) 
+            try {
+                if ($enableAdminNotifications) { Send-SysAdminNotify -title "系統操作通知" -content "管理員已透過 API 觸發 Agent 腳本重啟作業。" }
+                Start-Sleep -Seconds 1
+                try { $listener.Abort() } catch {}
+                Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+                [System.Environment]::Exit(0) 
+            } catch {
+                Write-ApiLog "!!! 執行重啟腳本失敗: $($_.Exception.Message)" -Color Red
+            }
         }
+        
         if ($restartComputer) {
             Write-ApiLog ">>> 伺服器即將關機重啟..." -Color Red
-            try { $listener.Abort() } catch {}
-            if ($enableAdminNotifications) { Send-SysAdminNotify -content "API：收到管理員指令，伺服器即將在 5 秒後重新啟動。" -title "系統操作" }
-            Start-Process "shutdown.exe" -ArgumentList "/r /t 5 /f /d p:4:1"
-            [System.Environment]::Exit(0)
+            try { 
+                try { $listener.Abort() } catch {}
+                if ($enableAdminNotifications) { Send-SysAdminNotify -content "API：收到管理員指令，伺服器即將在 5 秒後重新啟動。" -title "系統操作" }
+                Start-Process "shutdown.exe" -ArgumentList "/r /t 5 /f /d p:4:1"
+                [System.Environment]::Exit(0)
+            } catch {
+                Write-ApiLog "!!! 執行重啟伺服器失敗: $($_.Exception.Message)" -Color Red
+            }
         }
     } catch { $contextTask = $null }
 }
