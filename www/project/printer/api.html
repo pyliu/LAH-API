@@ -3,439 +3,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Print Server API 診斷工具</title>
+    <title>Print Server API 測試面板 (v17.64)</title>
     
-    <!-- [離線模式] 載入本地整合後的資源 -->
+    <!-- 使用與前端主網頁相同的 offline 本地資源 -->
     <link rel="stylesheet" href="offline/bundle.css">
     <script src="offline/tailwind.js"></script>
     <script src="offline/bundle.js"></script>
-
-    <style>
-        [v-cloak] { display: none; }
-        .console-line { font-family: 'Consolas', 'Monaco', monospace; }
-        /* Modal 淡入淡出動畫 */
-        .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
-        .fade-enter-from, .fade-leave-to { opacity: 0; }
-    </style>
 </head>
-<body class="bg-gray-100 text-gray-800 h-screen flex flex-col font-sans">
+<body class="bg-gray-100 text-gray-800 font-sans p-4 md:p-8">
 
-    <div id="app" v-cloak class="flex flex-col h-full relative">
-        
-        <!-- 頂部設定列 -->
-        <header class="bg-white border-b border-gray-200 p-4 shadow-sm z-10">
-            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-2">
-                    <div class="bg-purple-600 text-white p-2 rounded"><i class="fa-solid fa-stethoscope"></i></div>
-                    <h1 class="text-xl font-bold tracking-tight">API 診斷工具 v1.6 (Modal 版)</h1>
-                </div>
-
-                <div class="flex items-center gap-2 bg-gray-50 p-2 rounded border border-gray-200">
-                    <input type="text" v-model="config.ip" placeholder="Server IP" class="p-2 text-sm border rounded w-32 focus:ring-2 focus:ring-purple-500 outline-none">
-                    <input type="text" v-model="config.port" placeholder="Port" class="p-2 text-sm border rounded w-16 focus:ring-2 focus:ring-purple-500 outline-none">
-                    <input type="password" v-model="config.key" placeholder="API Key" class="p-2 text-sm border rounded w-32 focus:ring-2 focus:ring-purple-500 outline-none">
-                    <button @click="initConnection" :disabled="loading" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50">
-                        <i v-if="loading" class="fa-solid fa-spinner fa-spin mr-1"></i> 連線並取得列表
-                    </button>
-                </div>
+<div id="app" class="max-w-6xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col md:flex-row items-center justify-between gap-4 border-l-4 border-blue-500">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800"><i class="fa-solid fa-flask text-blue-500 mr-2"></i>Print Server API 測試面板</h1>
+            <p class="text-sm text-gray-500 mt-1">支援 v17.64 最新端點與 WebSocket 安全認證測試</p>
+        </div>
+        <div class="flex items-center gap-3 w-full md:w-auto">
+            <div class="flex flex-col flex-1">
+                <label class="text-xs font-bold text-gray-500 uppercase">Server IP / Domain</label>
+                <input type="text" v-model="serverIp" class="border border-gray-300 px-3 py-1.5 rounded text-sm w-full focus:ring-2 focus:ring-blue-500 outline-none" placeholder="例如: 127.0.0.1">
             </div>
-        </header>
-
-        <!-- 主內容 -->
-        <main class="flex-1 overflow-hidden flex flex-col md:flex-row max-w-7xl mx-auto w-full p-4 gap-4">
-            
-            <!-- 左側：控制與印表機選擇 -->
-            <aside class="w-full md:w-1/3 flex flex-col gap-4 overflow-y-auto pr-1">
-                
-                <!-- 1. 目標選擇 -->
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex-shrink-0">
-                    <h2 class="font-bold text-gray-700 mb-3 border-b pb-2"><i class="fa-solid fa-bullseye text-red-500 mr-2"></i>測試目標</h2>
-                    
-                    <div v-if="printers.length === 0" class="text-center text-gray-400 py-4">
-                        請先連線以取得印表機列表
-                    </div>
-                    <div v-else class="space-y-3">
-                        <!-- 印表機選擇 -->
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-1">選擇測試用的印表機</label>
-                            <select v-model="selectedPrinter" class="w-full p-2 border rounded bg-gray-50 text-sm focus:ring-2 focus:ring-purple-500 outline-none cursor-pointer">
-                                <option v-for="p in printers" :value="p">{{ p.Name }} ({{ p.Status }})</option>
-                            </select>
-                            <div v-if="selectedPrinter" class="text-xs text-gray-500 space-y-1 bg-gray-50 p-2 rounded mt-2 border border-gray-100">
-                                <p><i class="fa-solid fa-network-wired w-4 text-center"></i> IP: {{ selectedPrinter.IP }}</p>
-                                <p><i class="fa-solid fa-microchip w-4 text-center"></i> Driver: {{ selectedPrinter.Driver }}</p>
-                                <p><i class="fa-regular fa-clock w-4 text-center"></i> Updated: {{ selectedPrinter.LastUpdated }}</p>
-                            </div>
-                        </div>
-
-                        <!-- 動態檔案路徑選擇 (供 Preview 與 Re-print 使用) -->
-                        <div v-if="selectedPrinter">
-                            <label class="block text-xs font-bold text-gray-500 mb-1">選擇要測試的紀錄檔案 (路徑參數)</label>
-                            <div v-if="selectedPrinter.printed && selectedPrinter.printed.length > 0">
-                                <select v-model="selectedFilePath" class="w-full p-2 border rounded bg-blue-50/50 text-xs border-blue-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
-                                    <option value="" disabled>請選擇已列印過的檔案...</option>
-                                    <option v-for="(f, idx) in selectedPrinter.printed" :key="idx" :value="f.path" :title="f.path">
-                                        [{{ f.time }}] {{ getFileName(f.path) }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div v-else class="text-xs text-orange-600 bg-orange-50 p-2 rounded border border-orange-100 flex items-start gap-2">
-                                <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
-                                <span>該印表機今日尚無列印紀錄。包含「預覽 (Preview)」與「重印 (Re-print)」的測試項目將無法執行。</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. 測試項目列表 -->
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex-1">
-                    <div class="flex justify-between items-center mb-3 border-b pb-2">
-                        <h2 class="font-bold text-gray-700"><i class="fa-solid fa-list-check text-blue-500 mr-2"></i>測試項目</h2>
-                        <button v-if="printers.length > 0" @click="runAllTests" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 transition-colors">
-                            <i class="fa-solid fa-play mr-1"></i>批次執行
-                        </button>
-                    </div>
-
-                    <div class="space-y-2">
-                        <div v-for="(test, index) in testCases" :key="index" 
-                             class="flex items-center justify-between p-3 rounded border transition-all"
-                             :class="getTestClass(test.status)">
-                            
-                            <div class="flex items-center gap-3">
-                                <div class="w-6 text-center">
-                                    <i v-if="test.status === 'idle'" class="fa-regular fa-circle text-gray-300"></i>
-                                    <i v-if="test.status === 'running'" class="fa-solid fa-spinner fa-spin text-blue-500"></i>
-                                    <i v-if="test.status === 'success'" class="fa-solid fa-check-circle text-green-500"></i>
-                                    <i v-if="test.status === 'error'" class="fa-solid fa-circle-xmark text-red-500"></i>
-                                </div>
-                                <div>
-                                    <div class="text-sm font-bold flex items-center gap-2">
-                                        {{ test.name }}
-                                        <span v-if="test.isBinary" class="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">PDF 流</span>
-                                    </div>
-                                    <div class="text-xs opacity-70 font-mono">{{ test.endpoint }}</div>
-                                </div>
-                            </div>
-                            
-                            <button @click="runSingleTest(index)" 
-                                    :disabled="loading || (test.requirePrinter && !selectedPrinter) || (test.requirePath && !selectedFilePath)" 
-                                    class="text-gray-400 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                    :title="getRunTitle(test)">
-                                <i class="fa-solid fa-play"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-
-            <!-- 右側：控制台日誌 -->
-            <section class="w-full md:w-2/3 bg-gray-900 rounded-lg shadow-lg flex flex-col overflow-hidden">
-                <div class="bg-gray-800 p-3 flex justify-between items-center border-b border-gray-700">
-                    <span class="text-gray-300 text-sm font-mono"><i class="fa-solid fa-terminal mr-2 text-green-400"></i>Console Output</span>
-                    <button @click="clearLog" class="text-xs text-gray-400 hover:text-white transition-colors bg-gray-700 px-2 py-1 rounded"><i class="fa-solid fa-trash mr-1"></i>Clear</button>
-                </div>
-                <div id="console-box" class="flex-1 overflow-y-auto p-4 space-y-1 font-mono text-xs leading-relaxed">
-                    <div v-if="logs.length === 0" class="text-gray-600 italic">等待執行測試...</div>
-                    <div v-for="(log, i) in logs" :key="i" :class="log.type" class="break-all">
-                        <span class="opacity-50 mr-2 select-none">[{{ log.time }}]</span>
-                        <span v-html="log.msg"></span>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <!-- PDF 預覽 iframe Modal (測試工具用) -->
-        <transition name="fade">
-            <div v-if="showPreviewModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-2 sm:p-6">
-                <div class="bg-white rounded-xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden transition-colors border border-gray-200">
-                    <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                        <h3 class="font-bold text-gray-700 truncate pr-4 flex items-center text-sm sm:text-base">
-                            <i class="fa-solid fa-file-pdf mr-2 text-red-500"></i>
-                            API 預覽測試 - {{ previewFileName }}
-                        </h3>
-                        <div class="flex gap-2 flex-shrink-0">
-                            <a :href="previewPdfUrl" :download="previewFileName" class="text-gray-500 hover:text-blue-600 p-1.5 rounded transition-colors bg-gray-200 hover:bg-gray-300" title="下載檔案">
-                                <i class="fa-solid fa-download"></i>
-                            </a>
-                            <button @click="closePreviewModal" class="text-gray-500 hover:text-red-600 p-1.5 rounded transition-colors bg-gray-200 hover:bg-gray-300" title="關閉預覽">
-                                <i class="fa-solid fa-xmark text-lg leading-none"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex-1 bg-gray-300 w-full relative">
-                        <iframe v-if="previewPdfUrl" :src="previewPdfUrl" class="absolute inset-0 w-full h-full border-0" title="PDF Preview"></iframe>
-                        <div v-else class="absolute inset-0 flex items-center justify-center text-gray-500">
-                            <i class="fa-solid fa-circle-notch fa-spin text-2xl mr-2"></i> 正在載入文件...
-                        </div>
-                    </div>
-                </div>
+            <div class="flex flex-col flex-1">
+                <label class="text-xs font-bold text-gray-500 uppercase">API KEY</label>
+                <input type="password" v-model="apiKey" class="border border-gray-300 px-3 py-1.5 rounded text-sm w-full focus:ring-2 focus:ring-blue-500 outline-none" placeholder="YourSecretApiKey123">
             </div>
-        </transition>
-
+        </div>
     </div>
 
-    <script>
-        const { createApp, ref, reactive, nextTick, watch } = Vue;
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- HTTP API 測試區 -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden flex flex-col h-[700px]">
+            <div class="bg-gray-800 text-white px-4 py-3 font-bold flex justify-between items-center">
+                <span><i class="fa-solid fa-globe mr-2"></i>HTTP API 測試</span>
+            </div>
+            <div class="p-4 space-y-4 overflow-y-auto flex-1">
+                
+                <!-- 端點選擇 -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">選擇測試端點 (Endpoint)</label>
+                    <select v-model="selectedEndpoint" class="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <optgroup label="狀態與監控">
+                            <option value="/printers">GET /printers (取得所有印表機狀態)</option>
+                            <option value="/printer/status">GET /printer/status (單一印表機狀態)</option>
+                        </optgroup>
+                        <optgroup label="操作與列印">
+                            <option value="/printer/refresh">GET /printer/refresh (刷新/喚醒單一設備)</option>
+                            <option value="/printer/clear">GET /printer/clear (清除指定佇列)</option>
+                            <option value="/printer/update">GET /printer/update (更新位置與備註)</option>
+                            <option value="/printer/print-pdf">POST /printer/print-pdf (上傳並列印 PDF)</option>
+                            <option value="/printer/re-print">GET /printer/re-print (伺服器端重印紀錄檔)</option>
+                            <option value="/printer/preview">GET /printer/preview (預覽紀錄檔二進位串流)</option>
+                        </optgroup>
+                        <optgroup label="系統與日誌">
+                            <option value="/server/logs">GET /server/logs (取得 API 日誌)</option>
+                            <option value="/server/applyforms">GET /server/applyforms (取得今日申請書)</option>
+                            <option value="/server/printlog">GET /server/printlog (取得原始 printlog)</option>
+                        </optgroup>
+                        <optgroup label="自癒與重啟">
+                            <option value="/service/self-heal">GET /service/self-heal (深度自癒/清空暫存區)</option>
+                            <option value="/service/restart-spooler">GET /service/restart-spooler (重啟 Spooler)</option>
+                            <option value="/server/restart-script">GET /server/restart-script (重啟 API 腳本)</option>
+                            <option value="/server/restart-computer">GET /server/restart-computer (伺服器重新開機)</option>
+                        </optgroup>
+                    </select>
+                </div>
 
-        createApp({
-            setup() {
-                // 設定
-                const config = reactive({
-                    ip: localStorage.getItem('tester_ip') || '127.0.0.1',
-                    port: localStorage.getItem('tester_port') || '8888',
-                    key: localStorage.getItem('tester_key') || ''
+                <!-- 參數輸入區 (根據端點動態顯示) -->
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 space-y-3">
+                    <h3 class="text-xs font-bold text-blue-800 uppercase mb-2">請求參數 (Query / Body)</h3>
+                    
+                    <div v-if="needsParam('name')">
+                        <label class="block text-xs font-bold text-gray-700">印表機名稱 (name)</label>
+                        <input type="text" v-model="params.name" class="w-full border rounded p-1.5 text-sm" placeholder="例如: Office-Printer">
+                    </div>
+                    
+                    <div v-if="needsParam('path')">
+                        <label class="block text-xs font-bold text-gray-700">檔案絕對路徑 (path)</label>
+                        <input type="text" v-model="params.path" class="w-full border rounded p-1.5 text-sm" placeholder="例如: C:/PDFPrint/test.pdf">
+                    </div>
+
+                    <div v-if="needsParam('duplex')">
+                        <label class="block text-xs font-bold text-gray-700">雙面列印模式 (duplex)</label>
+                        <select v-model="params.duplex" class="w-full border rounded p-1.5 text-sm">
+                            <option value="0">單面 (0)</option>
+                            <option value="1">雙面-長邊翻轉 (1)</option>
+                            <option value="2">雙面-短邊翻轉 (2)</option>
+                        </select>
+                    </div>
+
+                    <div v-if="needsParam('location')">
+                        <label class="block text-xs font-bold text-gray-700">位置 (location)</label>
+                        <input type="text" v-model="params.location" class="w-full border rounded p-1.5 text-sm">
+                    </div>
+
+                    <div v-if="needsParam('comment')">
+                        <label class="block text-xs font-bold text-gray-700">備註 (comment)</label>
+                        <input type="text" v-model="params.comment" class="w-full border rounded p-1.5 text-sm">
+                    </div>
+
+                    <div v-if="needsParam('lines')">
+                        <label class="block text-xs font-bold text-gray-700">行數 (lines)</label>
+                        <input type="number" v-model="params.lines" class="w-full border rounded p-1.5 text-sm" placeholder="預設 100">
+                    </div>
+
+                    <div v-if="selectedEndpoint === '/printer/print-pdf'">
+                        <label class="block text-xs font-bold text-gray-700">選擇 PDF 檔案 (Body)</label>
+                        <input type="file" ref="fileInput" accept=".pdf" class="w-full text-sm">
+                    </div>
+
+                    <div v-if="!hasAnyParam" class="text-sm text-gray-500 italic">此端點不需要任何參數。</div>
+                </div>
+
+                <button @click="sendHttpRequest" :disabled="httpLoading" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 rounded transition-colors disabled:opacity-50">
+                    <i class="fa-solid fa-paper-plane mr-2" :class="{'fa-fade': httpLoading}"></i> 發送 HTTP 請求
+                </button>
+
+                <!-- HTTP 回應區 -->
+                <div class="mt-4 flex flex-col h-64">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-sm font-bold text-gray-700">伺服器回應 (Response)</label>
+                        <span class="text-xs font-mono px-2 py-0.5 rounded" :class="httpStatus === 200 ? 'bg-green-100 text-green-700' : (httpStatus ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-600')">
+                            Status: {{ httpStatus || 'N/A' }}
+                        </span>
+                    </div>
+                    <textarea readonly v-model="httpResponse" class="w-full flex-1 bg-gray-900 text-green-400 font-mono text-xs p-3 rounded outline-none resize-none"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- WebSocket 測試區 -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden flex flex-col h-[700px]">
+            <div class="bg-indigo-800 text-white px-4 py-3 font-bold flex justify-between items-center">
+                <span><i class="fa-solid fa-satellite-dish mr-2"></i>WebSocket 即時推播測試</span>
+                <span class="text-xs px-2 py-0.5 rounded-full" :class="wsConnected ? 'bg-green-500' : 'bg-red-500'">{{ wsConnected ? '已連線' : '未連線' }}</span>
+            </div>
+            
+            <div class="p-4 flex flex-col h-full">
+                <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-lg text-sm text-indigo-800 mb-4">
+                    <strong>連線網址:</strong> ws://{{ serverIp }}:8888/?key=***<br>
+                    <span class="text-xs text-indigo-600 mt-1 block"><i class="fa-solid fa-circle-info mr-1"></i>連線建立後，請嘗試丟一份列印檔案至伺服器，觀察下方的即時封包接收狀況。</span>
+                </div>
+
+                <div class="flex gap-2 mb-4">
+                    <button v-if="!wsConnected" @click="connectWs" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded font-bold transition-colors">
+                        <i class="fa-solid fa-link mr-1"></i> 建立連線
+                    </button>
+                    <button v-else @click="disconnectWs" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded font-bold transition-colors">
+                        <i class="fa-solid fa-link-slash mr-1"></i> 斷開連線
+                    </button>
+                    <button @click="wsLogs = []" class="px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded font-bold transition-colors">清空</button>
+                </div>
+
+                <label class="block text-sm font-bold text-gray-700 mb-1">推播事件接收日誌 (Event Logs)</label>
+                <div class="flex-1 bg-gray-900 rounded p-2 overflow-y-auto font-mono text-xs flex flex-col-reverse">
+                    <div v-if="wsLogs.length === 0" class="text-gray-600 text-center py-10 my-auto">等待推播事件...</div>
+                    <div v-for="(log, idx) in wsLogs" :key="idx" class="mb-2 border-b border-gray-800 pb-2 break-all">
+                        <span class="text-gray-500">[{{ log.time }}]</span>
+                        <span :class="log.type === 'PRINTER_QUEUE_UPDATE' ? 'text-sky-400' : (log.type === 'PRINT_LOG_UPDATE' ? 'text-purple-400' : 'text-yellow-400')">
+                            {{ log.type || 'SYSTEM' }}
+                        </span>
+                        <div class="text-gray-300 mt-1 whitespace-pre-wrap">{{ log.data }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const { createApp, ref, computed, onMounted } = Vue;
+
+    createApp({
+        setup() {
+            const serverIp = ref(localStorage.getItem('test_server_ip') || '127.0.0.1');
+            const apiKey = ref(localStorage.getItem('test_api_key') || 'YourSecretApiKey123');
+            
+            // HTTP API Variables
+            const selectedEndpoint = ref('/printers');
+            const params = ref({ name: '', path: '', duplex: '0', location: '', comment: '', lines: '' });
+            const fileInput = ref(null);
+            const httpLoading = ref(false);
+            const httpResponse = ref('');
+            const httpStatus = ref(null);
+
+            // WebSocket Variables
+            let ws = null;
+            const wsConnected = ref(false);
+            const wsLogs = ref([]);
+
+            const getApiUrl = (path) => `http://${serverIp.value}:8888${path}`;
+
+            const endpointConfig = {
+                '/printers': [],
+                '/printer/status': ['name'],
+                '/printer/refresh': ['name'],
+                '/printer/clear': ['name'],
+                '/printer/update': ['name', 'location', 'comment'],
+                '/printer/print-pdf': ['name', 'duplex'], // POST
+                '/printer/re-print': ['name', 'path', 'duplex'],
+                '/printer/preview': ['path'], // Blob
+                '/server/logs': ['lines'],
+                '/server/applyforms': [],
+                '/server/printlog': [],
+                '/service/self-heal': [],
+                '/service/restart-spooler': [],
+                '/server/restart-script': [],
+                '/server/restart-computer': []
+            };
+
+            const needsParam = (p) => endpointConfig[selectedEndpoint.value]?.includes(p);
+            const hasAnyParam = computed(() => endpointConfig[selectedEndpoint.value]?.length > 0);
+
+            const buildQueryString = () => {
+                const query = new URLSearchParams();
+                endpointConfig[selectedEndpoint.value].forEach(k => {
+                    if (params.value[k]) query.append(k, params.value[k]);
                 });
+                const qStr = query.toString();
+                return qStr ? `?${qStr}` : '';
+            };
 
-                const loading = ref(false);
-                const printers = ref([]);
-                const selectedPrinter = ref(null);
-                const selectedFilePath = ref(""); // 儲存選中的歷史檔案路徑
-                const logs = ref([]);
+            const sendHttpRequest = async () => {
+                localStorage.setItem('test_server_ip', serverIp.value);
+                localStorage.setItem('test_api_key', apiKey.value);
+                
+                httpLoading.value = true;
+                httpResponse.value = '連線中...';
+                httpStatus.value = null;
 
-                // Iframe Modal 控制狀態
-                const showPreviewModal = ref(false);
-                const previewPdfUrl = ref('');
-                const previewFileName = ref('');
+                try {
+                    const url = getApiUrl(selectedEndpoint.value) + buildQueryString();
+                    const headers = { 'X-API-KEY': apiKey.value };
+                    let options = { method: 'GET', headers };
 
-                const closePreviewModal = () => {
-                    showPreviewModal.value = false;
-                    setTimeout(() => {
-                        if (previewPdfUrl.value) {
-                            URL.revokeObjectURL(previewPdfUrl.value);
-                            previewPdfUrl.value = '';
+                    if (selectedEndpoint.value === '/printer/print-pdf') {
+                        options.method = 'POST';
+                        if (!fileInput.value || !fileInput.value.files[0]) {
+                            alert("請選擇 PDF 檔案！"); httpLoading.value = false; return;
                         }
-                    }, 300);
-                };
+                        options.body = fileInput.value.files[0];
+                        headers['Content-Type'] = 'application/pdf';
+                    }
 
-                // 當切換印表機時，自動選取第一個印過的檔案 (如果有)
-                watch(selectedPrinter, (newPrinter) => {
-                    if (newPrinter && newPrinter.printed && newPrinter.printed.length > 0) {
-                        selectedFilePath.value = newPrinter.printed[0].path;
+                    const res = await fetch(url, options);
+                    httpStatus.value = res.status;
+
+                    if (selectedEndpoint.value === '/printer/preview' && res.ok) {
+                        const blob = await res.blob();
+                        httpResponse.value = `[二進位資料] 成功取得 PDF 串流，檔案大小: ${blob.size} bytes。\n\n(瀏覽器無法直接顯示二進位，但代表 API 運作正常)`;
                     } else {
-                        selectedFilePath.value = "";
+                        const text = await res.text();
+                        try {
+                            const json = JSON.parse(text);
+                            httpResponse.value = JSON.stringify(json, null, 2);
+                        } catch {
+                            httpResponse.value = text; // Non-JSON response
+                        }
                     }
+                } catch (err) {
+                    httpStatus.value = 0;
+                    httpResponse.value = `請求失敗: ${err.message}\n\n請確認：\n1. 伺服器 IP 是否正確\n2. Print Server Agent 是否啟動\n3. 防火牆 8888 埠是否開啟`;
+                } finally {
+                    httpLoading.value = false;
+                }
+            };
+
+            // WebSocket Methods
+            const wsLog = (type, data) => {
+                wsLogs.value.unshift({
+                    time: new Date().toLocaleTimeString(),
+                    type: type,
+                    data: typeof data === 'object' ? JSON.stringify(data, null, 2) : data
                 });
+                if (wsLogs.value.length > 50) wsLogs.value.pop();
+            };
 
-                // 測試案例定義
-                const testCases = ref([
-                    { name: '取得印表機列表', endpoint: '/printers', method: 'GET', requirePrinter: false, requirePath: false, status: 'idle' },
-                    { name: '查詢單一狀態', endpoint: '/printer/status', method: 'GET', requirePrinter: true, requirePath: false, status: 'idle' },
-                    { name: '重新整理 (Refresh)', endpoint: '/printer/refresh', method: 'GET', requirePrinter: true, requirePath: false, status: 'idle' },
-                    { name: '預覽列印檔案 (Preview)', endpoint: '/printer/preview', method: 'GET', requirePrinter: false, requirePath: true, isBinary: true, status: 'idle' },
-                    { name: '重新列印紀錄檔案 (Re-print)', endpoint: '/printer/re-print', method: 'GET', requirePrinter: true, requirePath: true, status: 'idle' }, 
-                    { name: '取得目標印表機當日紀錄', endpoint: '/printer/printed', method: 'GET', requirePrinter: true, requirePath: false, status: 'idle' },
-                    { name: '取得伺服器全域列印紀錄', endpoint: '/server/printlog', method: 'GET', requirePrinter: false, requirePath: false, status: 'idle' },
-                    { name: '清除佇列 (Clear)', endpoint: '/printer/clear', method: 'GET', requirePrinter: true, requirePath: false, status: 'idle' },
-                    { name: '更新資訊 (Meta)', endpoint: '/printer/update', method: 'GET', requirePrinter: true, requirePath: false, params: { location: 'Test_Loc', comment: 'Test_Comment' }, status: 'idle' },
-                    { name: '讀取伺服器系統日誌', endpoint: '/server/logs', method: 'GET', requirePrinter: false, requirePath: false, params: { lines: 10 }, status: 'idle' },
-                    { name: '自癒功能測試', endpoint: '/service/self-heal', method: 'GET', requirePrinter: false, requirePath: false, status: 'idle' },
-                    { name: '重啟 Spooler', endpoint: '/service/restart-spooler', method: 'GET', requirePrinter: false, requirePath: false, status: 'idle' },
-                    { name: '重啟電腦 (Restart OS)', endpoint: '/server/restart-computer', method: 'GET', requirePrinter: false, requirePath: false, status: 'idle' }
-                ]);
-
-                // 擷取檔名，讓下拉選單比較好讀
-                const getFileName = (path) => {
-                    if (!path) return "未知檔案";
-                    return path.split(/[\\/]/).pop();
-                };
-
-                const getRunTitle = (test) => {
-                    if (test.requirePrinter && !selectedPrinter.value) return "請先選擇目標印表機";
-                    if (test.requirePath && !selectedFilePath.value) return "該印表機無列印紀錄，無法執行需要路徑的測試";
-                    return "執行此測試";
-                };
-
-                // 儲存設定
-                const saveConfig = () => {
-                    localStorage.setItem('tester_ip', config.ip);
-                    localStorage.setItem('tester_port', config.port);
-                    localStorage.setItem('tester_key', config.key);
-                };
-
-                // 日誌功能
-                const addLog = (msg, type = 'text-gray-300') => {
-                    const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
-                    logs.value.push({ time, msg, type });
-                    nextTick(() => {
-                        const box = document.getElementById('console-box');
-                        if (box) box.scrollTop = box.scrollHeight;
-                    });
-                };
-                const clearLog = () => logs.value = [];
-
-                // 取得 API URL
-                const getUrl = (path) => `http://${config.ip}:${config.port}${path}`;
-
-                // 1. 初始化連線
-                const initConnection = async () => {
-                    saveConfig();
-                    if(!config.ip || !config.key) return alert("請輸入 IP 與 API Key");
+            const connectWs = () => {
+                if (ws) ws.close();
+                wsLogs.value = [];
+                wsLog('SYSTEM', `正在嘗試連線至 ws://${serverIp.value}:8888/...`);
+                
+                try {
+                    ws = new WebSocket(`ws://${serverIp.value}:8888/?key=${encodeURIComponent(apiKey.value)}`);
                     
-                    loading.value = true;
-                    addLog(`Connecting to ${getUrl('/printers')}...`, 'text-blue-400');
+                    ws.onopen = () => {
+                        wsConnected.value = true;
+                        wsLog('SYSTEM', '安全 WebSocket 通道建立成功！');
+                    };
                     
-                    try {
-                        const res = await axios.get(getUrl('/printers'), { headers: { 'X-API-KEY': config.key } });
-                        addLog(`Response: ${JSON.stringify(res.data, null, 2)}`, 'text-green-400');
-                        
-                        if(res.data.success) {
-                            printers.value = res.data.data;
-                            if(printers.value.length > 0) {
-                                selectedPrinter.value = printers.value[0];
-                                addLog(`已載入 ${printers.value.length} 台印表機，預設選取: ${selectedPrinter.value.Name}`, 'text-yellow-400');
-                                testCases.value[0].status = 'success';
-                            } else {
-                                addLog("警告: 伺服器回傳空列表", 'text-orange-400');
-                            }
-                        } else {
-                            addLog(`API Error: ${res.data.message}`, 'text-red-400');
-                            testCases.value[0].status = 'error';
+                    ws.onmessage = (e) => {
+                        try {
+                            const msg = JSON.parse(e.data);
+                            wsLog(msg.type, msg.data);
+                        } catch {
+                            wsLog('UNKNOWN', e.data);
                         }
-                    } catch (err) {
-                        addLog(`Connection Failed: ${err.message}`, 'text-red-500 bg-red-900/20 p-1');
-                        testCases.value[0].status = 'error';
-                    } finally {
-                        loading.value = false;
-                    }
-                };
-
-                // 2. 執行單一測試
-                const runSingleTest = async (index) => {
-                    const test = testCases.value[index];
+                    };
                     
-                    // 防呆：如果是重啟電腦，先確認
-                    if (test.endpoint === '/server/restart-computer') {
-                        if (!confirm("警告：這將會立即重啟遠端伺服器！確定要執行嗎？")) return;
-                    }
-
-                    test.status = 'running';
+                    ws.onclose = (e) => {
+                        wsConnected.value = false;
+                        wsLog('SYSTEM', `連線已斷開 (Code: ${e.code})。如果 Code 為 1006，可能是 API KEY 錯誤被拒絕。`);
+                    };
                     
-                    let url = getUrl(test.endpoint);
-                    let params = test.params ? { ...test.params } : {};
+                    ws.onerror = (e) => {
+                        wsLog('SYSTEM', '連線發生錯誤。');
+                    };
+                } catch (e) {
+                    wsLog('SYSTEM', `初始化失敗: ${e.message}`);
+                }
+            };
 
-                    // 動態附加印表機名稱
-                    if (test.requirePrinter) {
-                        if (!selectedPrinter.value) {
-                            addLog(`Skipping ${test.name}: 未選擇印表機`, 'text-gray-500');
-                            test.status = 'idle';
-                            return;
-                        }
-                        params['name'] = selectedPrinter.value.Name;
-                    }
+            const disconnectWs = () => {
+                if (ws) ws.close();
+            };
 
-                    // 動態附加檔案路徑
-                    if (test.requirePath) {
-                        if (!selectedFilePath.value) {
-                            addLog(`Skipping ${test.name}: 無檔案路徑可供測試`, 'text-red-400');
-                            test.status = 'error';
-                            return;
-                        }
-                        params['path'] = selectedFilePath.value;
-                    }
-
-                    addLog(`> [${test.method}] ${test.endpoint} ${Object.keys(params).length > 0 ? JSON.stringify(params) : ''}`, 'text-cyan-300');
-
-                    try {
-                        // 特殊處理：二進位流 (PDF 預覽)
-                        if (test.isBinary) {
-                            const res = await axios({
-                                method: test.method,
-                                url: url,
-                                headers: { 'X-API-KEY': config.key },
-                                params: params,
-                                responseType: 'blob' // 關鍵：指示 axios 接收二進位資料
-                            });
-
-                            // 檢查是否成功回傳 PDF (透過 Content-Type 判斷)
-                            if (res.headers['content-type'] && res.headers['content-type'].includes('application/pdf')) {
-                                addLog(`< ${res.status} 成功接收二進位流 (大小: ${res.data.size} bytes)`, 'text-green-500 font-bold');
-                                
-                                // 呼叫 Modal 顯示，不再開啟新分頁
-                                const blobUrl = URL.createObjectURL(res.data);
-                                previewPdfUrl.value = blobUrl;
-                                previewFileName.value = getFileName(selectedFilePath.value);
-                                showPreviewModal.value = true;
-                                
-                                addLog(`[Preview] 已在彈出視窗中渲染 PDF。`, 'text-purple-300');
-                                
-                                test.status = 'success';
-                            } else {
-                                // 如果不是 PDF，通常是伺服器回傳了 JSON 格式的錯誤訊息
-                                const textData = await res.data.text();
-                                addLog(`< ${res.status} 請求失敗 (未收到 PDF)`, 'text-red-500');
-                                addLog(textData, 'text-red-300');
-                                test.status = 'error';
-                            }
-                            return;
-                        }
-
-                        // 一般 JSON 處理
-                        const res = await axios({
-                            method: test.method,
-                            url: url,
-                            headers: { 'X-API-KEY': config.key },
-                            params: params
-                        });
-
-                        const isSuccess = res.data && res.data.success;
-                        const color = isSuccess ? 'text-green-300' : 'text-red-300';
-                        
-                        addLog(`< ${res.status} ${res.statusText}`, isSuccess ? 'text-green-500' : 'text-red-500');
-                        addLog(JSON.stringify(res.data, null, 2), color);
-
-                        test.status = isSuccess ? 'success' : 'error';
-                    } catch (err) {
-                        addLog(`Request Error: ${err.message}`, 'text-red-500');
-                        
-                        if (err.response && err.response.data) {
-                            if (err.response.data instanceof Blob) {
-                                // 如果錯誤被封裝在 Blob 中 (因為 isBinary 時設定了 responseType: 'blob')
-                                const textError = await err.response.data.text();
-                                addLog(`Response Error: ${textError}`, 'text-red-400');
-                            } else {
-                                addLog(`Response Data: ${JSON.stringify(err.response.data)}`, 'text-red-400');
-                            }
-                        }
-                        test.status = 'error';
-                    }
-                };
-
-                // 3. 執行所有測試 (循序)
-                const runAllTests = async () => {
-                    if (!selectedPrinter.value) return alert("請先選擇一台測試用的印表機");
-                    if (!confirm("確定要對所選印表機執行一系列測試嗎？\n(注意：破壞性與彈出視窗的操作將被自動跳過)")) return;
-
-                    addLog("--- 開始全自動測試 ---", 'text-white border-t border-gray-600 pt-2 mt-2');
-                    
-                    for (let i = 0; i < testCases.value.length; i++) {
-                        const test = testCases.value[i];
-                        if (i === 0) continue; // 跳過連線讀取列表
-                        if (test.endpoint.includes('restart') || test.endpoint.includes('clear')) continue; // 跳過破壞性操作
-                        if (test.isBinary) continue; // 跳過預覽，避免彈出一堆 Modal
-                        
-                        await runSingleTest(i);
-                        await new Promise(r => setTimeout(r, 600)); // 延遲讓視覺更順暢
-                    }
-                    
-                    addLog("--- 測試結束 ---", 'text-white border-b border-gray-600 pb-2 mb-2');
-                };
-
-                const getTestClass = (status) => {
-                    switch(status) {
-                        case 'success': return 'bg-green-50 border-green-200';
-                        case 'error': return 'bg-red-50 border-red-200';
-                        case 'running': return 'bg-blue-50 border-blue-200 animate-pulse';
-                        default: return 'bg-white hover:bg-gray-50';
-                    }
-                };
-
-                return {
-                    config, loading, printers, selectedPrinter, selectedFilePath, logs, testCases,
-                    showPreviewModal, previewPdfUrl, previewFileName, closePreviewModal, // 導出變數
-                    initConnection, runSingleTest, runAllTests, clearLog, getTestClass, getFileName, getRunTitle
-                };
-            }
-        }).mount('#app');
-    </script>
+            return {
+                serverIp, apiKey, selectedEndpoint, params, fileInput,
+                needsParam, hasAnyParam, sendHttpRequest, httpLoading, httpResponse, httpStatus,
+                wsConnected, wsLogs, connectWs, disconnectWs
+            };
+        }
+    }).mount('#app');
+</script>
 </body>
 </html>

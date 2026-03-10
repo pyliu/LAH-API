@@ -73,14 +73,14 @@
                         <div class="flex items-center gap-2">
                             <h1 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight flex items-center gap-2">
                                 Print Server Monitor
-                                <!-- 顯示當前監控的伺服器名稱 -->
+                                <!-- 顯示目前監控標的名稱徽章 -->
                                 <span v-if="currentServerName" class="text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-800 flex items-center shadow-sm">
                                     <i class="fa-solid fa-desktop mr-1.5 text-[0.625rem]"></i>{{ currentServerName }}
                                 </span>
                             </h1>
                             <span v-if="isDemoMode" class="bg-red-500 text-white text-[0.625rem] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-sm">DEMO MODE</span>
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v4.12 (WebSocket 即時推播版)</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v4.15 (WebSocket 安全推播版)</p>
                     </div>
                 </div>
 
@@ -247,7 +247,7 @@
                             <span class="absolute right-3 top-3 text-slate-400 pointer-events-none"><i class="fa-solid fa-chevron-down text-xs"></i></span>
                         </div>
                         <div class="flex items-center gap-1 w-full sm:w-auto">
-                            <div class="relative flex-1 sm:w-40">
+                            <div class="relative flex-1 sm:w-48">
                                 <span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-arrow-down-short-wide"></i></span>
                                 <select v-model="sortBy" class="w-full pl-9 pr-8 py-2 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors appearance-none cursor-pointer text-sm">
                                     <option value="IP">IP 位址</option>
@@ -443,7 +443,7 @@
             </div>
         </transition>
 
-        <!-- 4. 單一印表機 列印紀錄 Modal -->
+        <!-- 4. 單一印表機 列印紀錄 (Records) Modal -->
         <transition name="fade">
             <div v-if="showRecordModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden transition-colors flex flex-col max-h-[85vh]">
@@ -675,37 +675,37 @@
             </div>
         </transition>
 
-        <!-- 即時推播歷程 Modal -->
+        <!-- 即時推播歷程看板 Modal (New) -->
         <transition name="fade">
             <div v-if="showPushHistoryModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden transition-colors flex flex-col max-h-[85vh]">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[85vh] transition-colors border border-slate-200 dark:border-slate-700">
                     <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
-                        <h3 class="font-bold text-slate-700 dark:text-slate-200 truncate pr-4">
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center">
                             <i class="fa-solid fa-satellite-dish mr-2 text-indigo-500"></i>即時推播歷程 (最近 50 筆)
                         </h3>
-                        <div class="flex items-center gap-3">
-                            <button @click="pushHistory = []" v-if="pushHistory.length > 0" class="text-sm text-slate-500 hover:text-red-500 transition-colors mr-2">
+                        <div class="flex gap-4 items-center">
+                            <button v-if="pushHistory.length > 0" @click="pushHistory = []" class="text-sm text-slate-500 hover:text-red-500 transition-colors flex items-center">
                                 <i class="fa-solid fa-trash-can mr-1"></i>清空
                             </button>
-                            <button @click="showPushHistoryModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors flex-shrink-0">
+                            <button @click="showPushHistoryModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
                                 <i class="fa-solid fa-xmark text-xl"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="overflow-y-auto p-4 sm:p-6 space-y-3 bg-slate-50 dark:bg-slate-900/50 flex-1">
-                        <div v-if="pushHistory.length === 0" class="text-center text-slate-500 py-10">
+                    <div class="overflow-y-auto p-4 sm:p-6 space-y-3 flex-1 bg-slate-50 dark:bg-slate-900/50">
+                        <div v-if="pushHistory.length === 0" class="text-center text-slate-400 py-10">
                             <i class="fa-solid fa-wind text-4xl mb-3 text-slate-300 dark:text-slate-600"></i>
                             <p>目前尚無任何推播紀錄</p>
                         </div>
-                        <div v-else v-for="item in pushHistory" :key="item.id" class="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-3 transition-colors hover:border-indigo-300 dark:hover:border-indigo-700">
+                        <div v-else v-for="item in pushHistory" :key="item.id" class="bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-3 transition-colors hover:border-indigo-300 dark:hover:border-indigo-700">
                             <div class="mt-1 flex-shrink-0">
                                 <i v-if="item.type === 'print'" class="fa-solid fa-file-pdf text-purple-500 text-lg"></i>
                                 <i v-else-if="item.type === 'queue'" class="fa-solid fa-layer-group text-sky-500 text-lg"></i>
                             </div>
                             <div class="flex-1 overflow-hidden">
-                                <div class="flex items-center justify-between mb-1">
+                                <div class="flex justify-between items-center mb-1">
                                     <span class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ item.title }}</span>
-                                    <span class="text-xs text-slate-400 font-mono"><i class="fa-regular fa-clock mr-1"></i>{{ item.time }}</span>
+                                    <span class="text-xs text-slate-400 font-mono"><i class="fa-regular fa-clock mr-1"></i> {{ item.time }}</span>
                                 </div>
                                 <div class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{{ item.detail }}</div>
                             </div>
@@ -747,7 +747,7 @@
         <!-- 10. 派送列印中防護 Modal -->
         <transition name="fade">
             <div v-if="printDispatching.active" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4 transition-all">
-                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-sm w-full text-center border border-slate-200 dark:border-slate-700 flex flex-col items-center">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center border border-slate-200 dark:border-slate-700 flex flex-col items-center">
                     <i class="fa-solid fa-print fa-bounce text-5xl text-blue-500 mb-6 mt-2"></i>
                     <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-3">正在派送列印</h2>
                     <p class="text-sm font-medium text-slate-600 dark:text-slate-400">{{ printDispatching.message }}</p>
@@ -780,7 +780,7 @@
                 const isLandSystem = ref(false);
                 const uiScale = ref(parseInt(localStorage.getItem('ps_ui_scale')) || 100);
                 const connectionFailed = ref(false);
-                const flashHighlight = ref(false); // 控制新紀錄推播時的動畫特效
+                const flashHighlight = ref(false);
 
                 // 推播歷程紀錄邏輯
                 const pushHistory = ref([]);
@@ -788,10 +788,10 @@
                 const addPushHistory = (type, title, detail) => {
                     const time = new Date().toLocaleTimeString();
                     pushHistory.value.unshift({ id: Date.now() + Math.random(), time, type, title, detail });
-                    if (pushHistory.value.length > 50) pushHistory.value.pop(); // 保持最多 50 筆
+                    if (pushHistory.value.length > 50) pushHistory.value.pop();
                 };
 
-                // WebSocket 相關變數
+                // WebSocket 變數
                 let ws = null;
                 let wsReconnectTimer = null;
 
@@ -812,7 +812,7 @@
                 const filterStatus = ref('');
                 const filterLocation = ref('');
                 
-                // 預設排序改為 Jobs (佇列數)，並搭配 sortDesc = true (降冪 DESC)
+                // 預設排序：佇列數 DESC
                 const sortBy = ref('Jobs');
                 const sortDesc = ref(true);
                 
@@ -921,28 +921,27 @@
                 const showConnectionPrompt = computed(() => !isConfigValid.value || connectionFailed.value);
                 const isConnected = computed(() => isConfigValid.value && !connectionFailed.value && lastUpdated.value !== '');
 
-                // 計算並回傳當前選擇的伺服器名稱
                 const currentServerName = computed(() => {
                     if (isDemoMode.value) return 'Demo 伺服器';
                     const srv = servers.value.find(s => s.id === currentServerId.value);
                     return srv ? srv.name : '';
                 });
 
-                // 初始化 WebSocket (主動推播接收引擎)
+                // WebSocket 認證與推播處理
                 const initWebSocket = () => {
-                    if (isDemoMode.value || !config.value.ip) return;
+                    if (isDemoMode.value || !config.value.ip || !config.value.key) return;
                     
                     if (ws) {
                         ws.onclose = null; 
                         ws.close();
                     }
 
-                    const wsUrl = `ws://${config.value.ip}:8888/`;
+                    const wsUrl = `ws://${config.value.ip}:8888/?key=${encodeURIComponent(config.value.key)}`;
                     try {
                         ws = new WebSocket(wsUrl);
 
                         ws.onopen = () => {
-                            console.log('>>> [WebSocket] 雙向通道建立成功，等待背景推播...');
+                            console.log('>>> [WebSocket] 雙向通道建立成功 (已認證)');
                             if (wsReconnectTimer) clearInterval(wsReconnectTimer);
                         };
 
@@ -952,11 +951,9 @@
                                 if (msg.type === 'PRINT_LOG_UPDATE') {
                                     updateRecordsFromLogs(msg.data);
                                 } 
-                                // 接收並處理即時佇列數推播
                                 else if (msg.type === 'PRINTER_QUEUE_UPDATE') {
                                     if (!msg.data) return;
                                     
-                                    // 解析並比對哪些佇列發生了變動
                                     let queueChanges = [];
                                     msg.data.forEach(qInfo => {
                                         const target = printers.value.find(p => p.Name === qInfo.Name);
@@ -966,12 +963,10 @@
                                         }
                                     });
                                     
-                                    // 發現變動時，加入歷程並顯示 5 秒 Toast 通知
                                     if (queueChanges.length > 0) {
                                         let detailText = queueChanges.join('、');
                                         addPushHistory('queue', '佇列數量更新', `變動細節: ${detailText}`);
                                         
-                                        // 畫面 Toast 通知 (藍色，顯示 5 秒)
                                         let toastMsg = queueChanges.length > 2 
                                             ? `📡 佇列變動: ${queueChanges.length} 台設備數量已更新` 
                                             : `📡 佇列變動: ${detailText}`;
@@ -990,32 +985,28 @@
                     } catch (e) {}
                 };
 
-                // 將收到的快取資料覆蓋進 Vue 記憶體，引發局部刷新
                 const updateRecordsFromLogs = (newLogs) => {
                     let updatedCount = 0;
-                    let newFileNames = []; // 用來蒐集新列印出來的檔名
+                    let newFileNames = [];
 
                     printers.value.forEach(p => {
                         const myLogs = newLogs.filter(log => log.printer === p.Name);
                         if (!p.printed) p.printed = [];
                         
                         if (p.printed.length !== myLogs.length) {
-                            // 比對差異，抓出這批推播中「最新增加」的檔案名稱
                             if (myLogs.length > p.printed.length) {
-                                const latestLog = myLogs[myLogs.length - 1]; // 取出最後一筆
+                                const latestLog = myLogs[myLogs.length - 1];
                                 if (latestLog && latestLog.path) {
                                     const fname = latestLog.path.split(/[\\/]/).pop();
                                     newFileNames.push(`[${p.Name}] ${fname}`);
                                 }
                             }
-                            
                             p.printed = myLogs;
                             updatedCount++;
                         }
                     });
 
                     if (updatedCount > 0) {
-                        // 產生推播歷程與 5 秒紫色 Toast 通知
                         let detailText = newFileNames.length > 0 ? newFileNames.join('、') : `有 ${updatedCount} 台印表機的紀錄更新`;
                         addPushHistory('print', '新增列印紀錄', `最新列印: ${detailText}`);
                         
@@ -1024,7 +1015,6 @@
                             : `⚡ 最新列印: ${detailText}`;
                         toast(toastMsg, "#8b5cf6", 5000); 
                         
-                        // 觸發 UI 按鈕的高亮閃爍動畫
                         flashHighlight.value = true;
                         setTimeout(() => { flashHighlight.value = false; }, 500);
 
@@ -1320,7 +1310,7 @@
                         const res = await axios.get(getApiUrl('/server/applyforms'), { headers: { 'X-API-KEY': config.value.key } });
                         if (res.data.success) { 
                             applyFormsData.value = res.data.data; 
-                            if (applyFormsData.value.length > 0) success(res.data.message || `成功取得 ${applyFormsData.value.length} 筆表單資料`); 
+                            success(res.data.message || `成功取得 ${applyFormsData.value.length} 筆今日表單`); 
                         }
                         else { error(res.data.message || "無法取得表單"); }
                     } catch (err) { error("API 請求失敗: " + err.message); } finally { applyFormsLoading.value = false; }
@@ -1425,7 +1415,7 @@
                     if (loader) { loader.classList.add('fade-out'); setTimeout(() => loader.remove(), 500); }
                     if (isConfigValid.value) { 
                         fetchPrinters(); 
-                        initWebSocket(); // 啟動 WebSocket 接收背景推播
+                        initWebSocket(); 
                         if (autoRefresh.value) startPolling(); 
                     }
                 });
@@ -1434,7 +1424,7 @@
                     config, servers, currentServerId, showServerModal, editingServer, printers, loading, lastUpdated, autoRefresh, darkMode, isConfigValid, isDemoMode,
                     searchQuery, filterStatus, filterLocation, uniqueLocations, filteredPrinters, errorCount, sortBy, sortDesc, refreshInterval, validateInterval, countdown,
                     countAll, countReady, countIssue, countError, countWarning, countReadyWarning,
-                    uiScale, changeScale, connectionFailed, showConnectionPrompt, isConnected, currentServerName, 
+                    uiScale, changeScale, connectionFailed, showConnectionPrompt, isConnected, currentServerName,
                     isLandSystem, flashHighlight,
                     pushHistory, showPushHistoryModal,
                     allPrintedRecords, showGlobalRecordModal, globalRecordSearchQuery, filteredGlobalRecords,
