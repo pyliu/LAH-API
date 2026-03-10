@@ -1,13 +1,14 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v17.57 (完整註解保留與 SumatraPDF 雙面引擎整合版)
+    版本：v17.58 (FileSystemWatcher 即時事件驅動版)
     
     修正紀錄：
-    1. [雙面列印突破] 針對 HP 等不支援 Set-PrintConfiguration 的頑固驅動，引入 SumatraPDF 參數化列印機制。
-    2. [效能優化] 當使用 SumatraPDF 時，自動豁免 5 秒的 Race Condition 緩衝等待，大幅提升派送速度。
-    3. [向下相容] 即使未安裝 SumatraPDF，依然保留 Foxit/Acrobat 的基礎列印與報錯捕捉機制。
-    4. [註解修復] 永久保留完整系統架構與自癒機制說明，方便後續維護作業。
+    1. [效能革命] 導入 FileSystemWatcher 監控 C:\printlog，捨棄傳統 API 輪詢讀檔，改為背景即時更新快取。
+    2. [安全機制] 使用 Dirty Flag Pattern 避免執行緒衝突與檔案鎖定 (File in use) 錯誤。
+    3. [雙面列印突破] 針對 HP 等不支援 Set-PrintConfiguration 的頑固驅動，引入 SumatraPDF 參數化列印機制。
+    4. [防卡死優化] 啟動時自動解除 SumatraPDF 的網際網路安全封鎖 (Unblock-File)。
+    5. [註解修復] 永久保留完整系統架構與自癒機制說明，方便後續維護作業。
 
 .DESCRIPTION
     本腳本具備多層次自我檢查與自動修復機制 (Self-Healing & Resilience)：
@@ -89,7 +90,7 @@ $logRetentionDays   = Get-EnvInt "LOG_RETENTION_DAYS" 7
 
 $printLogFilePath   = Get-EnvString "PRINT_LOG_FILE_PATH" "C:\printlog"
 
-# [新增] SumatraPDF 為最優先順序，它是唯一能完美支援 CLI 雙面的軟體
+# SumatraPDF 為最優先順序，它是唯一能完美支援 CLI 雙面的軟體
 $defaultPdfReaders  = @(
     "C:\Temp\SumatraPDF.exe",
     "C:\Program Files\SumatraPDF\SumatraPDF.exe",
@@ -149,9 +150,10 @@ $global:IsNotifyServerOnline = $true
 $restartScript = $false
 $restartComputer = $false
 
-# --- 列印紀錄快取變數 ---
+# --- 列印紀錄快取變數 (配合 FileSystemWatcher 使用) ---
 $global:PrintLogCache = @()
 $global:PrintLogLastWriteTime = [DateTime]::MinValue
+$global:PrintLogDirty = $true # 初始設為髒，強制第一次載入
 
 # -------------------------------------------------------------------------
 # 2. 核心函數庫
@@ -242,6 +244,7 @@ function Rotate-PrintLog {
         
         $global:PrintLogCache = @()
         $global:PrintLogLastWriteTime = [DateTime]::MinValue
+        $global:PrintLogDirty = $true
     } catch {
         Write-ApiLog "!!! [系統維護] 備份 printlog 失敗: $($_.Exception.Message)" -Color Red
     }
@@ -333,84 +336,89 @@ function Get-Utf8QueryParam {
 function Resolve-VirtualPath {
     param([string]$rawPath)
     if ([string]::IsNullOrEmpty($rawPath)) { return $null }
-    
-    # 1. 統一將正斜線轉換為 Windows 標準反斜線
     $path = $rawPath.Replace("/", "\")
-    
-    # 2. 如果啟用對應，且路徑以指定的磁碟機代號開頭 (不分大小寫)，則替換為 UNC 路徑
     if ($enableDriveMapping -and $path -match "^(?i)$([regex]::Escape($mappedDriveLetter))\\?(.*)$") {
         $path = Join-Path $mappedDriveUncPath $matches[1]
     }
-    
     return $path
 }
 
-# --- 解析當日列印紀錄函數 (超級效能逐行讀取版) ---
-function Get-PrintLogs {
+# -------------------------------------------------------------------------
+# [新增核心] 獨立的快取更新函數 (給 FileSystemWatcher 使用)
+# -------------------------------------------------------------------------
+function Update-PrintLogCache {
     if (-not (Test-Path $printLogFilePath -PathType Leaf)) {
-        return @() # 找不到紀錄檔時回傳空陣列，不再拋出例外錯誤
+        $global:PrintLogCache = @()
+        return
     }
+    
+    $fs = $null; $sr = $null
+    try {
+        $currentFileInfo = Get-Item $printLogFilePath -ErrorAction Stop
+        $currentWriteTime = $currentFileInfo.LastWriteTime
+        
+        # 避免秒級內重複解析
+        if ($currentWriteTime -eq $global:PrintLogLastWriteTime) { return }
 
-    $currentFileInfo = Get-Item $printLogFilePath -ErrorAction Stop
-    $currentWriteTime = $currentFileInfo.LastWriteTime
-
-    if ($global:PrintLogCache -eq $null -or $global:PrintLogCache.Length -eq 0 -or $currentWriteTime -gt $global:PrintLogLastWriteTime) {
-        Write-ApiLog ">>> [Cache] 紀錄檔已更新或無快取，開始重新解析..." -Color Cyan
+        Write-ApiLog ">>> [Cache] 偵測到列印紀錄變動，執行背景即時解析..." -Color Cyan
         
         $results = New-Object System.Collections.ArrayList
-        
         $enUS = New-Object System.Globalization.CultureInfo("en-US")
         $now = Get-Date
-        $todayMonthStr  = $now.ToString("MMM", $enUS) # "Mar"
-        $todayDay       = $now.Day                    # 3
-        $todayYearStr   = $now.ToString("yyyy")       # "2026"
+        $todayMonthStr  = $now.ToString("MMM", $enUS)
+        $todayDay       = $now.Day
+        $todayYearStr   = $now.ToString("yyyy")
         $todayFormatted = $now.ToString("yyyy-MM-dd")
 
-        $fs = $null
-        $sr = $null
-
-        try {
-            $fs = New-Object System.IO.FileStream($printLogFilePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
-            $sr = New-Object System.IO.StreamReader($fs, [System.Text.Encoding]::Default)
-            
-            while (-not $sr.EndOfStream) {
-                $line = $sr.ReadLine()
-                if ($line -match "([a-zA-Z]{3}\s+[a-zA-Z]{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+.+?\d{4})") {
-                    $timeStr = $matches[1]
-                    if ($timeStr -match "$todayMonthStr\s+0?$todayDay\b" -and $timeStr -match "$todayYearStr$") {
-                        $time = ""
-                        if ($timeStr -match "(\d{2}:\d{2}:\d{2})") { $time = $matches[1] }
-                        
-                        if (-not $sr.EndOfStream) {
-                            $dataLine = $sr.ReadLine()
-                            if ($dataLine -match '(?i)"([^"]+\.pdf)"\s+"([^"]+)"') {
-                                $obj = New-Object PSObject
-                                $obj | Add-Member NoteProperty date $todayFormatted
-                                $obj | Add-Member NoteProperty time $time
-                                $obj | Add-Member NoteProperty path $matches[1]
-                                $obj | Add-Member NoteProperty printer $matches[2]
-                                [void]$results.Add($obj)
-                            }
+        $fs = New-Object System.IO.FileStream($printLogFilePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+        $sr = New-Object System.IO.StreamReader($fs, [System.Text.Encoding]::Default)
+        
+        while (-not $sr.EndOfStream) {
+            $line = $sr.ReadLine()
+            if ($line -match "([a-zA-Z]{3}\s+[a-zA-Z]{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+.+?\d{4})") {
+                $timeStr = $matches[1]
+                if ($timeStr -match "$todayMonthStr\s+0?$todayDay\b" -and $timeStr -match "$todayYearStr$") {
+                    $time = ""
+                    if ($timeStr -match "(\d{2}:\d{2}:\d{2})") { $time = $matches[1] }
+                    
+                    if (-not $sr.EndOfStream) {
+                        $dataLine = $sr.ReadLine()
+                        if ($dataLine -match '(?i)"([^"]+\.pdf)"\s+"([^"]+)"') {
+                            $obj = New-Object PSObject
+                            $obj | Add-Member NoteProperty date $todayFormatted
+                            $obj | Add-Member NoteProperty time $time
+                            $obj | Add-Member NoteProperty path $matches[1]
+                            $obj | Add-Member NoteProperty printer $matches[2]
+                            [void]$results.Add($obj)
                         }
                     }
                 }
             }
-        } catch {
-            Write-ApiLog "!!! [Error] 讀取 printlog 失敗: $($_.Exception.Message)" -Color Red
-        } finally {
-            if ($null -ne $sr) { $sr.Close(); $sr.Dispose() }
-            if ($null -ne $fs) { $fs.Close(); $fs.Dispose() }
         }
-        
         $global:PrintLogCache = $results.ToArray()
         $global:PrintLogLastWriteTime = $currentWriteTime
         Write-ApiLog ">>> [Cache] 解析完成，已快取 $($global:PrintLogCache.Length) 筆當日紀錄。" -Color Green
+
+    } catch {
+        # 捕捉到 IOException (通常是檔案正在被外部程式寫入/鎖定中)
+        # 此處安靜處理，並讓 Dirty 標籤保留為 true，等下一次 while 迴圈自動重試
+        Write-ApiLog "!!! [Cache] 即時讀取 printlog 遇到鎖定或錯誤 (稍後自動重試): $($_.Exception.Message)" -Color Yellow
+        $global:PrintLogDirty = $true 
+    } finally {
+        if ($null -ne $sr) { $sr.Close(); $sr.Dispose() }
+        if ($null -ne $fs) { $fs.Close(); $fs.Dispose() }
     }
-    
+}
+
+# --- 修改版：純粹返回快取的 Getter (完全與硬碟脫鉤，唯讀記憶體 RAM) ---
+function Get-PrintLogs {
+    if ($null -eq $global:PrintLogCache) {
+        return @()
+    }
     return $global:PrintLogCache
 }
 
-# --- 獲取所有印表機狀態 (包含附掛當日列印紀錄) ---
+# --- 獲取所有印表機狀態 ---
 function Get-PrinterStatusData {
     $results = New-Object System.Collections.Generic.List[Object]
     $portMap = @{}
@@ -419,7 +427,7 @@ function Get-PrinterStatusData {
     $logsByPrinter = @{}
     try {
         if (Test-Path $printLogFilePath -PathType Leaf) {
-            $allLogs = @(Get-PrintLogs)
+            $allLogs = @(Get-PrintLogs) # 現在瞬間返回記憶體快取
             foreach ($log in $allLogs) {
                 if (-not $logsByPrinter.ContainsKey($log.printer)) {
                     $logsByPrinter[$log.printer] = New-Object System.Collections.ArrayList
@@ -545,23 +553,21 @@ function Test-PrinterHealth {
 # 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Print Server API & Monitor v17.57 " -Color Cyan
+Write-ApiLog " Print Server API & Monitor v17.58 " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 # A. 防火牆設定
 Setup-FirewallRule $port
 
-# B. PDF 閱讀器偵測
+# B. PDF 閱讀器偵測 (包含 MotW 安全性警告解除)
 foreach ($path in $pdfReaderPaths) { if (Test-Path $path) { $global:ValidPdfReader = $path; break } }
 if ($global:ValidPdfReader) { 
     Write-ApiLog "PDF Reader: OK ($global:ValidPdfReader)" -Color Green 
-    
-    # [新增] 自動解除網際網路下載檔案的安全性封鎖 (移除 Mark of the Web)，防止背景列印被安全警告卡死
     try { Unblock-File -Path $global:ValidPdfReader -ErrorAction SilentlyContinue } catch {}
 }
 else { Write-ApiLog "PDF Reader: Not Found (Fallback to Shell)" -Color Yellow }
 
-# 判斷是否為 SumatraPDF (攸關雙面列印機制的切換)
+# 判斷是否為 SumatraPDF
 $global:IsSumatraPDF = ($global:ValidPdfReader -match "SumatraPDF")
 if ($global:IsSumatraPDF) { Write-ApiLog ">>> [系統] 偵測到 SumatraPDF，已啟用高階 CLI 雙面列印引擎！" -Color Magenta }
 
@@ -571,7 +577,7 @@ if ($enableNotifyHealthCheck) {
     else { $global:IsNotifyServerOnline = $false; Write-ApiLog "Notify Server: Offline (Notifications Disabled)" -Color Red }
 }
 
-# 網路芳鄰預先認證 (解決 UNC 權限存取拒絕問題)
+# D. 網路芳鄰預先認證 (解決 UNC 權限存取拒絕問題)
 if ($enableDriveMapping -and -not [string]::IsNullOrEmpty($networkUsername)) {
     Write-ApiLog "正在建立 UNC 網路路徑認證 ($mappedDriveUncPath)..." -Color Yellow
     try { net use "$mappedDriveUncPath" /delete /y 2>&1 | Out-Null } catch {}
@@ -584,7 +590,32 @@ if ($enableDriveMapping -and -not [string]::IsNullOrEmpty($networkUsername)) {
     }
 }
 
-# D. 啟動 Web Server (含重試機制)
+# E. 啟動 FileSystemWatcher (事件驅動監控)
+try {
+    # 清除重啟前遺留的監聽器避免記憶體洩漏
+    Get-EventSubscriber | Where-Object SourceIdentifier -like "PrintLog*" | Unregister-Event -ErrorAction SilentlyContinue
+    
+    if (Test-Path (Split-Path $printLogFilePath)) {
+        $watcher = New-Object System.IO.FileSystemWatcher
+        $watcher.Path = Split-Path $printLogFilePath
+        $watcher.Filter = Split-Path $printLogFilePath -Leaf
+        $watcher.NotifyFilter = [System.IO.NotifyFilters]::LastWrite, [System.IO.NotifyFilters]::FileName, [System.IO.NotifyFilters]::Size
+        $watcher.EnableRaisingEvents = $true
+        
+        # 只要發生變更，一律將髒標記設為 true，讓主迴圈自行找空檔安全讀取
+        Register-ObjectEvent -InputObject $watcher -EventName "Changed" -SourceIdentifier "PrintLogChanged" -Action { $global:PrintLogDirty = $true } | Out-Null
+        Register-ObjectEvent -InputObject $watcher -EventName "Created" -SourceIdentifier "PrintLogCreated" -Action { $global:PrintLogDirty = $true } | Out-Null
+        Register-ObjectEvent -InputObject $watcher -EventName "Renamed" -SourceIdentifier "PrintLogRenamed" -Action { $global:PrintLogDirty = $true } | Out-Null
+
+        Write-ApiLog ">>> [System] 已啟用 FileSystemWatcher 即時監控: $printLogFilePath" -Color Magenta
+    } else {
+        Write-ApiLog "!!! [System] FileSystemWatcher 找不到目錄，將回退至主動輪詢" -Color Yellow
+    }
+} catch {
+    Write-ApiLog "!!! [System] FileSystemWatcher 初始化失敗: $($_.Exception.Message)" -Color Yellow
+}
+
+# F. 啟動 Web Server (含重試機制)
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://*:$port/")
 $started = $false
@@ -607,7 +638,12 @@ if (-not $started) {
     exit
 }
 
-# E. 主迴圈
+# [新增] 啟動前先強制做一次快取暖機 (Warm-up)，確保第一筆 API 請求不會拿到空陣列
+Write-ApiLog ">>> [系統初始化] 正在執行列印紀錄快取暖機..." -Color Cyan
+Update-PrintLogCache
+$global:PrintLogDirty = $false
+
+# G. 主迴圈
 $nextCheck = Get-Date; $nextHeart = Get-Date; $contextTask = $null
 
 while ($listener.IsListening) {
@@ -615,6 +651,14 @@ while ($listener.IsListening) {
         $now = Get-Date
         if ($now -ge $nextHeart) { Write-ApiLog "[Heartbeat] 服務運作中..." -Color DarkGray; $nextHeart = $now.AddSeconds(60) } 
         
+        # [新增] 檢查 FileSystemWatcher 產生的變更標記
+        if ($global:PrintLogDirty) {
+            $global:PrintLogDirty = $false
+            # 延遲 200 毫秒，讓寫入的程式有時間釋放檔案鎖定 (Race Condition Prevention)
+            Start-Sleep -Milliseconds 200
+            Update-PrintLogCache
+        }
+
         # 監控邏輯
         if ($now -ge $nextCheck) {
             $day = $now.DayOfWeek.ToString()
@@ -635,8 +679,10 @@ while ($listener.IsListening) {
             }
         }
 
-        # HTTP 請求處理
+        # HTTP 請求處理 (非阻塞設計)
         if ($null -eq $contextTask) { $contextTask = $listener.BeginGetContext($null, $null) }
+        
+        # 等待 1000ms，超時就會 continue 去巡迴檢查 FileSystemWatcher 標記
         if (-not $contextTask.AsyncWaitHandle.WaitOne(1000)) { continue }
 
         $context = $listener.EndGetContext($contextTask); $contextTask = $null
@@ -739,7 +785,6 @@ while ($listener.IsListening) {
                         } else {
                             $restoreDup = $false; $oldDup = $null
                             
-                            # [舊式驅動設定法] 若不是 SumatraPDF 才嘗試用 Windows 原生指令改預設值
                             if ($dup -and $dup -ne "0" -and -not $global:IsSumatraPDF) {
                                 if (Get-Command Set-PrintConfiguration -ErrorAction SilentlyContinue) {
                                     try {
@@ -755,7 +800,6 @@ while ($listener.IsListening) {
                                         }
                                     } catch { 
                                         Write-ApiLog "!!! [列印設定] 驅動程式拒絕修改設定: $($_.Exception.Message)" -Color Red 
-                                        Write-ApiLog ">>> [建議] 您的印表機驅動不相容標準 API，強烈建議改用 SumatraPDF！" -Color Yellow
                                     }
                                 }
                             }
@@ -763,7 +807,6 @@ while ($listener.IsListening) {
                             try {
                                 if ($global:ValidPdfReader) {
                                     if ($global:IsSumatraPDF) {
-                                        # [SumatraPDF 強制派送法] 繞過驅動限制，免修改 Windows 設定
                                         $sumatraSettings = ""
                                         if ($dup -eq "1" -or $dup -eq "long") { $sumatraSettings = "duplexlong" }
                                         elseif ($dup -eq "2" -or $dup -eq "short") { $sumatraSettings = "duplexshort" }
@@ -777,7 +820,6 @@ while ($listener.IsListening) {
                                         Start-Process -FilePath $global:ValidPdfReader -ArgumentList $argList -WindowStyle Hidden
                                         $out.success = $true; $out.message = "已成功透過 SumatraPDF 派送至 [$n]"
                                     } else {
-                                        # [傳統 Foxit 法] 依賴系統預設值
                                         Start-Process -FilePath $global:ValidPdfReader -ArgumentList "/t `"$fPath`" `"$n`"" -WindowStyle Hidden
                                         $out.success = $true; $out.message = "已成功發送指令至印表機 [$n]"
                                     }
@@ -787,7 +829,6 @@ while ($listener.IsListening) {
                                 }
                             } catch { $out.success = $false; $out.message = "列印失敗: $($_.Exception.Message)" }
                             
-                            # 舊式驅動復原邏輯
                             if ($restoreDup -and -not $global:IsSumatraPDF) { 
                                 Write-ApiLog ">>> [列印設定] 等待 5 秒讓 Spooler 接收指令..." -Color DarkGray
                                 Start-Sleep -Seconds 5
