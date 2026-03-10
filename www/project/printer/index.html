@@ -1398,6 +1398,17 @@
                             return 0;
                         };
 
+                        // [新增] 取得該印表機最新的列印時間
+                        const getLatestPrintTime = (printer) => {
+                            if (!printer.printed || printer.printed.length === 0) return '';
+                            let maxTime = '';
+                            for (let i = 0; i < printer.printed.length; i++) {
+                                const t = printer.printed[i].time || '';
+                                if (t > maxTime) maxTime = t;
+                            }
+                            return maxTime; // 回傳例如 "14:30:22"
+                        };
+
                         // ==========================================
                         // 【第一層】 主要排序 (依據右上角下拉選單)
                         // ==========================================
@@ -1408,9 +1419,10 @@
                         if (pKey === 'Jobs') {
                             cmp = (a.Jobs || 0) - (b.Jobs || 0);
                         } else if (pKey === 'Printed') {
-                            const pA = a.printed ? a.printed.length : 0;
-                            const pB = b.printed ? b.printed.length : 0;
-                            cmp = pA - pB;
+                            // [修改] 針對「列印紀錄」，改為比較最新時間的字串
+                            const timeA = getLatestPrintTime(a);
+                            const timeB = getLatestPrintTime(b);
+                            cmp = timeA < timeB ? -1 : (timeA > timeB ? 1 : 0);
                         } else if (pKey === 'IP') {
                             cmp = cmpIp(a.IP, b.IP);
                         } else if (pKey === 'Status') {
@@ -1433,10 +1445,10 @@
                         // 0. 佇列數 DESC (越多越優先)
                         if (a.Jobs !== b.Jobs) return (b.Jobs || 0) - (a.Jobs || 0);
                         
-                        // 1. 地政系統列印紀錄 DESC (越多越優先)
-                        const pA = a.printed ? a.printed.length : 0;
-                        const pB = b.printed ? b.printed.length : 0;
-                        if (pA !== pB) return pB - pA;
+                        // 1. 地政系統列印紀錄 DESC (越新越優先)
+                        const tA = getLatestPrintTime(a);
+                        const tB = getLatestPrintTime(b);
+                        if (tA !== tB) return tA < tB ? 1 : -1;
                         
                         // 2. IP ASC (IP 越小越優先)
                         const ipDiff = cmpIp(a.IP, b.IP);
