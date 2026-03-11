@@ -423,8 +423,26 @@ function Send-SysAdminNotify {
 function Invoke-SpoolerSelfHealing {
     param([string]$reason)
     
-    Write-ApiLog "!!! [自癒啟動] $reason"
-    Send-SysAdminNotify -title "?? 自癒啟動" -content "偵測到異常 ($reason)，正在執行修復。"
+    $notifyTitle = "?? 自癒啟動"
+    $notifyContent = "偵測到異常 ($reason)，正在執行修復。"
+    $completeTitle = "? 自癒完成"
+    $completeContent = "服務已重啟。"
+    
+    # 智慧判斷觸發情境，給予對應的語意化通知
+    if ($reason -match "Cron" -or $reason -match "排程") {
+        $notifyTitle = "?? 例行維護"
+        $notifyContent = "系統執行例行性排程維護 ($reason)，正在安全重置列印服務與暫存區。"
+        $completeTitle = "? 維護完成"
+        $completeContent = "例行維護已完成，服務運作正常。"
+    } elseif ($reason -match "API") {
+        $notifyTitle = "??? 手動維護"
+        $notifyContent = "管理員透過 API 手動觸發系統維護 ($reason)，正在重置列印服務與暫存區。"
+        $completeTitle = "? 維護完成"
+        $completeContent = "手動維護已完成，服務運作正常。"
+    }
+    
+    Write-ApiLog "!!! [$notifyTitle] $reason"
+    Send-SysAdminNotify -title $notifyTitle -content $notifyContent
     
     try {
         Stop-Service "Spooler" -Force
@@ -435,9 +453,9 @@ function Invoke-SpoolerSelfHealing {
         }
         
         Start-Service "Spooler"
-        Send-SysAdminNotify -title "? 自癒完成" -content "服務已重啟。"
+        Send-SysAdminNotify -title $completeTitle -content $completeContent
     } catch {
-        Send-SysAdminNotify -title "? 自癒失敗" -content "錯誤: $($_.Exception.Message)" 
+        Send-SysAdminNotify -title "? 維護/自癒失敗" -content "錯誤: $($_.Exception.Message)" 
     }
 }
 
