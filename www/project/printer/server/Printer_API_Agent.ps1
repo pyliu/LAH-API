@@ -423,39 +423,45 @@ function Send-SysAdminNotify {
 function Invoke-SpoolerSelfHealing {
     param([string]$reason)
     
-    $notifyTitle = "?? 自癒啟動"
-    $notifyContent = "偵測到異常 ($reason)，正在執行修復。"
-    $completeTitle = "? 自癒完成"
-    $completeContent = "服務已重啟。"
+    $isCron = ($reason -match "Cron" -or $reason -match "排程")
+    $isApi = ($reason -match "API")
     
-    # 智慧判斷觸發情境，給予對應的語意化通知
-    if ($reason -match "Cron" -or $reason -match "排程") {
-        $notifyTitle = "?? 例行維護"
-        $notifyContent = "系統執行例行性排程維護 ($reason)，正在安全重置列印服務與暫存區。"
-        $completeTitle = "? 維護完成"
-        $completeContent = "例行維護已完成，服務運作正常。"
-    } elseif ($reason -match "API") {
-        $notifyTitle = "??? 手動維護"
-        $notifyContent = "管理員透過 API 手動觸發系統維護 ($reason)，正在重置列印服務與暫存區。"
-        $completeTitle = "? 維護完成"
-        $completeContent = "手動維護已完成，服務運作正常。"
-    }
-    
-    Write-ApiLog "!!! [$notifyTitle] $reason"
-    Send-SysAdminNotify -title $notifyTitle -content $notifyContent
+    Write-ApiLog "!!! [程序啟動] 觸發原因: $reason"
     
     try {
         Stop-Service "Spooler" -Force
         Start-Sleep -Seconds 3
         
+        # 計算並清理暫存檔
+        $clearedCount = 0
         if (Test-Path "C:\Windows\System32\spool\PRINTERS") { 
-            Get-ChildItem -Path "C:\Windows\System32\spool\PRINTERS\*" -Include *.* -Force | Remove-Item -Force 
+            $items = Get-ChildItem -Path "C:\Windows\System32\spool\PRINTERS\*" -Include *.* -Force 
+            $clearedCount = @($items).Count
+            if ($clearedCount -gt 0) {
+                $items | Remove-Item -Force 
+            }
         }
         
         Start-Service "Spooler"
-        Send-SysAdminNotify -title $completeTitle -content $completeContent
+        
+        # 統一集結在一封訊息發送 (包含清理數量)
+        $notifyTitle = "?? 自癒修復完成"
+        $notifyContent = "系統偵測到異常 ($reason)，已自動完成修復。`n? Spooler 服務已重啟`n?? 共清理了 $clearedCount 個佇列暫存檔"
+        
+        if ($isCron) {
+            $notifyTitle = "?? 例行維護完成"
+            $notifyContent = "系統已順利執行排程維護 ($reason)。`n? Spooler 服務已安全重置`n?? 共清理了 $clearedCount 個過期暫存檔"
+        } elseif ($isApi) {
+            $notifyTitle = "??? 手動維護完成"
+            $notifyContent = "管理員已透過 API 手動觸發系統維護。`n? Spooler 服務已安全重置`n?? 共清理了 $clearedCount 個佇列暫存檔"
+        }
+        
+        Write-ApiLog "? [程序完成] 服務已重啟，清理了 $clearedCount 個暫存檔。" -Color Green
+        Send-SysAdminNotify -title $notifyTitle -content $notifyContent
     } catch {
-        Send-SysAdminNotify -title "? 維護/自癒失敗" -content "錯誤: $($_.Exception.Message)" 
+        $err = $_.Exception.Message
+        Write-ApiLog "? [程序失敗] $err" -Color Red
+        Send-SysAdminNotify -title "? 維護/自癒失敗" -content "觸發原因: $reason`n錯誤訊息: $err" 
     }
 }
 
