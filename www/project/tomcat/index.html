@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tomcat 戰情面板 (Vue3)</title>
+    <title>Tomcat 戰情面板</title>
     
     <!-- 離線資源引入 (請確保同層有 offline 資料夾) -->
     <script src="./offline/tailwindcss.js"></script>
@@ -806,12 +806,12 @@
                         if (!reconnectState.active && !isOperating.value && !setupModal.show) { fetchStatus(); }
                     }, 15000);
 
-                    // 🚀 日誌無感背景同步排程 (每 10 秒)
+                    // 🚀 日誌無感背景同步排程 (每 3 秒)
                     setInterval(() => {
                         if (!reconnectState.active && !isOperating.value && !setupModal.show && !isConnectionError.value) { 
                             fetchLogs(true); 
                         }
-                    }, 10000);
+                    }, 3000);
                 });
                 
                 onUpdated(() => lucide.createIcons());

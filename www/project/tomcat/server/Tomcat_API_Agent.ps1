@@ -343,8 +343,10 @@ while ($listener.IsListening) {
         $context = $listener.EndGetContext($contextTask); $contextTask = $null
         $req = $context.Request; $res = $context.Response; $path = $req.Url.AbsolutePath.ToLower()
         
-        # ?? 補回這行：記錄每一次前端發送過來的請求
-        Write-ApiLog ">>> [請求] $($req.RemoteEndPoint) $path"
+        # ?? 排除高頻輪詢請求，避免 Log 洗版 (只記錄其他重要操作或失敗時的紀錄)
+        if ($path -notmatch "^/(tomcat/status|tomcat/logs|server/logs)") {
+            Write-ApiLog ">>> [請求] $($req.RemoteEndPoint) $path"
+        }
         
         $res.AddHeader("Access-Control-Allow-Origin", "*")
         $res.AddHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
@@ -405,7 +407,10 @@ while ($listener.IsListening) {
 
                 $out.data = @{ "ServiceName"=$svc.Name; "DisplayName"=$svc.DisplayName; "Status"=$svc.Status.ToString(); "TomcatDir"=$tomcatDir; "SysCpu"=$sysCpu; "SysMemTotal"=$sysMemTotal; "SysMemUsed"=$sysMemUsed; "SysMemPct"=$sysMemPct; "TomcatCpu"=$tomcatCpuPct; "TomcatMemUsed"=$tomcatMemBytes; "HasCrashDumps"=$hasCrashDumps }
                 $out.success = $true; $out.message = "OK"
-            } catch { $out.message = "狀態讀取失敗: $($_.Exception.Message)" }
+            } catch { 
+                $out.message = "狀態讀取失敗: $($_.Exception.Message)" 
+                Write-ApiLog "!!! 狀態讀取失敗: $($_.Exception.Message)" -Color Yellow
+            }
         }
         elseif ($path -eq "/tomcat/logs") {
             $logDate = Get-Date -Format "yyyy-MM-dd"
