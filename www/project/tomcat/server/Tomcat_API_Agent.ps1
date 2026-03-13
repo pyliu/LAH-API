@@ -219,6 +219,9 @@ function Send-SysAdminNotify {
     # 若環境變數設定不啟用通知，則直接跳出
     if (-not $enableAdminNotifications) { return }
     
+    # 確保逾時時間至少有 3000 毫秒 (3秒)，避免設定錯誤導致瞬間中斷
+    $timeout = if ($notifyTimeoutMs -lt 3000) { 3000 } else { $notifyTimeoutMs }
+
     try {
         # 組合完整的通知 API 網址 (包含 IP, Port 與 Endpoint)
         $url = "http://$notifyIp`:$notifyPort$notifyEndpoint"
@@ -231,13 +234,11 @@ function Send-SysAdminNotify {
         }
         $jsonBody = ConvertTo-SimpleJson $body
         
-        # 建立 HTTP WebRequest (相容性最佳寫法)
+        # 建立 HTTP WebRequest
         $req = [System.Net.WebRequest]::Create($url)
         $req.Method = "POST"
         $req.ContentType = "application/json; charset=utf-8"
-        
-        # 設定逾時時間 (避免外部通知伺服器死機導致 Tomcat Agent 被卡住)
-        $req.Timeout = $notifyTimeoutMs
+        $req.Timeout = $timeout
         
         # 寫入二進位資料並發送
         $bytes = [System.Text.Encoding]::UTF8.GetBytes($jsonBody)
@@ -246,13 +247,25 @@ function Send-SysAdminNotify {
         $stream.Write($bytes, 0, $bytes.Length)
         $stream.Close()
         
-        # 接收回應 (在此不需要解析內容，只要沒噴錯就代表發送成功)
+        # 接收回應
         $res = $req.GetResponse()
         $res.Close()
         
         Write-ApiLog " -> [通知系統] 已成功發送推播: $title" -Color DarkGray
     } catch {
-        Write-ApiLog "!!! [通知系統] 推播發送失敗: $($_.Exception.Message)" -Color DarkYellow
+        # ?? 錯誤訊息優化處理：過濾掉底層醜陋的例外提示
+        $errMsg = $_.Exception.Message
+        if ($null -ne $_.Exception.InnerException) { 
+            $errMsg = $_.Exception.InnerException.Message 
+        }
+        
+        if ($errMsg -match "要求已經中止" -or $errMsg -match "canceled" -or $errMsg -match "逾時") {
+            $errMsg = "連線逾時 (通知伺服器未在 $($timeout/1000) 秒內回應)"
+        } elseif ($errMsg -match "無法連接到遠端伺服器" -or $errMsg -match "Unable to connect") {
+            $errMsg = "無法連接到通知伺服器 ($notifyIp:$notifyPort)"
+        }
+        
+        Write-ApiLog "!!! [通知系統] 推播發送失敗: $errMsg" -Color DarkYellow
     }
 }
 
