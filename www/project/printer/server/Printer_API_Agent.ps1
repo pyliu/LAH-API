@@ -1,17 +1,17 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v17.64 (終極完整展開版 - 包含安全認證與極速推播)
+    版本：v17.65 (終極 BIG5 安全版 - 零 Emoji 實體字元)
     
     修正紀錄：
-    1. [程式碼全展開] 嚴格禁止壓縮，完整保留所有 API 路由實作 (re-print, preview, print-pdf 等) 與系統函數。
-    2. [WS 安全認證] 實作 WebSocket 連線金鑰驗證，統一使用 $apiKey 進行安全防護。
-    3. [佇列極速推播] 改用 Win32_PrintJob 分析配合手動 JSON 組裝，實現毫秒級無阻塞廣播。
-    4. [路由全面修復] 包含 /printer/refresh, /printer/status, /service/self-heal, /printer/clear 等 15 支完整 API。
-    5. [WS 交握修復] 採用 [NullString]::Value 解決 PowerShell $null 轉空字串造成的交握失敗。
-    6. [即時推播] 結合 FileSystemWatcher 監控 printlog 與 Spooler 底層目錄。
-    7. [雙面列印突破] 針對 HP 等頑固驅動，引入 SumatraPDF 參數化列印機制。
-    8. [註解修復] 永久保留完整系統架構與自癒機制說明，絕不精簡。
+    1. [編碼安全] 徹底移除所有實體 Emoji，改用 [char]::ConvertFromUtf32() 動態生成，完美相容 BIG5 / ANSI 存檔。
+    2. [程式碼全展開] 嚴格禁止壓縮，完整保留所有 API 路由實作 (re-print, preview, print-pdf 等) 與系統函數。
+    3. [WS 安全認證] 實作 WebSocket 連線金鑰驗證，統一使用 $apiKey 進行安全防護。
+    4. [佇列極速推播] 改用 Win32_PrintJob 分析配合手動 JSON 組裝，實現毫秒級無阻塞廣播。
+    5. [路由全面修復] 包含 /printer/refresh, /printer/status, /service/self-heal, /printer/clear 等 15 支完整 API。
+    6. [WS 交握修復] 採用 [NullString]::Value 解決 PowerShell $null 轉空字串造成的交握失敗。
+    7. [即時推播] 結合 FileSystemWatcher 監控 printlog 與 Spooler 底層目錄。
+    8. [雙面列印突破] 針對 HP 等頑固驅動，引入 SumatraPDF 參數化列印機制。
 
 .DESCRIPTION
     本腳本具備多層次自我檢查與自動修復機制 (Self-Healing & Resilience)：
@@ -40,7 +40,7 @@
        - 為了符合資安 SOC 監控要求，移除所有 ICMP (Ping) 操作，改用 TCP Port 9100/80 探測，避免被偵測為掃描攻擊。
 
 .NOTES
-    ?? 測試指令範例 (CMD):
+    [提示] 測試指令範例 (CMD):
     curl -H "X-API-KEY: %API_KEY%" http://localhost:8888/printers
 #>
 
@@ -426,6 +426,14 @@ function Invoke-SpoolerSelfHealing {
     $isCron = ($reason -match "Cron" -or $reason -match "排程")
     $isApi = ($reason -match "API")
     
+    # [BIG5 完美解法] 在記憶體中動態生成 Emoji，檔案維持純 ASCII 就不會變亂碼
+    $eAlert  = [char]::ConvertFromUtf32(0x1F6A8) # 警車燈
+    $eRecyc  = [char]::ConvertFromUtf32(0x267B)  # 循環標誌
+    $eTool   = [char]::ConvertFromUtf32(0x1F6E0) # 工具
+    $eCheck  = [char]::ConvertFromUtf32(0x2705)  # 綠色打勾
+    $eBroom  = [char]::ConvertFromUtf32(0x1F9F9) # 掃把
+    $eCross  = [char]::ConvertFromUtf32(0x274C)  # 紅色叉叉
+    
     Write-ApiLog "!!! [程序啟動] 觸發原因: $reason"
     
     try {
@@ -445,23 +453,23 @@ function Invoke-SpoolerSelfHealing {
         Start-Service "Spooler"
         
         # 統一集結在一封訊息發送 (包含清理數量)
-        $notifyTitle = "?? 自癒修復完成"
-        $notifyContent = "系統偵測到異常 ($reason)，已自動完成修復。`n? Spooler 服務已重啟`n?? 共清理了 $clearedCount 個佇列暫存檔"
+        $notifyTitle = "$eAlert 自癒修復完成"
+        $notifyContent = "系統偵測到異常 ($reason)，已自動完成修復。`n$eCheck Spooler 服務已重啟`n$eBroom 共清理了 $clearedCount 個佇列暫存檔"
         
         if ($isCron) {
-            $notifyTitle = "?? 例行維護完成"
-            $notifyContent = "系統已順利執行排程維護 ($reason)。`n? Spooler 服務已安全重置`n?? 共清理了 $clearedCount 個過期暫存檔"
+            $notifyTitle = "$eRecyc 例行維護完成"
+            $notifyContent = "系統已順利執行排程維護 ($reason)。`n$eCheck Spooler 服務已安全重置`n$eBroom 共清理了 $clearedCount 個過期暫存檔"
         } elseif ($isApi) {
-            $notifyTitle = "??? 手動維護完成"
-            $notifyContent = "管理員已透過 API 手動觸發系統維護。`n? Spooler 服務已安全重置`n?? 共清理了 $clearedCount 個佇列暫存檔"
+            $notifyTitle = "$eTool 手動維護完成"
+            $notifyContent = "管理員已透過 API 手動觸發系統維護。`n$eCheck Spooler 服務已安全重置`n$eBroom 共清理了 $clearedCount 個佇列暫存檔"
         }
         
-        Write-ApiLog "? [程序完成] 服務已重啟，清理了 $clearedCount 個暫存檔。" -Color Green
+        Write-ApiLog "$eCheck [程序完成] 服務已重啟，清理了 $clearedCount 個暫存檔。" -Color Green
         Send-SysAdminNotify -title $notifyTitle -content $notifyContent
     } catch {
         $err = $_.Exception.Message
-        Write-ApiLog "? [程序失敗] $err" -Color Red
-        Send-SysAdminNotify -title "? 維護/自癒失敗" -content "觸發原因: $reason`n錯誤訊息: $err" 
+        Write-ApiLog "$eCross [程序失敗] $err" -Color Red
+        Send-SysAdminNotify -title "$eCross 維護/自癒失敗" -content "觸發原因: $reason`n錯誤訊息: $err" 
     }
 }
 
@@ -754,6 +762,9 @@ function Test-PrinterHealth {
     $batchAlerts = New-Object System.Collections.Generic.List[string]
     $stuck = 0
     
+    # [BIG5 完美解法] 動態生成警告標誌
+    $eWarn = [char]::ConvertFromUtf32(0x26A0)
+    
     if ($enableAutoCleanup) {
         $zombies = Get-WmiObject Win32_PrintJob | Where-Object { $_.JobStatus -like "*Error*" -or $_.JobStatus -like "*Deleting*" }
         if ($zombies) { 
@@ -795,7 +806,7 @@ function Test-PrinterHealth {
         if ($j -ge $queueThreshold -and $j -ge $global:LastQueueCount[$n]) {
             $global:QueueStuckCount[$n]++
             if ($global:QueueStuckCount[$n] -eq $queueStuckLimit) { 
-                $batchAlerts.Add("?? [堵塞] $n 佇列停滯")
+                $batchAlerts.Add("$eWarn [堵塞] $n 佇列停滯")
                 $stuck++ 
             }
         } else { 
@@ -822,7 +833,7 @@ function Test-PrinterHealth {
 # 3. 主程序 (HttpListener & WebSocket & 即時監控)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Print Server API & Monitor v17.64 " -Color Cyan
+Write-ApiLog " Print Server API & Monitor v17.65 " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 # 啟動時設定防火牆
