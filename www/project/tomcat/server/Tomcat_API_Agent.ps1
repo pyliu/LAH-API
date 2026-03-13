@@ -30,6 +30,7 @@
     - 強化偵錯日誌：記錄每次自動清理操作與程序獵殺事件。
     - 記憶體與網路優化：實作日誌分塊打包 (Staging) 與 Chunked Streaming，徹底防堵 OOM 與前端斷流錯誤。
     - 容錯機制：優化通知 Timeout 捕捉，防堵無窮重啟迴圈。
+    - 推播整合優化：根據 PHP API 規範，改用 application/x-www-form-urlencoded 並補齊 type、sender 等必填欄位。
 
 .USAGE_NOTES
     1. 權限：必須以「系統管理員 (Administrator)」身分執行，否則無法重啟服務或獵殺程序。
@@ -48,7 +49,7 @@
 # -------------------------------------------------------------------------
 
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } elseif ($MyInvocation.MyCommand.Path) { Split-Path $MyInvocation.MyCommand.Path } else { $PWD.Path }
-# ?? 精準定位並鎖定腳本的絕對路徑，確保重啟時不會找不到檔案
+# 精準定位並鎖定腳本的絕對路徑，確保重啟時不會找不到檔案
 $global:AgentScriptPath = if ($PSCommandPath) { $PSCommandPath } elseif ($MyInvocation.MyCommand.Path) { $MyInvocation.MyCommand.Path } else { Join-Path $scriptDir "Tomcat_API_Agent.ps1" }
 
 $envFile = Join-Path $scriptDir "Tomcat_API_Agent.env"
@@ -97,7 +98,6 @@ $notifyEndpoint     = Get-EnvString "NOTIFY_ENDPOINT" "/api/notification_json_ap
 $notifyChannels     = Get-EnvArray "NOTIFY_CHANNELS" @("val")
 
 $enableNotifyHealthCheck  = Get-EnvBool "ENABLE_NOTIFY_HEALTH_CHECK" $true
-# ?? 預設提高到 5000ms，給予網路足夠的緩衝時間
 $notifyTimeoutMs          = Get-EnvInt "NOTIFY_TIMEOUT_MS" 5000
 $enableAdminNotifications = Get-EnvBool "ENABLE_ADMIN_NOTIFICATIONS" $true    
 
@@ -221,47 +221,83 @@ function Send-SysAdminNotify {
         [string]$content
     )
     
-    # 若環境變數設定不啟用通知，則直接跳出
     if (-not $enableAdminNotifications) { return }
-    
-    # 確保逾時時間至少有 3000 毫秒 (3秒)，避免設定錯誤導致瞬間中斷
     $timeout = if ($notifyTimeoutMs -lt 3000) { 3000 } else { $notifyTimeoutMs }
 
     try {
-        # ?? 核心修正：使用 ${} 括住變數名稱，避免 PowerShell 將冒號 (:) 誤判為作用域修飾符
         $url = "http://${notifyIp}:${notifyPort}${notifyEndpoint}"
         
-        # 組合 JSON Payload
-        $body = @{
-            "title" = $title
-            "content" = $content
-            "channels" = $notifyChannels
-        }
-        $jsonBody = ConvertTo-SimpleJson $body
+        # ?? 取得伺服器本機 IPv4 位址
+        $ipList = [System.Net.Dns]::GetHostAddresses($env:COMPUTERNAME) | Where-Object { $_.AddressFamily -eq 'InterNetwork' }
+        $serverIp = if ($ipList) { $ipList[0].ToString() } else { "127.0.0.1" }
+        $senderName = "$env:COMPUTERNAME ($serverIp)"
         
-        # 建立 HTTP WebRequest
+        # ?? 根據 PHP API 要求，建立傳統的 URL-Encoded 表單參數陣列
+        # 將 sender 改為伺服器的電腦名稱加上 IP ($senderName)
+        $postParams = @(
+            "type=add_notification",
+            "title=$([System.Uri]::EscapeDataString($title))",
+            "content=$([System.Uri]::EscapeDataString($content))",
+            "sender=$([System.Uri]::EscapeDataString($senderName))",
+            "priority=1",
+            "from_ip=$serverIp"
+        )
+        
+        # 處理陣列格式 (PHP 中的 $_POST['channels'] 預期格式為 channels[]=val1&channels[]=val2)
+        if ($null -ne $notifyChannels) {
+            foreach ($c in $notifyChannels) {
+                $postParams += "channels[]=$([System.Uri]::EscapeDataString($c))"
+            }
+        }
+        
+        # 將陣列組合成 Query String
+        $postString = $postParams -join "&"
+        
+        Write-ApiLog " -> [通知系統] 準備發送請求至 $url" -Color DarkGray
+        
         $req = [System.Net.WebRequest]::Create($url)
         $req.Method = "POST"
-        $req.ContentType = "application/json; charset=utf-8"
+        # ?? 關鍵：必須使用 application/x-www-form-urlencoded，PHP 的 $_POST 才能成功接收
+        $req.ContentType = "application/x-www-form-urlencoded; charset=utf-8"
         $req.Timeout = $timeout
         
-        # 寫入二進位資料並發送
-        $bytes = [System.Text.Encoding]::UTF8.GetBytes($jsonBody)
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($postString)
         $req.ContentLength = $bytes.Length
         $stream = $req.GetRequestStream()
         $stream.Write($bytes, 0, $bytes.Length)
         $stream.Close()
         
-        # 接收回應
+        # 接收 PHP 伺服器的回應
         $res = $req.GetResponse()
+        $reader = New-Object System.IO.StreamReader($res.GetResponseStream())
+        $resBody = $reader.ReadToEnd()
+        $reader.Close()
         $res.Close()
         
-        Write-ApiLog " -> [通知系統] 已成功發送推播: $title" -Color DarkGray
+        # ?? 將 PHP 回傳的 Unicode 編碼 (如 \u65b0\u589e) 解碼為人類可讀的中文字
+        try { $resBody = [System.Text.RegularExpressions.Regex]::Unescape($resBody) } catch {}
+        
+        # ?? 印出 PHP 的 JSON 回應，讓成功與否一目了然
+        Write-ApiLog " -> [通知系統] PHP 伺服器回應: $resBody" -Color Green
+        
     } catch {
-        # ?? 錯誤訊息優化處理：過濾掉底層醜陋的例外提示，轉為易讀格式
         $errMsg = $_.Exception.Message
         if ($null -ne $_.Exception.InnerException) { 
             $errMsg = $_.Exception.InnerException.Message 
+        }
+        
+        # 如果 PHP 伺服器回傳 400/500 等錯誤代碼，嘗試讀取它吐出的錯誤內容
+        if ($_.Exception -is [System.Net.WebException] -and $null -ne $_.Exception.Response) {
+            try {
+                $errReader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+                $errBody = $errReader.ReadToEnd()
+                $errReader.Close()
+                
+                # ?? 錯誤內容也一併解碼中文
+                try { $errBody = [System.Text.RegularExpressions.Regex]::Unescape($errBody) } catch {}
+                
+                $errMsg += " | PHP 回傳內容: $errBody"
+            } catch {}
         }
         
         if ($errMsg -match "要求已經中止" -or $errMsg -match "canceled" -or $errMsg -match "逾時") {
@@ -340,13 +376,11 @@ while ($listener.IsListening) {
         $now = Get-Date
         if ($now -ge $nextCleanup) { Cleanup-OldLogs; $nextCleanup = $now.AddHours(24) }
         
-        # 檢查並觸發每日定時排程維護 (解析 Cron 格式: 分 時 * * *)
+        # 檢查並觸發每日定時排程維護
         if ($enableScheduledRestart -and $scheduledRestartCron -match "^(\d+)\s+(\d+)") {
             $cronMin = [int]$matches[1]
             $cronHour = [int]$matches[2]
-            # 檢查是否到達設定的小時與分鐘
             if ($now.Hour -eq $cronHour -and $now.Minute -eq $cronMin) {
-                # 確保每天只執行一次
                 if ($null -eq $global:LastCronRunTime -or $global:LastCronRunTime.Date -ne $now.Date) {
                     $global:LastCronRunTime = $now
                     Execute-ScheduledMaintenance
@@ -360,7 +394,7 @@ while ($listener.IsListening) {
         $context = $listener.EndGetContext($contextTask); $contextTask = $null
         $req = $context.Request; $res = $context.Response; $path = $req.Url.AbsolutePath.ToLower()
         
-        # ?? 排除高頻輪詢請求，避免 Log 洗版
+        # 排除高頻輪詢請求，避免 Log 洗版
         if ($path -notmatch "^/(tomcat/status|tomcat/logs|server/logs)") {
             Write-ApiLog ">>> [請求] $($req.RemoteEndPoint) $path"
         }
@@ -373,7 +407,6 @@ while ($listener.IsListening) {
         $out = @{ "success"=$false; "message"=""; "data"=$null }
         $handledBinary = $false
         
-        # ?? 確保每次請求都重置狀態，防止進入無窮重啟迴圈
         $restartScript = $false
         $restartComputer = $false
 
@@ -387,7 +420,6 @@ while ($listener.IsListening) {
 
                 $sysCpu = 0; $sysMemTotal = 0; $sysMemUsed = 0; $sysMemPct = 0; $tomcatCpuPct = 0; $tomcatMemBytes = 0
                 
-                # 掃描是否存在 JVM 崩潰檔
                 $hasCrashDumps = $false
                 try {
                     $dumps = Get-ChildItem -Path $tomcatDir -Filter "hs_err_pid*" -File -ErrorAction SilentlyContinue
@@ -438,17 +470,16 @@ while ($listener.IsListening) {
             elseif ($reqType -eq "stderr") { $searchPattern = "*stderr*" }
             else { $searchPattern = "catalina*" }
 
-            # 1. 先找今天的日誌
+            # 先找今天的日誌
             $f = Get-ChildItem -Path "$tomcatDir\logs" -Filter "$searchPattern$logDate.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
             if ($f) { 
                 $targetFile = $f[0].FullName 
             } else {
-                # 2. 若今天沒有，退而求其次找目錄下最新的那份
+                # 若今天沒有，找最新那份
                 $f = Get-ChildItem -Path "$tomcatDir\logs" -Filter "$searchPattern*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
                 if ($f) { $targetFile = $f[0].FullName }
             }
 
-            # 3. 針對 catalina 特例 (catalina.out) 若都找不到
             if (-not $targetFile -and $reqType -ne "stdout" -and $reqType -ne "stderr") {
                 if (Test-Path "$tomcatDir\logs\catalina.out") { $targetFile = Join-Path $tomcatDir "logs\catalina.out" }
             }
@@ -528,7 +559,6 @@ while ($listener.IsListening) {
                 $zipName = "tomcat_logs_$(Get-Date -Format 'yyyyMMdd_HHmmss').zip"
                 $zipPath = Join-Path $logPath $zipName
                 
-                # ?? 1. 建立暫存區來避開 Tomcat 檔案鎖定 (File in use)
                 $stagingDir = Join-Path $logPath "staging_$([guid]::NewGuid().ToString().Substring(0,8))"
                 New-Item -ItemType Directory -Path $stagingDir -Force | Out-Null
                 
@@ -540,7 +570,6 @@ while ($listener.IsListening) {
                     Write-ApiLog " -> 正在壓縮 $($filesToZip.Count) 個檔案..."
                     Compress-Archive -Path "$stagingDir\*" -DestinationPath $zipPath -Force
                     
-                    # ?? 2. 改用 ContentLength64 與分塊串流傳輸，徹底解決參數錯誤與記憶體耗盡問題
                     $fileInfo = New-Object System.IO.FileInfo($zipPath)
                     $res.ContentType = "application/zip"
                     $res.AddHeader("Content-Disposition", "attachment; filename=`"$zipName`"")
@@ -558,7 +587,7 @@ while ($listener.IsListening) {
                         Write-ApiLog ">>> 日誌打包下載完成！" -Color Green
                     } catch {
                         Write-ApiLog "!!! 檔案傳輸中斷 (前端逾時或取消): $($_.Exception.Message)" -Color Yellow
-                        $handledBinary = $true # 標記為已處理，避免後續寫入 JSON 產生二次錯誤
+                        $handledBinary = $true 
                     } finally {
                         $fileStream.Close()
                         try { $res.Close() } catch {}
@@ -567,11 +596,9 @@ while ($listener.IsListening) {
                     throw "無法複製任何日誌檔案，檔案可能被完全鎖定或目錄為空。"
                 }
                 
-                # 清理暫存區
                 Remove-Item -Path $stagingDir -Recurse -Force -ErrorAction SilentlyContinue
                 
             } catch { 
-                # 發生錯誤時設定 HTTP 500，避免前端把錯誤訊息當成 ZIP 下載
                 $res.StatusCode = 500
                 $out.message = "備份日誌失敗: $($_.Exception.Message)" 
                 Write-ApiLog "!!! 打包日誌失敗: $($_.Exception.Message)" -Color Red
@@ -585,7 +612,6 @@ while ($listener.IsListening) {
             $logDate = Get-Date -Format "yyyy-MM-dd"
             $targetFile = Join-Path $logPath "TomcatApi_$logDate.log"
             
-            # 若找不到今天的 Agent 日誌，自動找最新的一份
             if (-not (Test-Path $targetFile)) {
                 $f = Get-ChildItem -Path $logPath -Filter "TomcatApi_*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
                 if ($f) { $targetFile = $f[0].FullName }
@@ -623,7 +649,6 @@ while ($listener.IsListening) {
             $res.ContentType = "application/json"; $res.OutputStream.Write($buf, 0, $buf.Length); $res.Close()
         }
 
-        # ?? 改良重啟邏輯，使用絕對路徑與安全陣列執行，確保重啟不會失敗且不會無窮迴圈
         if ($restartScript) { 
             Write-ApiLog ">>> 收到 API 指令：Agent 腳本即將重啟..." -Color Yellow
             try {
@@ -631,7 +656,6 @@ while ($listener.IsListening) {
                 Start-Sleep -Seconds 1
                 try { $listener.Abort() } catch {}
                 
-                # 確保路徑檔案真的存在才發動重啟，且使用 Array 傳遞參數避開空格地雷
                 if (Test-Path $global:AgentScriptPath) {
                     $psArgs = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $global:AgentScriptPath)
                     Start-Process powershell.exe -ArgumentList $psArgs
