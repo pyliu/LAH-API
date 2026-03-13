@@ -28,6 +28,8 @@
     - 檔案生命週期管理：優化 Cleanup-OldLogs，支援自動清理超過 7 天的歷史 ZIP 壓縮檔。
     - 修正 CORS 預檢邏輯，支援現代網路安全性標頭 (Access-Control-Allow-Headers: *)。
     - 強化偵錯日誌：記錄每次自動清理操作與程序獵殺事件。
+    - 記憶體與網路優化：實作日誌分塊打包 (Staging) 與 Chunked Streaming，徹底防堵 OOM 與前端斷流錯誤。
+    - 容錯機制：優化通知 Timeout 捕捉，防堵無窮重啟迴圈。
 
 .USAGE_NOTES
     1. 權限：必須以「系統管理員 (Administrator)」身分執行，否則無法重啟服務或獵殺程序。
@@ -46,6 +48,9 @@
 # -------------------------------------------------------------------------
 
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } elseif ($MyInvocation.MyCommand.Path) { Split-Path $MyInvocation.MyCommand.Path } else { $PWD.Path }
+# ?? 精準定位並鎖定腳本的絕對路徑，確保重啟時不會找不到檔案
+$global:AgentScriptPath = if ($PSCommandPath) { $PSCommandPath } elseif ($MyInvocation.MyCommand.Path) { $MyInvocation.MyCommand.Path } else { Join-Path $scriptDir "Tomcat_API_Agent.ps1" }
+
 $envFile = Join-Path $scriptDir "Tomcat_API_Agent.env"
 $envConfig = @{}
 
@@ -89,11 +94,11 @@ $scheduledRestartCron   = Get-EnvString "SCHEDULED_RESTART_CRON" "30 7 * * *"
 $notifyIp           = Get-EnvString "NOTIFY_IP" "220.1.34.75"
 $notifyPort         = Get-EnvInt "NOTIFY_PORT" 80
 $notifyEndpoint     = Get-EnvString "NOTIFY_ENDPOINT" "/api/notification_json_api.php"
-$notifyUrl          = "http://$notifyIp$notifyEndpoint"
 $notifyChannels     = Get-EnvArray "NOTIFY_CHANNELS" @("val")
 
 $enableNotifyHealthCheck  = Get-EnvBool "ENABLE_NOTIFY_HEALTH_CHECK" $true
-$notifyTimeoutMs          = Get-EnvInt "NOTIFY_TIMEOUT_MS" 1000
+# ?? 預設提高到 5000ms，給予網路足夠的緩衝時間
+$notifyTimeoutMs          = Get-EnvInt "NOTIFY_TIMEOUT_MS" 5000
 $enableAdminNotifications = Get-EnvBool "ENABLE_ADMIN_NOTIFICATIONS" $true    
 
 $global:IsNotifyServerOnline = $true 
@@ -223,8 +228,8 @@ function Send-SysAdminNotify {
     $timeout = if ($notifyTimeoutMs -lt 3000) { 3000 } else { $notifyTimeoutMs }
 
     try {
-        # 組合完整的通知 API 網址 (包含 IP, Port 與 Endpoint)
-        $url = "http://$notifyIp`:$notifyPort$notifyEndpoint"
+        # ?? 核心修正：使用 ${} 括住變數名稱，避免 PowerShell 將冒號 (:) 誤判為作用域修飾符
+        $url = "http://${notifyIp}:${notifyPort}${notifyEndpoint}"
         
         # 組合 JSON Payload
         $body = @{
@@ -253,7 +258,7 @@ function Send-SysAdminNotify {
         
         Write-ApiLog " -> [通知系統] 已成功發送推播: $title" -Color DarkGray
     } catch {
-        # ?? 錯誤訊息優化處理：過濾掉底層醜陋的例外提示
+        # ?? 錯誤訊息優化處理：過濾掉底層醜陋的例外提示，轉為易讀格式
         $errMsg = $_.Exception.Message
         if ($null -ne $_.Exception.InnerException) { 
             $errMsg = $_.Exception.InnerException.Message 
@@ -262,7 +267,7 @@ function Send-SysAdminNotify {
         if ($errMsg -match "要求已經中止" -or $errMsg -match "canceled" -or $errMsg -match "逾時") {
             $errMsg = "連線逾時 (通知伺服器未在 $($timeout/1000) 秒內回應)"
         } elseif ($errMsg -match "無法連接到遠端伺服器" -or $errMsg -match "Unable to connect") {
-            $errMsg = "無法連接到通知伺服器 ($notifyIp:$notifyPort)"
+            $errMsg = "無法連接到通知伺服器 (${notifyIp}:${notifyPort})"
         }
         
         Write-ApiLog "!!! [通知系統] 推播發送失敗: $errMsg" -Color DarkYellow
@@ -310,7 +315,6 @@ Write-ApiLog "----------------------------------------" -Color Cyan
 Write-ApiLog " Tomcat API Agent v2.1 (Port: $port) " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
-# 補上 .env 載入狀態的 Log 紀錄
 if (Test-Path $envFile) {
     Write-ApiLog ">>> [系統] 已載入外部設定檔: Tomcat_API_Agent.env" -Color Cyan
 } else {
@@ -336,7 +340,7 @@ while ($listener.IsListening) {
         $now = Get-Date
         if ($now -ge $nextCleanup) { Cleanup-OldLogs; $nextCleanup = $now.AddHours(24) }
         
-        # ?? 新增：檢查並觸發每日定時排程維護 (解析 Cron 格式: 分 時 * * *)
+        # 檢查並觸發每日定時排程維護 (解析 Cron 格式: 分 時 * * *)
         if ($enableScheduledRestart -and $scheduledRestartCron -match "^(\d+)\s+(\d+)") {
             $cronMin = [int]$matches[1]
             $cronHour = [int]$matches[2]
@@ -356,7 +360,7 @@ while ($listener.IsListening) {
         $context = $listener.EndGetContext($contextTask); $contextTask = $null
         $req = $context.Request; $res = $context.Response; $path = $req.Url.AbsolutePath.ToLower()
         
-        # ?? 排除高頻輪詢請求，避免 Log 洗版 (只記錄其他重要操作或失敗時的紀錄)
+        # ?? 排除高頻輪詢請求，避免 Log 洗版
         if ($path -notmatch "^/(tomcat/status|tomcat/logs|server/logs)") {
             Write-ApiLog ">>> [請求] $($req.RemoteEndPoint) $path"
         }
@@ -369,7 +373,7 @@ while ($listener.IsListening) {
         $out = @{ "success"=$false; "message"=""; "data"=$null }
         $handledBinary = $false
         
-        # ?? 核心修正 1：每次 API 請求都將重啟旗標歸零，避免因錯誤殘留導致無窮迴圈
+        # ?? 確保每次請求都重置狀態，防止進入無窮重啟迴圈
         $restartScript = $false
         $restartComputer = $false
 
@@ -400,7 +404,6 @@ while ($listener.IsListening) {
                     $sysProcessor = Get-WmiObject Win32_Processor | Measure-Object -Property LoadPercentage -Average
                     $sysCpu = [math]::Round($sysProcessor.Average, 1)
 
-                    # ?? 這裡補回遺失的 Tomcat 專屬 PID 資源監控邏輯
                     if ($svc.Status -eq 'Running') {
                         $svcWmi = Get-WmiObject Win32_Service -Filter "Name='$($svc.Name)'"
                         if ($svcWmi -and $svcWmi.ProcessId -gt 0) {
@@ -455,7 +458,6 @@ while ($listener.IsListening) {
                 try {
                     $logData = Get-Content $targetFile -Tail $cnt -Encoding Default -ErrorAction Stop
                     
-                    # 如果找到的日誌不是今天的，在前端插入友善提示
                     if ($targetFile -notmatch $logDate -and $targetFile -notmatch "catalina\.out") {
                         $leaf = Split-Path $targetFile -Leaf
                         $logData = @("[系統提示] Tomcat 尚未產生今日 ($logDate) 的日誌。") + @(">>> 目前為您顯示最新的一份歷史日誌: $leaf") + @("---------------------------------------------------------") + $logData
@@ -474,40 +476,110 @@ while ($listener.IsListening) {
         }
         elseif ($path -eq "/tomcat/restart") {
             try {
+                Write-ApiLog ">>> 收到 API 請求：準備重啟 Tomcat 服務..." -Color Cyan
                 Restart-Service -Name $tomcatServiceName -Force -ErrorAction Stop
                 $out.success = $true; $out.message = "Tomcat 重啟成功"
-            } catch { $out.message = "重啟失敗: $($_.Exception.Message)" }
+                Write-ApiLog ">>> Tomcat 服務重啟成功" -Color Green
+                if ($enableAdminNotifications) { Send-SysAdminNotify -title "系統操作通知" -content "管理員已透過 API 成功重啟 Tomcat 服務。" }
+            } catch { 
+                $out.message = "重啟失敗: $($_.Exception.Message)" 
+                Write-ApiLog "!!! Tomcat 服務重啟失敗: $($_.Exception.Message)" -Color Red
+                if ($enableAdminNotifications) { Send-SysAdminNotify -title "系統操作異常" -content "管理員嘗試透過 API 重啟 Tomcat 服務失敗: $($_.Exception.Message)" }
+            }
         }
         elseif ($path -eq "/tomcat/clean-cache") {
             try {
+                Write-ApiLog ">>> 收到 API 請求：準備清理 Tomcat 快取..." -Color Cyan
                 $w = Join-Path $tomcatDir "work"; $t = Join-Path $tomcatDir "temp"
                 if (Test-Path $w) { Get-ChildItem -Path $w -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue }
                 if (Test-Path $t) { Get-ChildItem -Path $t -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue }
                 $out.success = $true; $out.message = "快取目錄 (work/temp) 已清空"
-                Write-ApiLog "已執行 Tomcat 快取清理" -Color Cyan
-            } catch { $out.message = "清理失敗: $($_.Exception.Message)" }
+                Write-ApiLog ">>> 已執行 Tomcat 快取清理" -Color Green
+                if ($enableAdminNotifications) { Send-SysAdminNotify -title "系統操作通知" -content "管理員已透過 API 成功清空 Tomcat 快取 (work/temp)。" }
+            } catch { 
+                $out.message = "清理失敗: $($_.Exception.Message)" 
+                Write-ApiLog "!!! Tomcat 快取清理失敗: $($_.Exception.Message)" -Color Red
+                if ($enableAdminNotifications) { Send-SysAdminNotify -title "系統操作異常" -content "管理員嘗試透過 API 清空 Tomcat 快取失敗: $($_.Exception.Message)" }
+            }
         } 
         elseif ($path -eq "/tomcat/clean-crash-dumps") {
             try {
+                Write-ApiLog ">>> 收到 API 請求：準備清理 JVM Crash Dumps..." -Color Cyan
                 $dumps = Get-ChildItem -Path $tomcatDir -Filter "hs_err_pid*" -File
                 if ($dumps) {
                     $sz = 0; foreach ($f in $dumps) { $sz += $f.Length; Remove-Item $f.FullName -Force }
                     $out.success = $true; $out.message = "已刪除 $($dumps.Count) 個 Dump 檔，釋放 $([math]::Round($sz/1MB,2)) MB 空間"
-                    Write-ApiLog "清理了 $($dumps.Count) 個 JVM Crash Dumps" -Color Green
-                } else { $out.success = $true; $out.message = "未發現 Dump 檔案" }
-            } catch { $out.message = "刪除失敗: $($_.Exception.Message)" }
+                    Write-ApiLog ">>> 清理了 $($dumps.Count) 個 JVM Crash Dumps" -Color Green
+                    if ($enableAdminNotifications) { Send-SysAdminNotify -title "系統操作通知" -content "管理員已透過 API 成功清理 JVM 崩潰傾印檔，共釋放 $([math]::Round($sz/1MB,2)) MB 空間。" }
+                } else { 
+                    $out.success = $true; $out.message = "未發現 Dump 檔案" 
+                }
+            } catch { 
+                $out.message = "刪除失敗: $($_.Exception.Message)" 
+                Write-ApiLog "!!! JVM 崩潰檔清理失敗: $($_.Exception.Message)" -Color Red
+                if ($enableAdminNotifications) { Send-SysAdminNotify -title "系統操作異常" -content "管理員嘗試透過 API 清理 JVM 崩潰傾印檔失敗: $($_.Exception.Message)" }
+            }
         }
         elseif ($path -eq "/tomcat/download-logs") {
             try {
+                Write-ApiLog ">>> 收到 API 請求：準備打包下載日誌..." -Color Cyan
+                if (-not (Test-Path $logPath)) { New-Item -ItemType Directory -Path $logPath -Force | Out-Null }
+                
                 $zipName = "tomcat_logs_$(Get-Date -Format 'yyyyMMdd_HHmmss').zip"
                 $zipPath = Join-Path $logPath $zipName
-                Compress-Archive -Path "$tomcatDir\logs\*" -DestinationPath $zipPath -Force
-                $bytes = [System.IO.File]::ReadAllBytes($zipPath)
-                $res.ContentType = "application/zip"
-                $res.AddHeader("Content-Disposition", "attachment; filename=`"$zipName`"")
-                $res.OutputStream.Write($bytes, 0, $bytes.Length)
-                $res.Close(); $handledBinary = $true
-            } catch { $out.message = "備份日誌失敗" }
+                
+                # ?? 1. 建立暫存區來避開 Tomcat 檔案鎖定 (File in use)
+                $stagingDir = Join-Path $logPath "staging_$([guid]::NewGuid().ToString().Substring(0,8))"
+                New-Item -ItemType Directory -Path $stagingDir -Force | Out-Null
+                
+                Write-ApiLog " -> 正在複製日誌至暫存區..."
+                Copy-Item -Path "$tomcatDir\logs\*" -Destination $stagingDir -Recurse -Force -ErrorAction SilentlyContinue
+                
+                $filesToZip = Get-ChildItem -Path $stagingDir -File -Recurse
+                if ($filesToZip.Count -gt 0) {
+                    Write-ApiLog " -> 正在壓縮 $($filesToZip.Count) 個檔案..."
+                    Compress-Archive -Path "$stagingDir\*" -DestinationPath $zipPath -Force
+                    
+                    # ?? 2. 改用 ContentLength64 與分塊串流傳輸，徹底解決參數錯誤與記憶體耗盡問題
+                    $fileInfo = New-Object System.IO.FileInfo($zipPath)
+                    $res.ContentType = "application/zip"
+                    $res.AddHeader("Content-Disposition", "attachment; filename=`"$zipName`"")
+                    $res.ContentLength64 = $fileInfo.Length
+                    
+                    Write-ApiLog " -> 正在傳輸檔案 ($zipName, $([math]::Round($fileInfo.Length/1MB, 2)) MB)..."
+                    
+                    $fileStream = [System.IO.File]::OpenRead($zipPath)
+                    $buffer = New-Object byte[] 65536
+                    try {
+                        while (($read = $fileStream.Read($buffer, 0, $buffer.Length)) -gt 0) {
+                            $res.OutputStream.Write($buffer, 0, $read)
+                        }
+                        $handledBinary = $true
+                        Write-ApiLog ">>> 日誌打包下載完成！" -Color Green
+                    } catch {
+                        Write-ApiLog "!!! 檔案傳輸中斷 (前端逾時或取消): $($_.Exception.Message)" -Color Yellow
+                        $handledBinary = $true # 標記為已處理，避免後續寫入 JSON 產生二次錯誤
+                    } finally {
+                        $fileStream.Close()
+                        try { $res.Close() } catch {}
+                    }
+                } else {
+                    throw "無法複製任何日誌檔案，檔案可能被完全鎖定或目錄為空。"
+                }
+                
+                # 清理暫存區
+                Remove-Item -Path $stagingDir -Recurse -Force -ErrorAction SilentlyContinue
+                
+            } catch { 
+                # 發生錯誤時設定 HTTP 500，避免前端把錯誤訊息當成 ZIP 下載
+                $res.StatusCode = 500
+                $out.message = "備份日誌失敗: $($_.Exception.Message)" 
+                Write-ApiLog "!!! 打包日誌失敗: $($_.Exception.Message)" -Color Red
+                
+                if ($null -ne $stagingDir -and (Test-Path $stagingDir)) { 
+                    Remove-Item -Path $stagingDir -Recurse -Force -ErrorAction SilentlyContinue 
+                }
+            }
         }
         elseif ($path -eq "/server/logs") {
             $logDate = Get-Date -Format "yyyy-MM-dd"
@@ -551,14 +623,22 @@ while ($listener.IsListening) {
             $res.ContentType = "application/json"; $res.OutputStream.Write($buf, 0, $buf.Length); $res.Close()
         }
 
-        # ?? 核心修正 2：加入 try-catch 保護執行區塊，就算推播失敗也能正常重啟
+        # ?? 改良重啟邏輯，使用絕對路徑與安全陣列執行，確保重啟不會失敗且不會無窮迴圈
         if ($restartScript) { 
             Write-ApiLog ">>> 收到 API 指令：Agent 腳本即將重啟..." -Color Yellow
             try {
                 if ($enableAdminNotifications) { Send-SysAdminNotify -title "系統操作通知" -content "管理員已透過 API 觸發 Agent 腳本重啟作業。" }
                 Start-Sleep -Seconds 1
                 try { $listener.Abort() } catch {}
-                Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+                
+                # 確保路徑檔案真的存在才發動重啟，且使用 Array 傳遞參數避開空格地雷
+                if (Test-Path $global:AgentScriptPath) {
+                    $psArgs = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $global:AgentScriptPath)
+                    Start-Process powershell.exe -ArgumentList $psArgs
+                } else {
+                    Write-ApiLog "!!! 找不到腳本路徑 ($global:AgentScriptPath)，無法啟動新程序！" -Color Red
+                }
+                
                 [System.Environment]::Exit(0) 
             } catch {
                 Write-ApiLog "!!! 執行重啟腳本失敗: $($_.Exception.Message)" -Color Red

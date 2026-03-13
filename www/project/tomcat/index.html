@@ -768,7 +768,11 @@
                     try {
                         if (config.isDownload) {
                             downloadState.message = '正在執行壓縮打包作業...'; downloadState.active = true;
-                            const res = await fetch(apiUrl.value.replace(/\/$/, '') + config.endpoint, { headers: { 'X-API-KEY': apiKey.value } });
+                            // 🚀 核心修正：強制使用 POST 避免 GET 請求在耗時過長時被瀏覽器自動 Retry
+                            const res = await fetch(apiUrl.value.replace(/\/$/, '') + config.endpoint, { 
+                                method: 'POST',
+                                headers: { 'X-API-KEY': apiKey.value } 
+                            });
                             if (!res.ok) throw new Error('下載日誌失敗，請檢查伺服器日誌');
                             const blob = await res.blob();
                             const url = window.URL.createObjectURL(blob);
