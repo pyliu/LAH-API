@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tomcat 戰情面板</title>
+    <title>Tomcat 戰情面板 (Vue3)</title>
     
     <!-- 離線資源引入 (請確保同層有 offline 資料夾) -->
     <script src="./offline/tailwindcss.js"></script>
@@ -31,36 +31,39 @@
     </script>
 
     <style>
-        /* 基礎樣式與轉換動畫 */
         * { transition: background-color 0.2s ease, border-color 0.2s ease; }
         
-        /* 自訂捲軸樣式 */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         .dark ::webkit-scrollbar-track { background: #0f172a; }
         ::webkit-scrollbar-track { background: #f1f5f9; }
         .dark ::webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         ::webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         
-        /* 隱藏元素與捲動條 */
         .hide-scroll::-webkit-scrollbar { height: 0px; }
         [v-cloak] { display: none; }
         html { scroll-behavior: smooth; }
 
-        /* 縮放容器設定：視覺基準提升 20% */
         #zoom-wrapper {
             transform-origin: top center;
             transition: zoom 0.2s ease-out;
         }
 
-        /* 核心修復：解決 Chrome 在 zoom 下 Flexbox 與捲動圖層重疊的 Bug */
         .zoom-layer-fix {
             transform: translateZ(0);
             -webkit-transform: translateZ(0);
             isolation: isolate;
         }
         
-        /* 穩定 Icon 容器：防止 Lucide 替換 i 標籤時 Vue 崩潰 */
         .icon-box { display: inline-flex; align-items: center; justify-content: center; }
+
+        /* 🚀 AI 打字機特效動畫 */
+        @keyframes typeLine {
+            0% { opacity: 0; transform: translateX(-8px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        .animate-type-line {
+            animation: typeLine 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans overflow-hidden">
@@ -80,10 +83,8 @@
             <p class="text-slate-500 text-sm font-bold">正在與遠端 API Agent 建立安全連線...</p>
         </div>
 
-        <!-- 縮放層：zoom 設定為 zoomLevel * 1.2 (視覺基準提升 20%) -->
         <div id="zoom-wrapper" :style="{ zoom: zoomLevel * 1.2 }">
             
-            <!-- 👑 頂端導覽列 -->
             <header class="sticky top-0 z-30 w-full bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm zoom-layer-fix">
                 <div class="max-w-7xl mx-auto px-4 md:px-8 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div class="flex items-center">
@@ -97,7 +98,6 @@
                     </div>
 
                     <div class="flex items-center gap-2 w-full md:w-auto">
-                        <!-- API 快速設定欄位 -->
                         <div :class="['bg-white dark:bg-slate-900 border p-1 rounded-xl flex items-center gap-1 shadow-sm flex-1 md:flex-none md:min-w-[475px] transition-all', isConnectionError ? 'border-red-500 shadow-red-500/20 shadow-lg' : 'border-slate-200 dark:border-slate-800']">
                             <div class="relative flex-1">
                                 <span class="icon-box absolute left-3 top-1/2 -translate-y-1/2"><i data-lucide="activity" :class="['w-3.5 h-3.5', isConnectionError ? 'text-red-400' : 'text-slate-400']"></i></span>
@@ -113,14 +113,12 @@
                             </button>
                         </div>
 
-                        <!-- 主題切換 -->
                         <button @click="toggleTheme" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all shadow-sm">
                             <span class="icon-box text-amber-500 dark:text-yellow-400">
                                 <i :data-lucide="isDarkMode ? 'sun' : 'moon'" class="w-4 h-4"></i>
                             </span>
                         </button>
                         
-                        <!-- 縮放控制 UI -->
                         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl flex items-center gap-1 shadow-sm">
                             <button @click="changeZoom(-0.05)" class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
                                 <span class="icon-box"><i data-lucide="zoom-out" class="w-3.5 h-3.5 text-slate-500"></i></span>
@@ -134,13 +132,11 @@
                 </div>
             </header>
 
-            <!-- 內容佈局網格 -->
             <main class="max-w-7xl mx-auto px-4 md:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 
                 <!-- 左側：狀態與資源 (Sticky) -->
                 <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-[100px] zoom-layer-fix overflow-y-auto pr-2" :style="{ maxHeight: logContainerHeight }">
                     
-                    <!-- 1. 狀態卡片 -->
                     <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm relative overflow-hidden">
                         <div class="mb-6 flex justify-between items-start">
                             <div :class="['inline-flex items-center px-4 py-1.5 rounded-full border transition-all shadow-sm', statusColors.bg]">
@@ -174,7 +170,6 @@
                         </div>
                     </section>
 
-                    <!-- 2. 資源監控 -->
                     <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
                         <h2 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center">
                             <span class="icon-box"><i data-lucide="cpu" class="w-3.5 h-3.5 mr-2"></i></span> 資源監控 (Resource)
@@ -214,7 +209,6 @@
                         </div>
                     </section>
 
-                    <!-- 3. 維運操作 -->
                     <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
                         <h2 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">維運操作 (Operations)</h2>
                         <div class="space-y-2">
@@ -242,26 +236,6 @@
                         </div>
                     </section>
 
-                    <!-- 4. 系統資源下載連結 -->
-                    <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-                        <h2 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">系統資源 (Resources)</h2>
-                        <div class="space-y-2">
-                            <a href="./server/Tomcat_API_Agent.ps1" target="_blank" class="w-full flex items-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 border border-slate-100 dark:border-slate-700 rounded-xl transition-all group">
-                                <span class="icon-box mr-3 text-blue-500"><i data-lucide="file-code" class="w-4 h-4"></i></span>
-                                <span class="text-xs font-bold">伺服器服務腳本 (.ps1)</span>
-                            </a>
-                            <a href="./server/Tomcat_API_部署說明手冊.pdf" target="_blank" class="w-full flex items-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 border border-slate-100 dark:border-slate-700 rounded-xl transition-all group">
-                                <span class="icon-box mr-3 text-emerald-500"><i data-lucide="book-open" class="w-4 h-4"></i></span>
-                                <span class="text-xs font-bold">部署說明文件 (.pdf)</span>
-                            </a>
-                            <a href="./server/Tomcat_API_介面測試集.pdf" target="_blank" class="w-full flex items-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 border border-slate-100 dark:border-slate-700 rounded-xl transition-all group">
-                                <span class="icon-box mr-3 text-amber-500"><i data-lucide="test-tube" class="w-4 h-4"></i></span>
-                                <span class="text-xs font-bold">API 介面測試集 (.pdf)</span>
-                            </a>
-                        </div>
-                    </section>
-
-                    <!-- 5. 系統管理 -->
                     <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm text-center">
                         <div class="grid grid-cols-2 gap-2">
                             <button @click="handleAction('restartAgent')" :disabled="isOperating || isConnectionError" class="flex flex-col items-center justify-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 border border-slate-100 rounded-xl transition-all disabled:opacity-50">
@@ -286,7 +260,6 @@
                             </button>
                         </div>
                         <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                            <!-- 🚀 最後更新時間與無感同步指示器 -->
                             <div v-if="lastUpdated" class="hidden sm:flex items-center text-[10px] text-slate-500 dark:text-slate-400 font-mono mr-1 px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700">
                                 <span class="icon-box mr-1"><i data-lucide="clock" class="w-3 h-3"></i></span>
                                 更新於 {{ lastUpdated }}
@@ -302,25 +275,39 @@
                         </div>
                     </div>
                     
-                    <!-- 終端機顯示區 -->
                     <div class="relative flex-1 min-h-0">
-                        <!-- 🚀 捲動區 (加入 scroll 事件監聽防捲動) -->
                         <div ref="logContainer" @scroll="handleScroll" class="absolute inset-0 bg-slate-50 dark:bg-[#0a0f18] p-4 font-mono text-xs shadow-inner leading-relaxed overflow-y-auto zoom-layer-fix scroll-smooth">
                             <div v-if="logs.length === 0 && !isRefreshingLogs && !isAutoSyncing" class="h-full flex items-center justify-center text-slate-400 flex-col opacity-50">
                                 <span class="icon-box mb-4 opacity-20"><i data-lucide="terminal" class="w-16 h-16"></i></span>
                                 <p class="font-black tracking-[0.2em] uppercase">{{ isConnectionError ? '連線異常 (Connection Error)' : '目前尚無資料 (No Data)' }}</p>
                             </div>
                             <div v-else class="space-y-1">
-                                <!-- 日誌渲染區：包含智慧型發生時間顯示 -->
-                                <div v-for="(logItem, idx) in logs" :key="idx" :class="getLogColor(logItem.text)" class="break-all whitespace-pre-wrap">
-                                    <span class="opacity-30 mr-3 select-none inline-block w-8 text-right">{{ (idx + 1) }}</span>
-                                    <span v-if="logItem.time" class="text-blue-600/70 dark:text-blue-400/70 mr-2 select-none font-bold">[{{ logItem.time }}]</span>
-                                    <span>{{ logItem.text }}</span>
+                                <!-- 🚀 日誌渲染區 (採用 Flexbox 排版與打字機特效) -->
+                                <div v-for="(logItem, idx) in logs" :key="logItem.id || idx" :class="[getLogColor(logItem.text), logItem.isNew ? 'animate-type-line' : '']" class="break-all whitespace-pre-wrap flex">
+                                    <span class="opacity-30 mr-3 select-none inline-block w-8 text-right flex-shrink-0">{{ (idx + 1) }}</span>
+                                    <div class="flex-1">
+                                        <span v-if="logItem.time" class="text-blue-600/70 dark:text-blue-400/70 mr-2 select-none font-bold">[{{ logItem.time }}]</span>
+                                        <span>{{ logItem.text }}</span>
+                                    </div>
+                                </div>
+                                <!-- 🚀 終端機閃爍游標 -->
+                                <div v-if="logs.length > 0" class="flex mt-1">
+                                    <span class="opacity-30 mr-3 select-none inline-block w-8 text-right flex-shrink-0"></span>
+                                    <div class="flex-1">
+                                        <span class="inline-block w-2 h-3.5 bg-slate-400 dark:bg-slate-500 animate-pulse ml-1 align-middle"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- 載入中遮罩 (只有在手動刷新或首次載入時顯示，無感同步不顯示) -->
+                        <!-- 🚀 浮動按鈕：回到最新日誌 (當使用者往上滾動，且取消自動置底時顯示) -->
+                        <button v-if="!shouldAutoScroll && logs.length > 0" @click="resumeAutoScroll"
+                                class="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-blue-600/90 dark:bg-blue-500/90 hover:bg-blue-600 text-white rounded-full shadow-lg shadow-blue-900/50 backdrop-blur-sm border border-blue-400/30 flex items-center text-xs font-bold transition-all animate-fade-in-up z-40">
+                            <span class="icon-box mr-1.5"><i data-lucide="arrow-down" class="w-4 h-4 animate-bounce"></i></span>
+                            有新日誌，點擊回到最底
+                        </button>
+                        
+                        <!-- 載入中遮罩 -->
                         <div v-if="isRefreshingLogs" class="absolute inset-0 z-50 bg-white/50 dark:bg-[#0a0f18]/60 backdrop-blur-sm flex items-center justify-center transition-all duration-300">
                             <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-8 py-6 rounded-2xl shadow-2xl flex flex-col items-center animate-scale-in">
                                 <div class="relative w-12 h-12 mb-4">
@@ -335,7 +322,7 @@
             </main>
         </div>
 
-        <!-- 🚀 連線設定精靈 Modal -->
+        <!-- 連線設定精靈 -->
         <div v-if="setupModal.show" class="fixed inset-0 z-[300] flex items-center justify-center bg-slate-900/90 backdrop-blur-md px-4 animate-scale-in">
             <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-2xl p-8 max-w-md w-full text-center relative overflow-hidden">
                 <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -364,7 +351,6 @@
             </div>
         </div>
 
-        <!-- 全螢幕遮罩組件 (重連、下載) -->
         <div v-if="reconnectState.active" class="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-slate-900/90 backdrop-blur-md px-4 animate-scale-in text-center">
              <div class="relative flex items-center justify-center mb-10 w-40 h-40">
                 <div class="absolute w-full h-full border-4 border-blue-500/20 rounded-full animate-ping-slow"></div>
@@ -415,10 +401,9 @@
 
         createApp({
             setup() {
-                // 動態高度與縮放系統
                 const viewportHeight = ref(window.innerHeight);
                 const updateHeight = () => { viewportHeight.value = window.innerHeight; };
-                const baseZoomFactor = 1.2; // 視覺基準提升 20%
+                const baseZoomFactor = 1.2;
                 const zoomLevel = ref(parseFloat(localStorage.getItem('tomcatUiZoom')) || 1.0); 
                 
                 const changeZoom = (delta) => {
@@ -439,7 +424,6 @@
                 });
 
                 const isInitialLoading = ref(true);
-
                 const isDarkMode = ref(localStorage.getItem('tomcatTheme') !== 'light');
                 const toggleTheme = () => {
                     isDarkMode.value = !isDarkMode.value;
@@ -459,42 +443,105 @@
 
                 const statusData = ref(null);
                 const logs = ref([]); 
-                
-                // 🚀 預設顯示 stdout 頁籤
                 const currentLogType = ref('stdout');
-                
                 const logLines = ref(100); 
                 const isOperating = ref(false);
                 const isRefreshingLogs = ref(false);
-                const isAutoSyncing = ref(false); // 控制背景同步時的綠色呼吸燈
+                const isAutoSyncing = ref(false); 
                 const logContainer = ref(null);
-                
                 const lastUpdated = ref('');
-                
-                // 🚀 智慧型防滾動 (Smart Scroll) 狀態
                 const shouldAutoScroll = ref(true);
                 
+                // 🚀 AI 打字機串流系統
+                const logQueue = ref([]);
+                const isStreaming = ref(false);
+                
+                // 🚀 DOM 捲軸保護鎖 (防止 Vue 更新 DOM 瞬間觸發假性 scroll 事件)
+                let isUpdatingDOM = false;
+                let scrollLockTimeout = null;
+
+                // 安全生成 UUID
+                const generateId = () => {
+                    if (window.crypto && window.crypto.randomUUID) { return window.crypto.randomUUID(); }
+                    return Date.now().toString(36) + Math.random().toString(36).substring(2);
+                };
+
+                // 🚀 核心捲軸鎖定機制：更新資料前掛上保護鎖
+                const executeWithScrollLock = (actionCallback, forceScroll = false) => {
+                    isUpdatingDOM = true;
+                    if (scrollLockTimeout) clearTimeout(scrollLockTimeout);
+                    
+                    actionCallback(); // 執行資料變動 (例如新增/刪除行數)
+                    
+                    nextTick(() => {
+                        if (logContainer.value && (forceScroll || shouldAutoScroll.value)) {
+                            logContainer.value.scrollTop = logContainer.value.scrollHeight;
+                        }
+                        // 給予瀏覽器充足時間完成重繪，並吸收掉因高度變化而引發的錯誤 scroll 事件
+                        scrollLockTimeout = setTimeout(() => { isUpdatingDOM = false; }, 150);
+                    });
+                };
+
+                // 系統發生捲動時的處理邏輯
+                const handleScroll = (e) => {
+                    if (isUpdatingDOM) return; // 💡 鎖定期間忽略所有捲軸事件，防止被誤判為使用者向上捲動
+                    const { scrollTop, scrollHeight, clientHeight } = e.target;
+                    // 將判定閾值放寬至 80px，提升體驗
+                    shouldAutoScroll.value = scrollHeight - scrollTop - clientHeight < 80;
+                };
+
+                // 🚀 新增：手動恢復自動捲動並回到最底
+                const resumeAutoScroll = () => {
+                    shouldAutoScroll.value = true;
+                    // 強制平滑捲動到底部
+                    nextTick(() => {
+                        if (logContainer.value) {
+                            logContainer.value.scrollTo({
+                                top: logContainer.value.scrollHeight,
+                                behavior: 'smooth'
+                            });
+                        }
+                    });
+                };
+
+                // 將新日誌推入串流佇列
+                const streamQueue = (queue, forceScroll) => {
+                    logQueue.value = [...logQueue.value, ...queue];
+                    if (!isStreaming.value) {
+                        isStreaming.value = true;
+                        processQueue(forceScroll);
+                    }
+                };
+
+                // 行列消化器 (動態調整印出速度)
+                const processQueue = (forceScroll) => {
+                    if (logQueue.value.length === 0) {
+                        isStreaming.value = false;
+                        // 移除新行標記避免重複動畫
+                        setTimeout(() => { logs.value.forEach(l => l.isNew = false); }, 300);
+                        return;
+                    }
+
+                    // 透過保護鎖更新串流資料
+                    executeWithScrollLock(() => {
+                        const nextLine = logQueue.value.shift();
+                        logs.value.push(nextLine);
+
+                        if (logs.value.length > logLines.value) {
+                            logs.value.shift();
+                        }
+                    }, forceScroll);
+
+                    // 智慧調節打字速度：排隊越多，打字越快
+                    const delay = logQueue.value.length > 20 ? 15 : (logQueue.value.length > 5 ? 35 : 60);
+                    setTimeout(() => processQueue(forceScroll), delay);
+                };
+
                 const toasts = ref([]);
                 let toastIdCounter = 0;
                 const modal = reactive({ show: false, title: '', message: '', danger: false, actionKey: null });
                 const reconnectState = reactive({ active: false, message: '', secondsLeft: 0, maxTime: 0, intervalId: null });
                 const downloadState = reactive({ active: false, message: '' });
-
-                // 🚀 監聽捲動事件，判斷使用者是否正在往上翻閱
-                const handleScroll = (e) => {
-                    const { scrollTop, scrollHeight, clientHeight } = e.target;
-                    // 若距離底部小於 50px，則視為在最底部，允許自動捲動
-                    shouldAutoScroll.value = scrollHeight - scrollTop - clientHeight < 50;
-                };
-
-                // 🚀 只有在允許自動捲動，或是手動強制 (例如換頁籤) 時才捲到最底
-                const scrollToBottom = (force = false) => {
-                    nextTick(() => { 
-                        if (logContainer.value && (force || shouldAutoScroll.value)) {
-                            logContainer.value.scrollTop = logContainer.value.scrollHeight; 
-                        }
-                    });
-                };
 
                 const formatBytes = (bytes) => {
                     if (!bytes) return '0 B';
@@ -589,15 +636,25 @@
                     }
                 };
 
-                // 檢查字串是否已經包含原生時間戳，避免重複產生
                 const hasBuiltInTime = (line) => {
                     return /^(\[?\d{4}-\d{2}-\d{2}|\d{2}-[a-zA-Z]{3}-\d{4}|\d{1,2}\s+[\u4e00-\u9fa5a-zA-Z]+\s+\d{4}|\d{4}\/\d{2}\/\d{2}|[A-Za-z]{3}\s+\d{1,2},\s+\d{4}|[\u4e00-\u9fa5]{2,3}\s+\d{1,2},\s+\d{4}|\[系統提示\])/.test(line);
                 };
 
-                // 🚀 fetchLogs 增加 isAutoRefresh 參數 (true 時不顯示大型遮罩)
                 const fetchLogs = async (isAutoRefresh = false) => {
                     if (isConnectionError.value || !apiUrl.value || setupModal.show) return;
                     
+                    // 若前一波仍在印字中，瞬間將其補齊以準備下一次比對
+                    if (isStreaming.value) {
+                        executeWithScrollLock(() => {
+                            logs.value = [...logs.value, ...logQueue.value];
+                            if (logs.value.length > logLines.value) {
+                                logs.value = logs.value.slice(logs.value.length - logLines.value);
+                            }
+                        }, !isAutoRefresh);
+                        logQueue.value = [];
+                        isStreaming.value = false;
+                    }
+
                     if (!isAutoRefresh) isRefreshingLogs.value = true;
                     else isAutoSyncing.value = true;
                     
@@ -609,7 +666,6 @@
                     try {
                         const [res] = await Promise.all([
                             callApi(endpoint),
-                            // 若是手動刷新，保證最少看 600ms 毛玻璃；若是背景同步則無需等待
                             isAutoRefresh ? Promise.resolve() : new Promise(resolve => setTimeout(resolve, 600))
                         ]);
 
@@ -617,65 +673,81 @@
 
                         if (res.success) { 
                             const newLines = res.data;
-                            let nextLogs = [];
                             
-                            // 智慧型發生時間：比對狀態，若為新出現的日誌才標上當前時間
-                            if (logs.value.length === 0 || typeof logs.value[0] !== 'object' || !isAutoRefresh) {
-                                nextLogs = newLines.map(text => ({ 
-                                    text, 
-                                    time: hasBuiltInTime(text) ? '' : fetchTime 
-                                }));
+                            let isIdentical = false;
+                            if (logs.value.length === newLines.length && logs.value.length > 0) {
+                                isIdentical = logs.value.every((log, index) => log.text === newLines[index]);
+                            }
+
+                            if (isIdentical) {
+                                executeWithScrollLock(() => {}, !isAutoRefresh);
                             } else {
-                                const oldLogs = logs.value;
-                                const sigSize = Math.min(5, oldLogs.length);
-                                const oldSig = oldLogs.slice(oldLogs.length - sigSize).map(l => l.text).join('\n');
-                                let foundMatch = false;
-                                
-                                // 嘗試對齊尾端找出新舊重疊處
-                                for (let i = 0; i <= newLines.length - sigSize; i++) {
-                                    const newSig = newLines.slice(i, i + sigSize).join('\n');
-                                    if (newSig === oldSig) {
-                                        const oldStartIdx = oldLogs.length - (i + sigSize);
-                                        for (let j = 0; j < newLines.length; j++) {
-                                            if (j < i + sigSize && oldStartIdx + j >= 0) {
-                                                // 保留舊行的原有時間紀錄
-                                                nextLogs.push({
-                                                    time: oldLogs[oldStartIdx + j].time,
-                                                    text: newLines[j]
-                                                });
-                                            } else {
-                                                // 為新增的行數加上擷取時間
-                                                nextLogs.push({
-                                                    time: hasBuiltInTime(newLines[j]) ? '' : fetchTime,
-                                                    text: newLines[j]
-                                                });
+                                let baseLogs = [];
+                                let newLogsQueue = [];
+
+                                // 若是手動刷新或首次載入，直接瞬間顯示不排隊
+                                if (logs.value.length === 0 || typeof logs.value[0] !== 'object' || !isAutoRefresh) {
+                                    baseLogs = newLines.map(text => ({ 
+                                        text, 
+                                        time: hasBuiltInTime(text) ? '' : fetchTime,
+                                        id: generateId()
+                                    }));
+                                } else {
+                                    const oldLogs = logs.value;
+                                    const sigSize = Math.min(5, oldLogs.length);
+                                    const oldSig = oldLogs.slice(oldLogs.length - sigSize).map(l => l.text).join('\n');
+                                    let foundMatch = false;
+                                    
+                                    for (let i = 0; i <= newLines.length - sigSize; i++) {
+                                        const newSig = newLines.slice(i, i + sigSize).join('\n');
+                                        if (newSig === oldSig) {
+                                            const oldStartIdx = oldLogs.length - (i + sigSize);
+                                            for (let j = 0; j < newLines.length; j++) {
+                                                if (j < i + sigSize && oldStartIdx + j >= 0) {
+                                                    baseLogs.push({
+                                                        time: oldLogs[oldStartIdx + j].time,
+                                                        text: newLines[j],
+                                                        id: oldLogs[oldStartIdx + j].id || generateId()
+                                                    });
+                                                } else {
+                                                    newLogsQueue.push({
+                                                        time: hasBuiltInTime(newLines[j]) ? '' : fetchTime,
+                                                        text: newLines[j],
+                                                        id: generateId(),
+                                                        isNew: true
+                                                    });
+                                                }
                                             }
+                                            foundMatch = true;
+                                            break;
                                         }
-                                        foundMatch = true;
-                                        break;
+                                    }
+                                    
+                                    if (!foundMatch) {
+                                        baseLogs = newLines.map(text => ({ 
+                                            text, 
+                                            time: hasBuiltInTime(text) ? '' : fetchTime,
+                                            id: generateId()
+                                        }));
                                     }
                                 }
                                 
-                                // 若無法對齊 (如讀取更多歷史紀錄或被清空重啟)
-                                if (!foundMatch) {
-                                    nextLogs = newLines.map(text => ({ 
-                                        text, 
-                                        time: hasBuiltInTime(text) ? '' : fetchTime 
-                                    }));
+                                // 若有新 Log 排隊，則啟動串流打字機
+                                if (newLogsQueue.length > 0) {
+                                    executeWithScrollLock(() => { logs.value = baseLogs; }, !isAutoRefresh);
+                                    streamQueue(newLogsQueue, !isAutoRefresh);
+                                } else {
+                                    executeWithScrollLock(() => { logs.value = baseLogs; }, !isAutoRefresh);
                                 }
+                                
+                                lastUpdated.value = fetchTime;
                             }
-                            
-                            logs.value = nextLogs;
-                            lastUpdated.value = fetchTime;
                         } else {
-                            logs.value = [{ text: `[系統提示] ${res.message}`, time: '' }];
+                            logs.value = [{ text: `[系統提示] ${res.message}`, time: '', id: generateId() }];
                         }
                         
-                        // 捲動：若是手動刷新(非同步) 則強制往下滾；若是無感同步，則套用智慧防捲動邏輯
-                        scrollToBottom(!isAutoRefresh); 
-                        
                     } catch (e) {
-                        logs.value = [{ text: `[ERROR] ${e.message}`, time: '' }];
+                        logs.value = [{ text: `[ERROR] ${e.message}`, time: '', id: generateId() }];
                     } finally {
                         isRefreshingLogs.value = false;
                         isAutoSyncing.value = false;
@@ -685,9 +757,11 @@
 
                 const loadMoreLogs = () => { logLines.value += 100; fetchLogs(false); };
                 
-                // 當切換頁籤時，清空日誌，重置行數，並「強制」設定允許捲動
+                // 🚀 切換頁籤時清空打字機佇列與現有資料
                 watch(currentLogType, () => { 
-                    logs.value = [];
+                    isStreaming.value = false;
+                    logQueue.value = [];
+                    executeWithScrollLock(() => { logs.value = []; }, true);
                     logLines.value = 100;
                     shouldAutoScroll.value = true; 
                     fetchLogs(false); 
@@ -768,7 +842,6 @@
                     try {
                         if (config.isDownload) {
                             downloadState.message = '正在執行壓縮打包作業...'; downloadState.active = true;
-                            // 🚀 核心修正：強制使用 POST 避免 GET 請求在耗時過長時被瀏覽器自動 Retry
                             const res = await fetch(apiUrl.value.replace(/\/$/, '') + config.endpoint, { 
                                 method: 'POST',
                                 headers: { 'X-API-KEY': apiKey.value } 
@@ -805,12 +878,11 @@
                         triggerManualCheck(); 
                     }
                     
-                    // 🚀 狀態更新排程 (每 15 秒)
                     setInterval(() => {
                         if (!reconnectState.active && !isOperating.value && !setupModal.show) { fetchStatus(); }
                     }, 15000);
 
-                    // 🚀 日誌無感背景同步排程 (每 3 秒)
+                    // 🚀 背景日誌同步：改為更積極的每 3 秒同步，搭配打字機特效
                     setInterval(() => {
                         if (!reconnectState.active && !isOperating.value && !setupModal.show && !isConnectionError.value) { 
                             fetchLogs(true); 
@@ -821,7 +893,7 @@
                 onUpdated(() => lucide.createIcons());
 
                 return {
-                    zoomLevel, changeZoom, resetZoom, logContainerHeight, apiUrl, apiKey, statusData, logs, currentLogType, logLines, isOperating, isRefreshingLogs, isAutoSyncing, logContainer, handleScroll,
+                    zoomLevel, changeZoom, resetZoom, logContainerHeight, apiUrl, apiKey, statusData, logs, currentLogType, logLines, isOperating, isRefreshingLogs, isAutoSyncing, logContainer, handleScroll, shouldAutoScroll, resumeAutoScroll,
                     modal, toasts, statusColors, isDarkMode, formatBytes, fetchStatus, fetchLogs, loadMoreLogs, handleAction, executeModalAction, getLogColor, getToastColor, toggleTheme,
                     reconnectState, cancelReconnection, downloadState, isConnectionError, setupModal, openSetupModal, saveSetup, triggerManualCheck,
                     isInitialLoading, lastUpdated
