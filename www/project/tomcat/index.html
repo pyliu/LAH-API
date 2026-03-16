@@ -106,7 +106,10 @@
                             <div class="w-px h-4 bg-slate-200 dark:bg-slate-800 mx-1"></div>
                             <div class="relative flex-1">
                                 <span class="icon-box absolute left-3 top-1/2 -translate-y-1/2"><i data-lucide="settings" :class="['w-3.5 h-3.5', isConnectionError ? 'text-red-400' : 'text-slate-400']"></i></span>
-                                <input type="password" v-model="apiKey" placeholder="金鑰" class="pl-8 pr-3 py-1.5 bg-transparent text-xs focus:ring-0 outline-none w-full font-mono text-slate-800 dark:text-slate-200" @change="triggerManualCheck">
+                                <input :type="showApiKey ? 'text' : 'password'" v-model="apiKey" placeholder="金鑰" class="pl-8 pr-8 py-1.5 bg-transparent text-xs focus:ring-0 outline-none w-full font-mono text-slate-800 dark:text-slate-200" @change="triggerManualCheck">
+                                <button @click="toggleApiKeyVisibility" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                                    <span class="icon-box"><i :data-lucide="showApiKey ? 'eye-off' : 'eye'" class="w-3.5 h-3.5"></i></span>
+                                </button>
                             </div>
                             <button @click="openSetupModal" :class="['p-1.5 rounded-lg transition-colors', isConnectionError ? 'text-red-500 hover:bg-red-50 dark:hover:bg-red-500/20' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800']">
                                 <span class="icon-box"><i :data-lucide="isConnectionError ? 'alert-circle' : 'settings-2'" :class="['w-4 h-4', isConnectionError ? 'animate-pulse' : '']"></i></span>
@@ -337,7 +340,12 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">API 授權金鑰</label>
-                        <input type="password" v-model="setupModal.key" placeholder="輸入 API 金鑰" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono text-slate-800 dark:text-slate-200">
+                        <div class="relative">
+                            <input :type="setupModal.showKey ? 'text' : 'password'" v-model="setupModal.key" placeholder="輸入 API 金鑰" class="w-full pl-4 pr-11 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono text-slate-800 dark:text-slate-200">
+                            <button @click="toggleModalKeyVisibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1">
+                                <span class="icon-box"><i :data-lucide="setupModal.showKey ? 'eye-off' : 'eye'" class="w-4 h-4"></i></span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="flex gap-3 mt-8">
@@ -438,8 +446,19 @@
 
                 const apiUrl = ref(localStorage.getItem('tomcatApiUrl') || '');
                 const apiKey = ref(localStorage.getItem('tomcatApiKey') || '');
+                const showApiKey = ref(false);
                 const isConnectionError = ref(false);
-                const setupModal = reactive({ show: false, url: '', key: '', testing: false });
+                const setupModal = reactive({ show: false, url: '', key: '', testing: false, showKey: false });
+
+                const toggleApiKeyVisibility = () => {
+                    showApiKey.value = !showApiKey.value;
+                    nextTick(() => { lucide.createIcons(); });
+                };
+
+                const toggleModalKeyVisibility = () => {
+                    setupModal.showKey = !setupModal.showKey;
+                    nextTick(() => { lucide.createIcons(); });
+                };
 
                 const statusData = ref(null);
                 const logs = ref([]); 
@@ -910,9 +929,9 @@
                 onUpdated(() => lucide.createIcons());
 
                 return {
-                    zoomLevel, changeZoom, resetZoom, logContainerHeight, apiUrl, apiKey, statusData, logs, currentLogType, logLines, isOperating, isRefreshingLogs, isAutoSyncing, logContainer, handleScroll, shouldAutoScroll, resumeAutoScroll,
+                    zoomLevel, changeZoom, resetZoom, logContainerHeight, apiUrl, apiKey, showApiKey, toggleApiKeyVisibility, statusData, logs, currentLogType, logLines, isOperating, isRefreshingLogs, isAutoSyncing, logContainer, handleScroll, shouldAutoScroll, resumeAutoScroll,
                     modal, toasts, statusColors, isDarkMode, formatBytes, fetchStatus, fetchLogs, loadMoreLogs, handleAction, executeModalAction, getLogColor, getToastColor, toggleTheme,
-                    reconnectState, cancelReconnection, downloadState, isConnectionError, setupModal, openSetupModal, saveSetup, triggerManualCheck,
+                    reconnectState, cancelReconnection, downloadState, isConnectionError, setupModal, toggleModalKeyVisibility, openSetupModal, saveSetup, triggerManualCheck,
                     isInitialLoading, lastUpdated
                 };
             }
