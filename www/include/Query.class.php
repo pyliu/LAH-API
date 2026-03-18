@@ -85,7 +85,7 @@ class Query {
 					WHEN t.RM02 LIKE '%".$this->db_wrapper->getSite()."' THEN 'reg.XXHB'
 					WHEN t.RM02 LIKE 'H%".$this->db_wrapper->getSiteCode()."1' THEN 'reg.HXB1'
 					WHEN t.RM02 LIKE '".$this->db_wrapper->getSite()."%' THEN 'reg.HB'
-					ELSE '".mb_convert_encoding('登記案件', 'UTF-8', 'BIG5')."'
+					ELSE '".mb_convert_encoding('登記案件', 'UTF-8', ORACLE_ENCODING)."'
 				END) AS CODE_TYPE
 			FROM MOICAS.CRSMS t
 			LEFT JOIN MOIADM.RKEYN q ON q.kcde_1 = '04' AND q.kcde_2 = t.rm02
@@ -135,7 +135,7 @@ class Query {
 
 		$this->db_wrapper->getDB()->parse($prefix.$postfix);
 		if (!empty($cond)) {
-			$this->db_wrapper->getDB()->bind(":bv_cond", iconv("utf-8", "big5", ltrim($cond, '0')));
+			$this->db_wrapper->getDB()->bind(":bv_cond", iconv("utf-8", ORACLE_ENCODING, ltrim($cond, '0')));
 		}
 
 		$this->db_wrapper->getDB()->execute();
@@ -172,58 +172,58 @@ class Query {
 				r.SR08             AS \"LOG時間\",
 				r.SR_METHOD        AS \"申請方式\",
 				(CASE
-					WHEN t.MD04 = 'A' THEN '".iconv("utf-8", "big5", "登記電子資料謄本")."'
-					WHEN t.MD04 = 'B' THEN '".iconv("utf-8", "big5", "地價電子資料謄本")."'
-					WHEN t.MD04 = 'C' THEN '".iconv("utf-8", "big5", "地籍圖謄本")."'
-					WHEN t.MD04 = 'D' THEN '".iconv("utf-8", "big5", "建物平面圖謄本")."'
-					WHEN t.MD04 = 'E' THEN '".iconv("utf-8", "big5", "人工登記簿謄本")."'
-					WHEN t.MD04 = 'F' THEN '".iconv("utf-8", "big5", "閱覽")."'
-					WHEN t.MD04 = 'G' THEN '".iconv("utf-8", "big5", "列印電子資料")."'
-					WHEN t.MD04 = 'H' THEN '".iconv("utf-8", "big5", "申請")."'
-					WHEN t.MD04 = 'I' THEN '".iconv("utf-8", "big5", "測量")."'
-					WHEN t.MD04 = 'J' THEN '".iconv("utf-8", "big5", "異動索引")."'
-					WHEN t.MD04 = 'K' THEN '".iconv("utf-8", "big5", "土地建物異動清冊")."'
-					WHEN t.MD04 = 'L' THEN '".iconv("utf-8", "big5", "代理人申請登記案件明細表")."'
-					WHEN t.MD04 = 'M' THEN '".iconv("utf-8", "big5", "土地參考資訊")."'
+					WHEN t.MD04 = 'A' THEN '".iconv("utf-8", ORACLE_ENCODING, "登記電子資料謄本")."'
+					WHEN t.MD04 = 'B' THEN '".iconv("utf-8", ORACLE_ENCODING, "地價電子資料謄本")."'
+					WHEN t.MD04 = 'C' THEN '".iconv("utf-8", ORACLE_ENCODING, "地籍圖謄本")."'
+					WHEN t.MD04 = 'D' THEN '".iconv("utf-8", ORACLE_ENCODING, "建物平面圖謄本")."'
+					WHEN t.MD04 = 'E' THEN '".iconv("utf-8", ORACLE_ENCODING, "人工登記簿謄本")."'
+					WHEN t.MD04 = 'F' THEN '".iconv("utf-8", ORACLE_ENCODING, "閱覽")."'
+					WHEN t.MD04 = 'G' THEN '".iconv("utf-8", ORACLE_ENCODING, "列印電子資料")."'
+					WHEN t.MD04 = 'H' THEN '".iconv("utf-8", ORACLE_ENCODING, "申請")."'
+					WHEN t.MD04 = 'I' THEN '".iconv("utf-8", ORACLE_ENCODING, "測量")."'
+					WHEN t.MD04 = 'J' THEN '".iconv("utf-8", ORACLE_ENCODING, "異動索引")."'
+					WHEN t.MD04 = 'K' THEN '".iconv("utf-8", ORACLE_ENCODING, "土地建物異動清冊")."'
+					WHEN t.MD04 = 'L' THEN '".iconv("utf-8", ORACLE_ENCODING, "代理人申請登記案件明細表")."'
+					WHEN t.MD04 = 'M' THEN '".iconv("utf-8", ORACLE_ENCODING, "土地參考資訊")."'
 					ELSE t.MD04
        			END) AS \"謄本種類\",
        			(CASE
-					WHEN t.MD05 = 'A' THEN '".iconv("utf-8", "big5", "全部")."'
-					WHEN t.MD05 = 'B' THEN '".iconv("utf-8", "big5", "所有權個人全部")."'
-					WHEN t.MD05 = 'C' THEN '".iconv("utf-8", "big5", "標示部")."'
-					WHEN t.MD05 = 'D' THEN '".iconv("utf-8", "big5", "所有權部")."'
-					WHEN t.MD05 = 'E' THEN '".iconv("utf-8", "big5", "他項權利部")."'
-					WHEN t.MD05 = 'F' THEN '".iconv("utf-8", "big5", "標示部及所有權部")."'
-					WHEN t.MD05 = 'G' THEN '".iconv("utf-8", "big5", "標示部及他項權利部")."'
-					WHEN t.MD05 = 'H' THEN '".iconv("utf-8", "big5", "他項權利部之個人")."'
-					WHEN t.MD05 = 'I' THEN '".iconv("utf-8", "big5", "他項權利個人全部")."'
-					WHEN t.MD05 = 'J' THEN '".iconv("utf-8", "big5", "標示部")."'
-					WHEN t.MD05 = 'K' THEN '".iconv("utf-8", "big5", "所有權部")."'
-					WHEN t.MD05 = 'KA' THEN '".iconv("utf-8", "big5", "收件年期字號")."'
-					WHEN t.MD05 = 'KB' THEN '".iconv("utf-8", "big5", "收件年字號+登序")."'
-					WHEN t.MD05 = 'KC' THEN '".iconv("utf-8", "big5", "收件年字號+統編")."'
-					WHEN t.MD05 = 'KD' THEN '".iconv("utf-8", "big5", "收件年字號+姓名")."'
-					WHEN t.MD05 = 'L' THEN '".iconv("utf-8", "big5", "標示部及所有權部")."'
-					WHEN t.MD05 = 'LA' THEN '".iconv("utf-8", "big5", "統計起始日期+統計終止日期+代理人統一編號")."'
-					WHEN t.MD05 = 'LB' THEN '".iconv("utf-8", "big5", "統計起始日期+統計終止日期")."'
-					WHEN t.MD05 = 'LC' THEN '".iconv("utf-8", "big5", "代理人統一編號")."'
-					WHEN t.MD05 = 'M' THEN '".iconv("utf-8", "big5", "標示部(標示部不存在)")."'
-					WHEN t.MD05 = 'N' THEN '".iconv("utf-8", "big5", "所有權部(標示部不存在)")."'
-					WHEN t.MD05 = 'O' THEN '".iconv("utf-8", "big5", "標示部及所有權部(標示部不存在)")."'
-					WHEN t.MD05 = 'P' THEN '".iconv("utf-8", "big5", "資料庫不存在")."'
-					WHEN t.MD05 = 'Q' THEN '".iconv("utf-8", "big5", "地籍圖謄本")."'
-					WHEN t.MD05 = 'R' THEN '".iconv("utf-8", "big5", "建物平面圖謄本")."'
-					WHEN t.MD05 = 'S' THEN '".iconv("utf-8", "big5", "登記簿謄本")."'
-					WHEN t.MD05 = 'T' THEN '".iconv("utf-8", "big5", "閱覽")."'
-					WHEN t.MD05 = 'U' THEN '".iconv("utf-8", "big5", "列印電子資料")."'
-					WHEN t.MD05 = 'V' THEN '".iconv("utf-8", "big5", "申請")."'
-					WHEN t.MD05 = 'W' THEN '".iconv("utf-8", "big5", "測量")."'
-					WHEN t.MD05 = 'X' THEN '".iconv("utf-8", "big5", "異動索引")."'
-					WHEN t.MD05 = 'XA' THEN '".iconv("utf-8", "big5", "收件年期字號")."'
-					WHEN t.MD05 = 'XB' THEN '".iconv("utf-8", "big5", "地建號")."'
-					WHEN t.MD05 = 'XC' THEN '".iconv("utf-8", "big5", "地建號+登序")."'
-					WHEN t.MD05 = 'XD' THEN '".iconv("utf-8", "big5", "地建號+部別")."'
-					WHEN t.MD05 = 'XE' THEN '".iconv("utf-8", "big5", "地建號+統編")."'
+					WHEN t.MD05 = 'A' THEN '".iconv("utf-8", ORACLE_ENCODING, "全部")."'
+					WHEN t.MD05 = 'B' THEN '".iconv("utf-8", ORACLE_ENCODING, "所有權個人全部")."'
+					WHEN t.MD05 = 'C' THEN '".iconv("utf-8", ORACLE_ENCODING, "標示部")."'
+					WHEN t.MD05 = 'D' THEN '".iconv("utf-8", ORACLE_ENCODING, "所有權部")."'
+					WHEN t.MD05 = 'E' THEN '".iconv("utf-8", ORACLE_ENCODING, "他項權利部")."'
+					WHEN t.MD05 = 'F' THEN '".iconv("utf-8", ORACLE_ENCODING, "標示部及所有權部")."'
+					WHEN t.MD05 = 'G' THEN '".iconv("utf-8", ORACLE_ENCODING, "標示部及他項權利部")."'
+					WHEN t.MD05 = 'H' THEN '".iconv("utf-8", ORACLE_ENCODING, "他項權利部之個人")."'
+					WHEN t.MD05 = 'I' THEN '".iconv("utf-8", ORACLE_ENCODING, "他項權利個人全部")."'
+					WHEN t.MD05 = 'J' THEN '".iconv("utf-8", ORACLE_ENCODING, "標示部")."'
+					WHEN t.MD05 = 'K' THEN '".iconv("utf-8", ORACLE_ENCODING, "所有權部")."'
+					WHEN t.MD05 = 'KA' THEN '".iconv("utf-8", ORACLE_ENCODING, "收件年期字號")."'
+					WHEN t.MD05 = 'KB' THEN '".iconv("utf-8", ORACLE_ENCODING, "收件年字號+登序")."'
+					WHEN t.MD05 = 'KC' THEN '".iconv("utf-8", ORACLE_ENCODING, "收件年字號+統編")."'
+					WHEN t.MD05 = 'KD' THEN '".iconv("utf-8", ORACLE_ENCODING, "收件年字號+姓名")."'
+					WHEN t.MD05 = 'L' THEN '".iconv("utf-8", ORACLE_ENCODING, "標示部及所有權部")."'
+					WHEN t.MD05 = 'LA' THEN '".iconv("utf-8", ORACLE_ENCODING, "統計起始日期+統計終止日期+代理人統一編號")."'
+					WHEN t.MD05 = 'LB' THEN '".iconv("utf-8", ORACLE_ENCODING, "統計起始日期+統計終止日期")."'
+					WHEN t.MD05 = 'LC' THEN '".iconv("utf-8", ORACLE_ENCODING, "代理人統一編號")."'
+					WHEN t.MD05 = 'M' THEN '".iconv("utf-8", ORACLE_ENCODING, "標示部(標示部不存在)")."'
+					WHEN t.MD05 = 'N' THEN '".iconv("utf-8", ORACLE_ENCODING, "所有權部(標示部不存在)")."'
+					WHEN t.MD05 = 'O' THEN '".iconv("utf-8", ORACLE_ENCODING, "標示部及所有權部(標示部不存在)")."'
+					WHEN t.MD05 = 'P' THEN '".iconv("utf-8", ORACLE_ENCODING, "資料庫不存在")."'
+					WHEN t.MD05 = 'Q' THEN '".iconv("utf-8", ORACLE_ENCODING, "地籍圖謄本")."'
+					WHEN t.MD05 = 'R' THEN '".iconv("utf-8", ORACLE_ENCODING, "建物平面圖謄本")."'
+					WHEN t.MD05 = 'S' THEN '".iconv("utf-8", ORACLE_ENCODING, "登記簿謄本")."'
+					WHEN t.MD05 = 'T' THEN '".iconv("utf-8", ORACLE_ENCODING, "閱覽")."'
+					WHEN t.MD05 = 'U' THEN '".iconv("utf-8", ORACLE_ENCODING, "列印電子資料")."'
+					WHEN t.MD05 = 'V' THEN '".iconv("utf-8", ORACLE_ENCODING, "申請")."'
+					WHEN t.MD05 = 'W' THEN '".iconv("utf-8", ORACLE_ENCODING, "測量")."'
+					WHEN t.MD05 = 'X' THEN '".iconv("utf-8", ORACLE_ENCODING, "異動索引")."'
+					WHEN t.MD05 = 'XA' THEN '".iconv("utf-8", ORACLE_ENCODING, "收件年期字號")."'
+					WHEN t.MD05 = 'XB' THEN '".iconv("utf-8", ORACLE_ENCODING, "地建號")."'
+					WHEN t.MD05 = 'XC' THEN '".iconv("utf-8", ORACLE_ENCODING, "地建號+登序")."'
+					WHEN t.MD05 = 'XD' THEN '".iconv("utf-8", ORACLE_ENCODING, "地建號+部別")."'
+					WHEN t.MD05 = 'XE' THEN '".iconv("utf-8", ORACLE_ENCODING, "地建號+統編")."'
 					ELSE t.MD05
        			END) AS \"謄本項目\"
 			FROM MOICAS.CUSMD2 t
@@ -235,8 +235,8 @@ class Query {
 			--WHERE r.SR10 LIKE '%聯邦%' AND t.MD06 = '0222'
 			WHERE t.MD06 = :bv_section_code AND t.MD08 in ('".implode("','", $numbers)."')
 		";
-		//$sql = mb_convert_encoding($sql, "big5", "utf-8");
-		// $sql = iconv("utf-8", "big5", $sql);
+		//$sql = mb_convert_encoding($sql, ORACLE_ENCODING, "utf-8");
+		// $sql = iconv("utf-8", ORACLE_ENCODING, $sql);
 		$this->db_wrapper->getDB()->parse($sql);
 		$this->db_wrapper->getDB()->bind(":bv_section_code", $section_code);
 		$this->db_wrapper->getDB()->execute();
@@ -345,7 +345,7 @@ class Query {
 			SELECT t.*, s.K02
 			FROM MOIEXP.EXPAA t
 			LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
-			WHERE AA01 >= :bv_qday AND AA106 <> '1' AND s.K02 = '".iconv("utf-8", "big5", '悠遊卡')."'
+			WHERE AA01 >= :bv_qday AND AA106 <> '1' AND s.K02 = '".iconv("utf-8", ORACLE_ENCODING, '悠遊卡')."'
 		");
 		if (empty($qday)) {
 			$tw_date = new Datetime("now");
@@ -556,7 +556,7 @@ class Query {
 		$this->db_wrapper->getDB()->bind(":bv_pc_num", $pc_num);
 		$this->db_wrapper->getDB()->bind(":bv_fee_num", $fee_number);
 		$this->db_wrapper->getDB()->bind(":bv_operator", $operator);
-		$this->db_wrapper->getDB()->bind(":bv_reason", iconv("utf-8", "big5", $reason));
+		$this->db_wrapper->getDB()->bind(":bv_reason", iconv("utf-8", ORACLE_ENCODING, $reason));
 
 		Logger::getInstance()->info(__METHOD__.": 插入 SQL \"$sql\"");
 
@@ -730,8 +730,8 @@ class Query {
                 (v.AB03 NOT LIKE '%' || :bv_city || '%' AND v.AB03 NOT LIKE '%' || :bv_county || '%')
 		");
 		$this->db_wrapper->getDB()->bind(":bv_qmonth", $query_month);
-		$this->db_wrapper->getDB()->bind(":bv_city", mb_convert_encoding('桃園市', "big5"));
-    $this->db_wrapper->getDB()->bind(":bv_county", mb_convert_encoding('桃園縣', "big5"));
+		$this->db_wrapper->getDB()->bind(":bv_city", mb_convert_encoding('桃園市', ORACLE_ENCODING));
+    $this->db_wrapper->getDB()->bind(":bv_county", mb_convert_encoding('桃園縣', ORACLE_ENCODING));
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
@@ -1408,7 +1408,7 @@ class Query {
 				SS04_1 = :bv_ss04_1_code AND
 				SS04_2 = :bv_ss04_2_number
 		";
-		$this->db_wrapper->getDB()->parse(iconv("utf-8", "big5", $sql));
+		$this->db_wrapper->getDB()->parse(iconv("utf-8", ORACLE_ENCODING, $sql));
 		
         $this->db_wrapper->getDB()->bind(":bv_ss03_year", substr($id, 0, 3));
         $this->db_wrapper->getDB()->bind(":bv_ss04_1_code", substr($id, 3, 4));
@@ -1437,7 +1437,7 @@ class Query {
 			return false;
 		}
 
-		$this->db_wrapper->getDB()->parse(mb_convert_encoding(rtrim($sql, ";"), "big5", "utf-8"));
+		$this->db_wrapper->getDB()->parse(mb_convert_encoding(rtrim($sql, ";"), ORACLE_ENCODING, "utf-8"));
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll($raw);
 	}
@@ -1608,7 +1608,7 @@ class Query {
 			$this->db_wrapper->getDB()->bind(":bv_year", $year);
 			$this->db_wrapper->getDB()->bind(":bv_code", $code);
 			$this->db_wrapper->getDB()->bind(":bv_number", $num);
-			$this->db_wrapper->getDB()->bind(":bv_val", mb_convert_encoding($val, "big5"));
+			$this->db_wrapper->getDB()->bind(":bv_val", mb_convert_encoding($val, ORACLE_ENCODING));
 			$this->db_wrapper->getDB()->execute();
 
 			$note = "year: $year, code: $code, number: $num, $column: $val\n\n$sql";

@@ -40,8 +40,8 @@ class FileAPISQLCsvCommand extends FileAPICommand {
                 // heading
                 if ($count == 0) {
                     if (!is_array($row)) {
-                        fputcsv($out, array_values(array(iconv("utf-8", "big5", "錯誤說明"))), ',', '"');
-                        fputcsv($out, array_values(array(iconv("utf-8", "big5", "第一列的資料非陣列，無法轉換為CSV檔案"))), ',', '"');
+                        fputcsv($out, array_values(array(iconv("utf-8", ORACLE_ENCODING, "錯誤說明"))), ',', '"');
+                        fputcsv($out, array_values(array(iconv("utf-8", ORACLE_ENCODING, "第一列的資料非陣列，無法轉換為CSV檔案"))), ',', '"');
                         break;
                     }
                     $firstline = array_map(array($this, "mapColumns"), array_keys($row));
@@ -52,7 +52,7 @@ class FileAPISQLCsvCommand extends FileAPICommand {
                 $count++;
             }
         } else {
-            fwrite($out, mb_convert_encoding("錯誤說明：傳入之參數非陣列格式無法匯出！\n", "big5", "utf-8"));
+            fwrite($out, mb_convert_encoding("錯誤說明：傳入之參數非陣列格式無法匯出！\n", ORACLE_ENCODING, "utf-8"));
             fwrite($out, print_r($data, true));
         }
         fclose($out);
@@ -69,8 +69,8 @@ class FileAPISQLCsvCommand extends FileAPICommand {
             foreach ($data as $row) {
                 if (!$skip_header && !$firstline_flag) {
                     if (!is_array($row)) {
-                        fputcsv($out, array_values(array(iconv("utf-8", "big5", "錯誤說明"))), ',', '"');
-                        fputcsv($out, array_values(array(iconv("utf-8", "big5", "第一列的資料非陣列，無法轉換為CSV檔案"))), ',', '"');
+                        fputcsv($out, array_values(array(iconv("utf-8", ORACLE_ENCODING, "錯誤說明"))), ',', '"');
+                        fputcsv($out, array_values(array(iconv("utf-8", ORACLE_ENCODING, "第一列的資料非陣列，無法轉換為CSV檔案"))), ',', '"');
                         break;
                     }
                     $firstline = array_map(array($this, "mapColumns"), array_keys($row));
@@ -80,14 +80,14 @@ class FileAPISQLCsvCommand extends FileAPICommand {
                 }
                 $vals = array_values($row);
                 // foreach ($vals as $key => $value) {
-                //     $vals[$key] = mb_convert_encoding($value, "big5", "utf-8");
+                //     $vals[$key] = mb_convert_encoding($value, ORACLE_ENCODING, "utf-8");
                 // }
 
                 fputcsv($out, $vals, ',', '"');
             }
         } else {
-            fputcsv($out, array_values(array(iconv("utf-8", "big5", "錯誤說明"))), ',', '"');
-            fputcsv($out, array_values(array(iconv("utf-8", "big5", "傳入之參數非陣列格式無法匯出！"))), ',', '"');
+            fputcsv($out, array_values(array(iconv("utf-8", ORACLE_ENCODING, "錯誤說明"))), ',', '"');
+            fputcsv($out, array_values(array(iconv("utf-8", ORACLE_ENCODING, "傳入之參數非陣列格式無法匯出！"))), ',', '"');
         }
         fclose($out);
     }

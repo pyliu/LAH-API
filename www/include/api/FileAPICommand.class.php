@@ -15,13 +15,13 @@ abstract class FileAPICommand {
             $str = "$str";
         }
         if (strstr($str, '"')) $str = '"' . str_replace('"', '""', $str) . '"';
-        $converted = mb_convert_encoding($str, "big5", "utf-8");
+        $converted = mb_convert_encoding($str, ORACLE_ENCODING, "utf-8");
         if (!empty($converted)) {
             $str = $converted;
         }
     }
 
     protected function mapColumns($input, $convert = true) {
-        return array_key_exists($input, $this->colsNameMapping) ? ($convert ? mb_convert_encoding($this->colsNameMapping[$input], "big5", "utf-8") : $this->colsNameMapping[$input]) : $input;
+        return array_key_exists($input, $this->colsNameMapping) ? ($convert ? mb_convert_encoding($this->colsNameMapping[$input], ORACLE_ENCODING, "utf-8") : $this->colsNameMapping[$input]) : $input;
     }
 }

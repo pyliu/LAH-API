@@ -13,7 +13,7 @@ switch ($_POST["type"]) {
 	case "moisms_log_query":
 		Logger::getInstance()->info("XHR [moisms_log_query] get sms log record request.");
 		// possible to search by content, so needs to do BIG5 convertion here
-		$keyword = mb_convert_encoding($_POST['keyword'], 'BIG5', 'UTF-8');
+		$keyword = mb_convert_encoding($_POST['keyword'], ORACLE_ENCODING, 'UTF-8');
 		
 		$moiadm_rows = $mock ? $cache->get('moisms_log_query_moiadm') : $moisms->getMOIADMSMSLogRecords($keyword);
 		$cache->set('moisms_log_query_moiadm', $moiadm_rows);

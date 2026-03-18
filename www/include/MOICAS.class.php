@@ -520,17 +520,17 @@ class MOICAS
 			t.mu02 AS \"收件字\",
 			t.mu03 AS \"收件號\",
 			(CASE
-				WHEN t.mu04 = '1' THEN '".mb_convert_encoding('現場申請', 'BIG5', 'UTF-8')."'
-				WHEN t.mu04 = '2' THEN '".mb_convert_encoding('隨案謄本', 'BIG5', 'UTF-8')."'
-				WHEN t.mu04 = '3' THEN '".mb_convert_encoding('內部使用', 'BIG5', 'UTF-8')."'
-				WHEN t.mu04 = '4' THEN '".mb_convert_encoding('傳真申請', 'BIG5', 'UTF-8')."'
+				WHEN t.mu04 = '1' THEN '".mb_convert_encoding('現場申請', ORACLE_ENCODING, 'UTF-8')."'
+				WHEN t.mu04 = '2' THEN '".mb_convert_encoding('隨案謄本', ORACLE_ENCODING, 'UTF-8')."'
+				WHEN t.mu04 = '3' THEN '".mb_convert_encoding('內部使用', ORACLE_ENCODING, 'UTF-8')."'
+				WHEN t.mu04 = '4' THEN '".mb_convert_encoding('傳真申請', ORACLE_ENCODING, 'UTF-8')."'
 				ELSE t.mu04
 			END) AS \"申請方式\",
 			(CASE
-				WHEN t.mu42 = '00' THEN '".mb_convert_encoding('公務用', 'BIG5', 'UTF-8')."'
-				WHEN t.mu42 = '01' THEN '".mb_convert_encoding('第一類', 'BIG5', 'UTF-8')."'
-				WHEN t.mu42 = '02' THEN '".mb_convert_encoding('第二類', 'BIG5', 'UTF-8')."'
-				WHEN t.mu42 = '04' THEN '".mb_convert_encoding('第三類', 'BIG5', 'UTF-8')."'
+				WHEN t.mu42 = '00' THEN '".mb_convert_encoding('公務用', ORACLE_ENCODING, 'UTF-8')."'
+				WHEN t.mu42 = '01' THEN '".mb_convert_encoding('第一類', ORACLE_ENCODING, 'UTF-8')."'
+				WHEN t.mu42 = '02' THEN '".mb_convert_encoding('第二類', ORACLE_ENCODING, 'UTF-8')."'
+				WHEN t.mu42 = '04' THEN '".mb_convert_encoding('第三類', ORACLE_ENCODING, 'UTF-8')."'
 				ELSE t.mu42
 			END) AS \"申請類別\",
 			t.mu05 AS \"申請人統編\",
@@ -540,15 +540,15 @@ class MOICAS
 			t.mu12 AS \"收件日期\",
 			t.mu13 AS \"收件時間\",
 			(CASE
-				WHEN s.md04 = 'A' THEN '".mb_convert_encoding('登記電子資料謄本', 'BIG5', 'UTF-8')."'
-				WHEN s.md04 = 'C' THEN '".mb_convert_encoding('地價電子資料謄本', 'BIG5', 'UTF-8')."'
-				WHEN s.md04 = 'D' THEN '".mb_convert_encoding('建物平面圖謄本', 'BIG5', 'UTF-8')."'
-				WHEN s.md04 = 'E' THEN '".mb_convert_encoding('人工登記簿謄本', 'BIG5', 'UTF-8')."'
-				WHEN s.md04 = 'F' THEN '".mb_convert_encoding('閱覽', 'BIG5', 'UTF-8')."'
-				WHEN s.md04 = 'G' THEN '".mb_convert_encoding('列印電子資料', 'BIG5', 'UTF-8')."'
-				WHEN s.md04 = 'H' THEN '".mb_convert_encoding('申請', 'BIG5', 'UTF-8')."'
-				WHEN s.md04 = 'I' THEN '".mb_convert_encoding('其他', 'BIG5', 'UTF-8')."'
-				WHEN s.md04 = 'J' THEN '".mb_convert_encoding('異動索引', 'BIG5', 'UTF-8')."'
+				WHEN s.md04 = 'A' THEN '".mb_convert_encoding('登記電子資料謄本', ORACLE_ENCODING, 'UTF-8')."'
+				WHEN s.md04 = 'C' THEN '".mb_convert_encoding('地價電子資料謄本', ORACLE_ENCODING, 'UTF-8')."'
+				WHEN s.md04 = 'D' THEN '".mb_convert_encoding('建物平面圖謄本', ORACLE_ENCODING, 'UTF-8')."'
+				WHEN s.md04 = 'E' THEN '".mb_convert_encoding('人工登記簿謄本', ORACLE_ENCODING, 'UTF-8')."'
+				WHEN s.md04 = 'F' THEN '".mb_convert_encoding('閱覽', ORACLE_ENCODING, 'UTF-8')."'
+				WHEN s.md04 = 'G' THEN '".mb_convert_encoding('列印電子資料', ORACLE_ENCODING, 'UTF-8')."'
+				WHEN s.md04 = 'H' THEN '".mb_convert_encoding('申請', ORACLE_ENCODING, 'UTF-8')."'
+				WHEN s.md04 = 'I' THEN '".mb_convert_encoding('其他', ORACLE_ENCODING, 'UTF-8')."'
+				WHEN s.md04 = 'J' THEN '".mb_convert_encoding('異動索引', ORACLE_ENCODING, 'UTF-8')."'
 				ELSE s.md04
 			END) AS \"申請類別\",
 			s.md06 AS \"段代碼\",
@@ -556,8 +556,8 @@ class MOICAS
 			s.md09 AS \"鄉鎮市區代碼\",
 			v.kname AS \"鄉鎮市區\",
 			(CASE
-				WHEN s.md07 = 'C' THEN '".mb_convert_encoding('土地', 'BIG5', 'UTF-8')."'
-				WHEN s.md07 = 'F' THEN '".mb_convert_encoding('建物', 'BIG5', 'UTF-8')."'
+				WHEN s.md07 = 'C' THEN '".mb_convert_encoding('土地', ORACLE_ENCODING, 'UTF-8')."'
+				WHEN s.md07 = 'F' THEN '".mb_convert_encoding('建物', ORACLE_ENCODING, 'UTF-8')."'
 				ELSE s.md07
 			END) AS \"地建別\",
 			s.md08 AS \"地建號\",
@@ -584,7 +584,7 @@ class MOICAS
 			return array();
 		}
 		$this->db_wrapper->getDB()->parse($this->getCUSMMSQL('pid'));
-		$this->db_wrapper->getDB()->bind(":bv_pid", mb_convert_encoding($pid, 'BIG5', 'UTF-8'));
+		$this->db_wrapper->getDB()->bind(":bv_pid", mb_convert_encoding($pid, ORACLE_ENCODING, 'UTF-8'));
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}

@@ -314,7 +314,7 @@ class MOIEXP {
 			UPDATE MOIEXP.EXPAA SET $column = :bv_update_value WHERE AA01 = :bv_aa01 AND AA04 = :bv_aa04
 		");
 
-		$converted = mb_convert_encoding($update_val, 'BIG5', 'UTF-8');
+		$converted = mb_convert_encoding($update_val, ORACLE_ENCODING, 'UTF-8');
 		$this->db_wrapper->getDB()->bind(":bv_update_value", $converted);
 		$this->db_wrapper->getDB()->bind(":bv_aa01", $date);
 		$this->db_wrapper->getDB()->bind(":bv_aa04", $number);
@@ -369,7 +369,7 @@ class MOIEXP {
 			$this->db_wrapper->getDB()->bind(":bv_pc_num", $pc_num);
 			$this->db_wrapper->getDB()->bind(":bv_fee_num", $fee_number);
 			$this->db_wrapper->getDB()->bind(":bv_operator", $operator);
-			$this->db_wrapper->getDB()->bind(":bv_reason", iconv("utf-8", "big5", $reason));
+			$this->db_wrapper->getDB()->bind(":bv_reason", iconv("utf-8", ORACLE_ENCODING, $reason));
 
 			Logger::getInstance()->info(__METHOD__.": 插入 SQL \"$sql\"");
 

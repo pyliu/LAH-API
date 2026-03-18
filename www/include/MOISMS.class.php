@@ -164,8 +164,8 @@ class MOISMS {
 				 MS04_2 AS SMS_NUMBER,
 				 --MS_TYPE AS SMS_TYPE,
 				 (CASE
-				   WHEN t.MS_TYPE = 'M' THEN '".mb_convert_encoding('地籍異動即時通', 'BIG5', 'UTF-8')."'
-					 WHEN t.MS_TYPE = 'W' THEN '".mb_convert_encoding('指定送達處所', 'BIG5', 'UTF-8')."'
+				   WHEN t.MS_TYPE = 'M' THEN '".mb_convert_encoding('地籍異動即時通', ORACLE_ENCODING, 'UTF-8')."'
+					 WHEN t.MS_TYPE = 'W' THEN '".mb_convert_encoding('指定送達處所', ORACLE_ENCODING, 'UTF-8')."'
 					 ELSE t.MS_TYPE
 				 END) AS SMS_TYPE,
 				 MS07_1 AS SMS_DATE,
@@ -205,10 +205,10 @@ class MOISMS {
 				 MS04_2 AS SMS_NUMBER,
 				 --MS_TYPE AS SMS_TYPE,
 				 (CASE
-				   WHEN t.MS_TYPE = 'M' THEN '".mb_convert_encoding('地籍異動即時通', 'BIG5', 'UTF-8')."'
-					 WHEN t.MS_TYPE = 'W' THEN '".mb_convert_encoding('指定送達處所', 'BIG5', 'UTF-8')."'
-					 WHEN t.MS_TYPE = 'Z' THEN '".mb_convert_encoding('智慧控管系統', 'BIG5', 'UTF-8')."'
-					 WHEN t.MS_TYPE = 'O' THEN '".mb_convert_encoding('跨域代收代寄', 'BIG5', 'UTF-8')."'
+				   WHEN t.MS_TYPE = 'M' THEN '".mb_convert_encoding('地籍異動即時通', ORACLE_ENCODING, 'UTF-8')."'
+					 WHEN t.MS_TYPE = 'W' THEN '".mb_convert_encoding('指定送達處所', ORACLE_ENCODING, 'UTF-8')."'
+					 WHEN t.MS_TYPE = 'Z' THEN '".mb_convert_encoding('智慧控管系統', ORACLE_ENCODING, 'UTF-8')."'
+					 WHEN t.MS_TYPE = 'O' THEN '".mb_convert_encoding('跨域代收代寄', ORACLE_ENCODING, 'UTF-8')."'
 					 ELSE t.MS_TYPE
 				 END) AS SMS_TYPE,
 				 MS07_1 AS SMS_DATE,
@@ -243,7 +243,7 @@ class MOISMS {
 				t.M01 AS SMS_YEAR,
 				t.M02 AS SMS_CODE,
 				t.M03 AS SMS_NUMBER,
-				'".mb_convert_encoding('案件辦理情形', 'BIG5', 'UTF-8')."' AS SMS_TYPE,
+				'".mb_convert_encoding('案件辦理情形', ORACLE_ENCODING, 'UTF-8')."' AS SMS_TYPE,
 				TO_CHAR( t.send_time, 'YYYYMMDD' ) - 19110000 AS SMS_DATE,
 				TO_CHAR( t.send_time, 'HH24MISS' ) AS SMS_TIME,
 				t.PHONE AS SMS_CELL,
@@ -279,7 +279,7 @@ class MOISMS {
 				t.M01 AS SMS_YEAR,
 				t.M02 AS SMS_CODE,
 				t.M03 AS SMS_NUMBER,
-				'".mb_convert_encoding('案件辦理情形', 'BIG5', 'UTF-8')."' AS SMS_TYPE,
+				'".mb_convert_encoding('案件辦理情形', ORACLE_ENCODING, 'UTF-8')."' AS SMS_TYPE,
 				TO_CHAR( t.send_time, 'YYYYMMDD' ) - 19110000 AS SMS_DATE,
 				TO_CHAR( t.send_time, 'HH24MISS' ) AS SMS_TIME,
 				t.PHONE AS SMS_CELL,
@@ -316,9 +316,9 @@ class MOISMS {
 				SUBSTR(t.MA4_NO, 4, 4) AS SMS_CODE,
 				SUBSTR(t.MA4_NO, 8, 6) AS SMS_NUMBER,
 				(CASE
-					WHEN t.MA4_CONT LIKE '%".mb_convert_encoding('隱匿', 'BIG5', 'UTF-8')."%' THEN '".mb_convert_encoding('住址隱匿', 'BIG5', 'UTF-8')."'
-					WHEN t.MA4_CONT LIKE '%".mb_convert_encoding('跨縣市', 'BIG5', 'UTF-8')."%' THEN '".mb_convert_encoding('跨域代收代寄', 'BIG5', 'UTF-8')."'
-					ELSE '".mb_convert_encoding('手動', 'BIG5', 'UTF-8')."'
+					WHEN t.MA4_CONT LIKE '%".mb_convert_encoding('隱匿', ORACLE_ENCODING, 'UTF-8')."%' THEN '".mb_convert_encoding('住址隱匿', ORACLE_ENCODING, 'UTF-8')."'
+					WHEN t.MA4_CONT LIKE '%".mb_convert_encoding('跨縣市', ORACLE_ENCODING, 'UTF-8')."%' THEN '".mb_convert_encoding('跨域代收代寄', ORACLE_ENCODING, 'UTF-8')."'
+					ELSE '".mb_convert_encoding('手動', ORACLE_ENCODING, 'UTF-8')."'
 				END) AS SMS_TYPE,
 				t.EDITDATE AS SMS_DATE,
 				t.EDITTIME AS SMS_TIME,
@@ -356,9 +356,9 @@ class MOISMS {
 				SUBSTR(t.MA4_NO, 4, 4) AS SMS_CODE,
 				SUBSTR(t.MA4_NO, 8, 6) AS SMS_NUMBER,
 				(CASE
-					WHEN t.MA4_CONT LIKE '%".mb_convert_encoding('隱匿', 'BIG5', 'UTF-8')."%' THEN '".mb_convert_encoding('住址隱匿', 'BIG5', 'UTF-8')."'
-					WHEN t.MA4_CONT LIKE '%".mb_convert_encoding('跨縣市', 'BIG5', 'UTF-8')."%' THEN '".mb_convert_encoding('跨域代收代寄', 'BIG5', 'UTF-8')."'
-					ELSE '".mb_convert_encoding('手動', 'BIG5', 'UTF-8')."'
+					WHEN t.MA4_CONT LIKE '%".mb_convert_encoding('隱匿', ORACLE_ENCODING, 'UTF-8')."%' THEN '".mb_convert_encoding('住址隱匿', ORACLE_ENCODING, 'UTF-8')."'
+					WHEN t.MA4_CONT LIKE '%".mb_convert_encoding('跨縣市', ORACLE_ENCODING, 'UTF-8')."%' THEN '".mb_convert_encoding('跨域代收代寄', ORACLE_ENCODING, 'UTF-8')."'
+					ELSE '".mb_convert_encoding('手動', ORACLE_ENCODING, 'UTF-8')."'
 				END) AS SMS_TYPE,
 				t.EDITDATE AS SMS_DATE,
 				t.EDITTIME AS SMS_TIME,
@@ -395,9 +395,9 @@ class MOISMS {
 				SUBSTR(t.MA5_NO, 4, 4) AS SMS_CODE,
 				SUBSTR(t.MA5_NO, 8, 6) AS SMS_NUMBER,
 				(CASE
-					WHEN t.MA5_CONT LIKE '%".mb_convert_encoding('隱匿', 'BIG5', 'UTF-8')."%' THEN '".mb_convert_encoding('住址隱匿', 'BIG5', 'UTF-8')."'
-					WHEN t.MA5_CONT LIKE '%".mb_convert_encoding('跨縣市', 'BIG5', 'UTF-8')."%' THEN '".mb_convert_encoding('跨域代收代寄', 'BIG5', 'UTF-8')."'
-					ELSE '".mb_convert_encoding('手動', 'BIG5', 'UTF-8')."'
+					WHEN t.MA5_CONT LIKE '%".mb_convert_encoding('隱匿', ORACLE_ENCODING, 'UTF-8')."%' THEN '".mb_convert_encoding('住址隱匿', ORACLE_ENCODING, 'UTF-8')."'
+					WHEN t.MA5_CONT LIKE '%".mb_convert_encoding('跨縣市', ORACLE_ENCODING, 'UTF-8')."%' THEN '".mb_convert_encoding('跨域代收代寄', ORACLE_ENCODING, 'UTF-8')."'
+					ELSE '".mb_convert_encoding('手動', ORACLE_ENCODING, 'UTF-8')."'
 				END) AS SMS_TYPE,
 				t.MA5_SDATE AS SMS_DATE,
 				t.MA5_STIME AS SMS_TIME,
@@ -435,9 +435,9 @@ class MOISMS {
 				SUBSTR(t.MA5_NO, 4, 4) AS SMS_CODE,
 				SUBSTR(t.MA5_NO, 8, 6) AS SMS_NUMBER,
 				(CASE
-					WHEN t.MA5_CONT LIKE '%".mb_convert_encoding('隱匿', 'BIG5', 'UTF-8')."%' THEN '".mb_convert_encoding('住址隱匿', 'BIG5', 'UTF-8')."'
-					WHEN t.MA5_CONT LIKE '%".mb_convert_encoding('跨縣市', 'BIG5', 'UTF-8')."%' THEN '".mb_convert_encoding('跨域代收代寄', 'BIG5', 'UTF-8')."'
-					ELSE '".mb_convert_encoding('手動', 'BIG5', 'UTF-8')."'
+					WHEN t.MA5_CONT LIKE '%".mb_convert_encoding('隱匿', ORACLE_ENCODING, 'UTF-8')."%' THEN '".mb_convert_encoding('住址隱匿', ORACLE_ENCODING, 'UTF-8')."'
+					WHEN t.MA5_CONT LIKE '%".mb_convert_encoding('跨縣市', ORACLE_ENCODING, 'UTF-8')."%' THEN '".mb_convert_encoding('跨域代收代寄', ORACLE_ENCODING, 'UTF-8')."'
+					ELSE '".mb_convert_encoding('手動', ORACLE_ENCODING, 'UTF-8')."'
 				END) AS SMS_TYPE,
 				t.MA5_SDATE AS SMS_DATE,
 				t.MA5_STIME AS SMS_TIME,
@@ -675,7 +675,7 @@ class MOISMS {
 
     $this->db_wrapper->getDB()->parse($sql);
     $this->db_wrapper->getDB()->bind(":bv_ma5_mp", $cell);
-    $this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($message, 'BIG5', 'UTF-8'));
+    $this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($message, ORACLE_ENCODING, 'UTF-8'));
     $result = $this->db_wrapper->getDB()->execute();
 
     if ($result === FALSE) {
@@ -741,9 +741,9 @@ class MOISMS {
 			)
 		");
 		$this->db_wrapper->getDB()->bind(":bv_ma5_no", $next_no);
-		$this->db_wrapper->getDB()->bind(":bv_ma5_name", mb_convert_encoding($name, 'BIG5', 'UTF-8'));
+		$this->db_wrapper->getDB()->bind(":bv_ma5_name", mb_convert_encoding($name, ORACLE_ENCODING, 'UTF-8'));
 		$this->db_wrapper->getDB()->bind(":bv_ma5_mp", $cell);
-		$this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($cont, 'BIG5', 'UTF-8'));
+		$this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($cont, ORACLE_ENCODING, 'UTF-8'));
 		$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
 		Logger::getInstance()->info(__METHOD__.": 即時簡訊插入 MOICAS.SMS_MA05 ($next_no) ".($result ? "成功" : "失敗")."。");
 		return $result ? $next_no : false;
@@ -822,9 +822,9 @@ class MOISMS {
 			)
 		");
 		// $this->db_wrapper->getDB()->bind(":bv_ma5_no", $next_no);
-		$this->db_wrapper->getDB()->bind(":bv_ma5_name", mb_convert_encoding($name, 'BIG5', 'UTF-8'));
+		$this->db_wrapper->getDB()->bind(":bv_ma5_name", mb_convert_encoding($name, ORACLE_ENCODING, 'UTF-8'));
 		$this->db_wrapper->getDB()->bind(":bv_ma5_mp", $cell);
-		$this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($cont, 'BIG5', 'UTF-8'));
+		$this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($cont, ORACLE_ENCODING, 'UTF-8'));
 		$this->db_wrapper->getDB()->bind(":bv_ma5_rdate", $rdate);
 		$this->db_wrapper->getDB()->bind(":bv_ma5_rtime", $rtime);
 		$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
@@ -859,7 +859,7 @@ class MOISMS {
 
     $this->db_wrapper->getDB()->parse($sql);
     $this->db_wrapper->getDB()->bind(":bv_ma5_mp", $cell);
-    $this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($message, 'BIG5', 'UTF-8'));
+    $this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($message, ORACLE_ENCODING, 'UTF-8'));
     $this->db_wrapper->getDB()->bind(":bv_ma5_name", __METHOD__);
     $result = $this->db_wrapper->getDB()->execute();
 

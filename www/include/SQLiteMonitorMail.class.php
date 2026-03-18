@@ -140,7 +140,7 @@ class SQLiteMonitorMail {
     public function getLatestMail($convert = false) {
         // $site = System::getInstance()->getSiteCode();
         if($stmt = $this->db->prepare("SELECT * FROM mail ORDER BY id DESC LIMIT 1")) {
-            return $convert ? mb_convert_encoding($this->prepareArray($stmt)[0], 'UTF-8', 'BIG5') : $this->prepareArray($stmt)[0];
+            return $convert ? mb_convert_encoding($this->prepareArray($stmt)[0], 'UTF-8', ORACLE_ENCODING) : $this->prepareArray($stmt)[0];
         }
         return false;
     }
@@ -157,7 +157,7 @@ class SQLiteMonitorMail {
     public function getMailsWithinSeconds($seconds_before = 15 * 60, $convert = false) {
         $ts = time() - intval($seconds_before);
         if($stmt = $this->db->prepare("SELECT * FROM mail WHERE timestamp >= $ts ORDER BY id DESC")) {
-            return $convert ? mb_convert_encoding($this->prepareArray($stmt), 'UTF-8', 'BIG5') : $this->prepareArray($stmt);
+            return $convert ? mb_convert_encoding($this->prepareArray($stmt), 'UTF-8', ORACLE_ENCODING) : $this->prepareArray($stmt);
         }
         return false;
     }
@@ -188,7 +188,7 @@ class SQLiteMonitorMail {
     public function getMailsBySubject($query_string, $seconds_before = 24 * 60 * 60, $convert = false) {
         $ts = time() - intval($seconds_before);
         if($stmt = $this->db->prepare("SELECT * FROM mail WHERE timestamp >= $ts AND subject LIKE '%$query_string%' ORDER BY timestamp DESC")) {
-            return $convert ? mb_convert_encoding($this->prepareArray($stmt), 'UTF-8', 'BIG5') : $this->prepareArray($stmt);
+            return $convert ? mb_convert_encoding($this->prepareArray($stmt), 'UTF-8', ORACLE_ENCODING) : $this->prepareArray($stmt);
         }
         return false;
     }
@@ -198,7 +198,7 @@ class SQLiteMonitorMail {
     public function getMailsBySender($query_string, $seconds_before = 24 * 60 * 60, $convert = false) {
         $ts = time() - intval($seconds_before);
         if($stmt = $this->db->prepare("SELECT * FROM mail WHERE timestamp >= $ts AND sender LIKE '%$query_string%' ORDER BY timestamp DESC")) {
-            return $convert ? mb_convert_encoding($this->prepareArray($stmt), 'UTF-8', 'BIG5') : $this->prepareArray($stmt);
+            return $convert ? mb_convert_encoding($this->prepareArray($stmt), 'UTF-8', ORACLE_ENCODING) : $this->prepareArray($stmt);
         }
         return false;
     }

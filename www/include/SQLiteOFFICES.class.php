@@ -61,7 +61,7 @@ class SQLiteOFFICES {
         }
 
         $db = new OraDB();
-        $sql = "select * from MOICAC.LANDIP t where iname like '%".mb_convert_encoding('地政事務所', "big5")."' order by IID";
+        $sql = "select * from MOICAC.LANDIP t where iname like '%".mb_convert_encoding('地政事務所', ORACLE_ENCODING)."' order by IID";
         $db->parse($sql);
         $db->execute();
         $rows = $db->fetchAll();

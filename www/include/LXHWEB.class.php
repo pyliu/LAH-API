@@ -114,7 +114,7 @@ class LXHWEB {
         $sysauth1 = new SQLiteSYSAUTH1();
         foreach ($rows as $row) {
             $sysauth1->import($row);
-            // $user_name = mb_convert_encoding(preg_replace('/\d+/', "", $row["USER_NAME"]), "UTF-8", "BIG5");
+            // $user_name = mb_convert_encoding(preg_replace('/\d+/', "", $row["USER_NAME"]), "UTF-8", ORACLE_ENCODING);
             $user_name = $row["USER_NAME"];
             if (array_key_exists($row['USER_ID'], $filtered)) {
                 if (strlen($user_name) < strlen($filtered[$row['USER_ID']])) {

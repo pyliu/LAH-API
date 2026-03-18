@@ -740,7 +740,7 @@ class Prefetch {
                     // $IN_CONDITION = "AND AB01 NOT IN ('";
                     // $IN_CONDITION .= implode("','", $no_land_office);
                     // $IN_CONDITION .= "')";
-                    $IN_CONDITION = "AND AB02 NOT LIKE '%".mb_convert_encoding('地政事務所', 'BIG5', 'UTF-8')."'";
+                    $IN_CONDITION = "AND AB02 NOT LIKE '%".mb_convert_encoding('地政事務所', ORACLE_ENCODING, 'UTF-8')."'";
                 }
                 $db->parse("
                     -- 登記案件
@@ -834,7 +834,7 @@ class Prefetch {
                     // $IN_CONDITION = "AND AB01 NOT IN ('";
                     // $IN_CONDITION .= implode("','", $no_land_office);
                     // $IN_CONDITION .= "')";
-                    $IN_CONDITION = "AND AB02 NOT LIKE '%".mb_convert_encoding('地政事務所', 'BIG5', 'UTF-8')."'";
+                    $IN_CONDITION = "AND AB02 NOT LIKE '%".mb_convert_encoding('地政事務所', ORACLE_ENCODING, 'UTF-8')."'";
                 }
                 $db->parse("
                     -- 測量案件
@@ -935,47 +935,47 @@ class Prefetch {
                         t.RM21   AS \"義務人統一編號\",
                         t.RM22   AS \"義務人姓名\",
                         (CASE
-                            WHEN p.LCDE = '1' THEN '".mb_convert_encoding('本國人', 'BIG5', 'UTF-8')."'
-                            WHEN p.LCDE = '2' THEN '".mb_convert_encoding('外國人', 'BIG5', 'UTF-8')."'
-                            WHEN p.LCDE = '3' THEN '".mb_convert_encoding('國有（中央機關）', 'BIG5', 'UTF-8')."'
-                            WHEN p.LCDE = '4' THEN '".mb_convert_encoding('省市有（省市機關）', 'BIG5', 'UTF-8')."'
-                            WHEN p.LCDE = '5' THEN '".mb_convert_encoding('縣市有（縣市機關）', 'BIG5', 'UTF-8')."'
-                            WHEN p.LCDE = '6' THEN '".mb_convert_encoding('鄉鎮市有（鄉鎮市機關）', 'BIG5', 'UTF-8')."'
-                            WHEN p.LCDE = '7' THEN '".mb_convert_encoding('本國私法人', 'BIG5', 'UTF-8')."'
-                            WHEN p.LCDE = '8' THEN '".mb_convert_encoding('外國法人', 'BIG5', 'UTF-8')."'
-                            WHEN p.LCDE = '9' THEN '".mb_convert_encoding('祭祀公業', 'BIG5', 'UTF-8')."'
-                            WHEN p.LCDE = 'A' THEN '".mb_convert_encoding('其他', 'BIG5', 'UTF-8')."'
-                            WHEN p.LCDE = 'B' THEN '".mb_convert_encoding('銀行法人', 'BIG5', 'UTF-8')."'
-                            WHEN p.LCDE = 'C' THEN '".mb_convert_encoding('大陸地區自然人', 'BIG5', 'UTF-8')."'
-                            WHEN p.LCDE = 'D' THEN '".mb_convert_encoding('大陸地區法人', 'BIG5', 'UTF-8')."'
+                            WHEN p.LCDE = '1' THEN '".mb_convert_encoding('本國人', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN p.LCDE = '2' THEN '".mb_convert_encoding('外國人', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN p.LCDE = '3' THEN '".mb_convert_encoding('國有（中央機關）', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN p.LCDE = '4' THEN '".mb_convert_encoding('省市有（省市機關）', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN p.LCDE = '5' THEN '".mb_convert_encoding('縣市有（縣市機關）', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN p.LCDE = '6' THEN '".mb_convert_encoding('鄉鎮市有（鄉鎮市機關）', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN p.LCDE = '7' THEN '".mb_convert_encoding('本國私法人', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN p.LCDE = '8' THEN '".mb_convert_encoding('外國法人', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN p.LCDE = '9' THEN '".mb_convert_encoding('祭祀公業', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN p.LCDE = 'A' THEN '".mb_convert_encoding('其他', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN p.LCDE = 'B' THEN '".mb_convert_encoding('銀行法人', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN p.LCDE = 'C' THEN '".mb_convert_encoding('大陸地區自然人', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN p.LCDE = 'D' THEN '".mb_convert_encoding('大陸地區法人', ORACLE_ENCODING, 'UTF-8')."'
                             ELSE p.LCDE
                         END) AS \"外國人類別\",
                         (CASE
-                            WHEN t.RM30 = 'A' THEN '".mb_convert_encoding('初審', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM30 = 'B' THEN '".mb_convert_encoding('複審', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM30 = 'H' THEN '".mb_convert_encoding('公告', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM30 = 'I' THEN '".mb_convert_encoding('補正', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM30 = 'R' THEN '".mb_convert_encoding('登錄', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM30 = 'C' THEN '".mb_convert_encoding('校對', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM30 = 'U' THEN '".mb_convert_encoding('異動完成', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM30 = 'F' THEN '".mb_convert_encoding('結案', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM30 = 'X' THEN '".mb_convert_encoding('補正初核', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM30 = 'Y' THEN '".mb_convert_encoding('駁回初核', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM30 = 'J' THEN '".mb_convert_encoding('撤回初核', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM30 = 'K' THEN '".mb_convert_encoding('撤回', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM30 = 'Z' THEN '".mb_convert_encoding('歸檔', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM30 = 'N' THEN '".mb_convert_encoding('駁回', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM30 = 'L' THEN '".mb_convert_encoding('公告初核', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM30 = 'E' THEN '".mb_convert_encoding('請示', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM30 = 'D' THEN '".mb_convert_encoding('展期', 'BIG5', 'UTF-8')."'
+                            WHEN t.RM30 = 'A' THEN '".mb_convert_encoding('初審', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM30 = 'B' THEN '".mb_convert_encoding('複審', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM30 = 'H' THEN '".mb_convert_encoding('公告', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM30 = 'I' THEN '".mb_convert_encoding('補正', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM30 = 'R' THEN '".mb_convert_encoding('登錄', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM30 = 'C' THEN '".mb_convert_encoding('校對', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM30 = 'U' THEN '".mb_convert_encoding('異動完成', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM30 = 'F' THEN '".mb_convert_encoding('結案', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM30 = 'X' THEN '".mb_convert_encoding('補正初核', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM30 = 'Y' THEN '".mb_convert_encoding('駁回初核', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM30 = 'J' THEN '".mb_convert_encoding('撤回初核', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM30 = 'K' THEN '".mb_convert_encoding('撤回', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM30 = 'Z' THEN '".mb_convert_encoding('歸檔', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM30 = 'N' THEN '".mb_convert_encoding('駁回', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM30 = 'L' THEN '".mb_convert_encoding('公告初核', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM30 = 'E' THEN '".mb_convert_encoding('請示', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM30 = 'D' THEN '".mb_convert_encoding('展期', ORACLE_ENCODING, 'UTF-8')."'
                             ELSE t.RM30
                         END) AS \"辦理情形\",
                         (CASE
-                            WHEN t.RM31 = 'A' THEN '".mb_convert_encoding('結案', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM31 = 'B' THEN '".mb_convert_encoding('撤回', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM31 = 'C' THEN '".mb_convert_encoding('併案', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM31 = 'D' THEN '".mb_convert_encoding('駁回', 'BIG5', 'UTF-8')."'
-                            WHEN t.RM31 = 'E' THEN '".mb_convert_encoding('請示', 'BIG5', 'UTF-8')."'
+                            WHEN t.RM31 = 'A' THEN '".mb_convert_encoding('結案', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM31 = 'B' THEN '".mb_convert_encoding('撤回', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM31 = 'C' THEN '".mb_convert_encoding('併案', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM31 = 'D' THEN '".mb_convert_encoding('駁回', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.RM31 = 'E' THEN '".mb_convert_encoding('請示', ORACLE_ENCODING, 'UTF-8')."'
                             ELSE t.RM31
                         END) AS \"結案與否\",
                         s.RECA AS \"土地筆數\",
@@ -1118,7 +1118,7 @@ class Prefetch {
                         AND rb.KCDE_1 = '30'
                         AND GG30_1 = rb.KCDE_2(+)
                         AND GG00 in ('B', 'C')
-                        AND (GG30_1 IN ('GH', 'GJ') OR GG30_2 LIKE '%".mb_convert_encoding('信託', 'BIG5', 'UTF-8')."%')
+                        AND (GG30_1 IN ('GH', 'GJ') OR GG30_2 LIKE '%".mb_convert_encoding('信託', ORACLE_ENCODING, 'UTF-8')."%')
                         --AND GS_TYPE IN ('D', 'M')
                         AND s.RM01 = GS03
                         AND s.RM02 = GS04_1
@@ -1207,7 +1207,7 @@ class Prefetch {
                         AND rb.KCDE_1 = '30'
                         AND GG30_1 = rb.KCDE_2(+)
                         AND GG00 in ('D', 'E')
-                        AND (GG30_1 IN ('GH', 'GJ') OR GG30_2 LIKE '%".mb_convert_encoding('信託', 'BIG5', 'UTF-8')."%')
+                        AND (GG30_1 IN ('GH', 'GJ') OR GG30_2 LIKE '%".mb_convert_encoding('信託', ORACLE_ENCODING, 'UTF-8')."%')
                         --AND GS_TYPE in ('D', 'M')
                         AND s.RM01 = GS03
                         AND s.RM02 = GS04_1
@@ -1276,10 +1276,10 @@ class Prefetch {
                         rkeyn_all.KNAME AS RM11_CHT,
                         rkeyn_all.KNAME AS GG48_CHT,
                         (CASE
-                            WHEN t.GS_TYPE = 'A' THEN '".mb_convert_encoding('新增', 'BIG5', 'UTF-8')."'
-                            WHEN t.GS_TYPE = 'D' THEN '".mb_convert_encoding('刪除', 'BIG5', 'UTF-8')."'
-                            WHEN t.GS_TYPE = 'N' THEN '".mb_convert_encoding('更新後', 'BIG5', 'UTF-8')."'
-                            WHEN t.GS_TYPE = 'M' THEN '".mb_convert_encoding('更新前', 'BIG5', 'UTF-8')."'
+                            WHEN t.GS_TYPE = 'A' THEN '".mb_convert_encoding('新增', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.GS_TYPE = 'D' THEN '".mb_convert_encoding('刪除', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.GS_TYPE = 'N' THEN '".mb_convert_encoding('更新後', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.GS_TYPE = 'M' THEN '".mb_convert_encoding('更新前', ORACLE_ENCODING, 'UTF-8')."'
                             ELSE t.GS_TYPE
                         END) AS GS_TYPE_CHT
                     FROM 
@@ -1341,10 +1341,10 @@ class Prefetch {
                         u.KCNT AS RM09_CHT,
                         w.KNAME    AS BA48_CHT,
                         (CASE
-                            WHEN r.BS_TYPE = 'A' THEN '".mb_convert_encoding('新增', 'BIG5', 'UTF-8')."'
-                            WHEN r.BS_TYPE = 'D' THEN '".mb_convert_encoding('刪除', 'BIG5', 'UTF-8')."'
-                            WHEN r.BS_TYPE = 'N' THEN '".mb_convert_encoding('更新後', 'BIG5', 'UTF-8')."'
-                            WHEN r.BS_TYPE = 'M' THEN '".mb_convert_encoding('更新前', 'BIG5', 'UTF-8')."'
+                            WHEN r.BS_TYPE = 'A' THEN '".mb_convert_encoding('新增', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN r.BS_TYPE = 'D' THEN '".mb_convert_encoding('刪除', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN r.BS_TYPE = 'N' THEN '".mb_convert_encoding('更新後', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN r.BS_TYPE = 'M' THEN '".mb_convert_encoding('更新前', ORACLE_ENCODING, 'UTF-8')."'
                             ELSE r.BS_TYPE
                         END) AS BS_TYPE_CHT,
                         v.LNAM AS BB09_NAME,
@@ -1405,8 +1405,8 @@ class Prefetch {
                     SELECT DISTINCT
                         u.GG00,                 -- 部別代碼
                         (CASE
-                            WHEN u.GG00 = 'B' THEN '".mb_convert_encoding('土地', 'BIG5', 'UTF-8')."'
-                            WHEN u.GG00 = 'E' THEN '".mb_convert_encoding('建物', 'BIG5', 'UTF-8')."'
+                            WHEN u.GG00 = 'B' THEN '".mb_convert_encoding('土地', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN u.GG00 = 'E' THEN '".mb_convert_encoding('建物', ORACLE_ENCODING, 'UTF-8')."'
                             ELSE u.GG00
                         END) AS GG00_CHT,       -- 部別
                         u.GS03,                 -- 收件年
@@ -1417,10 +1417,10 @@ class Prefetch {
                         u.RM56_1,               -- 校對日期
                         u.GS_TYPE,              -- 異動別代碼
                         (CASE
-                            WHEN u.GS_TYPE = 'N' THEN '".mb_convert_encoding('更新後', 'BIG5', 'UTF-8')."'
-                            WHEN u.GS_TYPE = 'M' THEN '".mb_convert_encoding('更新前', 'BIG5', 'UTF-8')."'
-                            WHEN u.GS_TYPE = 'A' THEN '".mb_convert_encoding('新增', 'BIG5', 'UTF-8')."'
-                            WHEN u.GS_TYPE = 'D' THEN '".mb_convert_encoding('刪除', 'BIG5', 'UTF-8')."'
+                            WHEN u.GS_TYPE = 'N' THEN '".mb_convert_encoding('更新後', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN u.GS_TYPE = 'M' THEN '".mb_convert_encoding('更新前', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN u.GS_TYPE = 'A' THEN '".mb_convert_encoding('新增', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN u.GS_TYPE = 'D' THEN '".mb_convert_encoding('刪除', ORACLE_ENCODING, 'UTF-8')."'
                             ELSE u.GS_TYPE
                         END) AS GS_TYPE_CHT,    -- 異動狀態
                         u.GG48,                 -- 段代碼,
@@ -1486,10 +1486,10 @@ class Prefetch {
                     select distinct
                         t.as_type,  -- 異動類別
                         (CASE
-                            WHEN t.as_type = 'A' THEN '".mb_convert_encoding('新增', 'BIG5', 'UTF-8')."'
-                            WHEN t.as_type = 'D' THEN '".mb_convert_encoding('刪除', 'BIG5', 'UTF-8')."'
-                            WHEN t.as_type = 'N' THEN '".mb_convert_encoding('更新後', 'BIG5', 'UTF-8')."'
-                            WHEN t.as_type = 'M' THEN '".mb_convert_encoding('更新前', 'BIG5', 'UTF-8')."'
+                            WHEN t.as_type = 'A' THEN '".mb_convert_encoding('新增', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.as_type = 'D' THEN '".mb_convert_encoding('刪除', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.as_type = 'N' THEN '".mb_convert_encoding('更新後', ORACLE_ENCODING, 'UTF-8')."'
+                            WHEN t.as_type = 'M' THEN '".mb_convert_encoding('更新前', ORACLE_ENCODING, 'UTF-8')."'
                             ELSE t.as_type
                         END) AS as_type_cht,
                         t.aa48,     -- 段代碼

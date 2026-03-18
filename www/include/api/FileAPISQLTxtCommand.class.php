@@ -15,11 +15,11 @@ class FileAPISQLTxtCommand extends FileAPICommand {
                 fwrite($out, $flat_text."\n");
             }
             if ($print_count) {
-                fwrite($out, mb_convert_encoding("##### TAG #####共產製 ".$count." 筆資料", "big5", "utf-8"));
+                fwrite($out, mb_convert_encoding("##### TAG #####共產製 ".$count." 筆資料", ORACLE_ENCODING, "utf-8"));
                 // fwrite($out, "##### TAG #####共產製 ".$count." 筆資料");
             }
         } else {
-            fwrite($out, mb_convert_encoding("錯誤說明：傳入之參數非陣列格式無法匯出！\n", "big5", "utf-8"));
+            fwrite($out, mb_convert_encoding("錯誤說明：傳入之參數非陣列格式無法匯出！\n", ORACLE_ENCODING, "utf-8"));
             fwrite($out, print_r($data, true));
         }
         fclose($out);
@@ -39,11 +39,11 @@ class FileAPISQLTxtCommand extends FileAPICommand {
                 fwrite($out, $flat_text."\n");
             }
             if ($print_count) {
-                fwrite($out, mb_convert_encoding("##### TAG #####共產製 ".$count." 筆資料", "big5", "utf-8"));
+                fwrite($out, mb_convert_encoding("##### TAG #####共產製 ".$count." 筆資料", ORACLE_ENCODING, "utf-8"));
                 // fwrite($out, "##### TAG #####共產製 ".$count." 筆資料");
             }
         } else {
-            fwrite($out, mb_convert_encoding("錯誤說明：傳入之參數非陣列格式無法匯出！\n", "big5", "utf-8"));
+            fwrite($out, mb_convert_encoding("錯誤說明：傳入之參數非陣列格式無法匯出！\n", ORACLE_ENCODING, "utf-8"));
             fwrite($out, print_r($data, true));
         }
         fclose($out);

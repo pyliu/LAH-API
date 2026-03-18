@@ -606,7 +606,7 @@ class XCase {
 			$values = "(";
 			foreach ($remote_row as $key => $value) {
 				$columns .= $key.",";
-				$values .= "'".($raw ? $value : iconv("utf-8", "big5", $value))."',";
+				$values .= "'".($raw ? $value : iconv("utf-8", ORACLE_ENCODING, $value))."',";
 			}
 			$columns = rtrim($columns, ",").")";
 			$values = rtrim($values, ",").")";

@@ -169,8 +169,8 @@ class StatsOracle {
                 (v.AB03 NOT LIKE '%' || :bv_city || '%' AND v.AB03 NOT LIKE '%' || :bv_county || '%')
         ");
         $this->db_wrapper->getDB()->bind(":bv_cond", $year_month);
-        $this->db_wrapper->getDB()->bind(":bv_city", mb_convert_encoding('桃園市', "big5"));
-        $this->db_wrapper->getDB()->bind(":bv_county", mb_convert_encoding('桃園縣', "big5"));
+        $this->db_wrapper->getDB()->bind(":bv_city", mb_convert_encoding('桃園市', ORACLE_ENCODING));
+        $this->db_wrapper->getDB()->bind(":bv_county", mb_convert_encoding('桃園縣', ORACLE_ENCODING));
         $this->db_wrapper->getDB()->execute();
         return $this->db_wrapper->getDB()->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
     }

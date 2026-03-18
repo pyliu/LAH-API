@@ -7,7 +7,7 @@ class PrcAllCasesData {
     private function convertCharset() {
         $convert = array();
         foreach ($this->rows as $key=>$value) {
-            $convert[$key] = empty($value) ? $value : iconv("big5", "utf-8", $value);
+            $convert[$key] = empty($value) ? $value : iconv(ORACLE_ENCODING, "utf-8", $value);
         }
         return $convert;
     }
