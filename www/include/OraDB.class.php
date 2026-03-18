@@ -1,4 +1,5 @@
 <?php
+require_once("GlobalConstants.inc.php");
 require_once("System.class.php");
 // 地所DB的內碼為「American_America.US7ASCII」
 putenv('NLS_LANG=American_America.US7ASCII');
@@ -35,7 +36,7 @@ class OraDB {
     private $numrows;
     private $CONN_TYPE;
     private $connected = false;
-    private $db_encoding = 'BIG5';
+    private $db_encoding = ORACLE_ENCODING;
     private $web_encoding = 'UTF-8';
 
     private function initSetting() {
