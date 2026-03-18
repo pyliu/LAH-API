@@ -70,7 +70,7 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
                 $numbers = explode(strpos($row[4], ',') === false ? '、' : ',', $row[4]);
 
                 if (!$clean_old_data) {
-                    $keyword = mb_convert_encoding($household, 'UTF-8', 'BIG5')[0];
+                    $keyword = mb_convert_encoding($household, 'UTF-8', 'CP950')[0];
                     $log->info('清除所有舊歸戶資料。('.$keyword.'%)');
                     $db->removePeopleMapping($keyword);
                     $clean_old_data = true;

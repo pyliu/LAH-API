@@ -51,14 +51,14 @@ if (isset($_FILES['file']['name'])) {
                         $now_land_number = str_replace('-', '', $now_land_number);
                         $saved_path = $saved_dir.DIRECTORY_SEPARATOR.$now_land_number.".txt";
                         $prev_content = @file_get_contents($saved_path);
-                        $current_content = mb_convert_encoding($now_content, 'UTF-8', 'BIG5');
+                        $current_content = mb_convert_encoding($now_content, 'UTF-8', 'CP950');
                         if ($prev_content === false) {
                             file_put_contents($saved_path, $current_content);
                             $processed_count++;
                         } else {
                             file_put_contents($saved_path, $prev_content.$current_content);
                         }
-                        $db->addLandData($found_section_code, mb_convert_encoding($found_section_name, 'UTF-8', 'BIG5'), $now_land_number, ($prev_content ?? '').$current_content);
+                        $db->addLandData($found_section_code, mb_convert_encoding($found_section_name, 'UTF-8', 'CP950'), $now_land_number, ($prev_content ?? '').$current_content);
                         // reset previous data, startover again
                         $now_section_name = '';
                         $now_land_number = '';
@@ -67,7 +67,7 @@ if (isset($_FILES['file']['name'])) {
                     }
                 } else {
                     // find the section name and land number as the beginning point
-                    $pattern = mb_convert_encoding("[^#]{3}\s(?'section'[^#]+?段)\s(?'number'\d{4}-\d{4})\s地號\n", 'BIG5', 'UTF-8');
+                    $pattern = mb_convert_encoding("[^#]{3}\s(?'section'[^#]+?段)\s(?'number'\d{4}-\d{4})\s地號\n", 'CP950', 'UTF-8');
                     if(preg_match("/$pattern/m", $line, $matches)) {
                         $found_section_name = $now_section_name = $matches['section'];
                         $now_land_number = $matches['number'];
