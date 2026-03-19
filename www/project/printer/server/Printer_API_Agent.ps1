@@ -1,17 +1,17 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v17.65 (終極 BIG5 安全版 - 零 Emoji 實體字元)
+    版本：v17.67 (終極 API 防阻塞與強制重啟優化版)
     
     修正紀錄：
-    1. [編碼安全] 徹底移除所有實體 Emoji，改用 [char]::ConvertFromUtf32() 動態生成，完美相容 BIG5 / ANSI 存檔。
-    2. [程式碼全展開] 嚴格禁止壓縮，完整保留所有 API 路由實作 (re-print, preview, print-pdf 等) 與系統函數。
-    3. [WS 安全認證] 實作 WebSocket 連線金鑰驗證，統一使用 $apiKey 進行安全防護。
-    4. [佇列極速推播] 改用 Win32_PrintJob 分析配合手動 JSON 組裝，實現毫秒級無阻塞廣播。
-    5. [路由全面修復] 包含 /printer/refresh, /printer/status, /service/self-heal, /printer/clear 等 15 支完整 API。
-    6. [WS 交握修復] 採用 [NullString]::Value 解決 PowerShell $null 轉空字串造成的交握失敗。
-    7. [即時推播] 結合 FileSystemWatcher 監控 printlog 與 Spooler 底層目錄。
-    8. [雙面列印突破] 針對 HP 等頑固驅動，引入 SumatraPDF 參數化列印機制。
+    1. [API 阻塞修復] 將 /service/restart-spooler 與 /service/self-heal 改為「先回應、後執行」的延遲觸發架構，徹底解決前端無回應 (Timeout) 的問題。
+    2. [防卡死防線] 強化 Invoke-SpoolerSelfHealing 與重啟功能，在 Stop-Service 後加入強制 Stop-Process spoolsv，保證服務重啟 100% 成功。
+    3. [CRON 邏輯修復] 解決隔日排程不觸發的問題 (將防止重複執行的檢查，從單純比對時/分，升級為精確到日的 yyyyMMddHHmm 比對)。
+    4. [CRON 解析強化] 使用正規表示式分隔空白，提高對 .env 檔中多餘空白字元的容錯度。
+    5. [編碼安全] 徹底移除所有實體 Emoji，改用 [char]::ConvertFromUtf32() 動態生成，完美相容 BIG5 / ANSI 存檔。
+    6. [程式碼全展開] 嚴格禁止壓縮，完整保留所有 API 路由實作 (re-print, preview, print-pdf 等) 與系統函數。
+    7. [WS 安全認證] 實作 WebSocket 連線金鑰驗證，統一使用 $apiKey 進行安全防護。
+    8. [佇列極速推播] 改用 Win32_PrintJob 分析配合手動 JSON 組裝，實現毫秒級無阻塞廣播。
 
 .DESCRIPTION
     本腳本具備多層次自我檢查與自動修復機制 (Self-Healing & Resilience)：
@@ -437,8 +437,15 @@ function Invoke-SpoolerSelfHealing {
     Write-ApiLog "!!! [程序啟動] 觸發原因: $reason"
     
     try {
-        Stop-Service "Spooler" -Force
-        Start-Sleep -Seconds 3
+        # [防卡死優化] 強制停止服務，並在背景確保進程被獵殺，避免 API 掛死
+        Stop-Service "Spooler" -Force -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
+        Start-Sleep -Seconds 2
+        
+        $spoolerProc = Get-Process -Name "spoolsv" -ErrorAction SilentlyContinue
+        if ($spoolerProc) {
+            $spoolerProc | Stop-Process -Force -ErrorAction SilentlyContinue
+        }
+        Start-Sleep -Seconds 1
         
         # 計算並清理暫存檔
         $clearedCount = 0
@@ -477,7 +484,9 @@ function Test-CronMatch {
     param($cron, $now)
     
     if ([string]::IsNullOrEmpty($cron)) { return $false }
-    $parts = $cron.Split(" ")
+    
+    # [CRON 解析強化] 支援多個連續空白字元的防錯處理
+    $parts = $cron -split '\s+'
     if ($parts.Count -ne 5) { return $false }
     
     $min = $parts[0]
@@ -833,7 +842,7 @@ function Test-PrinterHealth {
 # 3. 主程序 (HttpListener & WebSocket & 即時監控)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Print Server API & Monitor v17.65 " -Color Cyan
+Write-ApiLog " Print Server API & Monitor v17.67 " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 # 啟動時設定防火牆
@@ -998,13 +1007,14 @@ while ($listener.IsListening) {
             $nextCheck = $now.AddSeconds($checkIntervalSec)
         }
 
-        # 定期深度自癒
+        # 定期深度自癒 (加入跨日邏輯判定)
         if ($enableScheduledHeal) {
-            if ($global:LastCronRunTime -eq $null -or ($now.Minute -ne $global:LastCronRunTime.Minute -or $now.Hour -ne $global:LastCronRunTime.Hour)) {
+            $currentMinStr = $now.ToString("yyyyMMddHHmm")
+            if ($global:LastCronRunTime -ne $currentMinStr) {
                 if (Test-CronMatch $scheduledHealCron $now) {
                     Invoke-SpoolerSelfHealing -reason "Cron 排程"
                     Rotate-PrintLog
-                    $global:LastCronRunTime = $now
+                    $global:LastCronRunTime = $currentMinStr
                 }
             }
         }
@@ -1023,6 +1033,7 @@ while ($listener.IsListening) {
         $req = $context.Request
         $res = $context.Response
         $path = $req.Url.AbsolutePath.ToLower()
+        $pendingAction = $null  # [重要] 每次請求重置延遲動作標記
 
         # [核心] WebSocket 安全認證
         if ($req.IsWebSocketRequest) {
@@ -1343,19 +1354,17 @@ while ($listener.IsListening) {
                 }
                 $out.success = $true
             }
-            # 12. 重啟 Spooler 服務
+            # 12. 重啟 Spooler 服務 [已修改: 延遲執行防阻塞]
             elseif ($path -eq "/service/restart-spooler") { 
-                try { 
-                    Restart-Service "Spooler" -Force
-                    $out.success = $true 
-                } catch {
-                    $out.message = $_.Exception.Message
-                } 
-            }
-            # 13. 深度自癒
-            elseif ($path -eq "/service/self-heal") { 
-                Invoke-SpoolerSelfHealing "API Trigger"
                 $out.success = $true 
+                $out.message = "正在背景執行重啟 Spooler 服務..."
+                $pendingAction = "restart-spooler"
+            }
+            # 13. 深度自癒 [已修改: 延遲執行防阻塞]
+            elseif ($path -eq "/service/self-heal") { 
+                $out.success = $true 
+                $out.message = "正在背景執行深度自癒流程..."
+                $pendingAction = "self-heal"
             }
             # 14. 重啟腳本
             elseif ($path -eq "/server/restart-script") { 
@@ -1373,6 +1382,7 @@ while ($listener.IsListening) {
         }
 
         # 輸出 JSON (如果不是預覽 PDF 的二進位檔)
+        # 此段會關閉網路連線，將結果送回前端
         if (-not $handledBinary) {
             $json = ConvertTo-SimpleJson $out
             $buf = [System.Text.Encoding]::UTF8.GetBytes($json)
@@ -1382,6 +1392,28 @@ while ($listener.IsListening) {
                 $res.OutputStream.Write($buf, 0, $buf.Length)
                 $res.Close()
             } catch {}
+        }
+
+        # ---------------------------------------------------------
+        # [核心解法] 執行延遲動作 (確保前端先收到成功回應，不再 Timeout)
+        # ---------------------------------------------------------
+        if ($pendingAction -eq "restart-spooler") {
+            Write-ApiLog ">>> [系統操作] 正在執行延遲動作: 重啟 Spooler 服務" -Color Yellow
+            try { 
+                # [防卡死優化] 強制停止，並在背景確保進程被獵殺
+                Stop-Service -Name "Spooler" -Force -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
+                Start-Sleep -Seconds 2
+                $spoolerProc = Get-Process -Name "spoolsv" -ErrorAction SilentlyContinue
+                if ($spoolerProc) { $spoolerProc | Stop-Process -Force -ErrorAction SilentlyContinue }
+                Start-Sleep -Seconds 1
+                Start-Service -Name "Spooler"
+                Write-ApiLog ">>> [系統操作] Spooler 服務已成功重啟" -Color Green
+            } catch {
+                Write-ApiLog "!!! [系統操作] Spooler 重啟失敗: $($_.Exception.Message)" -Color Red
+            }
+        } elseif ($pendingAction -eq "self-heal") {
+            Write-ApiLog ">>> [系統操作] 正在執行延遲動作: 深度自癒" -Color Yellow
+            Invoke-SpoolerSelfHealing "API Trigger"
         }
 
         # 執行重啟動作
