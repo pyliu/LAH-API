@@ -84,6 +84,25 @@ switch ($_POST["type"]) {
         $status_code = $fail === 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
         echoJSONResponse($message, $status_code);
         break;
+    case "remove_notification_by_title":
+        $channels = $_POST['channels'];
+        $title = $_POST['title'];
+        $notify = new Notification();
+        $success = 0;
+        $fail = 0;
+        foreach ($channels as $channel) {
+            $result = $notify->removeOutdatedMessageByTitle($channel, $title);
+            Logger::getInstance()->info('從 '.$channel.' 頻道移除「'.$title.'」訊息'.($result ? '成功' : '失敗').'。');
+            if ($res === false) {
+                $fail++;
+            } else {
+                $success++;
+            }
+        }
+        $message = "根據標題移除訊息成功 $success 筆，失敗 $fail 筆。";
+        $status_code = $fail === 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+        echoJSONResponse($message, $status_code);
+        break;
     case "get_notification":
         $channel = $_POST['channel'];
         $limit = $_POST['limit'] ?? 10;

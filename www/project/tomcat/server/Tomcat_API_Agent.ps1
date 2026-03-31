@@ -227,13 +227,56 @@ function Send-SysAdminNotify {
     try {
         $url = "http://${notifyIp}:${notifyPort}${notifyEndpoint}"
         
-        # ?? 取得伺服器本機 IPv4 位址
+        # 取得伺服器本機 IPv4 位址與電腦名稱
         $ipList = [System.Net.Dns]::GetHostAddresses($env:COMPUTERNAME) | Where-Object { $_.AddressFamily -eq 'InterNetwork' }
         $serverIp = if ($ipList) { $ipList[0].ToString() } else { "127.0.0.1" }
         $senderName = "$env:COMPUTERNAME ($serverIp)"
         
-        # ?? 根據 PHP API 要求，建立傳統的 URL-Encoded 表單參數陣列
-        # 將 sender 改為伺服器的電腦名稱加上 IP ($senderName)
+        # ==============================================================
+        # ?? 步驟 1：發送刪除舊訊息請求 (依據 Title)
+        # ==============================================================
+        try {
+            $delParams = @(
+                "type=remove_notification_by_title",
+                "title=$([System.Uri]::EscapeDataString($title))"
+            )
+            
+            if ($null -ne $notifyChannels) {
+                foreach ($c in $notifyChannels) {
+                    $delParams += "channels[]=$([System.Uri]::EscapeDataString($c))"
+                }
+            }
+            
+            $delString = $delParams -join "&"
+            
+            Write-ApiLog " -> [通知系統] 準備清除舊訊息 (Title: $title)..." -Color DarkGray
+            
+            $reqDel = [System.Net.WebRequest]::Create($url)
+            $reqDel.Method = "POST"
+            $reqDel.ContentType = "application/x-www-form-urlencoded; charset=utf-8"
+            $reqDel.Timeout = $timeout
+            
+            $bytesDel = [System.Text.Encoding]::UTF8.GetBytes($delString)
+            $reqDel.ContentLength = $bytesDel.Length
+            $streamDel = $reqDel.GetRequestStream()
+            $streamDel.Write($bytesDel, 0, $bytesDel.Length)
+            $streamDel.Close()
+            
+            $resDel = $reqDel.GetResponse()
+            $readerDel = New-Object System.IO.StreamReader($resDel.GetResponseStream())
+            $resBodyDel = $readerDel.ReadToEnd()
+            $readerDel.Close()
+            $resDel.Close()
+            
+            try { $resBodyDel = [System.Text.RegularExpressions.Regex]::Unescape($resBodyDel) } catch {}
+            Write-ApiLog " -> [通知系統] 刪除回應: $resBodyDel" -Color DarkGray
+        } catch {
+            Write-ApiLog "!!! [通知系統] 刪除舊訊息異常 (不影響後續發送): $($_.Exception.Message)" -Color DarkYellow
+        }
+
+        # ==============================================================
+        # ?? 步驟 2：發送新訊息請求
+        # ==============================================================
         $postParams = @(
             "type=add_notification",
             "title=$([System.Uri]::EscapeDataString($title))",
@@ -253,11 +296,11 @@ function Send-SysAdminNotify {
         # 將陣列組合成 Query String
         $postString = $postParams -join "&"
         
-        Write-ApiLog " -> [通知系統] 準備發送請求至 $url" -Color DarkGray
+        Write-ApiLog " -> [通知系統] 準備發送新推播請求至 $url" -Color DarkGray
         
         $req = [System.Net.WebRequest]::Create($url)
         $req.Method = "POST"
-        # ?? 關鍵：必須使用 application/x-www-form-urlencoded，PHP 的 $_POST 才能成功接收
+        # ? 關鍵：必須使用 application/x-www-form-urlencoded，PHP 的 $_POST 才能成功接收
         $req.ContentType = "application/x-www-form-urlencoded; charset=utf-8"
         $req.Timeout = $timeout
         
@@ -274,10 +317,10 @@ function Send-SysAdminNotify {
         $reader.Close()
         $res.Close()
         
-        # ?? 將 PHP 回傳的 Unicode 編碼 (如 \u65b0\u589e) 解碼為人類可讀的中文字
+        # 將 PHP 回傳的 Unicode 編碼 (如 \u65b0\u589e) 解碼為人類可讀的中文字
         try { $resBody = [System.Text.RegularExpressions.Regex]::Unescape($resBody) } catch {}
         
-        # ?? 印出 PHP 的 JSON 回應，讓成功與否一目了然
+        # 印出 PHP 的 JSON 回應，讓成功與否一目了然
         Write-ApiLog " -> [通知系統] PHP 伺服器回應: $resBody" -Color Green
         
     } catch {
