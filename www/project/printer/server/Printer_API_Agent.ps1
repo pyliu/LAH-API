@@ -1,17 +1,18 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v17.67 (終極 API 防阻塞與強制重啟優化版)
+    版本：v17.68 (終極靜音排程與防阻塞優化版)
     
     修正紀錄：
-    1. [API 阻塞修復] 將 /service/restart-spooler 與 /service/self-heal 改為「先回應、後執行」的延遲觸發架構，徹底解決前端無回應 (Timeout) 的問題。
-    2. [防卡死防線] 強化 Invoke-SpoolerSelfHealing 與重啟功能，在 Stop-Service 後加入強制 Stop-Process spoolsv，保證服務重啟 100% 成功。
-    3. [CRON 邏輯修復] 解決隔日排程不觸發的問題 (將防止重複執行的檢查，從單純比對時/分，升級為精確到日的 yyyyMMddHHmm 比對)。
-    4. [CRON 解析強化] 使用正規表示式分隔空白，提高對 .env 檔中多餘空白字元的容錯度。
-    5. [編碼安全] 徹底移除所有實體 Emoji，改用 [char]::ConvertFromUtf32() 動態生成，完美相容 BIG5 / ANSI 存檔。
-    6. [程式碼全展開] 嚴格禁止壓縮，完整保留所有 API 路由實作 (re-print, preview, print-pdf 等) 與系統函數。
-    7. [WS 安全認證] 實作 WebSocket 連線金鑰驗證，統一使用 $apiKey 進行安全防護。
-    8. [佇列極速推播] 改用 Win32_PrintJob 分析配合手動 JSON 組裝，實現毫秒級無阻塞廣播。
+    1. [防擾民機制] 針對 Cron 排程執行的例行維護，若無過期暫存檔需清理 ($clearedCount = 0)，則僅寫入 Log，不發送推播通知。
+    2. [API 阻塞修復] 將 /service/restart-spooler 與 /service/self-heal 改為「先回應、後執行」的延遲觸發架構，徹底解決前端無回應 (Timeout) 的問題。
+    3. [防卡死防線] 強化 Invoke-SpoolerSelfHealing 與重啟功能，在 Stop-Service 後加入強制 Stop-Process spoolsv，保證服務重啟 100% 成功。
+    4. [CRON 邏輯修復] 解決隔日排程不觸發的問題 (將防止重複執行的檢查，從單純比對時/分，升級為精確到日的 yyyyMMddHHmm 比對)。
+    5. [CRON 解析強化] 使用正規表示式分隔空白，提高對 .env 檔中多餘空白字元的容錯度。
+    6. [編碼安全] 徹底移除所有實體 Emoji，改用 [char]::ConvertFromUtf32() 動態生成，完美相容 BIG5 / ANSI 存檔。
+    7. [程式碼全展開] 嚴格禁止壓縮，完整保留所有 API 路由實作 (re-print, preview, print-pdf 等) 與系統函數。
+    8. [WS 安全認證] 實作 WebSocket 連線金鑰驗證，統一使用 $apiKey 進行安全防護。
+    9. [佇列極速推播] 改用 Win32_PrintJob 分析配合手動 JSON 組裝，實現毫秒級無阻塞廣播。
 
 .DESCRIPTION
     本腳本具備多層次自我檢查與自動修復機制 (Self-Healing & Resilience)：
@@ -459,20 +460,34 @@ function Invoke-SpoolerSelfHealing {
         
         Start-Service "Spooler"
         
-        # 統一集結在一封訊息發送 (包含清理數量)
+        # 決定是否需要發送通知的邏輯旗標
+        $shouldNotify = $true
+        
+        # 準備統一集結的訊息
         $notifyTitle = "$eAlert 自癒修復完成"
         $notifyContent = "系統偵測到異常 ($reason)，已自動完成修復。`n$eCheck Spooler 服務已重啟`n$eBroom 共清理了 $clearedCount 個佇列暫存檔"
         
         if ($isCron) {
             $notifyTitle = "$eRecyc 例行維護完成"
             $notifyContent = "系統已順利執行排程維護 ($reason)。`n$eCheck Spooler 服務已安全重置`n$eBroom 共清理了 $clearedCount 個過期暫存檔"
+            
+            # [防擾民優化] 如果是例行排程且沒有清到任何檔案，就不發送通知
+            if ($clearedCount -eq 0) {
+                $shouldNotify = $false
+            }
         } elseif ($isApi) {
             $notifyTitle = "$eTool 手動維護完成"
             $notifyContent = "管理員已透過 API 手動觸發系統維護。`n$eCheck Spooler 服務已安全重置`n$eBroom 共清理了 $clearedCount 個佇列暫存檔"
         }
         
         Write-ApiLog "$eCheck [程序完成] 服務已重啟，清理了 $clearedCount 個暫存檔。" -Color Green
-        Send-SysAdminNotify -title $notifyTitle -content $notifyContent
+        
+        if ($shouldNotify) {
+            Send-SysAdminNotify -title $notifyTitle -content $notifyContent
+        } else {
+            Write-ApiLog ">>> [提示] 例行維護無暫存檔需清理，已略過推播通知防擾民。" -Color DarkGray
+        }
+        
     } catch {
         $err = $_.Exception.Message
         Write-ApiLog "$eCross [程序失敗] $err" -Color Red
@@ -717,7 +732,7 @@ function Get-PrinterStatusData {
             }
         } else {
             switch ($p.PrinterStatus) {
-                1 { $finalStatus = "Error"; $errDetails = "驅動異常" } 
+                1 { $finalStatus = "Error"; $errDetails = "驅驚異常" } 
                 2 { $finalStatus = "Error"; $errDetails = "其他錯誤" }
                 4 { $finalStatus = "Printing" } 
                 5 { $finalStatus = "Warmup" }
@@ -842,7 +857,7 @@ function Test-PrinterHealth {
 # 3. 主程序 (HttpListener & WebSocket & 即時監控)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Print Server API & Monitor v17.67 " -Color Cyan
+Write-ApiLog " Print Server API & Monitor v17.68 " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 # 啟動時設定防火牆
