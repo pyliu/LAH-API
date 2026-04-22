@@ -116,6 +116,55 @@
                             </button>
                         </div>
 
+                        <!-- 伺服器清單切換器 -->
+                        <div class="relative">
+                            <button @click="showServerList = !showServerList" :class="['flex items-center gap-1.5 p-2.5 rounded-xl border transition-all shadow-sm text-xs font-bold',
+                                showServerList ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800']"
+                                title="切換監控伺服器">
+                                <span class="icon-box"><i data-lucide="layers" class="w-4 h-4"></i></span>
+                                <span class="hidden md:inline max-w-[80px] truncate">{{ currentServerLabel || '清單' }}</span>
+                                <span v-if="servers.length" :class="['text-[10px] font-black px-1.5 py-0.5 rounded-full', showServerList ? 'bg-white/20 text-white' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400']">{{ servers.length }}</span>
+                            </button>
+                            <!-- 下拉清單 -->
+                            <div v-if="showServerList" class="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden animate-scale-in">
+                                <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                                    <span class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">監控伺服器清單</span>
+                                    <button @click="openSetupModal" class="flex items-center text-[10px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 px-2 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                                        <span class="icon-box mr-1"><i data-lucide="plus" class="w-3 h-3"></i></span>新增
+                                    </button>
+                                </div>
+                                <div v-if="servers.length === 0" class="px-4 py-6 text-center text-slate-400 dark:text-slate-500 text-xs">
+                                    <span class="icon-box mb-2 opacity-40"><i data-lucide="server-off" class="w-8 h-8 mx-auto block"></i></span>
+                                    <p class="font-bold">尚無儲存的伺服器</p>
+                                    <p class="mt-1 text-[10px]">點擊上方「新增」或在連線設定中<br>填入暱稱即可加入清單。</p>
+                                </div>
+                                <div v-else class="max-h-60 overflow-y-auto">
+                                    <div v-for="s in servers" :key="s.id"
+                                        :class="['flex items-center gap-2 px-3 py-2.5 border-b border-slate-50 dark:border-slate-800 last:border-0 group',
+                                            s.url === apiUrl ? 'bg-blue-50/70 dark:bg-blue-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50']">
+                                        <div :class="['w-1.5 h-1.5 rounded-full flex-shrink-0', s.url === apiUrl ? 'bg-blue-500 animate-pulse' : 'bg-slate-300 dark:bg-slate-600']"></div>
+                                        <div class="flex-1 min-w-0 cursor-pointer" @click="switchToServer(s)">
+                                            <p :class="['text-xs font-bold truncate', s.url === apiUrl ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200']">{{ s.name }}</p>
+                                            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-mono truncate">{{ s.url }}</p>
+                                        </div>
+                                        <button v-if="s.url !== apiUrl" @click="switchToServer(s)"
+                                            class="opacity-0 group-hover:opacity-100 text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg flex-shrink-0 transition-opacity">
+                                            切換
+                                        </button>
+                                        <span v-else class="text-[10px] font-bold text-blue-500 dark:text-blue-400 flex-shrink-0 px-1">使用中</span>
+                                        <button @click.stop="removeServer(s.id)" class="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-all flex-shrink-0">
+                                            <span class="icon-box"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
+                                    <p class="text-[10px] text-slate-400 dark:text-slate-500 text-center">連線設定時填入暱稱可加入清單</p>
+                                </div>
+                            </div>
+                            <!-- 點擊外部關閉 -->
+                            <div v-if="showServerList" class="fixed inset-0 z-40" @click="showServerList = false"></div>
+                        </div>
+
                         <button @click="toggleTheme" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all shadow-sm">
                             <span class="icon-box text-amber-500 dark:text-yellow-400">
                                 <i :data-lucide="isDarkMode ? 'sun' : 'moon'" class="w-4 h-4"></i>
@@ -158,6 +207,13 @@
                         </div>
 
                         <div class="space-y-4 text-xs">
+                            <div v-if="currentServerLabel" class="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-xl">
+                                <span class="icon-box text-blue-500 dark:text-blue-400 flex-shrink-0"><i data-lucide="layers" class="w-3.5 h-3.5"></i></span>
+                                <div class="min-w-0">
+                                    <p class="text-[10px] text-blue-400 dark:text-blue-500 font-bold uppercase tracking-widest leading-none mb-0.5">系統別名</p>
+                                    <p class="font-black text-blue-700 dark:text-blue-300 truncate text-sm leading-tight">{{ currentServerLabel }}</p>
+                                </div>
+                            </div>
                             <div class="flex flex-col border-b border-slate-50 dark:border-slate-800 pb-2 gap-1">
                                 <span class="text-slate-400 font-medium uppercase tracking-wider">服務名稱</span>
                                 <span class="font-bold text-slate-700 dark:text-slate-200 break-all leading-normal text-sm">
@@ -347,6 +403,15 @@
                             </button>
                         </div>
                     </div>
+                    <!-- 儲存到伺服器清單 -->
+                    <div class="border-t border-slate-100 dark:border-slate-700 pt-4">
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1 flex items-center gap-1.5">
+                            <span class="icon-box"><i data-lucide="layers" class="w-3.5 h-3.5"></i></span>
+                            加入伺服器清單（選填暱稱）
+                        </label>
+                        <input type="text" v-model="setupModal.name" placeholder="例如: 生產環境-A機  (留空則不加入清單)" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500 focus:border-solid outline-none text-sm text-slate-800 dark:text-slate-200">
+                        <p class="text-[10px] text-slate-400 mt-1.5 ml-1">填入暱稱後點「儲存並連線」，此伺服器將出現在頂部清單中供快速切換。</p>
+                    </div>
                 </div>
                 <div class="flex gap-3 mt-8">
                     <button v-if="apiUrl" @click="setupModal.show = false" class="py-3 px-6 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">取消</button>
@@ -448,7 +513,39 @@
                 const apiKey = ref(localStorage.getItem('tomcatApiKey') || '');
                 const showApiKey = ref(false);
                 const isConnectionError = ref(false);
-                const setupModal = reactive({ show: false, url: '', key: '', testing: false, showKey: false });
+                const setupModal = reactive({ show: false, url: '', key: '', name: '', testing: false, showKey: false });
+
+                // ── 伺服器清單管理 ──────────────────────────────────────
+                const servers = ref(JSON.parse(localStorage.getItem('tomcatServers') || '[]'));
+                const showServerList = ref(false);
+
+                const saveToServerList = (name, url, key) => {
+                    const idx = servers.value.findIndex(s => s.url === url);
+                    if (idx >= 0) { servers.value[idx] = { ...servers.value[idx], name, url, key }; }
+                    else { servers.value.push({ id: generateId(), name, url, key }); }
+                    localStorage.setItem('tomcatServers', JSON.stringify(servers.value));
+                };
+
+                const switchToServer = (server) => {
+                    apiUrl.value = server.url;
+                    apiKey.value = server.key;
+                    localStorage.setItem('tomcatApiUrl', server.url);
+                    localStorage.setItem('tomcatApiKey', server.key);
+                    showServerList.value = false;
+                    showToast(`切換至：${server.name}`, 'info');
+                    triggerManualCheck();
+                };
+
+                const removeServer = (id) => {
+                    servers.value = servers.value.filter(s => s.id !== id);
+                    localStorage.setItem('tomcatServers', JSON.stringify(servers.value));
+                };
+
+                const currentServerLabel = computed(() => {
+                    const matched = servers.value.find(s => s.url === apiUrl.value);
+                    return matched ? matched.name : null;
+                });
+                // ────────────────────────────────────────────────────────
 
                 const toggleApiKeyVisibility = () => {
                     showApiKey.value = !showApiKey.value;
@@ -592,7 +689,9 @@
                 const openSetupModal = () => {
                     setupModal.url = apiUrl.value || '';
                     setupModal.key = apiKey.value;
+                    setupModal.name = '';
                     setupModal.show = true;
+                    showServerList.value = false;
                     nextTick(() => { lucide.createIcons(); });
                 };
 
@@ -613,7 +712,13 @@
                             statusData.value = res.data;
                             isConnectionError.value = false;
                             setupModal.show = false; 
-                            showToast('連線成功！已儲存設定。', 'success');
+                            if (setupModal.name.trim()) {
+                                saveToServerList(setupModal.name.trim(), setupModal.url, setupModal.key);
+                                showToast(`已儲存「${setupModal.name.trim()}」到伺服器清單`, 'success');
+                            } else {
+                                showToast('連線成功！已儲存設定。', 'success');
+                            }
+                            setupModal.name = '';
                             nextTick(() => { fetchLogs(false); });
                         } else { throw new Error(res.message); }
                     } catch (error) {
@@ -932,7 +1037,8 @@
                     zoomLevel, changeZoom, resetZoom, logContainerHeight, apiUrl, apiKey, showApiKey, toggleApiKeyVisibility, statusData, logs, currentLogType, logLines, isOperating, isRefreshingLogs, isAutoSyncing, logContainer, handleScroll, shouldAutoScroll, resumeAutoScroll,
                     modal, toasts, statusColors, isDarkMode, formatBytes, fetchStatus, fetchLogs, loadMoreLogs, handleAction, executeModalAction, getLogColor, getToastColor, toggleTheme,
                     reconnectState, cancelReconnection, downloadState, isConnectionError, setupModal, toggleModalKeyVisibility, openSetupModal, saveSetup, triggerManualCheck,
-                    isInitialLoading, lastUpdated
+                    isInitialLoading, lastUpdated,
+                    servers, showServerList, switchToServer, removeServer, currentServerLabel
                 };
             }
         }).mount('#app');
