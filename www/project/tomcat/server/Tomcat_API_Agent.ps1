@@ -23,7 +23,7 @@
     - 支援 JVM Crash Dumps (hs_err_pid) 系統目錄偵測與自動掃描。
     - 實作日誌打包 API，支援將 logs 目錄壓縮為二進位 ZIP 串流傳輸。
 
-    版本 v2.1 - [目前版本]
+    版本 v2.1
     - 安全性強化：將預設監聽連接埠變更為 18888，並修改通知頻道為 "val"。
     - 檔案生命週期管理：優化 Cleanup-OldLogs，支援自動清理超過 7 天的歷史 ZIP 壓縮檔。
     - 修正 CORS 預檢邏輯，支援現代網路安全性標頭 (Access-Control-Allow-Headers: *)。
@@ -31,6 +31,9 @@
     - 記憶體與網路優化：實作日誌分塊打包 (Staging) 與 Chunked Streaming，徹底防堵 OOM 與前端斷流錯誤。
     - 容錯機制：優化通知 Timeout 捕捉，防堵無窮重啟迴圈。
     - 推播整合優化：根據 PHP API 規範，改用 application/x-www-form-urlencoded 並補齊 type、sender 等必填欄位。
+    
+    版本 v2.2
+    - 增加服務自動守護機制
 
 .USAGE_NOTES
     1. 權限：必須以「系統管理員 (Administrator)」身分執行，否則無法重啟服務或獵殺程序。
@@ -482,7 +485,7 @@ function Watch-AutoServices {
 # 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Tomcat API Agent v2.1 (Port: $port) " -Color Cyan
+Write-ApiLog " Tomcat API Agent v2.2 (Port: $port) " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 if (Test-Path $envFile) {
