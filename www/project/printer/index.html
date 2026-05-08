@@ -294,9 +294,17 @@
                                         <span v-if="p.IP" class="text-xs font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded"><i class="fa-solid fa-network-wired mr-1"></i>{{ p.IP }}</span>
                                     </div>
                                 </div>
-                                <div class="text-right flex-shrink-0 ml-2">
-                                    <div class="text-2xl font-bold" :class="p.Jobs > 0 ? (p.Jobs > 20 ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400') : 'text-slate-400 dark:text-slate-600'">{{ p.Jobs }}</div>
-                                    <div class="text-[0.625rem] text-slate-400 dark:text-slate-500 uppercase">佇列數</div>
+                                <div class="flex flex-col items-end justify-start flex-shrink-0 ml-2">
+                                    <div class="flex items-center gap-2">
+                                        <transition name="fade">
+                                            <button v-if="clearBtnVisible[p.Name]" @click="clearQueue(p.Name)" :disabled="loading" 
+                                                    class="bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400 px-1.5 py-0.5 rounded text-[0.625rem] font-medium shadow-sm transition-colors flex items-center gap-1 border border-red-200 dark:border-red-800 disabled:opacity-50" title="清除所有佇列">
+                                                <i class="fa-solid fa-trash-can"></i><span>清除</span>
+                                            </button>
+                                        </transition>
+                                        <div class="text-2xl leading-none font-bold" :class="p.Jobs > 0 ? (p.Jobs > 20 ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400') : 'text-slate-400 dark:text-slate-600'">{{ p.Jobs }}</div>
+                                    </div>
+                                    <div class="text-[0.625rem] text-slate-400 dark:text-slate-500 uppercase mt-1">佇列數</div>
                                 </div>
                             </div>
                             
@@ -322,8 +330,6 @@
                                     <i class="fa-solid fa-clock-rotate-left"></i> 紀錄 
                                     <span class="bg-purple-200 text-purple-800 dark:bg-purple-800 dark:text-purple-200 rounded-full px-1.5 py-0.5 text-[0.625rem] leading-none transition-all duration-300" :class="{'scale-125 bg-purple-300': flashHighlight}">{{ p.printed.length }}</span>
                                 </button>
-                                
-                                <button @click="clearQueue(p.Name)" :disabled="loading" class="flex-1 min-w-[60px] bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-300 text-xs py-2 rounded border border-red-200 dark:border-red-800 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-trash"></i> 清除</button>
                             </div>
                         </div>
                     </div>
@@ -416,7 +422,7 @@
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden transition-colors">
                     <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900"><h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-pen-to-square mr-2 text-yellow-500"></i>編輯資訊</h3><button @click="showEditModal = false" :disabled="saving" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"><i class="fa-solid fa-xmark"></i></button></div>
                     <div class="p-6 space-y-4">
-                        <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg text-sm text-yellow-800 dark:text-yellow-200 mb-4 border border-yellow-100 dark:border-yellow-900/50"><span class="font-bold">目標：</span> {{ editTarget?.Name }}</div>
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg text-sm text-yellow-800 dark:text-blue-200 mb-4 border border-yellow-100 dark:border-yellow-900/50"><span class="font-bold">目標：</span> {{ editTarget?.Name }}</div>
                         <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">位置</label><input type="text" v-model="editLocation" class="block w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-yellow-500"></div>
                         <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">備註</label><textarea v-model="editComment" rows="3" class="block w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-yellow-500"></textarea></div>
                     </div>
@@ -812,6 +818,40 @@
                 const filterStatus = ref('');
                 const filterLocation = ref('');
                 
+                // --- 新增：清除佇列按鈕的狀態控制 ---
+                const clearBtnVisible = ref({});
+                const queueTimers = {};
+
+                watch(printers, (newPrinters) => {
+                    const currentPrinterNames = new Set(newPrinters.map(p => p.Name));
+                    
+                    // 清理已不存在於列表中的印表機 Timer
+                    Object.keys(queueTimers).forEach(name => {
+                        if (!currentPrinterNames.has(name)) {
+                            clearTimeout(queueTimers[name]);
+                            delete queueTimers[name];
+                            delete clearBtnVisible.value[name];
+                        }
+                    });
+
+                    newPrinters.forEach(p => {
+                        if (p.Jobs > 0) {
+                            if (!queueTimers[p.Name] && !clearBtnVisible.value[p.Name]) {
+                                queueTimers[p.Name] = setTimeout(() => {
+                                    clearBtnVisible.value[p.Name] = true;
+                                }, 10000);
+                            }
+                        } else {
+                            if (queueTimers[p.Name]) {
+                                clearTimeout(queueTimers[p.Name]);
+                                delete queueTimers[p.Name];
+                            }
+                            clearBtnVisible.value[p.Name] = false;
+                        }
+                    });
+                }, { deep: true });
+                // ------------------------------------
+                
                 // 預設排序：佇列數 DESC
                 const sortBy = ref('Jobs');
                 const sortDesc = ref(true);
@@ -1183,7 +1223,9 @@
                             loading.value = false;
                             if (targetName) {
                                 const p = printers.value.find(x => x.Name === targetName);
-                                if (p && endpoint.includes('clear')) p.Jobs = 0;
+                                if (p && endpoint.includes('clear')) {
+                                    p.Jobs = 0;
+                                }
                             }
                         }, 600);
                         return;
@@ -1505,7 +1547,7 @@
                     reprintDuplex, 
                     showPreviewModal, previewPdfUrl, previewFileName, closePreviewModal,
                     showLogModal, logData, logsLoading, showLogs, fetchLogs, downloadFiles, handleDownload,
-                    showAdvancedOps, restarting, reloadPage, printDispatching
+                    showAdvancedOps, restarting, reloadPage, printDispatching, clearBtnVisible
                 };
             }
         }).mount('#app');
