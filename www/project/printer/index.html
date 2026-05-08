@@ -160,7 +160,7 @@
                                 <i class="fa-solid fa-satellite-dish text-slate-400 group-hover:text-indigo-500 group-disabled:text-slate-300" :class="{'animate-pulse text-indigo-500': flashHighlight}"></i>
                             </div>
                             </div>
-                            <p class="text-xs text-slate-400 mt-1">檢視最近 50 筆推播動態</p>
+                            <p class="text-xs text-slate-400 mt-1">檢視最近 100 筆推播動態</p>
                         </button>
 
                         <button @click="showAdvancedOps = !showAdvancedOps" class="w-full py-2 text-xs text-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 border border-dashed border-slate-300 dark:border-slate-600 rounded hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all mt-4 mb-2 flex items-center justify-center gap-2">
@@ -235,8 +235,6 @@
 
             <!-- Main Content -->
             <section class="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 relative transition-colors">
-                
-                <!-- 修改區塊：響應式搜尋與過濾列 -->
                 <div class="mb-6 flex flex-col 2xl:flex-row gap-4 justify-between items-start 2xl:items-center">
                     <div class="flex flex-wrap sm:flex-nowrap flex-col sm:flex-row gap-4 w-full 2xl:w-auto">
                         <div class="relative w-full sm:flex-1 sm:min-w-[200px]"><span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-search"></i></span><input type="text" v-model="searchQuery" placeholder="搜尋名稱、IP、備註..." class="w-full pl-10 pr-4 py-2 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors text-sm"></div>
@@ -285,6 +283,13 @@
                                     <h3 class="font-bold text-slate-800 dark:text-slate-100 text-lg truncate pr-2" :title="p.Name">{{ p.Name }}</h3>
                                     
                                     <div class="flex flex-wrap items-center gap-2 mt-1">
+                                        <!-- 新增：刷新按鈕 (移到最前面，改為圓形無文字，並加強視覺提示) -->
+                                        <button v-if="p.Status === 'Error'" @click="refreshPrinter(p.Name)" :disabled="loading" 
+                                                class="flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400 hover:bg-red-500 hover:text-white dark:hover:bg-red-500 dark:hover:text-white border border-red-300 dark:border-red-700 shadow-sm transition-all disabled:opacity-50 group" 
+                                                title="重新連線測試">
+                                            <i class="fa-solid fa-sync text-xs group-hover:rotate-180 transition-transform duration-300" :class="{'fa-spin': loading}"></i>
+                                        </button>
+
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :class="getStatusColor(p.Status)"><i class="fa-solid fa-circle text-[0.5rem] mr-1.5"></i>{{ p.Status }}</span>
                                         
                                         <span v-if="p.ErrorDetails" class="inline-flex items-center px-1.5 py-0.5 rounded border text-[0.625rem] sm:text-xs font-medium transition-colors"
@@ -324,7 +329,6 @@
                             
                             <!-- 底部按鈕區 -->
                             <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-100 dark:border-slate-700">
-                                <button @click="refreshPrinter(p.Name)" :disabled="loading" class="flex-1 min-w-[60px] bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 text-xs py-2 rounded border border-slate-200 dark:border-slate-600 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-sync" :class="{'fa-spin': loading}"></i> 刷新</button>
                                 <button @click="openEditModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 text-xs py-2 rounded border border-yellow-200 dark:border-yellow-800 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-pen-to-square"></i> 編輯</button>
                                 <button v-if="p.Status === 'Ready'" @click="openPdfModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-300 text-xs py-2 rounded border border-blue-200 dark:border-blue-800 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-file-pdf"></i> 列印</button>
                                 
@@ -689,7 +693,7 @@
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[85vh] transition-colors border border-slate-200 dark:border-slate-700">
                     <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
                         <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center">
-                            <i class="fa-solid fa-satellite-dish mr-2 text-indigo-500"></i>即時推播歷程 (最近 50 筆)
+                            <i class="fa-solid fa-satellite-dish mr-2 text-indigo-500"></i>即時推播歷程 (最近 100 筆)
                         </h3>
                         <div class="flex gap-4 items-center">
                             <button v-if="pushHistory.length > 0" @click="pushHistory = []" class="text-sm text-slate-500 hover:text-red-500 transition-colors flex items-center">
@@ -796,7 +800,7 @@
                 const addPushHistory = (type, title, detail) => {
                     const time = new Date().toLocaleTimeString();
                     pushHistory.value.unshift({ id: Date.now() + Math.random(), time, type, title, detail });
-                    if (pushHistory.value.length > 50) pushHistory.value.pop();
+                    if (pushHistory.value.length > 100) pushHistory.value.pop();
                 };
 
                 // WebSocket 變數
@@ -1097,8 +1101,10 @@
                     if (pollTimer) clearInterval(pollTimer);
                     countdown.value = refreshInterval.value;
                     pollTimer = setInterval(() => {
-                        countdown.value--;
-                        if (countdown.value <= 0) { fetchPrinters(false); countdown.value = refreshInterval.value; }
+                        if (!loading.value) {
+                            countdown.value--;
+                            if (countdown.value <= 0) { fetchPrinters(false); }
+                        }
                     }, 1000);
                 }
                 function stopPolling() { if (pollTimer) clearInterval(pollTimer); }
@@ -1160,7 +1166,6 @@
                 const fetchPrinters = async (showToast = false) => {
                     if (!isConfigValid.value) { if (showToast) error("請選擇伺服器"); return; }
                     loading.value = true;
-                    if (autoRefresh.value) countdown.value = refreshInterval.value;
                     
                     if (isDemoMode.value) {
                         setTimeout(() => {
@@ -1183,6 +1188,7 @@
                             if (!autoRefresh.value) autoRefresh.value = true;
                             
                             loading.value = false; connectionFailed.value = false; 
+                            if (autoRefresh.value) countdown.value = refreshInterval.value;
                             const l = document.getElementById('init-loading'); if(l) { l.classList.add('fade-out'); setTimeout(()=>l.remove(),500); }
                         }, 800);
                         return;
@@ -1211,6 +1217,7 @@
                     } catch (err) { connectionFailed.value = true; error("連線失敗"); autoRefresh.value = false; }
                     finally { 
                         loading.value = false;
+                        if (autoRefresh.value) countdown.value = refreshInterval.value;
                         const l = document.getElementById('init-loading'); if(l) { l.classList.add('fade-out'); setTimeout(()=>l.remove(),500); }
                     }
                 };
