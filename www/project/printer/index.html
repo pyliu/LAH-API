@@ -235,10 +235,12 @@
 
             <!-- Main Content -->
             <section class="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 relative transition-colors">
-                <div class="mb-6 flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center">
-                    <div class="flex flex-col sm:flex-row gap-4 w-full xl:w-auto">
-                        <div class="relative w-full sm:w-60"><span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-search"></i></span><input type="text" v-model="searchQuery" placeholder="搜尋名稱、IP、備註..." class="w-full pl-10 pr-4 py-2 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors text-sm"></div>
-                        <div class="relative w-full sm:w-48">
+                
+                <!-- 修改區塊：響應式搜尋與過濾列 -->
+                <div class="mb-6 flex flex-col 2xl:flex-row gap-4 justify-between items-start 2xl:items-center">
+                    <div class="flex flex-wrap sm:flex-nowrap flex-col sm:flex-row gap-4 w-full 2xl:w-auto">
+                        <div class="relative w-full sm:flex-1 sm:min-w-[200px]"><span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-search"></i></span><input type="text" v-model="searchQuery" placeholder="搜尋名稱、IP、備註..." class="w-full pl-10 pr-4 py-2 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors text-sm"></div>
+                        <div class="relative w-full sm:w-auto sm:min-w-[160px]">
                             <span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-location-dot"></i></span>
                             <select v-model="filterLocation" class="w-full pl-10 pr-8 py-2 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors appearance-none cursor-pointer text-sm">
                                 <option value="">所有位置 ({{ uniqueLocations.length }})</option>
@@ -261,10 +263,10 @@
                                 </select>
                                 <span class="absolute right-3 top-3 text-slate-400 pointer-events-none"><i class="fa-solid fa-chevron-down text-xs"></i></span>
                             </div>
-                            <button @click="sortDesc = !sortDesc" class="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors shadow-sm" :title="sortDesc ? '降冪' : '升冪'"><i class="fa-solid" :class="sortDesc ? 'fa-arrow-down-z-a' : 'fa-arrow-up-a-z'"></i></button>
+                            <button @click="sortDesc = !sortDesc" class="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors shadow-sm flex-shrink-0" :title="sortDesc ? '降冪' : '升冪'"><i class="fa-solid" :class="sortDesc ? 'fa-arrow-down-z-a' : 'fa-arrow-up-a-z'"></i></button>
                         </div>
                     </div>
-                    <div class="flex gap-2 flex-wrap justify-start mt-2 xl:mt-0">
+                    <div class="flex gap-2 flex-wrap justify-start w-full 2xl:w-auto mt-2 2xl:mt-0">
                          <button @click="filterStatus = ''" :class="filterStatus === '' ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">全部 ({{ countAll }})</button>
                          <button @click="filterStatus = 'Ready'" :class="filterStatus === 'Ready' ? 'bg-emerald-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">就緒 ({{ countReady }})</button>
                          <button @click="filterStatus = 'ReadyWarning'" :class="filterStatus === 'ReadyWarning' ? 'bg-teal-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">就緒+警告 ({{ countReadyWarning }})</button>
