@@ -428,10 +428,10 @@ canvas{display:block;width:100%!important;height:auto!important;}
 
       <!-- 快速情境 -->
       <div class="scene-grid">
-        <button class="scene-btn" onclick="setScene(75000,1500000,9000,7,2.5,8)"><strong>🟢 標準方案</strong>150萬 / 7年 / 2.5% / 8%</button>
-        <button class="scene-btn" onclick="setScene(75000,1500000,9000,10,2.5,8)"><strong>🔵 拉長年期</strong>150萬 / 10年 / 2.5% / 8%</button>
-        <button class="scene-btn" onclick="setScene(75000,1000000,5000,7,2.5,8)"><strong>🟡 保守方案</strong>100萬 / 7年 / 2.5% / 8%</button>
-        <button class="scene-btn" onclick="setScene(75000,1500000,9000,7,5.0,8)"><strong>🔴 壓力測試</strong>150萬 / 7年 / 5% / 8%</button>
+        <button class="scene-btn" onclick="setScene(75000,2000000,9000,10,2.5,8)"><strong>🟢 標準方案</strong>200萬 / 10年 / 2.5% / 8%</button>
+        <button class="scene-btn" onclick="setScene(75000,1500000,9000,10,2.5,8)"><strong>🔵 保守方案</strong>150萬 / 10年 / 2.5% / 8%</button>
+        <button class="scene-btn" onclick="setScene(75000,1000000,5000,7,2.5,8)"><strong>🟡 輕槓方案</strong>100萬 / 7年 / 2.5% / 8%</button>
+        <button class="scene-btn" onclick="setScene(75000,2000000,9000,10,5.0,8)"><strong>🔴 壓力測試</strong>200萬 / 10年 / 5% / 8%</button>
       </div>
 
       <hr class="ctrl-sep" style="margin: 0 0 20px 0;">
@@ -451,7 +451,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
         <div class="ctrl-group" style="margin-bottom:0;">
           <div class="ctrl-head">
             <span class="ctrl-label">💳 信貸總額</span>
-            <span class="ctrl-val" id="lbl-loan">1,500,000</span>
+            <span class="ctrl-val" id="lbl-loan">2,000,000</span>
           </div>
           <input type="range" id="inp-loan" min="500000" max="3000000" step="50000" value="2000000" oninput="calculate()" style="--track-fill:var(--blue)">
           <div class="range-hint">
@@ -1150,7 +1150,7 @@ function calculate(){
 
   const dbrMax = salary * 22;
   safeText('hint-loan-max', `上限≈${fmtM(dbrMax)}`);
-  safeText('hdr-dbr-badge', `DBR22 月薪${salary/10000}萬上限≈${fmtM(dbrMax)}`);
+  safeText('hdr-dbr-badge', `DBR22 月薪${(salary/10000).toFixed(1)}萬上限≈${fmtM(dbrMax)}`);
 
   // 計算 PMT
   const mr  = (rate/100)/12;
@@ -1183,14 +1183,16 @@ function calculate(){
     curLoan -= (pmt - interest);
     if(curLoan<0) curLoan=0;
 
-    // 損益平衡：逐月精確插值
+    // 損益平衡：逐月精確插值，breakevenIdx 以 data 陣列索引儲存（0 = 第0個月）
     if(breakevenMonth === null){
-      const prev = data[data.length-1];
+      const prev = data[data.length-1];  // 上一個資料點
       const p1 = prev.a - fixedTotalCost;
       const p2 = curAsset - fixedTotalCost;
       if(p1 < 0 && p2 >= 0){
-        const t = -p1 / (p2 - p1);
-        breakevenMonth = (i - 1) + t; 
+        const t = -p1 / (p2 - p1);       // 0~1 之間的比例
+        // data 中 prev 的 index = data.length-1（還沒 push 當月），當月 index = data.length
+        // 精確位置 = (data.length-1) + t
+        breakevenMonth = (data.length - 1) + t;  // 單位：data 陣列索引（含小數）
       }
     }
     
@@ -1209,7 +1211,10 @@ function calculate(){
   safeText('val-loan-kpi', fmtM(loan));
   
   if(breakevenMonth !== null){
-    const beYr = (breakevenMonth/12).toFixed(1);
+    // breakevenMonth 現在是 data 陣列索引（0=第0個月），data[i].m = i（月份）
+    // 轉換為年份：data 的第 k 個點對應第 k 個月（data[0].m=0, data[1].m=1...）
+    const beActualMonth = breakevenMonth; // index 即月份（data[i].m == i）
+    const beYr = (beActualMonth / 12).toFixed(1);
     safeText('val-breakeven', '第 '+beYr+' 年');
     safeClass('val-breakeven', 'kpi-val');
     safeColor('val-breakeven', 'var(--amber)');
@@ -1236,7 +1241,9 @@ function calculate(){
   safeText('val-interest', '－ ' + fmt(totalInterest + fee));
   safeText('val-asset', fmtM(curAsset));
   safeText('val-port', portReturn.toFixed(1)+'%');
-  safeText('val-survival', Math.floor(((loan-fee)*0.2)/pmt)+' 個月');
+  const cashPool = (loan - fee) * 0.2;
+  const survivalMonths = pmt > 0 ? Math.min(Math.floor(cashPool / pmt), 999) : 999;
+  safeText('val-survival', survivalMonths + ' 個月');
   
   const netGain = curAsset - fixedTotalCost;
   safeText('val-net', (netGain>=0?'+':'')+fmtM(netGain));
@@ -1407,10 +1414,10 @@ function drawLineChart(data){
   ctx.beginPath(); ctx.moveTo(P.l, targetY); ctx.lineTo(W-P.r, targetY); ctx.stroke();
   ctx.setLineDash([]);
 
-  const breakevenMonth = window._breakevenMonth;
-  if(breakevenMonth !== null){
-    const beIdx = breakevenMonth - 1;
-    const x = P.l + (beIdx / (data.length - 1)) * cW;
+  const breakevenMonth = window._breakevenMonth; // 已是 data 陣列索引（0-based，含小數）
+  if(breakevenMonth !== null && breakevenMonth >= 0){
+    // 直接用陣列索引換算 x 座標
+    const x = P.l + (breakevenMonth / (data.length - 1)) * cW;
     
     ctx.fillStyle = 'rgba(245,158,11,.05)';
     ctx.fillRect(x, P.t, W-P.r-x, H-P.b-P.t);
@@ -1420,7 +1427,7 @@ function drawLineChart(data){
     ctx.setLineDash([]);
     
     const fontSize = W < 600 ? 12 : 16;
-    const beYr = (breakevenMonth/12).toFixed(1);
+    const beYr = (breakevenMonth / 12).toFixed(1); // 月份索引 ÷ 12 = 年份
 
     ctx.fillStyle='#f59e0b'; ctx.font=`bold ${fontSize}px sans-serif`; ctx.textAlign='center';
     ctx.fillText(`真正回本: 第${beYr}年`, x, targetY - 10);
