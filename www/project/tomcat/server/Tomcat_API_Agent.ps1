@@ -120,7 +120,7 @@ $enableAdminNotifications = Get-EnvBool "ENABLE_ADMIN_NOTIFICATIONS" $true
 #                            若留空則自動掃描所有「啟動類型=自動」但已停止的服務
 # WATCH_AUTO_SERVICE_INTERVAL_SEC : 每次掃描間隔秒數 (預設 60)
 $enableWatchAutoServices     = Get-EnvBool  "WATCH_AUTO_SERVICES"              $true
-$watchAutoServiceNames       = Get-EnvArray "WATCH_AUTO_SERVICE_NAMES"         @("MSSQLSERVER")
+$watchAutoServiceNames       = Get-EnvArray "WATCH_AUTO_SERVICE_NAMES"         @("MSSQLSERVER", "VMware Tools", "VMware Snapshot Provider", "Volume Shadow Copy")
 $watchAutoServiceIntervalSec = Get-EnvInt   "WATCH_AUTO_SERVICE_INTERVAL_SEC"  60
 # ----------------------------------------------------------------------------
 
