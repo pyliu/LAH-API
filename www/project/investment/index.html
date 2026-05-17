@@ -346,11 +346,11 @@ canvas{display:block;width:100%!important;height:auto!important;}
 
   <!-- TABS -->
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('calc', event)">⚙️ 計算機</button>
-    <button class="tab" onclick="switchTab('charts', event)">📈 圖表分析</button>
-    <button class="tab" onclick="switchTab('strategy', event)">🛡️ 策略 SOP</button>
-    <button class="tab" onclick="switchTab('amort', event)">📋 還款明細</button>
-    <button class="tab" onclick="switchTab('videos', event)">🎥 影片資源</button>
+    <button class="tab active" data-tab="calc" onclick="switchTab('calc', event)">⚙️ 計算機</button>
+    <button class="tab" data-tab="charts" onclick="switchTab('charts', event)">📈 圖表分析</button>
+    <button class="tab" data-tab="strategy" onclick="switchTab('strategy', event)">🛡️ 策略 SOP</button>
+    <button class="tab" data-tab="amort" onclick="switchTab('amort', event)">📋 還款明細</button>
+    <button class="tab" data-tab="videos" onclick="switchTab('videos', event)">🎥 影片資源</button>
   </div>
 
   <!-- ═══ KPI STRIP (always visible) ═══ -->
@@ -699,7 +699,43 @@ canvas{display:block;width:100%!important;height:auto!important;}
       </div>
     </div>
 
-    <!-- ★ 新增：流動性避風港 (槓桿人生 EP29) -->
+    <!-- 新增：新慢富思維 (好葉) -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">
+        <div class="ct-icon" style="background:rgba(245,158,11,.2)">🌱</div>新慢富思維：時間價值與體驗複利 (好葉觀點)
+        <button class="play-btn" onclick="openVideoModal('HqZ8Pa3oT-I','好葉｜解密「新慢富思維」','滾動金錢與回憶兩顆雪球、三帳戶配置與反脆弱試錯')">▶ 影片說明</button>
+      </div>
+      
+      <div class="g2" style="gap:16px;">
+        <div class="strat-box sb-amber" style="margin-bottom:0;">
+          <h4>🚨 傳統「慢慢變富」的盲點</h4>
+          <ul>
+            <li><strong>體驗有保存期限：</strong> 20歲的窮遊與50歲的奢華是完全不同的體驗。為存錢犧牲當下，可能會錯過一生只有一次的「年齡限定體驗」。</li>
+            <li><strong>稀缺心態 (隧道視野)：</strong> 對家人的愧疚感容易讓人陷入焦慮，為了「賺快錢」而盲目開高槓桿、碰高風險商品，反而把家庭推向懸崖。</li>
+            <li><strong>重新定義吃苦：</strong> 家人最需要的往往不是瞬間變出的豪宅，而是一個「沒有龐大壓力、情緒穩定」的陪伴。</li>
+          </ul>
+        </div>
+        <div class="strat-box sb-green" style="margin-bottom:0;">
+          <h4>⛄ 雪球雙軌制：金錢與回憶的複利</h4>
+          <ul>
+            <li><strong>滾動人生的兩顆雪球：</strong> 人生不只要滾「金錢的雪球」，還要滾「回憶的雪球」。越早體驗的美好回憶，能在未來的生命裡產生越多年的「記憶利息」。</li>
+            <li><strong>慢 ＝ 不走捷徑：</strong> 真正的慢富，不是當苦行僧，而是「放棄一夜暴富的幻想，不走高風險捷徑」，確保家庭不翻車。</li>
+            <li><strong>反脆弱的加速器：</strong> 不要拿本金去投機。想加速財富，應投入「試錯成本極低、潛在回報無限」的事物（例如：用低成本學習 AI 工具、經營副業）。</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="strat-box sb-blue" style="margin-top:16px; margin-bottom:0;">
+          <h4>💰 實戰行動：無憾三帳戶配置法</h4>
+          <ul>
+            <li><strong>1. 生活現金流帳戶 (50%)：</strong> 安穩當下，支付日常開銷，拔掉與他人比較的插頭，享受平實的小日子。</li>
+            <li><strong>2. 慢富底倉帳戶 (10%~20%+)：</strong> 創造未來，雷打不動地投入大盤指數或優質資產。這筆錢<strong class="danger">當作不存在</strong>，絕不動用或炒短線。</li>
+            <li><strong>3. 無憾體驗帳戶 (10%~20%)：</strong> 活在當下，專門用來購買「年齡限定」的體驗與家人回憶。花這筆錢時請<strong class="hl">丟掉罪惡感</strong>，這是存入回憶銀行的本金。</li>
+          </ul>
+      </div>
+    </div>
+
+    <!-- 流動性避風港 (槓桿人生 EP29) -->
     <div class="card" style="margin-bottom:20px;">
       <div class="card-title">
         <div class="ct-icon" style="background:rgba(59,130,246,.2)">🌊</div>流動性避風港：為什麼「有負債」更安全？ (槓桿人生 EP29)
@@ -967,31 +1003,35 @@ canvas{display:block;width:100%!important;height:auto!important;}
 
   <!-- ═══ TAB: VIDEOS ═══ -->
   <div class="tab-panel" id="tab-videos">
+    
+    <!-- 主題 1：正2 與 4-4-2 防禦陣型 -->
+    <div class="section-title">🛡️ 正2 與 4-4-2 防禦陣型</div>
     <div class="video-grid">
-      <!-- ★ 新增：流動性避風港 (槓桿人生 EP29) 指定從 5:41 開始 -->
-      <div class="vcard" onclick="openVideoModal('fbqKU_lxWpM','槓桿人生 EP29｜為什麼有負債更安全？','欠錢不會死，沒錢才會死！解析流動性的三個層次與防禦陣型', 341)">
-        <div class="vthumb">
-          <img src="https://img.youtube.com/vi/fbqKU_lxWpM/mqdefault.jpg" alt="為什麼有負債更安全">
-          <div class="vplay">▶ 點擊播放</div>
-        </div>
-        <div class="vinfo"><div class="vtitle">槓桿人生 EP29｜為什麼有負債更安全？</div><div class="vdesc">欠錢不會死，沒錢才會死！解析流動性的三個層次與防禦陣型</div></div>
-      </div>
-
-      <!-- ★ 新增：不想做到老 (雷恩) -->
-      <div class="vcard" onclick="openVideoModal('yzj9XrBAMms','雷恩｜體力下滑必學！用別人的錢翻轉下半生','人力折舊危機、OPM思維、安全搬錢鐵律與買下國運')">
-        <div class="vthumb">
-          <img src="https://img.youtube.com/vi/yzj9XrBAMms/mqdefault.jpg" alt="不想做到老 OPM">
-          <div class="vplay">▶ 點擊播放</div>
-        </div>
-        <div class="vinfo"><div class="vtitle">雷恩｜體力下滑必學！用別人的錢翻轉下半生</div><div class="vdesc">人力折舊危機、OPM思維、安全搬錢鐵律與買下國運</div></div>
-      </div>
-
       <div class="vcard" onclick="openVideoModal('gHrSgY-fUp4','4-4-2 防禦陣型','正2操作模式、微笑佈局與年線紀律')">
         <div class="vthumb">
           <img src="https://img.youtube.com/vi/gHrSgY-fUp4/mqdefault.jpg" alt="4-4-2 防禦陣型">
           <div class="vplay">▶ 點擊播放</div>
         </div>
         <div class="vinfo"><div class="vtitle">4-4-2 防禦陣型</div><div class="vdesc">正2操作模式、微笑佈局與年線紀律</div></div>
+      </div>
+      <div class="vcard" onclick="openVideoModal('lBcYpWsUBh0','倉鼠人生實驗室｜槓桿ETF投資法心得','生命週期投資法、台股逆價差優勢與5050曝險策略')">
+        <div class="vthumb">
+          <img src="https://img.youtube.com/vi/lBcYpWsUBh0/mqdefault.jpg" alt="槓桿ETF投資法心得">
+          <div class="vplay">▶ 點擊播放</div>
+        </div>
+        <div class="vinfo"><div class="vtitle">倉鼠人生實驗室｜槓桿ETF投資法心得</div><div class="vdesc">生命週期投資法、台股逆價差優勢與5050曝險策略</div></div>
+      </div>
+    </div>
+
+    <!-- 主題 2：信貸投資與生命週期投資法 -->
+    <div class="section-title">⏳ 信貸投資與生命週期投資法</div>
+    <div class="video-grid">
+      <div class="vcard" onclick="openVideoModal('fX0ue9r6qko','倉鼠人生實驗室 EP33｜生命週期投資法','諾貝爾獲利公式、時間分散與人力資本的底層邏輯')">
+        <div class="vthumb">
+          <img src="https://img.youtube.com/vi/fX0ue9r6qko/mqdefault.jpg" alt="生命週期投資法">
+          <div class="vplay">▶ 點擊播放</div>
+        </div>
+        <div class="vinfo"><div class="vtitle">倉鼠人生實驗室 EP33｜生命週期投資法</div><div class="vdesc">諾貝爾獲利公式、時間分散與人力資本的底層邏輯</div></div>
       </div>
       <div class="vcard" onclick="openVideoModal('IqGpMr38xWQ','槓桿人生 EP14｜信貸投資指南','生命週期投資法、拉長年期降低現金流壓力')">
         <div class="vthumb">
@@ -1000,28 +1040,17 @@ canvas{display:block;width:100%!important;height:auto!important;}
         </div>
         <div class="vinfo"><div class="vtitle">槓桿人生 EP14｜信貸投資指南</div><div class="vdesc">生命週期投資法、拉長年期降低現金流壓力</div></div>
       </div>
-      
+    </div>
+
+    <!-- 主題 3：0 本金投資與 BBD 質押策略 -->
+    <div class="section-title">⚙️ 0 本金投資與 BBD 質押策略</div>
+    <div class="video-grid">
       <div class="vcard" onclick="openVideoModal('5hUsdzq2Xmg','雷恩｜0本金投資術 進階篇','破解信貸利息黑洞！小資族專屬「0月付永動機」')">
         <div class="vthumb">
           <img src="https://img.youtube.com/vi/5hUsdzq2Xmg/mqdefault.jpg" alt="0本金投資術">
           <div class="vplay">▶ 點擊播放</div>
         </div>
         <div class="vinfo"><div class="vtitle">雷恩｜0本金投資術 進階篇</div><div class="vdesc">破解信貸利息黑洞！小資族專屬「0月付永動機」</div></div>
-      </div>
-
-      <div class="vcard" onclick="openVideoModal('1J1oKwZUvKE','槓桿人生 EP28｜歷史高檔生存邏輯','落袋為安的心理盲區、質押思維與新手高檔開槓桿警告')">
-        <div class="vthumb">
-          <img src="https://img.youtube.com/vi/1J1oKwZUvKE/mqdefault.jpg" alt="歷史高檔生存邏輯">
-          <div class="vplay">▶ 點擊播放</div>
-        </div>
-        <div class="vinfo"><div class="vtitle">槓桿人生 EP28｜歷史高檔生存邏輯</div><div class="vdesc">落袋為安的心理盲區、質押思維與新手高檔開槓桿警告</div></div>
-      </div>
-      <div class="vcard" onclick="openVideoModal('37vqVuCMezU','威利財經角｜槓桿開多少才安全','極端壓力測試：活得久比賺得快更重要')">
-        <div class="vthumb">
-          <img src="https://img.youtube.com/vi/37vqVuCMezU/mqdefault.jpg" alt="威利財經角">
-          <div class="vplay">▶ 點擊播放</div>
-        </div>
-        <div class="vinfo"><div class="vtitle">威利財經角｜槓桿開多少才安全</div><div class="vdesc">極端壓力測試：活得久比賺得快更重要</div></div>
       </div>
       <div class="vcard" onclick="openVideoModal('DcXFgmmAt3k','威利財經角｜買借死的財務槓桿術','質押借款不賣股，活用現金流與風險解析')">
         <div class="vthumb">
@@ -1037,19 +1066,46 @@ canvas{display:block;width:100%!important;height:auto!important;}
         </div>
         <div class="vinfo"><div class="vtitle">槓桿投資實戰再進化</div><div class="vdesc">信貸質押雙軌並行與進階現金流管控</div></div>
       </div>
-      <div class="vcard" onclick="openVideoModal('lBcYpWsUBh0','倉鼠人生實驗室｜槓桿ETF投資法心得','生命週期投資法、台股逆價差優勢與5050曝險策略')">
+    </div>
+
+    <!-- 主題 4：流動性生存與投資心理 -->
+    <div class="section-title">🌊 流動性生存與投資心理</div>
+    <div class="video-grid">
+      <!-- 新增：好葉 新慢富思維 -->
+      <div class="vcard" onclick="openVideoModal('HqZ8Pa3oT-I','好葉｜解密「新慢富思維」','滾動金錢與回憶兩顆雪球、三帳戶配置與反脆弱試錯')">
         <div class="vthumb">
-          <img src="https://img.youtube.com/vi/lBcYpWsUBh0/mqdefault.jpg" alt="槓桿ETF投資法心得">
+          <img src="https://img.youtube.com/vi/HqZ8Pa3oT-I/mqdefault.jpg" alt="好葉 新慢富思維">
           <div class="vplay">▶ 點擊播放</div>
         </div>
-        <div class="vinfo"><div class="vtitle">倉鼠人生實驗室｜槓桿ETF投資法心得</div><div class="vdesc">生命週期投資法、台股逆價差優勢與5050曝險策略</div></div>
+        <div class="vinfo"><div class="vtitle">好葉｜解密「新慢富思維」</div><div class="vdesc">滾動金錢與回憶兩顆雪球、三帳戶配置與反脆弱試錯</div></div>
       </div>
-      <div class="vcard" onclick="openVideoModal('fX0ue9r6qko','倉鼠人生實驗室 EP33｜生命週期投資法','諾貝爾獲利公式、時間分散與人力資本的底層邏輯')">
+      <div class="vcard" onclick="openVideoModal('fbqKU_lxWpM','槓桿人生 EP29｜為什麼有負債更安全？','欠錢不會死，沒錢才會死！解析流動性的三個層次與防禦陣型', 341)">
         <div class="vthumb">
-          <img src="https://img.youtube.com/vi/fX0ue9r6qko/mqdefault.jpg" alt="生命週期投資法">
+          <img src="https://img.youtube.com/vi/fbqKU_lxWpM/mqdefault.jpg" alt="為什麼有負債更安全">
           <div class="vplay">▶ 點擊播放</div>
         </div>
-        <div class="vinfo"><div class="vtitle">倉鼠人生實驗室 EP33｜生命週期投資法</div><div class="vdesc">諾貝爾獲利公式、時間分散與人力資本的底層邏輯</div></div>
+        <div class="vinfo"><div class="vtitle">槓桿人生 EP29｜為什麼有負債更安全？</div><div class="vdesc">欠錢不會死，沒錢才會死！解析流動性的三個層次與防禦陣型</div></div>
+      </div>
+      <div class="vcard" onclick="openVideoModal('yzj9XrBAMms','雷恩｜體力下滑必學！用別人的錢翻轉下半生','人力折舊危機、OPM思維、安全搬錢鐵律與買下國運')">
+        <div class="vthumb">
+          <img src="https://img.youtube.com/vi/yzj9XrBAMms/mqdefault.jpg" alt="不想做到老 OPM">
+          <div class="vplay">▶ 點擊播放</div>
+        </div>
+        <div class="vinfo"><div class="vtitle">雷恩｜體力下滑必學！用別人的錢翻轉下半生</div><div class="vdesc">人力折舊危機、OPM思維、安全搬錢鐵律與買下國運</div></div>
+      </div>
+      <div class="vcard" onclick="openVideoModal('1J1oKwZUvKE','槓桿人生 EP28｜歷史高檔生存邏輯','落袋為安的心理盲區、質押思維與新手高檔開槓桿警告')">
+        <div class="vthumb">
+          <img src="https://img.youtube.com/vi/1J1oKwZUvKE/mqdefault.jpg" alt="歷史高檔生存邏輯">
+          <div class="vplay">▶ 點擊播放</div>
+        </div>
+        <div class="vinfo"><div class="vtitle">槓桿人生 EP28｜歷史高檔生存邏輯</div><div class="vdesc">落袋為安的心理盲區、質押思維與新手高檔開槓桿警告</div></div>
+      </div>
+      <div class="vcard" onclick="openVideoModal('37vqVuCMezU','威利財經角｜槓桿開多少才安全','極端壓力測試：活得久比賺得快更重要')">
+        <div class="vthumb">
+          <img src="https://img.youtube.com/vi/37vqVuCMezU/mqdefault.jpg" alt="威利財經角">
+          <div class="vplay">▶ 點擊播放</div>
+        </div>
+        <div class="vinfo"><div class="vtitle">威利財經角｜槓桿開多少才安全</div><div class="vdesc">極端壓力測試：活得久比賺得快更重要</div></div>
       </div>
     </div>
     
@@ -1159,14 +1215,15 @@ function updateAllSliders(){
 }
 
 /* ────────────────────────────────
-   TAB SWITCH
+   TAB SWITCH & STATE SAVE
 ──────────────────────────────── */
 function switchTab(id, event){
   if (event && event.target) {
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
     event.target.classList.add('active');
   } else {
-    const defaultTab = document.querySelector(`[onclick="switchTab('${id}', event)"]`);
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    const defaultTab = document.querySelector(`[data-tab="${id}"]`);
     if(defaultTab) defaultTab.classList.add('active');
   }
 
@@ -1182,6 +1239,9 @@ function switchTab(id, event){
       kpiGrid.classList.add('compact');
     }
   }
+
+  // 儲存當前分頁狀態
+  localStorage.setItem('activeTab', id);
 
   if(id==='charts'){
     setTimeout(()=>{ resizeCanvas(); }, 50);
@@ -1215,7 +1275,7 @@ const fmtM = n => {
 };
 
 /* ────────────────────────────────
-   MAIN CALCULATE (加入安全 DOM 存取防呆機制)
+   MAIN CALCULATE (包含儲存參數狀態)
 ──────────────────────────────── */
 // 封裝安全存取函數，徹底根除 TypeError
 const safeText = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
@@ -1234,6 +1294,10 @@ function calculate(){
   const rate       = parseFloat(document.getElementById('inp-rate')?.value) || 2.5;
   const baseReturn = parseFloat(document.getElementById('inp-return')?.value) || 8.0;
   const months     = years * 12;
+
+  // 儲存當前計算參數
+  const state = { salary, loan, fee, years, rate, baseReturn };
+  localStorage.setItem('calcState', JSON.stringify(state));
 
   // 更新參數標籤
   safeText('lbl-salary', fmt(salary));
@@ -1622,16 +1686,39 @@ function drawDonutChart(portReturn){
   ctx.textBaseline='alphabetic';
 }
 
-// ★ 將初始化代碼包裝在 DOMContentLoaded 中，確保元素完全載入後才執行，完全杜絕 null 錯誤
+// ★ 將初始化代碼包裝在 DOMContentLoaded 中
 document.addEventListener("DOMContentLoaded", () => {
+  // 1. 恢復主題設定
   const savedTheme = localStorage.getItem('theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
   const themeBtn = document.getElementById('theme-toggle');
   if(themeBtn) {
     themeBtn.innerText = savedTheme === 'dark' ? '☀️' : '🌙';
   }
+
+  // 2. 恢復計算機參數狀態
+  const savedState = localStorage.getItem('calcState');
+  if (savedState) {
+    try {
+      const state = JSON.parse(savedState);
+      const safeSetVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+      
+      safeSetVal('inp-salary', state.salary);
+      safeSetVal('inp-loan', state.loan);
+      safeSetVal('inp-fee', state.fee);
+      safeSetVal('inp-years', state.years);
+      safeSetVal('inp-rate', state.rate);
+      safeSetVal('inp-return', state.baseReturn);
+    } catch (e) {
+      console.error("無法還原計算機狀態", e);
+    }
+  }
   
-  switchTab('calc', null);
+  // 3. 恢復最後停留的分頁
+  const savedTab = localStorage.getItem('activeTab') || 'calc';
+  switchTab(savedTab, null);
+
+  // 4. 更新滑桿外觀與觸發計算
   updateAllSliders();
   calculate();
 });
