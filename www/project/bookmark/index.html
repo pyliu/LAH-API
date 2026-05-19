@@ -171,15 +171,23 @@
                 <div class="p-2 border-t" :style="{ borderColor: 'var(--sidebar-border)' }">
                     <!-- Control Buttons -->
                     <button @click="toggleTheme" class="w-full flex items-center p-2 rounded-md" :class="{'justify-center': isSidebarCollapsed}" :aria-label="theme === 'dark' ? '切換為淺色模式' : '切換為深色模式'">
-                        <i :data-lucide="theme === 'dark' ? 'sun' : 'moon'" class="w-5 h-5"></i>
+                        <!-- 修正: 加入 span wrapper 隔離 Vue 與 Lucide 的 DOM 操作 -->
+                        <span :key="'theme-icon-' + theme" class="inline-flex flex-shrink-0">
+                            <i :data-lucide="theme === 'dark' ? 'sun' : 'moon'" class="w-5 h-5"></i>
+                        </span>
                         <span v-show="!isSidebarCollapsed" class="ml-3">切換主題</span>
                     </button>
                     <button @click="toggleFontSize" class="w-full flex items-center p-2 rounded-md" :class="{'justify-center': isSidebarCollapsed}" aria-label="調整字體大小">
-                        <i data-lucide="text" class="w-5 h-5"></i>
+                        <span class="inline-flex flex-shrink-0">
+                            <i data-lucide="text" class="w-5 h-5"></i>
+                        </span>
                         <span v-show="!isSidebarCollapsed" class="ml-3">調整字體 ({{ fontSizeLabel }})</span>
                     </button>
                     <button @click="toggleSidebar" class="w-full flex items-center p-2 rounded-md" :class="{'justify-center': isSidebarCollapsed}" :aria-label="isSidebarCollapsed ? '展開側邊欄' : '收合側邊欄'">
-                        <i :data-lucide="isSidebarCollapsed ? 'panel-right-open' : 'panel-left-close'" class="w-5 h-5"></i>
+                        <!-- 修正: 加入 span wrapper 隔離 Vue 與 Lucide 的 DOM 操作 -->
+                        <span :key="'sidebar-icon-' + isSidebarCollapsed" class="inline-flex flex-shrink-0">
+                            <i :data-lucide="isSidebarCollapsed ? 'panel-right-open' : 'panel-left-close'" class="w-5 h-5"></i>
+                        </span>
                         <span v-show="!isSidebarCollapsed" class="ml-3">收合側邊欄</span>
                     </button>
                     <!-- Time Display -->
