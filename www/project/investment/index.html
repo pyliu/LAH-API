@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>信貸投資與 4-4-2 策略儀表板</title>
+<title>信貸投資與 4-4-2 策略儀表板 (進階版)</title>
 <style>
 /* ── 變數 (預設暗色主題) ── */
 :root {
@@ -138,19 +138,19 @@ body{font-family:'PingFang TC','Microsoft JhengHei','Segoe UI',sans-serif;backgr
 @media(max-width:1100px){.g2,.g3{grid-template-columns:1fr;}}
 
 /* ── SLIDERS ── */
-.slider-row {display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:18px;}
-.ctrl-group{margin-bottom:22px;}
-.ctrl-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px;margin-bottom:10px;}
-.ctrl-label{font-size:.9rem;font-weight:600;color:var(--text2);}
-.ctrl-val{font-size:1.05rem;font-weight:800;color:var(--green);background:rgba(52,211,153,.1);padding:3px 12px;border-radius:999px;border:1px solid rgba(52,211,153,.25);}
+.slider-row {display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:24px 18px;}
+.ctrl-group{display:flex;flex-direction:column;justify-content:flex-end;margin-bottom:22px;height:100%;}
+.ctrl-head{display:flex;flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;margin-bottom:12px;min-height:34px;}
+.ctrl-label{font-size:.9rem;font-weight:600;color:var(--text2);white-space:nowrap;}
+.ctrl-val{font-size:1rem;font-weight:800;color:var(--green);background:rgba(52,211,153,.1);padding:4px 12px;border-radius:999px;border:1px solid rgba(52,211,153,.25);white-space:nowrap;}
 .ctrl-val.blue{color:var(--blue);background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.25);}
 .ctrl-val.purple{color:var(--purple);background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.25);}
 .slider-wrap{position:relative;padding:6px 0;}
-input[type=range]{width:100%;-webkit-appearance:none;background:transparent;cursor:pointer;}
+input[type=range]{width:100%;-webkit-appearance:none;background:transparent;cursor:pointer;margin-top:auto;}
 input[type=range]::-webkit-slider-runnable-track{height:6px;background:linear-gradient(to right,var(--track-fill,var(--green)) var(--fill-pct,50%),var(--border2) var(--fill-pct,50%));border-radius:999px;}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;height:20px;width:20px;background:var(--track-fill,var(--green));border-radius:50%;margin-top:-7px;border:3px solid var(--bg);box-shadow:0 0 12px rgba(16,185,129,.5);}
 input[type=range]:focus{outline:none;}
-.range-hint{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;}
+.range-hint{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:8px;min-height:16px;}
 .range-hint .hl{color:var(--amber);font-weight:700;}
 .ctrl-sep{border:none;border-top:1px solid var(--border);margin:24px 0;}
 
@@ -159,6 +159,22 @@ input[type=range]:focus{outline:none;}
 .scene-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:var(--r2);padding:12px;cursor:pointer;transition:.2s;font-size:.82rem;font-weight:600;line-height:1.4;font-family:inherit;text-align:left;}
 .scene-btn:hover{border-color:var(--green);color:var(--green);}
 .scene-btn strong{display:block;font-size:.92rem;color:var(--text);margin-bottom:3px;}
+
+/* ── TOGGLE SWITCH ── */
+.toggle-switch {
+  position: relative; display: inline-block; width: 44px; height: 24px;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.slider-round {
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--border2); transition: .4s; border-radius: 34px;
+}
+.slider-round:before {
+  position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+  background-color: white; transition: .4s; border-radius: 50%;
+}
+input:checked + .slider-round { background-color: var(--green); }
+input:checked + .slider-round:before { transform: translateX(20px); }
 
 /* ── CANVAS CHART ── */
 .chart-wrap{background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border);padding:20px;overflow:hidden;transition:background 0.3s, border-color 0.3s;}
@@ -215,6 +231,14 @@ canvas{display:block;width:100%!important;height:auto!important;}
 .amort-table td:first-child{text-align:center;color:var(--text2);}
 .amort-table tr:last-child td{border-bottom:none;}
 .amort-table tr:hover td{background:var(--bg3);}
+
+/* ── TOGGLE SWITCH ── */
+.toggle-switch{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;}
+.toggle-switch input{opacity:0;width:0;height:0;}
+.slider-round{position:absolute;cursor:pointer;inset:0;background:var(--border2);border-radius:999px;transition:.3s;}
+.slider-round:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.3s;}
+.toggle-switch input:checked + .slider-round{background:var(--blue);}
+.toggle-switch input:checked + .slider-round:before{transform:translateX(20px);}
 
 /* ── PROGRESS BAR ── */
 .progress-bar{height:8px;background:var(--bg3);border-radius:999px;overflow:hidden;margin-top:6px;}
@@ -311,6 +335,9 @@ canvas{display:block;width:100%!important;height:auto!important;}
 .modal-yt-btn:hover { background: linear-gradient(135deg,#ef4444,#dc2626); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(220,38,38,0.5); }
 .modal-yt-btn svg { flex-shrink: 0; }
 
+@media(max-width:900px){
+  .bbd-result-grid{grid-template-columns:1fr!important;}
+}
 @media(max-width:640px){
   .logo-text{font-size:1rem;}
   .kpi-val{font-size:1.6rem;}
@@ -321,6 +348,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
   .bbd-arrow {transform: rotate(90deg); margin: 4px 0;}
   .modal-overlay { padding: 10px; }
   .modal-close { top: 8px; right: 8px; width: 32px; height: 32px; font-size: 18px; }
+  .g2, .g3 { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -334,8 +362,8 @@ canvas{display:block;width:100%!important;height:auto!important;}
       <div class="logo-text">信貸投資 <span>4-4-2</span> 儀表板</div>
     </div>
     <div class="header-badges">
-      <span class="hbadge hb-green">4-4-2 防禦陣型</span>
-      <span class="hbadge hb-blue" id="hdr-dbr-badge">DBR22 月薪7.5萬上限≈1.65M</span>
+      <span class="hbadge hb-green">進階策略版</span>
+      <span class="hbadge hb-blue" id="hdr-dbr-badge">DBR22 上限未算</span>
       <button id="theme-toggle" class="theme-btn" aria-label="切換主題" onclick="toggleTheme()">☀️</button>
     </div>
   </div>
@@ -346,10 +374,11 @@ canvas{display:block;width:100%!important;height:auto!important;}
 
   <!-- TABS -->
   <div class="tabs">
-    <button class="tab active" data-tab="calc" onclick="switchTab('calc', event)">⚙️ 計算機</button>
+    <button class="tab active" data-tab="calc" onclick="switchTab('calc', event)">⚙️ 核心計算機</button>
+    <button class="tab" data-tab="bbd" onclick="switchTab('bbd', event)">🏦 BBD質押風控</button>
+    <button class="tab" data-tab="smile" onclick="switchTab('smile', event)">😊 微笑佈局試算</button>
     <button class="tab" data-tab="charts" onclick="switchTab('charts', event)">📈 圖表分析</button>
     <button class="tab" data-tab="strategy" onclick="switchTab('strategy', event)">🛡️ 策略 SOP</button>
-    <button class="tab" data-tab="amort" onclick="switchTab('amort', event)">📋 還款明細</button>
     <button class="tab" data-tab="videos" onclick="switchTab('videos', event)">🎥 影片資源</button>
   </div>
 
@@ -357,10 +386,10 @@ canvas{display:block;width:100%!important;height:auto!important;}
   <div class="kpi-grid" id="main-kpi-grid">
     <!-- 上排：資金成本資訊 -->
     <div class="kpi" style="--kpi-color:var(--blue2)">
-      <div class="kpi-icon">🏛️</div>
-      <div class="kpi-label">信貸總額</div>
+      <div class="kpi-icon" id="kpi-icon-loan">🏛️</div>
+      <div class="kpi-label" id="kpi-label-loan">信貸總額</div>
       <div class="kpi-val" id="val-loan-kpi">--</div>
-      <div class="kpi-sub">初始借出的本金</div>
+      <div class="kpi-sub" id="kpi-sub-loan">初始借出的本金</div>
     </div>
     <div class="kpi" style="--kpi-color:var(--amber)">
       <div class="kpi-icon">📉</div>
@@ -377,7 +406,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
     </div>
     <div class="kpi" style="--kpi-color:var(--red)">
       <div class="kpi-icon">💸</div>
-      <div class="kpi-label">信貸全期總支出</div>
+      <div class="kpi-label" id="kpi-label-cost">信貸全期總支出</div>
       <div class="kpi-val danger" id="val-interest">--</div>
       <div class="kpi-sub">給銀行的絕對資金成本</div>
     </div>
@@ -387,13 +416,13 @@ canvas{display:block;width:100%!important;height:auto!important;}
       <div class="kpi-icon">📊</div>
       <div class="kpi-label">組合年化報酬</div>
       <div class="kpi-val good" id="val-port">--</div>
-      <div class="kpi-sub">40%原型 + 40%正2 + 20%現金</div>
+      <div class="kpi-sub">原型 + 正2 (含逆價差)</div>
     </div>
     <div class="kpi" style="--kpi-color:var(--green)">
       <div class="kpi-icon">📈</div>
       <div class="kpi-label">期末總資產預估</div>
       <div class="kpi-val good" id="val-asset">--</div>
-      <div class="kpi-sub">4-4-2 策略複利增長</div>
+      <div class="kpi-sub">策略複利增長</div>
     </div>
     <div class="kpi" style="--kpi-color:var(--green)">
       <div class="kpi-icon">💰</div>
@@ -408,30 +437,37 @@ canvas{display:block;width:100%!important;height:auto!important;}
       <div class="kpi-sub">資產覆蓋本金+利息+手續費</div>
     </div>
     
-    <!-- 現金可撐月數 (策略核心防禦) -->
-    <div class="kpi" style="--kpi-color:var(--amber)">
-      <div class="kpi-icon">🛡️</div>
-      <div class="kpi-label">現金可撐月數</div>
-      <div class="kpi-val" id="val-survival">--</div>
-      <div class="kpi-sub">遭遇股災不賣股的底氣</div>
-    </div>
   </div>
 
-  <!-- ═══ TAB: CALC ═══ -->
+  <!-- ═══ TAB: CALC (核心計算機) ═══ -->
   <div class="tab-panel active" id="tab-calc">
     
-    <!-- 第一區：整合 快速情境與參數設定 -->
     <div class="card" style="margin-bottom: 20px;">
-      <div class="card-title" style="margin-bottom: 16px;">
-        <div class="ct-icon" style="background:rgba(59,130,246,.2)">⚙️</div>參數設定與快速情境
+      <div class="card-title" style="margin-bottom: 16px; justify-content: space-between;">
+        <div style="display:flex; align-items:center; gap:8px;">
+            <div class="ct-icon" style="background:rgba(59,130,246,.2)">⚙️</div>參數設定與快速情境
+        </div>
+        
+        <!-- 0本金切換開關 -->
+        <div style="display:flex; align-items:center; gap: 8px; background:var(--bg); padding:6px 12px; border-radius:999px; border:1px solid var(--border);">
+            <span style="font-size:0.85rem; font-weight:700; color:var(--text2);">0月付模式(預留24期)</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="inp-zero-pay" onchange="calculate()">
+                <span class="slider-round"></span>
+            </label>
+        </div>
       </div>
 
       <!-- 快速情境 -->
       <div class="scene-grid">
-        <button class="scene-btn" onclick="setScene(75000,2000000,9000,10,2.5,8)"><strong>🟢 標準方案</strong>200萬 / 10年 / 2.5% / 8%</button>
-        <button class="scene-btn" onclick="setScene(75000,1500000,9000,10,2.5,8)"><strong>🔵 保守方案</strong>150萬 / 10年 / 2.5% / 8%</button>
-        <button class="scene-btn" onclick="setScene(75000,1000000,5000,7,2.5,8)"><strong>🟡 輕槓方案</strong>100萬 / 7年 / 2.5% / 8%</button>
-        <button class="scene-btn" onclick="setScene(75000,2000000,9000,10,5.0,8)"><strong>🔴 壓力測試</strong>200萬 / 10年 / 5% / 8%</button>
+        <button class="scene-btn" onclick="setScene(75000,2000000,9000,10,2.5,8,4)"><strong>🟢 標準 4-4-2</strong>200萬 / 10年 / 2.5% / 原型8%</button>
+        <button class="scene-btn" onclick="setScene(75000,1500000,9000,10,2.5,8,4)"><strong>🔵 保守 4-4-2</strong>150萬 / 10年 / 2.5% / 原型8%</button>
+        <button class="scene-btn" onclick="setScene(75000,2000000,9000,7,2.5,8,6)"><strong>🚀 積極正2 (高逆價差)</strong>200萬 / 7年 / 2.5% / 原型8% + 6%</button>
+      </div>
+
+      <!-- 0本金模式提示 -->
+      <div id="zero-pay-alert" class="alert alert-blue" style="display:none; margin-top:0; margin-bottom:20px;">
+        💡 <strong>0月付永動機啟用：</strong> 將自動從信貸總額中扣除 <strong>首2年(24期) 的本利和</strong> 作為預留現金池。您前兩年完全不需從薪水掏錢還款！(剩餘資金才投入市場)
       </div>
 
       <hr class="ctrl-sep" style="margin: 0 0 20px 0;">
@@ -473,7 +509,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
         <div class="ctrl-group" style="margin-bottom:0;">
           <div class="ctrl-head">
             <span class="ctrl-label">📅 貸款年限</span>
-            <span class="ctrl-val" id="lbl-years">7 年</span>
+            <span class="ctrl-val" id="lbl-years">10 年</span>
           </div>
           <input type="range" id="inp-years" min="3" max="10" step="1" value="10" oninput="calculate()">
           <div class="range-hint">
@@ -489,7 +525,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
           <input type="range" id="inp-rate" min="1.8" max="8.0" step="0.1" value="2.5" oninput="calculate()" style="--track-fill:var(--red)">
           <div class="range-hint"><span>1.8%</span><span>8.0%</span></div>
         </div>
-        <!-- 6. 預期報酬 -->
+        <!-- 6. 原型報酬 -->
         <div class="ctrl-group" style="margin-bottom:0;">
           <div class="ctrl-head">
             <span class="ctrl-label">📊 原型年化</span>
@@ -500,15 +536,25 @@ canvas{display:block;width:100%!important;height:auto!important;}
             <span>3%</span><span style="color:var(--green);font-weight:700">歷史≈8%</span><span>15%</span>
           </div>
         </div>
+         <!-- 7. 正2 逆價差補償 -->
+         <div class="ctrl-group" style="margin-bottom:0;">
+            <div class="ctrl-head">
+              <span class="ctrl-label">📈 正2 逆價差補償</span>
+              <span class="ctrl-val purple" id="lbl-premium">4.0%</span>
+            </div>
+            <input type="range" id="inp-premium" min="0.0" max="10.0" step="0.5" value="4.0" oninput="calculate()" style="--track-fill:var(--purple)">
+            <div class="range-hint">
+              <span>0%</span><span style="color:var(--purple);font-weight:700">台股均值≈4%</span><span>10%</span>
+            </div>
+          </div>
       </div> <!-- /slider-row -->
 
       <!-- 組合公式說明 -->
       <div style="background:var(--bg3);border-radius:var(--r2);padding:10px 14px;font-size:.82rem;color:var(--text2);margin-top:20px;border:1px solid var(--border);text-align:center;">
-        綜合報酬公式 = <span style="color:var(--blue)">40% 原型底倉</span> + <span style="color:var(--purple)">40% 正2（預估原型×2）</span> + <span style="color:var(--green)">20% 現金（1% 活存）</span>
+        綜合報酬公式 = <span style="color:var(--blue)">40% 原型底倉</span> + <span style="color:var(--purple)">40% 正2（原型×2 + 逆價差）</span> + <span style="color:var(--green)">20% 現金（1% 活存）</span>
       </div>
     </div> <!-- /card 1 -->
 
-    <!-- 第二區：下半部 DBR 與 投資效益 並排 -->
     <div class="g2">
       <!-- DBR 分析 -->
       <div class="card">
@@ -522,7 +568,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
           </div>
         </div>
         <div style="font-size:.82rem;color:var(--text2);margin-top:4px;line-height:1.7" id="dbr-desc">
-          DBR22 上限 = 月薪 × 22 倍<br>月薪7.5萬 上限 = <strong style="color:var(--amber)">NT$1,650,000</strong>
+          DBR22 上限 = 月薪 × 22 倍
         </div>
         <div id="dbr-alert" class="alert alert-green" style="margin-top:12px;">✅ 信貸額度在 DBR22 安全範圍內</div>
       </div>
@@ -534,22 +580,148 @@ canvas{display:block;width:100%!important;height:auto!important;}
       </div>
     </div> <!-- /g2 -->
 
-    <!-- 風險提示 放最底部 -->
-    <div class="alert alert-amber" style="margin-top: 20px;">
-      ⚠️ <strong>槓桿雙刃劍：</strong>信貸投資無論市場漲跌，每月本息照繳。正2波動放大2倍，務必確保 20% 現金足以撐過股災期間，不被迫斷頭賣股。
-    </div>
-
   </div> <!-- /tab-calc -->
+
+  <!-- ═══ TAB: BBD 質押風控 ═══ -->
+  <div class="tab-panel" id="tab-bbd">
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title"><div class="ct-icon" style="background:rgba(139,92,246,.2)">🏦</div>BBD 股票質押維持率壓力測試</div>
+
+      <div class="alert" style="margin-bottom:20px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.3);color:var(--purple2);">
+        💡 <strong>富人思維：</strong>買入資產，不賣出，需要資金時向券商質押借款（僅還息不還本）。關鍵在於控管
+        <strong>維持率（維持率 = 擔保品市值 ÷ 借款金額 × 100%）</strong>。
+      </div>
+
+      <!-- 上方：三個滑桿並排 -->
+      <div class="slider-row" style="margin-bottom:24px;">
+
+        <!-- 擔保品市值 -->
+        <div class="ctrl-group" style="margin-bottom:0;">
+          <div class="ctrl-head">
+            <span class="ctrl-label">💼 擔保品市值 (ETF)</span>
+            <span class="ctrl-val" id="lbl-bbd-asset">3,000,000</span>
+          </div>
+          <input type="range" id="inp-bbd-asset" min="500000" max="10000000" step="100000" value="3000000"
+                 oninput="calcBBD()" style="--track-fill:var(--blue)">
+          <div class="range-hint"><span>50萬</span><span>1,000萬</span></div>
+        </div>
+
+        <!-- 質押借款金額 -->
+        <div class="ctrl-group" style="margin-bottom:0;">
+          <div class="ctrl-head">
+            <span class="ctrl-label">💸 欲借款金額</span>
+            <span class="ctrl-val purple" id="lbl-bbd-borrow">1,000,000</span>
+          </div>
+          <input type="range" id="inp-bbd-borrow" min="100000" max="6000000" step="50000" value="1000000"
+                 oninput="calcBBD()" style="--track-fill:var(--purple)">
+          <div class="range-hint"><span>10萬</span><span style="color:var(--purple);font-weight:700">法定上限60%</span><span id="lbl-bbd-borrow-max">600萬</span></div>
+        </div>
+
+        <!-- 壓力測試下跌幅度 -->
+        <div class="ctrl-group" style="margin-bottom:0;">
+          <div class="ctrl-head">
+            <span class="ctrl-label">📉 壓力測試（大盤下跌）</span>
+            <span class="ctrl-val" style="color:var(--red);background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.25);" id="lbl-bbd-drop">-20%</span>
+          </div>
+          <input type="range" id="inp-bbd-drop" min="0" max="60" step="1" value="20"
+                 oninput="calcBBD()" style="--track-fill:var(--red)">
+          <div class="range-hint"><span>0%</span><span style="color:var(--red)">-60%（2008海嘯級）</span></div>
+        </div>
+
+      </div><!-- /slider-row -->
+
+      <!-- 下方：結果三欄並排 -->
+      <div class="bbd-result-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+
+        <!-- 初始維持率 -->
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:20px;text-align:center;">
+          <div style="font-size:.85rem;color:var(--text2);margin-bottom:10px;font-weight:600;">📊 初始維持率</div>
+          <div id="bbd-init-ratio" style="font-size:2.8rem;font-weight:800;color:var(--blue);line-height:1.1;">300%</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:8px;">借款當下的安全倍率</div>
+        </div>
+
+        <!-- 壓力測試後維持率 -->
+        <div style="background:var(--bg3);border:2px solid var(--border2);border-radius:var(--r2);padding:20px;text-align:center;">
+          <div style="font-size:.85rem;color:var(--text2);margin-bottom:10px;font-weight:600;">
+            ⚡ 壓力後維持率 <span id="bbd-drop-text" style="color:var(--red);font-weight:700;">（-20%）</span>
+          </div>
+          <div id="bbd-stress-ratio" style="font-size:2.8rem;font-weight:800;color:var(--green);line-height:1.1;">240%</div>
+          <div id="bbd-status-badge" style="display:inline-block;margin-top:12px;padding:5px 14px;border-radius:999px;font-weight:700;font-size:.82rem;background:rgba(16,185,129,.15);color:var(--green);">
+            ✅ 資金水位安全
+          </div>
+        </div>
+
+        <!-- 警戒標準說明 -->
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:20px;">
+          <div style="font-size:.85rem;color:var(--text2);margin-bottom:12px;font-weight:600;">🎯 維持率警戒標準</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0;"></div>
+              <div style="font-size:.82rem;"><strong style="color:var(--green)">≥ 200%</strong><span style="color:var(--text2)"> — 安全（威利標準）</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:10px;height:10px;border-radius:50%;background:var(--amber);flex-shrink:0;"></div>
+              <div style="font-size:.82rem;"><strong style="color:var(--amber)">130%~200%</strong><span style="color:var(--text2)"> — 警戒，隨時追繳</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:10px;height:10px;border-radius:50%;background:var(--red);flex-shrink:0;"></div>
+              <div style="font-size:.82rem;"><strong style="color:var(--red)">＜ 130%</strong><span style="color:var(--text2)"> — 斷頭！補保證金</span></div>
+            </div>
+            <hr style="border:none;border-top:1px solid var(--border);margin:4px 0;">
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">
+              建議槓桿倍數控制在 <strong>1.1x ~ 1.5x</strong><br>
+              法定上限：擔保品市值 × <strong>60%</strong>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /result grid -->
+
+    </div>
+  </div>
+
+  <!-- ═══ TAB: SMILE 微笑佈局 ═══ -->
+  <div class="tab-panel" id="tab-smile">
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title"><div class="ct-icon" style="background:rgba(245,158,11,.2)">😊</div>240MA 微笑佈局試算機</div>
+        
+        <div class="alert alert-amber" style="margin-bottom:20px;">
+            💡 <strong>雷恩 SOP：</strong> 跌破年線絕對不買正2。備戰現金只買原型 ETF，左側分批往下買，右側站回年線上再將原型獲利了結轉回正2。
+        </div>
+
+        <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom: 24px;">
+            <div style="flex:1; min-width:200px;">
+                <label style="display:block; font-size:.9rem; font-weight:600; color:var(--text2); margin-bottom:8px;">🎯 基準標的 240MA 年線價格</label>
+                <input type="number" id="inp-smile-price" value="180" oninput="calcSmile()" style="width:100%; padding:12px; border-radius:var(--r2); border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:1.1rem; outline:none;">
+            </div>
+            <div style="flex:1; min-width:200px;">
+                <label style="display:block; font-size:.9rem; font-weight:600; color:var(--text2); margin-bottom:8px;">💰 預備投入現金總額</label>
+                <input type="number" id="inp-smile-cash" value="400000" oninput="calcSmile()" style="width:100%; padding:12px; border-radius:var(--r2); border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:1.1rem; outline:none;">
+            </div>
+        </div>
+
+        <table class="smile-table">
+          <thead>
+            <tr>
+              <th>跌幅階梯</th>
+              <th>觸發價格</th>
+              <th>左側建倉（往下買原型）</th>
+              <th>投入金額</th>
+              <th>右側出場（站回年線轉正2）</th>
+            </tr>
+          </thead>
+          <tbody id="smile-tbody">
+            <!-- JS 動態生成 -->
+          </tbody>
+        </table>
+      </div>
+  </div>
 
   <!-- ═══ TAB: CHARTS ═══ -->
   <div class="tab-panel" id="tab-charts">
     <div class="card" style="margin-bottom:20px;">
       <div class="card-title"><div class="ct-icon" style="background:rgba(16,185,129,.2)">📈</div>資產 vs 負債走勢預測</div>
       
-      <div class="alert alert-blue" style="margin-bottom:16px;padding:12px;border-radius:var(--r2);font-size:0.85rem;">
-        💡 <strong>精準回本點邏輯：</strong> 此圖已修正使用最嚴謹的 <code>「資產 ≥ 原始借款 + 全期總利息 + 開辦費」</code> （固定總成本目標）進行結算。這代表您真正把所有的借款成本都賺回來了！
-      </div>
-
       <div class="chart-wrap" id="chart-container">
         <canvas id="lineCanvas" width="1400" height="500"></canvas>
       </div>
@@ -576,12 +748,12 @@ canvas{display:block;width:100%!important;height:auto!important;}
             </div>
             <div class="dl-item" style="background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.3)">
               <div class="dl-swatch" style="background:var(--purple)"></div>
-              <div><div class="dl-name" style="color:var(--purple)">正2攻擊部隊</div><div class="dl-desc">年線下絕對不買防W底消耗</div></div>
+              <div><div class="dl-name" style="color:var(--purple)">正2攻擊部隊</div><div class="dl-desc">自帶隱形逆價差配息</div></div>
               <div class="dl-pct" style="color:var(--purple)">40%</div>
             </div>
             <div class="dl-item" style="background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.3)">
               <div class="dl-swatch" style="background:var(--green)"></div>
-              <div><div class="dl-name" style="color:var(--green)">現金保命金</div><div class="dl-desc">高利活存，跌-30%停止加碼</div></div>
+              <div><div class="dl-name" style="color:var(--green)">現金保命金</div><div class="dl-desc">高利活存/預留還款金</div></div>
               <div class="dl-pct" style="color:var(--green)">20%</div>
             </div>
             <div style="text-align:center;margin-top:14px;padding:12px;background:var(--bg3);border-radius:var(--r2);">
@@ -851,6 +1023,34 @@ canvas{display:block;width:100%!important;height:auto!important;}
       </div>
     </div>
 
+    <!-- ★ 新增：主動式 ETF 搭配 (00984A vs 00995A) -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">
+        <div class="ct-icon" style="background:rgba(245,158,11,.2)">🛡️</div>0本金進階搭配：主動式 ETF 穩定現金流
+      </div>
+      <div class="alert alert-amber" style="margin-bottom:16px;">
+        💡 <strong>解決信貸利息缺口：</strong> 若想實現完全 0 本金（連利息都不想掏），可將部分資金配置於高股息或主動式 ETF，用配息覆蓋信貸利息。
+      </div>
+      <div class="g2" style="gap:16px;">
+        <div class="strat-box sb-amber" style="margin-bottom:0;">
+          <h4>🎯 00984A (安聯台灣高息) - 穩息+成長首選</h4>
+          <ul>
+            <li><strong>策略：</strong> 60% 高股息 + 40% 成長，主動選股（約 100-180 檔分散）。</li>
+            <li><strong>配息：</strong> 1, 4, 7, 10 月（季配），適合打造覆蓋信貸利息的穩定現金流護城河。</li>
+            <li><strong>優勢：</strong> 費用率偏低 (管理費 0.7%)，且 YTD 績效穩健，適合做為防禦與收息的底倉。</li>
+          </ul>
+        </div>
+        <div class="strat-box sb-blue" style="margin-bottom:0;">
+          <h4>🚀 00995A (中信台灣卓越) - 積極成長</h4>
+          <ul>
+            <li><strong>策略：</strong> 集中持股（約 50 檔），高達 80% 以上集中在科技電子與半導體。</li>
+            <li><strong>配息：</strong> 同為季配，但屬新掛牌，預計 2026/09 首次評價。</li>
+            <li><strong>優勢：</strong> 股價爆發力強（YTD 表現高達 60%+），適合可承受較大波動、追求總報酬最大化的資金部位。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <!-- 信貸質押雙軌並行與動態再平衡 -->
     <div class="card" style="margin-bottom:20px;">
       <div class="card-title">
@@ -969,36 +1169,12 @@ canvas{display:block;width:100%!important;height:auto!important;}
           </tbody>
         </table>
 
-        <div class="alert alert-amber" style="margin-top:14px">
-          💡 <strong>微笑原理：</strong>左側分批買原型、右側回升轉正2，利用熊市累積部位，在反彈啟動時以正2倍數放大獲利。
+        <div style="text-align:center; margin-top:20px;">
+            <button class="scene-btn" style="border-color:var(--amber); color:var(--amber);" onclick="switchTab('smile')">👉 點此前往互動式【微笑佈局試算機】</button>
         </div>
       </div>
     </div>
 
-  </div>
-
-  <!-- ═══ TAB: AMORT ═══ -->
-  <div class="tab-panel" id="tab-amort">
-    <div class="card">
-      <div class="card-title"><div class="ct-icon" style="background:rgba(59,130,246,.2)">📋</div>逐月還款明細（本利均攤）</div>
-      <div class="amort-wrap">
-        <table class="amort-table">
-          <thead>
-            <tr>
-              <th>期數</th>
-              <th>月繳金額</th>
-              <th>本金部分</th>
-              <th>利息部分</th>
-              <th>剩餘本金</th>
-              <th>累計利息</th>
-            </tr>
-          </thead>
-          <tbody id="amort-body">
-            <tr><td colspan="6" style="text-align:center;color:var(--text2);padding:30px">請先在計算機頁面設定參數後自動生成</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
   </div>
 
   <!-- ═══ TAB: VIDEOS ═══ -->
@@ -1040,6 +1216,14 @@ canvas{display:block;width:100%!important;height:auto!important;}
         </div>
         <div class="vinfo"><div class="vtitle">槓桿人生 EP14｜信貸投資指南</div><div class="vdesc">生命週期投資法、拉長年期降低現金流壓力</div></div>
       </div>
+      <!-- ★ 新增影片：槓桿人生 EP11 -->
+      <div class="vcard" onclick="openVideoModal('empty_ep11','槓桿人生 EP11｜定期定額其實風險更高？','揭開生命週期投資法真相，本金少更該開槓桿')">
+        <div class="vthumb">
+          <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=600&q=80" alt="定期定額風險更高">
+          <div class="vplay">▶ 點擊播放</div>
+        </div>
+        <div class="vinfo"><div class="vtitle">槓桿人生 EP11｜定期定額其實風險更高？</div><div class="vdesc">揭開生命週期投資法真相，本金少更該開槓桿</div></div>
+      </div>
     </div>
 
     <!-- 主題 3：0 本金投資與 BBD 質押策略 -->
@@ -1071,7 +1255,6 @@ canvas{display:block;width:100%!important;height:auto!important;}
     <!-- 主題 4：流動性生存與投資心理 -->
     <div class="section-title">🌊 流動性生存與投資心理</div>
     <div class="video-grid">
-      <!-- 新增：好葉 新慢富思維 -->
       <div class="vcard" onclick="openVideoModal('HqZ8Pa3oT-I','好葉｜解密「新慢富思維」','滾動金錢與回憶兩顆雪球、三帳戶配置與反脆弱試錯')">
         <div class="vthumb">
           <img src="https://img.youtube.com/vi/HqZ8Pa3oT-I/mqdefault.jpg" alt="好葉 新慢富思維">
@@ -1106,6 +1289,22 @@ canvas{display:block;width:100%!important;height:auto!important;}
           <div class="vplay">▶ 點擊播放</div>
         </div>
         <div class="vinfo"><div class="vtitle">威利財經角｜槓桿開多少才安全</div><div class="vdesc">極端壓力測試：活得久比賺得快更重要</div></div>
+      </div>
+      <!-- ★ 新增影片：威利財經角 S26EP7 -->
+      <div class="vcard" onclick="openVideoModal('empty_s26ep7','威利財經角 S26EP7｜你以為沒有負債才安全？','很多人一輩子存不到錢，是因為太早把債還光了')">
+        <div class="vthumb">
+          <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=600&q=80" alt="沒有負債才安全">
+          <div class="vplay">▶ 點擊播放</div>
+        </div>
+        <div class="vinfo"><div class="vtitle">威利財經角 S26EP7｜你以為沒有負債才安全？</div><div class="vdesc">很多人之所以存不到錢，是因為太早把債還光了</div></div>
+      </div>
+      <!-- ★ 新增影片：A8阿吧 EP107 -->
+      <div class="vcard" onclick="openVideoModal('empty_ep107','A8阿吧 EP107｜長期投資賣出心理陷阱','長期投資正2別再犯這種錯！一旦賣出就很難買回')">
+        <div class="vthumb">
+          <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=600&q=80" alt="長期投資心理陷阱">
+          <div class="vplay">▶ 點擊播放</div>
+        </div>
+        <div class="vinfo"><div class="vtitle">A8阿吧 EP107｜長期投資賣出心理陷阱</div><div class="vdesc">長期投資正2別再犯這種錯！克服落袋為安的恐懼</div></div>
       </div>
     </div>
     
@@ -1177,95 +1376,41 @@ function closeVideoModal(e) {
 }
 
 /* ────────────────────────────────
-   THEME TOGGLE HELPER
+   STATE MANAGEMENT (集中管理狀態)
 ──────────────────────────────── */
-function toggleTheme() {
-  const root = document.documentElement;
-  const currentTheme = root.getAttribute('data-theme') || 'dark';
-  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  
-  root.setAttribute('data-theme', newTheme);
-  localStorage.setItem('theme', newTheme);
-  
-  const themeBtn = document.getElementById('theme-toggle');
-  if(themeBtn) {
-    themeBtn.innerText = newTheme === 'dark' ? '☀️' : '🌙';
-  }
-  
-  // 主題切換後重新繪製圖表
-  if (document.getElementById('tab-charts')?.classList.contains('active')) {
-    resizeCanvas();
-  } else {
-    if(window._lastData) drawLineChart(window._lastData);
-    if(window._lastPort) drawDonutChart(window._lastPort);
-  }
-}
-
-/* ────────────────────────────────
-   SLIDER FILL HELPER
-──────────────────────────────── */
-function updateSliderFill(el){
-  if(!el) return;
-  const min = parseFloat(el.min), max = parseFloat(el.max), val = parseFloat(el.value);
-  const pct = ((val - min) / (max - min) * 100).toFixed(1);
-  el.style.setProperty('--fill-pct', pct + '%');
-}
-function updateAllSliders(){
-  document.querySelectorAll('input[type=range]').forEach(updateSliderFill);
-}
-
-/* ────────────────────────────────
-   TAB SWITCH & STATE SAVE
-──────────────────────────────── */
-function switchTab(id, event){
-  if (event && event.target) {
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    event.target.classList.add('active');
-  } else {
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    const defaultTab = document.querySelector(`[data-tab="${id}"]`);
-    if(defaultTab) defaultTab.classList.add('active');
-  }
-
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  const targetPanel = document.getElementById('tab-'+id);
-  if(targetPanel) targetPanel.classList.add('active');
-
-  const kpiGrid = document.getElementById('main-kpi-grid');
-  if(kpiGrid) {
-    if (id === 'calc') {
-      kpiGrid.classList.remove('compact');
-    } else {
-      kpiGrid.classList.add('compact');
+const appState = {
+    inputs: {
+        salary: 75000,
+        loan: 2000000,
+        fee: 9000,
+        years: 10,
+        rate: 2.5,
+        baseReturn: 8.0,
+        premium: 4.0, // 正2逆價差
+        isZeroPay: false // 0月付模式
+    },
+    bbd: {
+        asset: 3000000,
+        borrow: 1000000,
+        drop: 20
+    },
+    smile: {
+        price: 180,
+        cash: 400000
+    },
+    calculated: {
+        pmt: 0,
+        dbrMax: 0,
+        portReturn: 0,
+        fixedTotalCost: 0,
+        data: [], // 折線圖資料
+        yearly: [],
+        breakevenMonth: null
     }
-  }
-
-  // 儲存當前分頁狀態
-  localStorage.setItem('activeTab', id);
-
-  if(id==='charts'){
-    setTimeout(()=>{ resizeCanvas(); }, 50);
-  }
-}
+};
 
 /* ────────────────────────────────
-   SCENARIO PRESETS
-──────────────────────────────── */
-function setScene(salary, loan, fee, years, rate, ret){
-  const safeSetVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
-  safeSetVal('inp-salary', salary);
-  safeSetVal('inp-loan', loan);
-  safeSetVal('inp-fee', fee);
-  safeSetVal('inp-years', years);
-  safeSetVal('inp-rate', rate);
-  safeSetVal('inp-return', ret);
-  
-  updateAllSliders();
-  calculate();
-}
-
-/* ────────────────────────────────
-   FORMAT HELPERS
+   FORMAT & HELPER FUNCTIONS
 ──────────────────────────────── */
 const fmt = n => Math.round(n).toLocaleString('en-US');
 const fmtM = n => {
@@ -1274,188 +1419,230 @@ const fmtM = n => {
   return fmt(n);
 };
 
-/* ────────────────────────────────
-   MAIN CALCULATE (包含儲存參數狀態)
-──────────────────────────────── */
-// 封裝安全存取函數，徹底根除 TypeError
 const safeText = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
 const safeHTML = (id, val) => { const el = document.getElementById(id); if(el) el.innerHTML = val; };
 const safeClass = (id, cls) => { const el = document.getElementById(id); if(el) el.className = cls; };
 const safeColor = (id, color) => { const el = document.getElementById(id); if(el) el.style.color = color; };
 
-function calculate(){
-  updateAllSliders(); 
-  
-  // 取得數值，若找不到元素則給予預設值防呆
-  const salary     = parseInt(document.getElementById('inp-salary')?.value) || 75000;
-  const loan       = parseFloat(document.getElementById('inp-loan')?.value) || 2000000;
-  const fee        = parseInt(document.getElementById('inp-fee')?.value) || 9000;
-  const years      = parseInt(document.getElementById('inp-years')?.value) || 10;
-  const rate       = parseFloat(document.getElementById('inp-rate')?.value) || 2.5;
-  const baseReturn = parseFloat(document.getElementById('inp-return')?.value) || 8.0;
-  const months     = years * 12;
+function updateSliderFill(el){
+  if(!el) return;
+  const min = parseFloat(el.min), max = parseFloat(el.max), val = parseFloat(el.value);
+  const pct = ((val - min) / (max - min) * 100).toFixed(1);
+  el.style.setProperty('--fill-pct', pct + '%');
+}
 
-  // 儲存當前計算參數
-  const state = { salary, loan, fee, years, rate, baseReturn };
-  localStorage.setItem('calcState', JSON.stringify(state));
+function syncInputsToState() {
+    // Calc Tab
+    appState.inputs.salary = parseInt(document.getElementById('inp-salary')?.value) || 75000;
+    appState.inputs.loan = parseFloat(document.getElementById('inp-loan')?.value) || 2000000;
+    appState.inputs.fee = parseInt(document.getElementById('inp-fee')?.value) || 9000;
+    appState.inputs.years = parseInt(document.getElementById('inp-years')?.value) || 10;
+    appState.inputs.rate = parseFloat(document.getElementById('inp-rate')?.value) || 2.5;
+    appState.inputs.baseReturn = parseFloat(document.getElementById('inp-return')?.value) || 8.0;
+    appState.inputs.premium = parseFloat(document.getElementById('inp-premium')?.value) || 4.0;
+    appState.inputs.isZeroPay = document.getElementById('inp-zero-pay')?.checked || false;
 
-  // 更新參數標籤
-  safeText('lbl-salary', fmt(salary));
-  safeText('lbl-loan', fmt(loan));
-  safeText('lbl-fee', fmt(fee));
-  safeText('lbl-years', years+' 年');
-  safeText('lbl-rate', rate.toFixed(1)+'%');
-  safeText('lbl-return', baseReturn.toFixed(1)+'%');
+    // BBD Tab
+    appState.bbd.asset = parseFloat(document.getElementById('inp-bbd-asset')?.value) || 3000000;
+    appState.bbd.borrow = parseFloat(document.getElementById('inp-bbd-borrow')?.value) || 1000000;
+    appState.bbd.drop = parseFloat(document.getElementById('inp-bbd-drop')?.value) || 20;
 
-  const dbrMax = salary * 22;
-  safeText('hint-loan-max', `上限≈${fmtM(dbrMax)}`);
-  safeText('hdr-dbr-badge', `DBR22 月薪${(salary/10000).toFixed(1)}萬上限≈${fmtM(dbrMax)}`);
+    // Smile Tab
+    appState.smile.price = parseFloat(document.getElementById('inp-smile-price')?.value) || 180;
+    appState.smile.cash = parseFloat(document.getElementById('inp-smile-cash')?.value) || 400000;
 
-  // 計算 PMT
-  const mr  = (rate/100)/12;
-  const pmt = mr === 0 ? (loan/months) : loan*(mr*Math.pow(1+mr,months))/(Math.pow(1+mr,months)-1);
-  const totalInterest = pmt*months - loan;
-  const pmtRatio = ((pmt/salary)*100).toFixed(1);
+    document.querySelectorAll('input[type=range]').forEach(updateSliderFill);
+    localStorage.setItem('advCalcState', JSON.stringify(appState));
+}
 
-  // 投資組合預期報酬
-  const portReturn = (0.4*baseReturn)+(0.4*baseReturn*2)+(0.2*1.0);
-  const mpr = (portReturn/100)/12;
+function setScene(salary, loan, fee, years, rate, ret, prem){
+  const safeSetVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+  safeSetVal('inp-salary', salary);
+  safeSetVal('inp-loan', loan);
+  safeSetVal('inp-fee', fee);
+  safeSetVal('inp-years', years);
+  safeSetVal('inp-rate', rate);
+  safeSetVal('inp-return', ret);
+  safeSetVal('inp-premium', prem);
+  document.querySelectorAll('input[type=range]').forEach(updateSliderFill); // 同步滑桿填色
+  calculate();
+}
 
-  // 定義「固定總成本」(Fixed Target)
-  const fixedTotalCost = loan + totalInterest + fee;
-
-  let curAsset = loan - fee; 
-  let curLoan = loan;
-  let cumInterest = 0;
-  let breakevenMonth = null; 
-  
-  const data=[], yearly=[];
-  for(let i=0;i<=months;i++){
-    if(i===0){ 
-      data.push({m:0, a:curAsset, l:curLoan, cost:fixedTotalCost}); 
-      continue; 
-    }
+/* ────────────────────────────────
+   CORE LOGIC: CALCULATE
+──────────────────────────────── */
+function calculate() {
+    syncInputsToState();
+    const state = appState.inputs;
     
-    curAsset *= (1+mpr);
-    const interest = curLoan * mr;
-    cumInterest += interest;
-    curLoan -= (pmt - interest);
-    if(curLoan<0) curLoan=0;
+    // UI Updates - Labels
+    safeText('lbl-salary', fmt(state.salary));
+    safeText('lbl-loan', fmt(state.loan));
+    safeText('lbl-fee', fmt(state.fee));
+    safeText('lbl-years', state.years + ' 年');
+    safeText('lbl-rate', state.rate.toFixed(1) + '%');
+    safeText('lbl-return', state.baseReturn.toFixed(1) + '%');
+    safeText('lbl-premium', state.premium.toFixed(1) + '%');
 
-    // 損益平衡：逐月精確插值，breakevenIdx 以 data 陣列索引儲存（0 = 第0個月）
-    if(breakevenMonth === null){
-      const prev = data[data.length-1];  // 上一個資料點
-      const p1 = prev.a - fixedTotalCost;
-      const p2 = curAsset - fixedTotalCost;
-      if(p1 < 0 && p2 >= 0){
-        const t = -p1 / (p2 - p1);       // 0~1 之間的比例
-        // data 中 prev 的 index = data.length-1（還沒 push 當月），當月 index = data.length
-        // 精確位置 = (data.length-1) + t
-        breakevenMonth = (data.length - 1) + t;  // 單位：data 陣列索引（含小數）
-      }
-    }
+    // 0月付 UI 切換
+    const alertEl = document.getElementById('zero-pay-alert');
+    if(alertEl) alertEl.style.display = state.isZeroPay ? 'block' : 'none';
+
+    // DBR22 Calc
+    const dbrMax = state.salary * 22;
+    appState.calculated.dbrMax = dbrMax;
+    safeText('hint-loan-max', `上限≈${fmtM(dbrMax)}`);
+    safeText('hdr-dbr-badge', `DBR22 月薪${(state.salary/10000).toFixed(1)}萬上限≈${fmtM(dbrMax)}`);
+
+    // PMT Calc
+    const months = state.years * 12;
+    const mr = (state.rate / 100) / 12;
+    const pmt = mr === 0 ? (state.loan / months) : state.loan * (mr * Math.pow(1 + mr, months)) / (Math.pow(1 + mr, months) - 1);
+    appState.calculated.pmt = pmt;
+    const totalInterest = pmt * months - state.loan;
+    const fixedTotalCost = state.loan + totalInterest + state.fee;
+    appState.calculated.fixedTotalCost = fixedTotalCost;
+
+    // Portfolio Return (4-4-2)
+    // 正2 報酬 = (原型報酬 * 2) + 逆價差補償
+    const leveragedReturn = (state.baseReturn * 2) + state.premium;
+    const portReturn = (0.4 * state.baseReturn) + (0.4 * leveragedReturn) + (0.2 * 1.0);
+    appState.calculated.portReturn = portReturn;
+    const mpr = (portReturn / 100) / 12;
+
+    // Projection Loop
+    let curAsset = state.loan - state.fee;
+    let reservedPool = 0;
     
-    data.push({m:i, a:curAsset, l:curLoan, cost:fixedTotalCost});
-    
-    if(i%12===0 || i===months){
-      yearly.push({yr:i/12, a:curAsset, l:curLoan, net: curAsset - fixedTotalCost});
+    // 【0月付永動機邏輯】: 從借款中預留前24期本利和作為還款池
+    // fixedTotalCost 也需扣除預留金（因為那筆錢根本沒進入投資市場）
+    if (state.isZeroPay) {
+        reservedPool = pmt * 24;
+        curAsset = Math.max(0, curAsset - reservedPool);
     }
-  }
-  
-  window._lastData = data;
-  window._lastPort = portReturn;
-  window._breakevenMonth = breakevenMonth;
 
-  // 寫入 KPI 數值
-  safeText('val-loan-kpi', fmtM(loan));
-  
-  if(breakevenMonth !== null){
-    // breakevenMonth 現在是 data 陣列索引（0=第0個月），data[i].m = i（月份）
-    // 轉換為年份：data 的第 k 個點對應第 k 個月（data[0].m=0, data[1].m=1...）
-    const beActualMonth = breakevenMonth; // index 即月份（data[i].m == i）
-    const beYr = (beActualMonth / 12).toFixed(1);
-    safeText('val-breakeven', '第 '+beYr+' 年');
-    safeClass('val-breakeven', 'kpi-val');
-    safeColor('val-breakeven', 'var(--amber)');
-  } else {
-    safeText('val-breakeven', '期間內未達標');
-    safeClass('val-breakeven', 'kpi-val danger');
-    safeColor('val-breakeven', 'var(--red)');
-  }
+    let curLoan = state.loan;
+    let breakevenMonth = null;
+    const data = [], yearly = [];
 
-  safeText('val-rate-kpi', rate.toFixed(1) + '%');
-  safeColor('val-rate-kpi', rate <= 3 ? 'var(--green)' : rate <= 5 ? 'var(--amber)' : 'var(--red)');
+    for (let i = 0; i <= months; i++) {
+        if (i === 0) {
+            data.push({ m: 0, a: curAsset, l: curLoan, cost: fixedTotalCost });
+            continue;
+        }
 
-  safeText('val-pmt', fmt(pmt));
-  safeClass('val-pmt', 'kpi-val'+(pmt>salary*0.4?' danger':''));
-  
-  safeHTML('val-pmt-desc', `佔月薪${salary/10000}萬的 `+pmtRatio+'% '+(pmt>(salary*0.4)?'<span style="color:var(--red)">(壓力偏高)</span>':'<span style="color:var(--green)">(安全)</span>'));
-  
-  const pmtBar = document.getElementById('pmt-bar');
-  if(pmtBar){
-    pmtBar.style.width = Math.min(pmtRatio,100)+'%';
-    pmtBar.style.background = pmt>(salary*0.4)?'var(--red)':'var(--blue)';
-  }
+        curAsset *= (1 + mpr);
+        const interest = curLoan * mr;
+        curLoan -= (pmt - interest);
+        if (curLoan < 0) curLoan = 0;
 
-  safeText('val-interest', '－ ' + fmt(totalInterest + fee));
-  safeText('val-asset', fmtM(curAsset));
-  safeText('val-port', portReturn.toFixed(1)+'%');
-  const cashPool = (loan - fee) * 0.2;
-  const survivalMonths = pmt > 0 ? Math.min(Math.floor(cashPool / pmt), 999) : 999;
-  safeText('val-survival', survivalMonths + ' 個月');
-  
-  const netGain = curAsset - fixedTotalCost;
-  safeText('val-net', (netGain>=0?'+':'')+fmtM(netGain));
-  safeClass('val-net', 'kpi-val '+(netGain>=0?'good':'danger'));
+        // Breakeven logic
+        if (breakevenMonth === null) {
+            const prev = data[data.length - 1];
+            const p1 = prev.a - fixedTotalCost;
+            const p2 = curAsset - fixedTotalCost;
+            if (p1 < 0 && p2 >= 0) {
+                const t = -p1 / (p2 - p1);
+                breakevenMonth = (data.length - 1) + t;
+            }
+        }
 
-  // DBR Update
-  const dbrPct = ((loan/dbrMax)*100).toFixed(1);
-  const dbrBar = document.getElementById('dbr-bar');
-  if(dbrBar) dbrBar.style.width = Math.min(dbrPct,100)+'%';
-  
-  safeText('dbr-pct', dbrPct+'%');
-  safeHTML('dbr-desc', `DBR22 上限 = 月薪 × 22 倍<br>月薪${salary/10000}萬 上限 = <strong style="color:var(--amber)">NT$${fmt(dbrMax)}</strong>`);
+        data.push({ m: i, a: curAsset, l: curLoan, cost: fixedTotalCost });
 
-  const dbrPctEl = document.getElementById('dbr-pct');
-  if(loan<=dbrMax){
-    if(dbrBar) dbrBar.style.background='var(--green)'; 
-    if(dbrPctEl) dbrPctEl.style.color='var(--green)';
-    safeColor('dbr-status', 'var(--green)'); safeText('dbr-status', `✅ DBR22 安全範圍（月薪${salary/10000}萬）`);
-    safeClass('dbr-alert', 'alert alert-green'); safeText('dbr-alert', '✅ 信貸額度在 DBR22 安全範圍內，銀行核貸機率高。');
-  } else {
-    if(dbrBar) dbrBar.style.background='var(--red)'; 
-    if(dbrPctEl) dbrPctEl.style.color='var(--red)';
-    safeColor('dbr-status', 'var(--red)'); safeText('dbr-status', '❌ 超出 DBR22 上限！');
-    safeClass('dbr-alert', 'alert alert-red'); safeText('dbr-alert', `❌ 信貸金額超出 DBR22 限制，月薪${salary/10000}萬的上限約為${fmtM(dbrMax)}，請降低額度或提供獎金扣繳憑單。`);
-  }
+        if (i % 12 === 0 || i === months) {
+            yearly.push({ yr: i / 12, a: curAsset, l: curLoan, net: curAsset - fixedTotalCost });
+        }
+    }
 
-  // ROI Analysis 寫入
-  safeHTML('roi-analysis', `
+    appState.calculated.data = data;
+    appState.calculated.yearly = yearly;
+    appState.calculated.breakevenMonth = breakevenMonth;
+
+    updateKPIs();
+    if (document.getElementById('tab-charts').classList.contains('active')) {
+        resizeCanvas();
+    }
+}
+
+function updateKPIs() {
+    const s = appState.inputs;
+    const c = appState.calculated;
+    const netGain = c.data[c.data.length - 1].a - c.fixedTotalCost;
+
+    safeText('val-loan-kpi', fmtM(s.loan));
+    safeText('val-rate-kpi', s.rate.toFixed(1) + '%');
+    
+    // PMT
+    safeText('val-pmt', fmt(c.pmt));
+    const pmtRatio = ((c.pmt / s.salary) * 100).toFixed(1);
+    safeHTML('val-pmt-desc', `佔月薪${(s.salary/10000).toFixed(1)}萬的 `+pmtRatio+'% '+(c.pmt>(s.salary*0.4)?'<span style="color:var(--red)">(高壓)</span>':'<span style="color:var(--green)">(安全)</span>'));
+    const pmtBar = document.getElementById('pmt-bar');
+    if(pmtBar){
+        pmtBar.style.width = Math.min(pmtRatio,100)+'%';
+        pmtBar.style.background = c.pmt>(s.salary*0.4)?'var(--red)':'var(--blue)';
+    }
+
+    // Cost
+    safeText('val-interest', '－ ' + fmt(c.fixedTotalCost - s.loan));
+    
+    // Return
+    safeText('val-port', c.portReturn.toFixed(1) + '%');
+    safeText('donut-return', c.portReturn.toFixed(1) + '%');
+    safeText('val-asset', fmtM(c.data[c.data.length - 1].a));
+    safeText('val-net', (netGain >= 0 ? '+' : '') + fmtM(netGain));
+    safeClass('val-net', 'kpi-val ' + (netGain >= 0 ? 'good' : 'danger'));
+
+    // Breakeven
+    if (c.breakevenMonth !== null) {
+        const beYr = (c.breakevenMonth / 12).toFixed(1);
+        safeText('val-breakeven', '第 ' + beYr + ' 年');
+        safeClass('val-breakeven', 'kpi-val');
+        safeColor('val-breakeven', 'var(--amber)');
+    } else {
+        safeText('val-breakeven', '期間內未達標');
+        safeClass('val-breakeven', 'kpi-val danger');
+        safeColor('val-breakeven', 'var(--red)');
+    }
+
+    // DBR
+    const dbrPct = ((s.loan / c.dbrMax) * 100).toFixed(1);
+    const dbrBar = document.getElementById('dbr-bar');
+    if (dbrBar) dbrBar.style.width = Math.min(dbrPct, 100) + '%';
+    safeText('dbr-pct', dbrPct + '%');
+    
+    safeHTML('dbr-desc', `DBR22 上限 = 月薪 × 22 倍<br>月薪 <strong>${(s.salary/10000).toFixed(1)}萬</strong> 上限 = <strong style="color:var(--amber)">NT$${fmt(c.dbrMax)}</strong>`);
+
+    if (s.loan <= c.dbrMax) {
+        if(dbrBar) dbrBar.style.background = 'var(--green)';
+        safeColor('dbr-pct', 'var(--green)');
+        safeColor('dbr-status', 'var(--green)'); safeText('dbr-status', `✅ DBR22 安全範圍`);
+        safeClass('dbr-alert', 'alert alert-green'); safeText('dbr-alert', '✅ 信貸額度在 DBR22 安全範圍內，銀行核貸機率高。');
+    } else {
+        if(dbrBar) dbrBar.style.background = 'var(--red)';
+        safeColor('dbr-pct', 'var(--red)');
+        safeColor('dbr-status', 'var(--red)'); safeText('dbr-status', '❌ 超出 DBR22 上限！');
+        safeClass('dbr-alert', 'alert alert-red'); safeText('dbr-alert', `❌ 信貸金額超出 DBR22 限制，請降低額度。`);
+    }
+
+    // ROI
+    safeHTML('roi-analysis', `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div style="background:var(--bg3);border-radius:var(--r2);padding:12px;border:1px solid var(--border)">
         <div style="font-size:11px;color:var(--text2);margin-bottom:4px">信貸全期總支出</div>
-        <div style="font-size:1.1rem;font-weight:800;color:var(--red)">－ ${fmt(totalInterest + fee)} 元</div>
+        <div style="font-size:1.1rem;font-weight:800;color:var(--red)">－ ${fmt(c.fixedTotalCost - s.loan)} 元</div>
       </div>
       <div style="background:var(--bg3);border-radius:var(--r2);padding:12px;border:1px solid var(--border)">
         <div style="font-size:11px;color:var(--text2);margin-bottom:4px">資產增長（含本金）</div>
-        <div style="font-size:1.1rem;font-weight:800;color:var(--green)">＋ ${fmtM(curAsset)} 元</div>
-      </div>
-      <div style="background:var(--bg3);border-radius:var(--r2);padding:12px;border:1px solid var(--border)">
-        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">組合年化報酬</div>
-        <div style="font-size:1.1rem;font-weight:800;color:var(--blue)">${portReturn.toFixed(2)}%</div>
-      </div>
-      <div style="background:var(--bg3);border-radius:var(--r2);padding:12px;border:1px solid var(--border)">
-        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">信貸年利率</div>
-        <div style="font-size:1.1rem;font-weight:800;color:var(--amber)">${rate.toFixed(1)}%</div>
+        <div style="font-size:1.1rem;font-weight:800;color:var(--green)">＋ ${fmtM(c.data[c.data.length - 1].a)} 元</div>
       </div>
     </div>
     <div style="margin-top:12px;padding:12px;border-radius:var(--r2);background:${netGain>=0?'rgba(16,185,129,.08)':'rgba(239,68,68,.08)'};border:1px solid ${netGain>=0?'rgba(16,185,129,.3)':'rgba(239,68,68,.3)'}">
       <strong style="color:${netGain>=0?'var(--green)':'var(--red)'}">${netGain>=0?'✅ 投資划算':'⚠️ 請謹慎評估'}</strong><br>
-      <span style="font-size:.82rem;color:var(--text2)">嚴謹結算最終淨收益：${(netGain>=0?'＋':'')}${fmt(netGain)} 元（${years}年後）</span>
+      <span style="font-size:.82rem;color:var(--text2)">嚴謹結算最終淨收益：${(netGain>=0?'＋':'')}${fmt(netGain)} 元（${s.years}年後）</span>
     </div>
   `);
 
-  // Yearly table 寫入
+  // Yearly Table
   safeHTML('yearly-table-wrap', `
     <div style="overflow-x:auto">
     <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
@@ -1467,7 +1654,7 @@ function calculate(){
           <th style="padding:10px;text-align:right;font-size:11px;border-bottom:1px solid var(--border)">累計淨損益</th>
         </tr>
       </thead>
-      <tbody>${yearly.map(r=>`
+      <tbody>${c.yearly.map(r=>`
         <tr style="border-bottom:1px solid var(--border)">
           <td style="padding:9px;text-align:center;color:var(--text2)">第${r.yr}年</td>
           <td style="padding:9px;text-align:right;color:var(--green);font-weight:700">${fmt(r.a)}</td>
@@ -1477,63 +1664,136 @@ function calculate(){
       </tbody>
     </table></div>
   `);
-
-  safeText('donut-return', portReturn.toFixed(1)+'%');
-  buildAmortTable(loan, mr, pmt, months);
-
-  const chartsTab = document.getElementById('tab-charts');
-  if(chartsTab && chartsTab.classList.contains('active')){
-    resizeCanvas();
-  }
 }
 
 /* ────────────────────────────────
-   AMORTIZATION TABLE
+   BBD 質押風控計算
 ──────────────────────────────── */
-function buildAmortTable(loan, mr, pmt, months){
-  let balance = loan, cumInterest = 0;
-  const rows = [];
-  for(let i=1;i<=months;i++){
-    const interest = balance*mr;
-    const principal = pmt - interest;
-    balance -= principal;
-    if(balance<0) balance=0;
-    cumInterest += interest;
-    rows.push({i,pmt,principal,interest,balance,cumInterest});
-  }
-  const bodyEl = document.getElementById('amort-body');
-  if(bodyEl){
-    bodyEl.innerHTML = rows.map(r=>`
-      <tr>
-        <td>${r.i}</td>
-        <td style="color:var(--text)">${fmt(r.pmt)}</td>
-        <td style="color:var(--blue)">${fmt(r.principal)}</td>
-        <td style="color:var(--red)">${fmt(r.interest)}</td>
-        <td style="color:var(--text2)">${fmt(r.balance)}</td>
-        <td style="color:var(--muted)">${fmt(r.cumInterest)}</td>
-      </tr>`).join('');
-  }
+function calcBBD() {
+    syncInputsToState();
+    const b = appState.bbd;
+
+    // 動態更新借款上限（60% 法定上限）
+    const maxBorrow = b.asset * 0.6;
+    const inpBorrow = document.getElementById('inp-bbd-borrow');
+    if (inpBorrow) {
+        inpBorrow.max = maxBorrow;
+        if (b.borrow > maxBorrow) {
+            b.borrow = maxBorrow;
+            inpBorrow.value = maxBorrow;
+        }
+        updateSliderFill(inpBorrow); // ← 動態 max 改完後立刻更新填色
+    }
+
+    // 同步所有 BBD sliders 填色
+    ['inp-bbd-asset','inp-bbd-drop'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) updateSliderFill(el);
+    });
+
+    // Label updates
+    safeText('lbl-bbd-asset',       fmt(b.asset));
+    safeText('lbl-bbd-borrow',      fmt(b.borrow));
+    safeText('lbl-bbd-borrow-max',  fmt(maxBorrow));
+    safeText('lbl-bbd-drop',        '-' + b.drop + '%');
+    safeText('bbd-drop-text',       '（-' + b.drop + '%）');
+
+    // 防止除以零
+    if (b.borrow <= 0) {
+        safeText('bbd-init-ratio',   '∞');
+        safeText('bbd-stress-ratio', '∞');
+        return;
+    }
+
+    // 計算維持率
+    const initRatio   = (b.asset / b.borrow) * 100;
+    const stressAsset = b.asset * (1 - b.drop / 100);
+    const stressRatio = (stressAsset / b.borrow) * 100;
+
+    safeText('bbd-init-ratio',   initRatio.toFixed(0) + '%');
+    safeText('bbd-stress-ratio', stressRatio.toFixed(0) + '%');
+
+    // 狀態徽章與顏色
+    const badge     = document.getElementById('bbd-status-badge');
+    const ratioEl   = document.getElementById('bbd-stress-ratio');
+    if (!badge || !ratioEl) return;
+
+    if (stressRatio >= 200) {
+        ratioEl.style.color    = 'var(--green)';
+        badge.style.background = 'rgba(16,185,129,.15)';
+        badge.style.color      = 'var(--green)';
+        badge.innerText        = '✅ 資金水位安全（符合威利標準）';
+    } else if (stressRatio >= 130) {
+        ratioEl.style.color    = 'var(--amber)';
+        badge.style.background = 'rgba(245,158,11,.15)';
+        badge.style.color      = 'var(--amber)';
+        badge.innerText        = '⚠️ 警戒！隨時面臨追繳風險';
+    } else {
+        ratioEl.style.color    = 'var(--red)';
+        badge.style.background = 'rgba(239,68,68,.15)';
+        badge.style.color      = 'var(--red)';
+        badge.innerText        = '💀 已斷頭！請立即補保證金';
+    }
 }
 
 /* ────────────────────────────────
-   CANVAS: RESIZE & REDRAW
+   SMILE 微笑佈局計算
+──────────────────────────────── */
+function calcSmile() {
+    syncInputsToState();
+    const s = appState.smile;
+    const tbody = document.getElementById('smile-tbody');
+    if (!tbody) return;
+
+    const drops = [
+        { pct: 8,  label: '-8%',  desc: '正常回調', buyPct: 5, sellPct: 2 },
+        { pct: 10, label: '-10%', desc: '警戒邊界', buyPct: 5, sellPct: 2 },
+        { pct: 15, label: '-15%', desc: '修正市場', buyPct: 5, sellPct: 2 },
+        { pct: 20, label: '-20%', desc: '空頭市場', buyPct: 5, sellPct: 2 },
+        { pct: 25, label: '-25%', desc: '深度空頭', buyPct: 5, sellPct: 2 },
+        { pct: 30, label: '-30%', desc: '極端熊市', buyPct: 5, sellPct: 2 }
+    ];
+
+    let cumInvested = 0;
+    let html = '';
+    drops.forEach(d => {
+        const triggerPrice  = s.price * (1 - d.pct / 100);
+        const recoveryPrice = s.price * 1.03; // 站回年線 +3% 視為確認
+        const investAmount  = s.cash * (d.buyPct / 100);
+        cumInvested += investAmount;
+        const sellDesc = `原型→正2，目標 $${recoveryPrice.toFixed(2)}`;
+        html += `
+            <tr>
+                <td class="td-drop">${d.label}<br><span style="font-size:10px;color:var(--muted)">${d.desc}</span></td>
+                <td style="font-weight:700;">$${triggerPrice.toFixed(2)}</td>
+                <td class="td-buy">+${d.buyPct}% 現金 → 買原型</td>
+                <td style="color:var(--text2)">$${fmt(investAmount)}<br><span style="font-size:10px;color:var(--muted)">累計$${fmt(cumInvested)}</span></td>
+                <td class="td-sell" style="font-size:.8rem;">${sellDesc}<br><span style="color:var(--muted);font-size:10px;">獲利+${d.sellPct}%資金轉回</span></td>
+            </tr>
+        `;
+    });
+    
+    const winterPrice = (s.price * 0.7).toFixed(2);
+    html += `<tr style="background:rgba(245,158,11,.06)"><td colspan="5" class="td-stop">❄️ 跌破 -30% ($${winterPrice}) → 冬眠模式：停止左側加碼，保護現金流！</td></tr>`;
+    tbody.innerHTML = html;
+}
+
+/* ────────────────────────────────
+   CANVAS CHART (重構繪圖邏輯)
 ──────────────────────────────── */
 function resizeCanvas() {
   const container = document.getElementById('chart-container');
   const cv = document.getElementById('lineCanvas');
   if(!container || !cv) return;
   cv.width = container.clientWidth - 40; 
-  if (window._lastData) drawLineChart(window._lastData);
-  if (window._lastPort) drawDonutChart(window._lastPort);
+  if (appState.calculated.data.length > 0) drawLineChart(appState.calculated.data);
+  if (appState.calculated.portReturn > 0) drawDonutChart(appState.calculated.portReturn);
 }
+
 window.addEventListener('resize', () => {
-  const chartsTab = document.getElementById('tab-charts');
-  if(chartsTab && chartsTab.classList.contains('active')) resizeCanvas();
+  if(document.getElementById('tab-charts')?.classList.contains('active')) resizeCanvas();
 });
 
-/* ────────────────────────────────
-   CANVAS: LINE CHART
-──────────────────────────────── */
 function drawLineChart(data){
   if(!data||!data.length) return;
   const cv = document.getElementById('lineCanvas');
@@ -1567,27 +1827,21 @@ function drawLineChart(data){
     ctx.fillText(val+'萬', P.l-10, y+5);
   }
 
-  // 總成本虛線
   const targetY = getY(fixedCost);
   ctx.strokeStyle='rgba(245,158,11,.6)'; ctx.lineWidth=2; ctx.setLineDash([5,5]);
   ctx.beginPath(); ctx.moveTo(P.l, targetY); ctx.lineTo(W-P.r, targetY); ctx.stroke();
   ctx.setLineDash([]);
 
-  const breakevenMonth = window._breakevenMonth; // 已是 data 陣列索引（0-based，含小數）
+  const breakevenMonth = appState.calculated.breakevenMonth;
   if(breakevenMonth !== null && breakevenMonth >= 0){
-    // 直接用陣列索引換算 x 座標
     const x = P.l + (breakevenMonth / (data.length - 1)) * cW;
-    
     ctx.fillStyle = 'rgba(245,158,11,.05)';
     ctx.fillRect(x, P.t, W-P.r-x, H-P.b-P.t);
-
     ctx.strokeStyle='rgba(245,158,11,.85)'; ctx.lineWidth=2.5; ctx.setLineDash([8,6]);
     ctx.beginPath(); ctx.moveTo(x,P.t+4); ctx.lineTo(x,H-P.b); ctx.stroke();
     ctx.setLineDash([]);
-    
     const fontSize = W < 600 ? 12 : 16;
-    const beYr = (breakevenMonth / 12).toFixed(1); // 月份索引 ÷ 12 = 年份
-
+    const beYr = (breakevenMonth / 12).toFixed(1);
     ctx.fillStyle='#f59e0b'; ctx.font=`bold ${fontSize}px sans-serif`; ctx.textAlign='center';
     ctx.fillText(`真正回本: 第${beYr}年`, x, targetY - 10);
   } else if((data[0]?.a ?? 0) >= fixedCost) {
@@ -1596,7 +1850,6 @@ function drawLineChart(data){
     ctx.fillText(`※ 投資自始維持正報酬，無回本等待期`, P.l + cW/2, P.t-10);
   }
 
-  // 信貸餘額線
   ctx.setLineDash([14,10]); ctx.strokeStyle='#ef4444'; ctx.lineWidth=4;
   ctx.beginPath();
   data.forEach((d,i)=>{ const x=getX(i),y=getY(d.l); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
@@ -1636,7 +1889,6 @@ function drawLineChart(data){
   ctx.fillStyle=primaryGreen; ctx.fillText('■ 預估資產', P.l+10, P.t-22);
   ctx.fillStyle='#ef4444'; ctx.fillText('╌ 信貸餘額', P.l+(W < 600 ? 120 : 180), P.t-22);
   
-  // 總成本目標 圖例
   ctx.setLineDash([5,5]); ctx.strokeStyle='rgba(245,158,11,.7)'; ctx.lineWidth=2;
   const legX_TR = W - P.r - (W < 600 ? 100 : 130);
   ctx.beginPath(); ctx.moveTo(legX_TR, P.t-28); ctx.lineTo(legX_TR+28, P.t-28); ctx.stroke();
@@ -1646,9 +1898,6 @@ function drawLineChart(data){
   ctx.fillText('總成本目標', legX_TR+34, P.t-22);
 }
 
-/* ────────────────────────────────
-   CANVAS: DONUT CHART
-──────────────────────────────── */
 function drawDonutChart(portReturn){
   if(!portReturn) return;
   const cv = document.getElementById('donutCanvas');
@@ -1658,7 +1907,6 @@ function drawDonutChart(portReturn){
   ctx.clearRect(0,0,W,H);
 
   const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-
   const cx=W/2, cy=H/2, R=100, r=62;
   const slices=[
     {p:.4, c: isLight ? '#2563eb' : '#3b82f6'},
@@ -1678,7 +1926,6 @@ function drawDonutChart(portReturn){
 
   const centerTextMain = isLight ? '#0f172a' : '#f1f5f9';
   const centerTextSub = isLight ? '#10b981' : '#34d399';
-
   ctx.fillStyle=centerTextMain; ctx.font='bold 16px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText('整體年化', cx, cy-10);
   ctx.fillStyle=centerTextSub; ctx.font='bold 22px sans-serif';
@@ -1686,41 +1933,90 @@ function drawDonutChart(portReturn){
   ctx.textBaseline='alphabetic';
 }
 
-// ★ 將初始化代碼包裝在 DOMContentLoaded 中
+/* ────────────────────────────────
+   TABS & INIT
+──────────────────────────────── */
+function switchTab(id, event){
+  if (event && event.target) {
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    event.target.classList.add('active');
+  } else {
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    const defaultTab = document.querySelector(`[data-tab="${id}"]`);
+    if(defaultTab) defaultTab.classList.add('active');
+  }
+
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  const targetPanel = document.getElementById('tab-'+id);
+  if(targetPanel) targetPanel.classList.add('active');
+
+  const kpiGrid = document.getElementById('main-kpi-grid');
+  if(kpiGrid) {
+    if (id === 'calc') {
+      kpiGrid.classList.remove('compact');
+    } else {
+      kpiGrid.classList.add('compact');
+    }
+  }
+  localStorage.setItem('activeTabAdv', id);
+  if(id==='charts'){ setTimeout(()=>{ resizeCanvas(); }, 50); }
+}
+
+function toggleTheme() {
+  const root = document.documentElement;
+  const currentTheme = root.getAttribute('data-theme') || 'dark';
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  const themeBtn = document.getElementById('theme-toggle');
+  if(themeBtn) { themeBtn.innerText = newTheme === 'dark' ? '☀️' : '🌙'; }
+  if (document.getElementById('tab-charts')?.classList.contains('active')) { resizeCanvas(); } 
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. 恢復主題設定
+  // Theme
   const savedTheme = localStorage.getItem('theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
   const themeBtn = document.getElementById('theme-toggle');
-  if(themeBtn) {
-    themeBtn.innerText = savedTheme === 'dark' ? '☀️' : '🌙';
-  }
+  if(themeBtn) themeBtn.innerText = savedTheme === 'dark' ? '☀️' : '🌙';
 
-  // 2. 恢復計算機參數狀態
-  const savedState = localStorage.getItem('calcState');
+  // Load State
+  const savedState = localStorage.getItem('advCalcState');
   if (savedState) {
     try {
       const state = JSON.parse(savedState);
       const safeSetVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+      const safeSetCheck = (id, val) => { const el = document.getElementById(id); if(el) el.checked = val; };
       
-      safeSetVal('inp-salary', state.salary);
-      safeSetVal('inp-loan', state.loan);
-      safeSetVal('inp-fee', state.fee);
-      safeSetVal('inp-years', state.years);
-      safeSetVal('inp-rate', state.rate);
-      safeSetVal('inp-return', state.baseReturn);
+      safeSetVal('inp-salary', state.inputs.salary);
+      safeSetVal('inp-loan', state.inputs.loan);
+      safeSetVal('inp-fee', state.inputs.fee);
+      safeSetVal('inp-years', state.inputs.years);
+      safeSetVal('inp-rate', state.inputs.rate);
+      safeSetVal('inp-return', state.inputs.baseReturn);
+      safeSetVal('inp-premium', state.inputs.premium);
+      safeSetCheck('inp-zero-pay', state.inputs.isZeroPay);
+
+      safeSetVal('inp-bbd-asset', state.bbd.asset);
+      safeSetVal('inp-bbd-borrow', state.bbd.borrow);
+      safeSetVal('inp-bbd-drop', state.bbd.drop);
+
+      safeSetVal('inp-smile-price', state.smile.price);
+      safeSetVal('inp-smile-cash', state.smile.cash);
+
     } catch (e) {
       console.error("無法還原計算機狀態", e);
     }
   }
-  
-  // 3. 恢復最後停留的分頁
-  const savedTab = localStorage.getItem('activeTab') || 'calc';
+
+  // Restore Tab
+  const savedTab = localStorage.getItem('activeTabAdv') || 'calc';
   switchTab(savedTab, null);
 
-  // 4. 更新滑桿外觀與觸發計算
-  updateAllSliders();
+  // Initial Calculation
   calculate();
+  calcBBD();
+  calcSmile();
 });
 </script>
 </body>
