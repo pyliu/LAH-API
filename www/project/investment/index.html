@@ -139,20 +139,23 @@ body{font-family:'PingFang TC','Microsoft JhengHei','Segoe UI',sans-serif;backgr
 
 /* ── SLIDERS ── */
 .slider-row {display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:24px 18px;}
-.ctrl-group{display:flex;flex-direction:column;justify-content:flex-end;margin-bottom:22px;height:100%;}
+.slider-row .ctrl-group{display:flex;flex-direction:column;justify-content:flex-end;height:100%;margin-bottom:0;}
 .ctrl-head{display:flex;flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;margin-bottom:12px;min-height:34px;}
 .ctrl-label{font-size:.9rem;font-weight:600;color:var(--text2);white-space:nowrap;}
 .ctrl-val{font-size:1rem;font-weight:800;color:var(--green);background:rgba(52,211,153,.1);padding:4px 12px;border-radius:999px;border:1px solid rgba(52,211,153,.25);white-space:nowrap;}
 .ctrl-val.blue{color:var(--blue);background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.25);}
 .ctrl-val.purple{color:var(--purple);background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.25);}
 .slider-wrap{position:relative;padding:6px 0;}
-input[type=range]{width:100%;-webkit-appearance:none;background:transparent;cursor:pointer;margin-top:auto;}
+input[type=range]{width:100%;-webkit-appearance:none;background:transparent;cursor:pointer;}
+.slider-row input[type=range]{margin-top:auto;}
 input[type=range]::-webkit-slider-runnable-track{height:6px;background:linear-gradient(to right,var(--track-fill,var(--green)) var(--fill-pct,50%),var(--border2) var(--fill-pct,50%));border-radius:999px;}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;height:20px;width:20px;background:var(--track-fill,var(--green));border-radius:50%;margin-top:-7px;border:3px solid var(--bg);box-shadow:0 0 12px rgba(16,185,129,.5);}
 input[type=range]:focus{outline:none;}
 .range-hint{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:8px;min-height:16px;}
 .range-hint .hl{color:var(--amber);font-weight:700;}
 .ctrl-sep{border:none;border-top:1px solid var(--border);margin:24px 0;}
+/* 一般的 ctrl-group (BBD使用) */
+.ctrl-group{margin-bottom:22px;}
 
 /* ── SCENARIO BUTTONS ── */
 .scene-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:10px;margin-bottom:20px;}
@@ -231,14 +234,6 @@ canvas{display:block;width:100%!important;height:auto!important;}
 .amort-table td:first-child{text-align:center;color:var(--text2);}
 .amort-table tr:last-child td{border-bottom:none;}
 .amort-table tr:hover td{background:var(--bg3);}
-
-/* ── TOGGLE SWITCH ── */
-.toggle-switch{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;}
-.toggle-switch input{opacity:0;width:0;height:0;}
-.slider-round{position:absolute;cursor:pointer;inset:0;background:var(--border2);border-radius:999px;transition:.3s;}
-.slider-round:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.3s;}
-.toggle-switch input:checked + .slider-round{background:var(--blue);}
-.toggle-switch input:checked + .slider-round:before{transform:translateX(20px);}
 
 /* ── PROGRESS BAR ── */
 .progress-bar{height:8px;background:var(--bg3);border-radius:999px;overflow:hidden;margin-top:6px;}
@@ -335,9 +330,6 @@ canvas{display:block;width:100%!important;height:auto!important;}
 .modal-yt-btn:hover { background: linear-gradient(135deg,#ef4444,#dc2626); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(220,38,38,0.5); }
 .modal-yt-btn svg { flex-shrink: 0; }
 
-@media(max-width:900px){
-  .bbd-result-grid{grid-template-columns:1fr!important;}
-}
 @media(max-width:640px){
   .logo-text{font-size:1rem;}
   .kpi-val{font-size:1.6rem;}
@@ -475,7 +467,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
       <!-- 參數滑桿區 -->
       <div class="slider-row">
         <!-- 1. 月薪 -->
-        <div class="ctrl-group" style="margin-bottom:0;">
+        <div class="ctrl-group">
           <div class="ctrl-head">
             <span class="ctrl-label">💰 評估月薪</span>
             <span class="ctrl-val" id="lbl-salary" style="color:var(--amber);background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.25)">75,000</span>
@@ -484,7 +476,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
           <div class="range-hint"><span>3萬</span><span>20萬</span></div>
         </div>
         <!-- 2. 信貸總額 -->
-        <div class="ctrl-group" style="margin-bottom:0;">
+        <div class="ctrl-group">
           <div class="ctrl-head">
             <span class="ctrl-label">💳 信貸總額</span>
             <span class="ctrl-val" id="lbl-loan">2,000,000</span>
@@ -495,7 +487,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
           </div>
         </div>
         <!-- 3. 開辦費 -->
-        <div class="ctrl-group" style="margin-bottom:0;">
+        <div class="ctrl-group">
           <div class="ctrl-head">
             <span class="ctrl-label">🧾 手續費用</span>
             <span class="ctrl-val purple" id="lbl-fee">9,000</span>
@@ -506,7 +498,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
           </div>
         </div>
         <!-- 4. 貸款年限 -->
-        <div class="ctrl-group" style="margin-bottom:0;">
+        <div class="ctrl-group">
           <div class="ctrl-head">
             <span class="ctrl-label">📅 貸款年限</span>
             <span class="ctrl-val" id="lbl-years">10 年</span>
@@ -517,7 +509,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
           </div>
         </div>
         <!-- 5. 信貸利率 -->
-        <div class="ctrl-group" style="margin-bottom:0;">
+        <div class="ctrl-group">
           <div class="ctrl-head">
             <span class="ctrl-label">📉 信貸利率</span>
             <span class="ctrl-val" id="lbl-rate">2.5%</span>
@@ -526,7 +518,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
           <div class="range-hint"><span>1.8%</span><span>8.0%</span></div>
         </div>
         <!-- 6. 原型報酬 -->
-        <div class="ctrl-group" style="margin-bottom:0;">
+        <div class="ctrl-group">
           <div class="ctrl-head">
             <span class="ctrl-label">📊 原型年化</span>
             <span class="ctrl-val blue" id="lbl-return">8.0%</span>
@@ -537,9 +529,9 @@ canvas{display:block;width:100%!important;height:auto!important;}
           </div>
         </div>
          <!-- 7. 正2 逆價差補償 -->
-         <div class="ctrl-group" style="margin-bottom:0;">
+         <div class="ctrl-group">
             <div class="ctrl-head">
-              <span class="ctrl-label">📈 正2 逆價差補償</span>
+              <span class="ctrl-label">📈 正2逆價差</span>
               <span class="ctrl-val purple" id="lbl-premium">4.0%</span>
             </div>
             <input type="range" id="inp-premium" min="0.0" max="10.0" step="0.5" value="4.0" oninput="calculate()" style="--track-fill:var(--purple)">
@@ -568,7 +560,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
           </div>
         </div>
         <div style="font-size:.82rem;color:var(--text2);margin-top:4px;line-height:1.7" id="dbr-desc">
-          DBR22 上限 = 月薪 × 22 倍
+          DBR22 上限 = 月薪 × 22 倍<br>月薪7.5萬 上限 = <strong style="color:var(--amber)">NT$1,650,000</strong>
         </div>
         <div id="dbr-alert" class="alert alert-green" style="margin-top:12px;">✅ 信貸額度在 DBR22 安全範圍內</div>
       </div>
@@ -584,99 +576,71 @@ canvas{display:block;width:100%!important;height:auto!important;}
 
   <!-- ═══ TAB: BBD 質押風控 ═══ -->
   <div class="tab-panel" id="tab-bbd">
-    <div class="card" style="margin-bottom:20px;">
-      <div class="card-title"><div class="ct-icon" style="background:rgba(139,92,246,.2)">🏦</div>BBD 股票質押維持率壓力測試</div>
-
-      <div class="alert" style="margin-bottom:20px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.3);color:var(--purple2);">
-        💡 <strong>富人思維：</strong>買入資產，不賣出，需要資金時向券商質押借款（僅還息不還本）。關鍵在於控管
-        <strong>維持率（維持率 = 擔保品市值 ÷ 借款金額 × 100%）</strong>。
-      </div>
-
-      <!-- 上方：三個滑桿並排 -->
-      <div class="slider-row" style="margin-bottom:24px;">
-
-        <!-- 擔保品市值 -->
-        <div class="ctrl-group" style="margin-bottom:0;">
-          <div class="ctrl-head">
-            <span class="ctrl-label">💼 擔保品市值 (ETF)</span>
-            <span class="ctrl-val" id="lbl-bbd-asset">3,000,000</span>
-          </div>
-          <input type="range" id="inp-bbd-asset" min="500000" max="10000000" step="100000" value="3000000"
-                 oninput="calcBBD()" style="--track-fill:var(--blue)">
-          <div class="range-hint"><span>50萬</span><span>1,000萬</span></div>
+    <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title"><div class="ct-icon" style="background:rgba(139,92,246,.2)">🏦</div>BBD 股票質押維持率壓力測試</div>
+        
+        <div class="alert alert-purple" style="margin-bottom:20px; background:rgba(139,92,246,.08); border:1px solid rgba(139,92,246,.3); color:var(--purple2);">
+            💡 <strong>富人思維：</strong> 買入資產，不賣出，需要資金時向券商質押借款（僅還息不還本）。關鍵在於控管 <strong>維持率 (維持率 = 擔保品市值 ÷ 借款金額 × 100%)</strong>。
         </div>
 
-        <!-- 質押借款金額 -->
-        <div class="ctrl-group" style="margin-bottom:0;">
-          <div class="ctrl-head">
-            <span class="ctrl-label">💸 欲借款金額</span>
-            <span class="ctrl-val purple" id="lbl-bbd-borrow">1,000,000</span>
-          </div>
-          <input type="range" id="inp-bbd-borrow" min="100000" max="6000000" step="50000" value="1000000"
-                 oninput="calcBBD()" style="--track-fill:var(--purple)">
-          <div class="range-hint"><span>10萬</span><span style="color:var(--purple);font-weight:700">法定上限60%</span><span id="lbl-bbd-borrow-max">600萬</span></div>
-        </div>
+        <div class="g2">
+            <!-- 左側設定 -->
+            <div>
+                <!-- 擔保品市值 -->
+                <div class="ctrl-group">
+                    <div class="ctrl-head">
+                      <span class="ctrl-label">💼 擔保品市值 (ETF)</span>
+                      <span class="ctrl-val" id="lbl-bbd-asset">3,000,000</span>
+                    </div>
+                    <input type="range" id="inp-bbd-asset" min="500000" max="10000000" step="100000" value="3000000" oninput="calcBBD()" style="--track-fill:var(--blue)">
+                </div>
 
-        <!-- 壓力測試下跌幅度 -->
-        <div class="ctrl-group" style="margin-bottom:0;">
-          <div class="ctrl-head">
-            <span class="ctrl-label">📉 壓力測試（大盤下跌）</span>
-            <span class="ctrl-val" style="color:var(--red);background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.25);" id="lbl-bbd-drop">-20%</span>
-          </div>
-          <input type="range" id="inp-bbd-drop" min="0" max="60" step="1" value="20"
-                 oninput="calcBBD()" style="--track-fill:var(--red)">
-          <div class="range-hint"><span>0%</span><span style="color:var(--red)">-60%（2008海嘯級）</span></div>
-        </div>
+                <!-- 質押借款金額 -->
+                <div class="ctrl-group">
+                    <div class="ctrl-head">
+                      <span class="ctrl-label">💸 欲借款金額</span>
+                      <span class="ctrl-val purple" id="lbl-bbd-borrow">1,000,000</span>
+                    </div>
+                    <input type="range" id="inp-bbd-borrow" min="100000" max="6000000" step="50000" value="1000000" oninput="calcBBD()" style="--track-fill:var(--purple)">
+                    <div class="range-hint"><span>法定上限 60%</span></div>
+                </div>
+                
+                <hr class="ctrl-sep">
 
-      </div><!-- /slider-row -->
-
-      <!-- 下方：結果三欄並排 -->
-      <div class="bbd-result-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
-
-        <!-- 初始維持率 -->
-        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:20px;text-align:center;">
-          <div style="font-size:.85rem;color:var(--text2);margin-bottom:10px;font-weight:600;">📊 初始維持率</div>
-          <div id="bbd-init-ratio" style="font-size:2.8rem;font-weight:800;color:var(--blue);line-height:1.1;">300%</div>
-          <div style="font-size:.78rem;color:var(--muted);margin-top:8px;">借款當下的安全倍率</div>
-        </div>
-
-        <!-- 壓力測試後維持率 -->
-        <div style="background:var(--bg3);border:2px solid var(--border2);border-radius:var(--r2);padding:20px;text-align:center;">
-          <div style="font-size:.85rem;color:var(--text2);margin-bottom:10px;font-weight:600;">
-            ⚡ 壓力後維持率 <span id="bbd-drop-text" style="color:var(--red);font-weight:700;">（-20%）</span>
-          </div>
-          <div id="bbd-stress-ratio" style="font-size:2.8rem;font-weight:800;color:var(--green);line-height:1.1;">240%</div>
-          <div id="bbd-status-badge" style="display:inline-block;margin-top:12px;padding:5px 14px;border-radius:999px;font-weight:700;font-size:.82rem;background:rgba(16,185,129,.15);color:var(--green);">
-            ✅ 資金水位安全
-          </div>
-        </div>
-
-        <!-- 警戒標準說明 -->
-        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:20px;">
-          <div style="font-size:.85rem;color:var(--text2);margin-bottom:12px;font-weight:600;">🎯 維持率警戒標準</div>
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <div style="width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0;"></div>
-              <div style="font-size:.82rem;"><strong style="color:var(--green)">≥ 200%</strong><span style="color:var(--text2)"> — 安全（威利標準）</span></div>
+                <!-- 壓力測試：大盤下跌 -->
+                <div class="ctrl-group" style="margin-bottom:0;">
+                    <div class="ctrl-head">
+                      <span class="ctrl-label">📉 壓力測試 (大盤下跌)</span>
+                      <span class="ctrl-val" style="color:var(--red); background:rgba(239,68,68,.1); border-color:rgba(239,68,68,.25);" id="lbl-bbd-drop">-20%</span>
+                    </div>
+                    <input type="range" id="inp-bbd-drop" min="0" max="60" step="1" value="20" oninput="calcBBD()" style="--track-fill:var(--red)">
+                    <div class="range-hint"><span>0%</span><span style="color:var(--red)">-60% (2008海嘯級)</span></div>
+                </div>
             </div>
-            <div style="display:flex;align-items:center;gap:10px;">
-              <div style="width:10px;height:10px;border-radius:50%;background:var(--amber);flex-shrink:0;"></div>
-              <div style="font-size:.82rem;"><strong style="color:var(--amber)">130%~200%</strong><span style="color:var(--text2)"> — 警戒，隨時追繳</span></div>
+
+            <!-- 右側結果 -->
+            <div style="background:var(--bg3); padding:20px; border-radius:var(--r2); border:1px solid var(--border); display:flex; flex-direction:column; justify-content:center;">
+                
+                <div style="text-align:center; margin-bottom: 20px;">
+                    <div style="font-size:.9rem; color:var(--text2); margin-bottom:8px;">初始維持率 (借款當下)</div>
+                    <div id="bbd-init-ratio" style="font-size:2.5rem; font-weight:800; color:var(--blue);">300%</div>
+                </div>
+
+                <div style="text-align:center; border-top:1px dashed var(--border2); padding-top:20px;">
+                    <div style="font-size:.9rem; color:var(--text2); margin-bottom:8px;">壓力測試後維持率 (<span id="bbd-drop-text" style="color:var(--red)">-20%</span>)</div>
+                    <div id="bbd-stress-ratio" style="font-size:3rem; font-weight:800; color:var(--green); line-height:1.1;">240%</div>
+                    
+                    <div id="bbd-status-badge" style="display:inline-block; margin-top:12px; padding:6px 16px; border-radius:999px; font-weight:700; font-size:.9rem; background:rgba(16,185,129,.15); color:var(--green);">
+                        ✅ 資金水位安全
+                    </div>
+                </div>
+
+                <div style="margin-top:20px; font-size:.82rem; color:var(--muted); line-height:1.6; text-align:center;">
+                    * 斷頭警戒線通常為 <strong>130%</strong>。<br>
+                    * 威利財經角建議：槓桿倍數控制在 <strong>1.1x ~ 1.5x</strong>，等同維持率需大於 <strong>200%</strong>。
+                </div>
             </div>
-            <div style="display:flex;align-items:center;gap:10px;">
-              <div style="width:10px;height:10px;border-radius:50%;background:var(--red);flex-shrink:0;"></div>
-              <div style="font-size:.82rem;"><strong style="color:var(--red)">＜ 130%</strong><span style="color:var(--text2)"> — 斷頭！補保證金</span></div>
-            </div>
-            <hr style="border:none;border-top:1px solid var(--border);margin:4px 0;">
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">
-              建議槓桿倍數控制在 <strong>1.1x ~ 1.5x</strong><br>
-              法定上限：擔保品市值 × <strong>60%</strong>
-            </div>
-          </div>
         </div>
-
-      </div><!-- /result grid -->
-
     </div>
   </div>
 
@@ -705,9 +669,8 @@ canvas{display:block;width:100%!important;height:auto!important;}
             <tr>
               <th>跌幅階梯</th>
               <th>觸發價格</th>
-              <th>左側建倉（往下買原型）</th>
-              <th>投入金額</th>
-              <th>右側出場（站回年線轉正2）</th>
+              <th>左側建倉動作 (買原型)</th>
+              <th>預計投入金額</th>
             </tr>
           </thead>
           <tbody id="smile-tbody">
@@ -776,7 +739,102 @@ canvas{display:block;width:100%!important;height:auto!important;}
   <!-- ═══ TAB: STRATEGY ═══ -->
   <div class="tab-panel" id="tab-strategy">
 
-    <!-- ★ 新增：人力折舊與 OPM 翻轉策略 -->
+    <!-- ★ 投資升級藍圖 (三大工具與三階段策略) -->
+    <div class="card" style="margin-bottom:20px; border:1px solid var(--green2); box-shadow: 0 0 20px rgba(16,185,129,0.15);">
+      <div class="card-title" style="border-bottom-color: rgba(16,185,129,0.3);">
+        <div class="ct-icon" style="background:rgba(16,185,129,.2)">🗺️</div>投資升級藍圖：三大槓桿工具與三階段策略 (槓桿人生 EP31)
+        <button class="play-btn" onclick="openVideoModal('-8VmnBwc1xM','槓桿人生 EP31｜信貸、正二、質押怎麼選？','解析三大槓桿工具防雷點，及從新兵到退休的三階段配置法')">▶ 影片說明</button>
+      </div>
+      
+      <div class="g2" style="gap:16px;">
+        <div class="strat-box sb-amber" style="margin-bottom:0;">
+          <h4>🛠️ 三大槓桿工具防雷指南</h4>
+          <ul>
+            <li><strong>信貸 (時光機)：</strong> 提早將未來薪水借來投資。利息越低越好、年限越長越好 (降月付金)。<strong class="danger">防雷點：</strong>扣除基本開銷與還款後，現金流必為正，且預留 6-12 個月氧氣瓶。</li>
+            <li><strong>正2 (懶人槓桿)：</strong> 不會斷頭、有複利偏移優勢。<strong class="danger">防雷點：</strong>極怕大跌，跌 90% 需漲 9 倍才能回本，絕不能 ALL IN，必須搭配資產配置與現金再平衡。</li>
+            <li><strong>質押 (富人遊戲)：</strong> 買借死，只繳息不還本，現金流壓力極低。<strong class="danger">防雷點：</strong>小心「雨天收傘」(券商縮額度或限制平轉續約)。解法是維持率抓 200%~500%，並保留大於借款金額的保命現金或未質押部位。</li>
+          </ul>
+        </div>
+        
+        <div class="strat-box sb-blue" style="margin-bottom:0;">
+          <h4>⚔️ 階段一：資產累積期 (剛出社會~小資)</h4>
+          <ul>
+            <li><strong>玩家裝備：</strong> 人力資本強、金融資本低。</li>
+            <li><strong>核心策略 (衝本金)：</strong> <strong class="hl">信貸 + 市值型 ETF + 正2。</strong></li>
+            <li><strong>行動指南：</strong> 容錯率高，配置可積極 (如 4-4-2 或 4-5-1)。核心任務是咬牙控管現金流，用信貸強迫自己把本金池快速撐大。</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="g2" style="gap:16px; margin-top:16px;">
+        <div class="strat-box sb-purple" style="margin-bottom:0;">
+          <h4>🛡️ 階段二：資產配置期 (資產達 500~1000 萬)</h4>
+          <ul>
+            <li><strong>玩家裝備：</strong> 既有股票部位生息。</li>
+            <li><strong>核心策略 (降波動)：</strong> <strong class="hl">既有部位 + 小額質押練習。</strong></li>
+            <li><strong>行動指南：</strong> 配置調回標準 4-4-2 或保守 5-3-2。開始每年小額借出約「總資產 2%」的質押資金，體驗讓資產為你買單的生活 (如出國旅遊)，追求穩健靈活。</li>
+          </ul>
+        </div>
+
+        <div class="strat-box sb-green" style="margin-bottom:0;">
+          <h4>🏝️ 階段三：資產自由期 (退休階段, 3000萬+)</h4>
+          <ul>
+            <li><strong>玩家裝備：</strong> 龐大總資產 + 10年生活費現金池。</li>
+            <li><strong>核心策略 (只提領不賣股)：</strong> <strong class="hl">20% 保命現金 + 80% 大盤與正2。</strong></li>
+            <li><strong>行動指南：</strong> 千萬別把股全賣掉換定存！將總資產的 20% (等同 10 年生活費) 換成現金應付任何崩盤，剩下 80% 繼續放股市滾。靠 2~4% 提領率或質押過活，資產會越花越多！</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ★ 大仁哥投資心法：資本主義底層邏輯與正2優勢 (合併彙整) -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">
+        <div class="ct-icon" style="background:rgba(239,68,68,.2)">📈</div>大仁哥投資心法：資本主義底層邏輯與正2優勢
+      </div>
+      <div class="g2" style="gap:16px; margin-bottom:16px;">
+        <div class="strat-box sb-red" style="margin-bottom:0;">
+          <h4>🚨 殘酷的「借貸階級」真相
+            <button class="play-btn" style="padding:2px 8px; font-size:0.7rem; margin-top:-4px; margin-bottom:-4px;" onclick="openVideoModal('3rlYu-Suy3U','大仁來開槓 EP.22｜資本主義就是借錢','信貸利率 3% 以上是盤子？揭密各年齡層借貸數據與額度迷思')">▶ 相關影片</button>
+          </h4>
+          <ul>
+            <li><strong>老富人的特權：</strong> 聯徵數據顯示，60歲以上長者借款人數最少，但<strong class="hl">平均借款金額最高、利率最低</strong>。富人擁有資產與金融認知，越老越敢借。</li>
+            <li><strong>年輕人的弱勢：</strong> 30歲以下平均借款額最低，但承擔的利率卻最高 (平均達 8.7%)。若不懂得及早運用槓桿，將被掌握「借貸特權」的富人大幅拉開貧富差距。</li>
+            <li><strong>金融的本質就是借錢：</strong> 存錢其實是「你借錢給銀行」，讓銀行拿去放貸賺利差。排斥借貸，等同於主動退出資本主義的財富分配遊戲。</li>
+          </ul>
+        </div>
+        <div class="strat-box sb-amber" style="margin-bottom:0;">
+          <h4>⚖️ 破除迷思：額度遠比利率重要</h4>
+          <ul>
+            <li><strong>不要當利率的計較鬼：</strong> 許多人為了 3% 或 4% 的利率斤斤計較，卻錯失了市場 10%~20% 的大波段行情，最大的損失其實是「機會成本」。</li>
+            <li><strong>利差就是你的淨利潤：</strong> 可口可樂前董事長曾說：「基於一定利率貸款，進行更高回報的投資，差額就是你的利潤。」只要預期報酬大於借款利率，<strong class="hl">借越多的錢 (額度)，創造的絕對財富就越多</strong>。</li>
+            <li><strong>正2的每日平衡防護網：</strong> 相比於期貨大跌會斷頭，正2透過「每日平衡」機制，在連續大跌時會自動減倉，從而免除了保證金追繳與歸零的風險。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="g2" style="gap:16px;">
+        <div class="strat-box sb-green" style="margin-bottom:0;">
+          <h4>🇹🇼 台股特有逆價差 (隱形配息)
+            <button class="play-btn" style="padding:2px 8px; font-size:0.7rem; margin-top:-4px; margin-bottom:-4px;" onclick="openVideoModal('lBcYpWsUBh0','倉鼠人生實驗室｜槓桿ETF投資法心得','生命週期投資法、台股逆價差優勢與5050曝險策略')">▶ 相關影片</button>
+          </h4>
+          <ul>
+            <li><strong>吸收除息點數：</strong> 台股是高殖利率市場 (均值約 4.1%)，每年除息會蒸發大盤點數，但正2 持有的「期貨」會吸收這些逆價差。</li>
+            <li><strong>兩倍的隱形殖利率：</strong> 正2 主要是持有期貨，因此可吸收到 4.1% × 2 = <strong class="hl" style="color:var(--green)">約 8% 的隱形配息</strong>。</li>
+            <li><strong>抵銷耗損：</strong> 這 8% 的逆價差收益，遠遠大於 ETF 的內扣費用與每日平衡耗損，是正2 長期能贏過原型兩倍以上的真正秘密。</li>
+          </ul>
+        </div>
+        <div class="strat-box sb-purple" style="margin-bottom:0;">
+          <h4>🧠 曝險思維與 5050 配置</h4>
+          <ul>
+            <li><strong>曝險等價：</strong> 100萬買 0050 = <strong class="hl">50萬買正2 + 50萬現金</strong>。兩者曝險皆為 100%，但後者多出 50% 現金可靈活防禦或鎖利。</li>
+            <li><strong>打破收息迷思：</strong> 不配息反而是優點！避免了股息稅，將資金全數投入複利滾動，年輕/信貸族應追求「總報酬最大化」而非「穩定領息」。</li>
+            <li><strong>印證 4-4-2 威力：</strong> 本策略中 40% 的正2 即提供 80% 的大盤曝險，加上 40% 原型，總曝險達 120%，進可攻退可守。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ★ 人力折舊與 OPM 翻轉策略 -->
     <div class="card" style="margin-bottom:20px;">
       <div class="card-title">
         <div class="ct-icon" style="background:rgba(59,130,246,.2)">👨‍💼</div>人力折舊危機與 OPM 翻轉策略 (雷恩觀點)
@@ -871,7 +929,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
       </div>
     </div>
 
-    <!-- 新增：新慢富思維 (好葉) -->
+    <!-- 新慢富思維 (好葉) -->
     <div class="card" style="margin-bottom:20px;">
       <div class="card-title">
         <div class="ct-icon" style="background:rgba(245,158,11,.2)">🌱</div>新慢富思維：時間價值與體驗複利 (好葉觀點)
@@ -1023,7 +1081,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
       </div>
     </div>
 
-    <!-- ★ 新增：主動式 ETF 搭配 (00984A vs 00995A) -->
+    <!-- 0本金進階搭配：主動式 ETF 穩定現金流 -->
     <div class="card" style="margin-bottom:20px;">
       <div class="card-title">
         <div class="ct-icon" style="background:rgba(245,158,11,.2)">🛡️</div>0本金進階搭配：主動式 ETF 穩定現金流
@@ -1077,32 +1135,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
       </div>
     </div>
 
-    <!-- 槓桿 ETF 底層邏輯與正2優勢 -->
-    <div class="card" style="margin-bottom:20px;">
-      <div class="card-title">
-        <div class="ct-icon" style="background:rgba(16,185,129,.2)">📈</div>槓桿 ETF 底層邏輯：台股正2專屬優勢 (大仁哥觀點)
-        <button class="play-btn" onclick="openVideoModal('lBcYpWsUBh0','倉鼠人生實驗室｜槓桿ETF投資法心得','生命週期投資法、台股逆價差優勢與5050曝險策略')">▶ 影片說明</button>
-      </div>
-      <div class="g2" style="gap:16px;">
-        <div class="strat-box sb-green" style="margin-bottom:0;">
-          <h4>🇹🇼 台股特有逆價差 (隱形配息)</h4>
-          <ul>
-            <li><strong>吸收除息點數：</strong> 台股是高殖利率市場 (均值約 4.1%)，每年除息會蒸發大盤點數，但正2 持有的「期貨」會吸收這些逆價差。</li>
-            <li><strong>兩倍的隱形殖利率：</strong> 正2 主要是持有期貨，因此可吸收到 4.1% × 2 = <strong class="hl" style="color:var(--green)">約 8% 的隱形配息</strong>。</li>
-            <li><strong>抵銷耗損：</strong> 這 8% 的逆價差收益，遠遠大於 ETF 的內扣費用與每日平衡耗損，是正2 長期能贏過原型兩倍以上的真正秘密。</li>
-          </ul>
-        </div>
-        <div class="strat-box sb-purple" style="margin-bottom:0;">
-          <h4>🧠 曝險思維與 5050 配置</h4>
-          <ul>
-            <li><strong>曝險等價：</strong> 100萬買 0050 = <strong class="hl">50萬買正2 + 50萬現金</strong>。兩者曝險皆為 100%，但後者多出 50% 現金可靈活防禦或鎖利。</li>
-            <li><strong>打破收息迷思：</strong> 不配息反而是優點！避免了股息稅，將資金全數投入複利滾動，年輕/信貸族應追求「總報酬最大化」而非「穩定領息」。</li>
-            <li><strong>印證 4-4-2 威力：</strong> 本策略中 40% 的正2 即提供 80% 的大盤曝險，加上 40% 原型，總曝險達 120%，進可攻退可守。</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
+    <!-- 正2 實戰 SOP 與 微笑佈局 -->
     <div class="g2" style="margin-bottom:20px;">
       <div class="card">
         <div class="card-title">
@@ -1175,11 +1208,11 @@ canvas{display:block;width:100%!important;height:auto!important;}
       </div>
     </div>
 
-  </div>
+  </div> <!-- /tab-strategy -->
 
   <!-- ═══ TAB: VIDEOS ═══ -->
   <div class="tab-panel" id="tab-videos">
-    
+
     <!-- 主題 1：正2 與 4-4-2 防禦陣型 -->
     <div class="section-title">🛡️ 正2 與 4-4-2 防禦陣型</div>
     <div class="video-grid">
@@ -1216,7 +1249,6 @@ canvas{display:block;width:100%!important;height:auto!important;}
         </div>
         <div class="vinfo"><div class="vtitle">槓桿人生 EP14｜信貸投資指南</div><div class="vdesc">生命週期投資法、拉長年期降低現金流壓力</div></div>
       </div>
-      <!-- ★ 新增影片：槓桿人生 EP11 -->
       <div class="vcard" onclick="openVideoModal('empty_ep11','槓桿人生 EP11｜定期定額其實風險更高？','揭開生命週期投資法真相，本金少更該開槓桿')">
         <div class="vthumb">
           <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=600&q=80" alt="定期定額風險更高">
@@ -1255,6 +1287,23 @@ canvas{display:block;width:100%!important;height:auto!important;}
     <!-- 主題 4：流動性生存與投資心理 -->
     <div class="section-title">🌊 流動性生存與投資心理</div>
     <div class="video-grid">
+      <!-- 三大工具與三階段策略 -->
+      <div class="vcard" onclick="openVideoModal('-8VmnBwc1xM','槓桿人生 EP31｜信貸、正二、質押怎麼選？','搭配三階段策略打造千萬退休金，完整解析三大槓桿工具！')">
+        <div class="vthumb">
+          <img src="https://img.youtube.com/vi/-8VmnBwc1xM/mqdefault.jpg" alt="信貸正二質押三階段">
+          <div class="vplay">▶ 點擊播放</div>
+        </div>
+        <div class="vinfo"><div class="vtitle">槓桿人生 EP31｜信貸、正二、質押怎麼選？</div><div class="vdesc">搭配三階段策略打造千萬退休金，完整解析三大槓桿工具！</div></div>
+      </div>
+      <!-- 大仁哥 資本主義與借貸迷思 -->
+      <div class="vcard" onclick="openVideoModal('3rlYu-Suy3U','大仁來開槓 EP.22｜資本主義就是借錢','信貸利率 3% 以上是盤子？揭密各年齡層借貸真相與額度迷思')">
+        <div class="vthumb">
+          <img src="https://img.youtube.com/vi/3rlYu-Suy3U/mqdefault.jpg" alt="資本主義就是借錢">
+          <div class="vplay">▶ 點擊播放</div>
+        </div>
+        <div class="vinfo"><div class="vtitle">大仁來開槓 EP.22｜資本主義就是借錢</div><div class="vdesc">信貸利率 3% 以上是盤子？揭密各年齡借貸真相與額度迷思</div></div>
+      </div>
+      
       <div class="vcard" onclick="openVideoModal('HqZ8Pa3oT-I','好葉｜解密「新慢富思維」','滾動金錢與回憶兩顆雪球、三帳戶配置與反脆弱試錯')">
         <div class="vthumb">
           <img src="https://img.youtube.com/vi/HqZ8Pa3oT-I/mqdefault.jpg" alt="好葉 新慢富思維">
@@ -1290,7 +1339,6 @@ canvas{display:block;width:100%!important;height:auto!important;}
         </div>
         <div class="vinfo"><div class="vtitle">威利財經角｜槓桿開多少才安全</div><div class="vdesc">極端壓力測試：活得久比賺得快更重要</div></div>
       </div>
-      <!-- ★ 新增影片：威利財經角 S26EP7 -->
       <div class="vcard" onclick="openVideoModal('empty_s26ep7','威利財經角 S26EP7｜你以為沒有負債才安全？','很多人一輩子存不到錢，是因為太早把債還光了')">
         <div class="vthumb">
           <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=600&q=80" alt="沒有負債才安全">
@@ -1298,7 +1346,6 @@ canvas{display:block;width:100%!important;height:auto!important;}
         </div>
         <div class="vinfo"><div class="vtitle">威利財經角 S26EP7｜你以為沒有負債才安全？</div><div class="vdesc">很多人之所以存不到錢，是因為太早把債還光了</div></div>
       </div>
-      <!-- ★ 新增影片：A8阿吧 EP107 -->
       <div class="vcard" onclick="openVideoModal('empty_ep107','A8阿吧 EP107｜長期投資賣出心理陷阱','長期投資正2別再犯這種錯！一旦賣出就很難買回')">
         <div class="vthumb">
           <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=600&q=80" alt="長期投資心理陷阱">
@@ -1353,14 +1400,29 @@ function openVideoModal(videoId, title, desc, startTime) {
   const link    = document.getElementById('modal-yt-link');
   if(!modal) return;
 
-  // 載入高畫質縮圖，若失敗退回普通畫質
-  thumb.src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-  thumb.onerror = () => { thumb.src = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`; };
+  // 載入高畫質縮圖，若失敗退回普通畫質 (若無影片ID則使用圖庫圖片)
+  if (videoId.startsWith('empty_')) {
+      const imgMap = {
+          'empty_ep11': 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1280&q=80',
+          'empty_s26ep7': 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1280&q=80',
+          'empty_ep107': 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1280&q=80'
+      };
+      thumb.src = imgMap[videoId] || '';
+  } else {
+      thumb.src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+      thumb.onerror = () => { thumb.src = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`; };
+  }
+  
   titleEl.textContent = title  || '影片';
   descEl.textContent  = desc   || '';
   
   // 若有指定開始時間，則附加時間參數
-  link.href = startTime ? `https://www.youtube.com/watch?v=${videoId}&t=${startTime}s` : `https://www.youtube.com/watch?v=${videoId}`;
+  if (!videoId.startsWith('empty_')) {
+      link.href = startTime ? `https://www.youtube.com/watch?v=${videoId}&t=${startTime}s` : `https://www.youtube.com/watch?v=${videoId}`;
+      link.style.display = 'flex';
+  } else {
+      link.style.display = 'none'; // 無實際影片連結時隱藏按鈕
+  }
 
   modal.classList.add('active');
   document.body.style.overflow = 'hidden'; 
@@ -1464,7 +1526,6 @@ function setScene(salary, loan, fee, years, rate, ret, prem){
   safeSetVal('inp-rate', rate);
   safeSetVal('inp-return', ret);
   safeSetVal('inp-premium', prem);
-  document.querySelectorAll('input[type=range]').forEach(updateSliderFill); // 同步滑桿填色
   calculate();
 }
 
@@ -1512,13 +1573,11 @@ function calculate() {
 
     // Projection Loop
     let curAsset = state.loan - state.fee;
-    let reservedPool = 0;
     
-    // 【0月付永動機邏輯】: 從借款中預留前24期本利和作為還款池
-    // fixedTotalCost 也需扣除預留金（因為那筆錢根本沒進入投資市場）
+    // 【0月付永動機邏輯】: 扣除前24期本利和作為預留金
     if (state.isZeroPay) {
-        reservedPool = pmt * 24;
-        curAsset = Math.max(0, curAsset - reservedPool);
+        curAsset = curAsset - (pmt * 24);
+        if (curAsset < 0) curAsset = 0; // 防呆
     }
 
     let curLoan = state.loan;
@@ -1575,7 +1634,7 @@ function updateKPIs() {
     // PMT
     safeText('val-pmt', fmt(c.pmt));
     const pmtRatio = ((c.pmt / s.salary) * 100).toFixed(1);
-    safeHTML('val-pmt-desc', `佔月薪${(s.salary/10000).toFixed(1)}萬的 `+pmtRatio+'% '+(c.pmt>(s.salary*0.4)?'<span style="color:var(--red)">(高壓)</span>':'<span style="color:var(--green)">(安全)</span>'));
+    safeHTML('val-pmt-desc', `佔月薪${s.salary/10000}萬的 `+pmtRatio+'% '+(c.pmt>(s.salary*0.4)?'<span style="color:var(--red)">(高壓)</span>':'<span style="color:var(--green)">(安全)</span>'));
     const pmtBar = document.getElementById('pmt-bar');
     if(pmtBar){
         pmtBar.style.width = Math.min(pmtRatio,100)+'%';
@@ -1610,8 +1669,6 @@ function updateKPIs() {
     if (dbrBar) dbrBar.style.width = Math.min(dbrPct, 100) + '%';
     safeText('dbr-pct', dbrPct + '%');
     
-    safeHTML('dbr-desc', `DBR22 上限 = 月薪 × 22 倍<br>月薪 <strong>${(s.salary/10000).toFixed(1)}萬</strong> 上限 = <strong style="color:var(--amber)">NT$${fmt(c.dbrMax)}</strong>`);
-
     if (s.loan <= c.dbrMax) {
         if(dbrBar) dbrBar.style.background = 'var(--green)';
         safeColor('dbr-pct', 'var(--green)');
@@ -1672,67 +1729,55 @@ function updateKPIs() {
 function calcBBD() {
     syncInputsToState();
     const b = appState.bbd;
-
-    // 動態更新借款上限（60% 法定上限）
+    
+    // Lable updates
+    safeText('lbl-bbd-asset', fmt(b.asset));
+    safeText('lbl-bbd-borrow', fmt(b.borrow));
+    safeText('lbl-bbd-drop', '-' + b.drop + '%');
+    
+    // Check max borrow (60%)
     const maxBorrow = b.asset * 0.6;
     const inpBorrow = document.getElementById('inp-bbd-borrow');
-    if (inpBorrow) {
+    if(inpBorrow && parseFloat(inpBorrow.max) !== maxBorrow) {
         inpBorrow.max = maxBorrow;
-        if (b.borrow > maxBorrow) {
-            b.borrow = maxBorrow;
-            inpBorrow.value = maxBorrow;
-        }
-        updateSliderFill(inpBorrow); // ← 動態 max 改完後立刻更新填色
+    }
+    
+    if (b.borrow > maxBorrow) {
+        b.borrow = maxBorrow;
+        if(inpBorrow) inpBorrow.value = maxBorrow;
+        safeText('lbl-bbd-borrow', fmt(maxBorrow));
     }
 
-    // 同步所有 BBD sliders 填色
-    ['inp-bbd-asset','inp-bbd-drop'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) updateSliderFill(el);
-    });
-
-    // Label updates
-    safeText('lbl-bbd-asset',       fmt(b.asset));
-    safeText('lbl-bbd-borrow',      fmt(b.borrow));
-    safeText('lbl-bbd-borrow-max',  fmt(maxBorrow));
-    safeText('lbl-bbd-drop',        '-' + b.drop + '%');
-    safeText('bbd-drop-text',       '（-' + b.drop + '%）');
-
-    // 防止除以零
-    if (b.borrow <= 0) {
-        safeText('bbd-init-ratio',   '∞');
-        safeText('bbd-stress-ratio', '∞');
-        return;
-    }
-
-    // 計算維持率
-    const initRatio   = (b.asset / b.borrow) * 100;
-    const stressAsset = b.asset * (1 - b.drop / 100);
+    // Calc Ratio
+    const initRatio = (b.asset / b.borrow) * 100;
+    const stressAsset = b.asset * (1 - (b.drop / 100));
     const stressRatio = (stressAsset / b.borrow) * 100;
 
-    safeText('bbd-init-ratio',   initRatio.toFixed(0) + '%');
+    safeText('bbd-init-ratio', initRatio.toFixed(0) + '%');
+    safeText('bbd-drop-text', '-' + b.drop + '%');
     safeText('bbd-stress-ratio', stressRatio.toFixed(0) + '%');
 
-    // 狀態徽章與顏色
-    const badge     = document.getElementById('bbd-status-badge');
-    const ratioEl   = document.getElementById('bbd-stress-ratio');
-    if (!badge || !ratioEl) return;
-
+    const badge = document.getElementById('bbd-status-badge');
+    const ratioText = document.getElementById('bbd-stress-ratio');
+    
     if (stressRatio >= 200) {
-        ratioEl.style.color    = 'var(--green)';
+        ratioText.style.color = 'var(--green)';
+        badge.className = '';
         badge.style.background = 'rgba(16,185,129,.15)';
-        badge.style.color      = 'var(--green)';
-        badge.innerText        = '✅ 資金水位安全（符合威利標準）';
+        badge.style.color = 'var(--green)';
+        badge.innerText = '✅ 資金水位安全 (符合威利標準)';
     } else if (stressRatio >= 130) {
-        ratioEl.style.color    = 'var(--amber)';
+        ratioText.style.color = 'var(--amber)';
+        badge.className = '';
         badge.style.background = 'rgba(245,158,11,.15)';
-        badge.style.color      = 'var(--amber)';
-        badge.innerText        = '⚠️ 警戒！隨時面臨追繳風險';
+        badge.style.color = 'var(--amber)';
+        badge.innerText = '⚠️ 警戒！隨時面臨追繳風險';
     } else {
-        ratioEl.style.color    = 'var(--red)';
+        ratioText.style.color = 'var(--red)';
+        badge.className = '';
         badge.style.background = 'rgba(239,68,68,.15)';
-        badge.style.color      = 'var(--red)';
-        badge.innerText        = '💀 已斷頭！請立即補保證金';
+        badge.style.color = 'var(--red)';
+        badge.innerText = '💀 已斷頭！請補保證金';
     }
 }
 
@@ -1746,35 +1791,29 @@ function calcSmile() {
     if (!tbody) return;
 
     const drops = [
-        { pct: 8,  label: '-8%',  desc: '正常回調', buyPct: 5, sellPct: 2 },
-        { pct: 10, label: '-10%', desc: '警戒邊界', buyPct: 5, sellPct: 2 },
-        { pct: 15, label: '-15%', desc: '修正市場', buyPct: 5, sellPct: 2 },
-        { pct: 20, label: '-20%', desc: '空頭市場', buyPct: 5, sellPct: 2 },
-        { pct: 25, label: '-25%', desc: '深度空頭', buyPct: 5, sellPct: 2 },
-        { pct: 30, label: '-30%', desc: '極端熊市', buyPct: 5, sellPct: 2 }
+        { pct: 8, label: '-8%', desc: '正常回調', cashPct: 5 },
+        { pct: 10, label: '-10%', desc: '警戒邊界', cashPct: 5 },
+        { pct: 15, label: '-15%', desc: '修正市場', cashPct: 5 },
+        { pct: 20, label: '-20%', desc: '空頭市場', cashPct: 5 },
+        { pct: 25, label: '-25%', desc: '深度空頭', cashPct: 5 },
+        { pct: 30, label: '-30%', desc: '極端熊市', cashPct: 5 }
     ];
 
-    let cumInvested = 0;
     let html = '';
     drops.forEach(d => {
-        const triggerPrice  = s.price * (1 - d.pct / 100);
-        const recoveryPrice = s.price * 1.03; // 站回年線 +3% 視為確認
-        const investAmount  = s.cash * (d.buyPct / 100);
-        cumInvested += investAmount;
-        const sellDesc = `原型→正2，目標 $${recoveryPrice.toFixed(2)}`;
+        const triggerPrice = s.price * (1 - (d.pct/100));
+        const investAmount = s.cash * (d.cashPct/100);
         html += `
             <tr>
-                <td class="td-drop">${d.label}<br><span style="font-size:10px;color:var(--muted)">${d.desc}</span></td>
+                <td class="td-drop">${d.label} <br><span style="font-size:10px;color:var(--muted)">${d.desc}</span></td>
                 <td style="font-weight:700;">$${triggerPrice.toFixed(2)}</td>
-                <td class="td-buy">+${d.buyPct}% 現金 → 買原型</td>
-                <td style="color:var(--text2)">$${fmt(investAmount)}<br><span style="font-size:10px;color:var(--muted)">累計$${fmt(cumInvested)}</span></td>
-                <td class="td-sell" style="font-size:.8rem;">${sellDesc}<br><span style="color:var(--muted);font-size:10px;">獲利+${d.sellPct}%資金轉回</span></td>
+                <td class="td-buy">+${d.cashPct}% 資金</td>
+                <td style="color:var(--text2)">$${fmt(investAmount)}</td>
             </tr>
         `;
     });
     
-    const winterPrice = (s.price * 0.7).toFixed(2);
-    html += `<tr style="background:rgba(245,158,11,.06)"><td colspan="5" class="td-stop">❄️ 跌破 -30% ($${winterPrice}) → 冬眠模式：停止左側加碼，保護現金流！</td></tr>`;
+    html += `<tr style="background:rgba(245,158,11,.06)"><td colspan="4" class="td-stop">❄️ 跌破 -30% ($${(s.price*0.7).toFixed(2)}) → 進入冬眠模式：停止左側加碼！</td></tr>`;
     tbody.innerHTML = html;
 }
 
