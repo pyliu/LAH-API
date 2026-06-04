@@ -1261,16 +1261,16 @@ canvas{display:block;width:100%!important;height:auto!important;}
         </div>
         <div class="vinfo"><div class="vtitle">威利財經角｜槓桿開多少才安全</div><div class="vdesc">極端壓力測試：活得久比賺得快更重要</div></div>
       </div>
-      <div class="vcard" onclick="openVideoModal('empty_s26ep7','威利財經角 S26EP7｜你以為沒有負債才安全？','很多人一輩子存不到錢，是因為太早把債還光了')">
+      <div class="vcard" onclick="openVideoModal('yjr1RolL7DU','威利財經角 S26EP7｜你以為沒有負債才安全？','很多人一輩子存不到錢，是因為太早把債還光了')">
         <div class="vthumb">
-          <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=600&q=80" alt="沒有負債才安全">
+          <img src="https://img.youtube.com/vi/yjr1RolL7DU/mqdefault.jpg" alt="沒有負債才安全">
           <div class="vplay">▶ 點擊播放</div>
         </div>
         <div class="vinfo"><div class="vtitle">威利財經角 S26EP7｜你以為沒有負債才安全？</div><div class="vdesc">很多人之所以存不到錢，是因為太早把債還光了</div></div>
       </div>
-      <div class="vcard" onclick="openVideoModal('empty_ep107','A8阿吧 EP107｜長期投資賣出心理陷阱','長期投資正2別再犯這種錯！一旦賣出就很難買回')">
+      <div class="vcard" onclick="openVideoModal('3lXTQo5SWCk','A8阿吧 EP107｜長期投資賣出心理陷阱','長期投資正2別再犯這種錯！一旦賣出就很難買回')">
         <div class="vthumb">
-          <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=600&q=80" alt="長期投資心理陷阱">
+          <img src="https://img.youtube.com/vi/3lXTQo5SWCk/mqdefault.jpg" alt="長期投資心理陷阱">
           <div class="vplay">▶ 點擊播放</div>
         </div>
         <div class="vinfo"><div class="vtitle">A8阿吧 EP107｜長期投資賣出心理陷阱</div><div class="vdesc">長期投資正2別再犯這種錯！克服落袋為安的恐懼</div></div>
@@ -1313,9 +1313,9 @@ canvas{display:block;width:100%!important;height:auto!important;}
         </div>
         <div class="vinfo"><div class="vtitle">槓桿人生 EP14｜信貸投資指南</div><div class="vdesc">生命週期投資法、拉長年期降低現金流壓力</div></div>
       </div>
-      <div class="vcard" onclick="openVideoModal('empty_ep11','槓桿人生 EP11｜定期定額其實風險更高？','揭開生命週期投資法真相，本金少更該開槓桿')">
+      <div class="vcard" onclick="openVideoModal('-W5T1QH3DSw','槓桿人生 EP11｜定期定額其實風險更高？','揭開生命週期投資法真相，本金少更該開槓桿')">
         <div class="vthumb">
-          <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=600&q=80" alt="定期定額風險更高">
+          <img src="https://img.youtube.com/vi/-W5T1QH3DSw/mqdefault.jpg" alt="定期定額風險更高">
           <div class="vplay">▶ 點擊播放</div>
         </div>
         <div class="vinfo"><div class="vtitle">槓桿人生 EP11｜定期定額其實風險更高？</div><div class="vdesc">揭開生命週期投資法真相，本金少更該開槓桿</div></div>
@@ -1396,9 +1396,7 @@ function openVideoModal(videoId, title, desc, startTime) {
   // 載入高畫質縮圖，若失敗退回普通畫質 (若無影片ID則使用圖庫圖片)
   if (videoId.startsWith('empty_')) {
       const imgMap = {
-          'empty_ep11': 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1280&q=80',
-          'empty_s26ep7': 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1280&q=80',
-          'empty_ep107': 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1280&q=80'
+          // 目前所有影片皆已補上真實 ID，預留 empty_ 防呆機制
       };
       thumb.src = imgMap[videoId] || '';
   } else {
