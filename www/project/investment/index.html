@@ -70,7 +70,6 @@ body{font-family:'PingFang TC','Microsoft JhengHei','Segoe UI',sans-serif;backgr
 .hbadge{padding:5px 14px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:.04em;}
 .hb-green{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.3);}
 .hb-blue{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.3);}
-.hb-purple{background:rgba(139,92,246,.12);color:var(--purple);border:1px solid rgba(139,92,246,.3);}
 
 /* 主題切換按鈕 */
 .theme-btn {
@@ -128,7 +127,7 @@ body{font-family:'PingFang TC','Microsoft JhengHei','Segoe UI',sans-serif;backgr
 
 /* ── CARDS ── */
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px;box-shadow:var(--shadow);}
-.card-title{font-size:1rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.card-title{font-size:1rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
 .card-title .ct-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
 .play-btn{margin-left:auto;background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.3);padding:4px 12px;border-radius:999px;font-size:.78rem;font-weight:700;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px;}
 .play-btn:hover{background:var(--red);color:#fff;}
@@ -367,7 +366,6 @@ canvas{display:block;width:100%!important;height:auto!important;}
     </div>
     <div class="header-badges">
       <span class="hbadge hb-green">進階策略版</span>
-      <span class="hbadge hb-purple" id="hdr-years-badge">10 年期信貸</span>
       <span class="hbadge hb-blue" id="hdr-dbr-badge">DBR22 上限未算</span>
       <button id="theme-toggle" class="theme-btn" aria-label="切換主題" onclick="toggleTheme()">☀️</button>
     </div>
@@ -404,7 +402,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
     </div>
     <div class="kpi" style="--kpi-color:var(--blue)">
       <div class="kpi-icon">💳</div>
-      <div class="kpi-label" id="kpi-label-pmt">每月應繳本息</div>
+      <div class="kpi-label">每月應繳本息</div>
       <div class="kpi-val" id="val-pmt">--</div>
       <div class="kpi-sub" id="val-pmt-desc">佔月薪 -- 的 --%</div>
       <div class="progress-bar"><div class="progress-fill" id="pmt-bar" style="background:var(--blue);width:0%"></div></div>
@@ -754,18 +752,27 @@ canvas{display:block;width:100%!important;height:auto!important;}
 
     <!-- ★ 投資升級藍圖 (三大工具與三階段策略) -->
     <div class="card" style="margin-bottom:20px; border:1px solid var(--green2); box-shadow: 0 0 20px rgba(16,185,129,0.15);">
-      <div class="card-title" style="border-bottom-color: rgba(16,185,129,0.3);">
-        <div class="ct-icon" style="background:rgba(16,185,129,.2)">🗺️</div>投資升級藍圖：三大槓桿工具與三階段策略 (槓桿人生 EP31)
-        <button class="play-btn" onclick="openVideoModal('-8VmnBwc1xM','槓桿人生 EP31｜信貸、正二、質押怎麼選？','解析三大槓桿工具防雷點，及從新兵到退休的三階段配置法')">▶ 影片說明</button>
+      <div class="card-title" style="border-bottom-color: rgba(16,185,129,0.3); flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="ct-icon" style="background:rgba(16,185,129,.2)">🗺️</div>新手到退休的通關藍圖與工具開啟順序
+        </div>
+        <div style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="play-btn" style="margin-left:0; background:rgba(245,158,11,.1); color:var(--amber); border-color:rgba(245,158,11,.3);" onclick="openVideoModal('haVZUqvJ4EM','雷恩｜本金太小只能慢慢存？','從檳榔看懂通膨！解析六大工具的正確開啟順序')">▶ 工具順序 (雷恩)</button>
+          <button class="play-btn" style="margin-left:0;" onclick="openVideoModal('-8VmnBwc1xM','槓桿人生 EP31｜信貸、正二、質押怎麼選？','解析三大槓桿工具防雷點，及從新兵到退休的三階段配置法')">▶ 三階段配置 (Ivan)</button>
+        </div>
       </div>
       
       <div class="g2" style="gap:16px;">
         <div class="strat-box sb-amber" style="margin-bottom:0;">
-          <h4>🛠️ 三大槓桿工具防雷指南</h4>
+          <h4>🛠️ 槓桿工具的正確開啟順序與防雷</h4>
           <ul>
-            <li><strong>信貸 (時光機)：</strong> 提早將未來薪水借來投資。利息越低越好、年限越長越好 (降月付金)。<strong class="danger">防雷點：</strong>扣除基本開銷與還款後，現金流必為正，且預留 6-12 個月氧氣瓶。</li>
-            <li><strong>正2 (懶人槓桿)：</strong> 不會斷頭、有複利偏移優勢。<strong class="danger">防雷點：</strong>極怕大跌，跌 90% 需漲 9 倍才能回本，絕不能 ALL IN，必須搭配資產配置與現金再平衡。</li>
-            <li><strong>質押 (富人遊戲)：</strong> 買借死，只繳息不還本，現金流壓力極低。<strong class="danger">防雷點：</strong>小心「雨天收傘」(券商縮額度或限制平轉續約)。解法是維持率抓 200%~500%，並保留大於借款金額的保命現金或未質押部位。</li>
+            <li><strong>本金小想加速不可恥，真正危險的是錯置順序。</strong></li>
+            <li><strong>1. 緊急預備金：</strong> 先建防護網，遇到意外才不會被迫賤賣資產。</li>
+            <li><strong>2. 核心底倉 (0050)：</strong> 不是為追求刺激，而是參與長期成長的基本盤。</li>
+            <li><strong>3. 槓桿部位 (正2)：</strong> 不會斷頭，但極怕大跌，絕不能 ALL IN，必須搭配現金再平衡。</li>
+            <li><strong>4. 信貸 (時光機)：</strong> 買的是時間。看的不是利率，是月現金流！扣除開銷必為正，且先扣留首兩年預備金。</li>
+            <li><strong>5. 質押 (富人遊戲)：</strong> 低動用率、高維持率(抓200%~500%)，不借滿不追高，當作安全氣囊。小心「雨天收傘」。</li>
+            <li><strong>6. 理財型房貸：</strong> 長期低成本，但牽涉家庭財務安全。需設定嚴格的動用規則，避免把彈性變負擔。</li>
           </ul>
         </div>
         
@@ -800,7 +807,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
       </div>
     </div>
 
-    <!-- ★ 大仁哥投資心法：資本主義底層邏輯與正2優勢 (合併彙整) -->
+    <!-- ★ 大仁哥投資心法：資本主義底層邏輯與正2優勢 -->
     <div class="card" style="margin-bottom:20px;">
       <div class="card-title">
         <div class="ct-icon" style="background:rgba(239,68,68,.2)">📈</div>大仁哥投資心法：資本主義底層邏輯與正2優勢
@@ -847,7 +854,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
       </div>
     </div>
 
-    <!-- ★ 人力折舊與 OPM 翻轉策略 -->
+    <!-- ★ 人力折舊危機與 OPM 翻轉策略 -->
     <div class="card" style="margin-bottom:20px;">
       <div class="card-title">
         <div class="ct-icon" style="background:rgba(59,130,246,.2)">👨‍💼</div>人力折舊危機與 OPM 翻轉策略 (雷恩觀點)
@@ -856,11 +863,11 @@ canvas{display:block;width:100%!important;height:auto!important;}
       
       <div class="g2" style="gap:16px;">
         <div class="strat-box sb-amber" style="margin-bottom:0;">
-          <h4>🚨 殘酷真相：人力折舊與通膨雙殺</h4>
+          <h4>🚨 殘酷真相：本金小的焦慮與通膨雙殺</h4>
           <ul>
-            <li><strong>你是一台會折舊的機器：</strong> 到了 35-45 歲，體力與專注力下滑，家庭責任達到巔峰，此時你在就業市場的性價比極低，隨時會被年輕的鮮肝取代。</li>
-            <li><strong>通膨的財富漏斗：</strong> 把錢死存在銀行，就是用你唯一不可逆的青春與健康，換取不斷貶值的紙鈔（購買力融化）。</li>
-            <li><strong>出賣自己是最低級的商業模式：</strong> 一般人出賣時間與勞力（有天花板），而富人、資本家則是靠「佔有並運用他人的生產力」來賺錢。</li>
+            <li><strong>想變快並不可恥：</strong> 上班族很努力存錢，但薪水追不上物價。難道要等雙手磨破皮才知道痛？想提高累積速度很正常，危險的不是槓桿，是用錯工具與瞎扛壓力。</li>
+            <li><strong>通膨的財富漏斗 (檳榔理論)：</strong> 以往 50 元能買 20 顆檳榔，現在只剩 7 顆。現金放著不會壞，但「購買力會蒸發」！借現在的錢，未來用變薄的錢還，才是抗通膨解藥。</li>
+            <li><strong>出賣自己是最低級的商業模式：</strong> 到了 35-45 歲體力下滑，就業性價比變低。富人靠「佔有並運用他人的生產力」賺錢，而非單靠勞力。</li>
           </ul>
         </div>
         <div class="strat-box sb-blue" style="margin-bottom:0;">
@@ -871,7 +878,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
               <br>1. <strong class="hl">首選薪轉銀行</strong>（看得到金流最放心，別亂槍打鳥）。
               <br>2. 只認 <strong class="hl">總費用年百分率 (APR)</strong>，目標壓在 3.5% 以下。
               <br>3. 用途填寫<strong class="hl">「理財規劃」</strong>，心態要反客為主。</li>
-            <li><strong>無聊的勝利：</strong> 買入資產、留足 20% 保命現金後，<span class="danger">刪掉看盤 APP</span>。把精力拿回本業與健康，讓時間替你賺錢。</li>
+            <li><strong>無聊的勝利：</strong> 買入資產、留足 20% 保命現金後，<span class="danger">刪掉看盤 APP</span>。投資是為了好天氣能去海邊放空，不是為了當數字的奴隸。</li>
           </ul>
         </div>
       </div>
@@ -1211,7 +1218,15 @@ canvas{display:block;width:100%!important;height:auto!important;}
     <!-- 主題 1：流動性生存與投資心理 -->
     <div class="section-title">🌊 流動性生存與投資心理</div>
     <div class="video-grid">
-      <!-- ★ 三大槓桿工具與三階段策略 -->
+      <!-- ★ 本金太小只能慢慢存？ (置頂) -->
+      <div class="vcard" onclick="openVideoModal('haVZUqvJ4EM','雷恩｜本金太小只能慢慢存？','從檳榔看懂通膨！解析 0050、正2、信貸、質押的正確開啟順序')">
+        <div class="vthumb">
+          <img src="https://img.youtube.com/vi/haVZUqvJ4EM/mqdefault.jpg" alt="本金太小加速SOP">
+          <div class="vplay">▶ 點擊播放</div>
+        </div>
+        <div class="vinfo"><div class="vtitle">雷恩｜本金太小只能慢慢存？</div><div class="vdesc">從檳榔看懂通膨！解析 0050、正2、信貸、質押的正確開啟順序</div></div>
+      </div>
+      <!-- 三大工具與三階段策略 -->
       <div class="vcard" onclick="openVideoModal('-8VmnBwc1xM','槓桿人生 EP31｜信貸、正二、質押怎麼選？','搭配三階段策略打造千萬退休金，完整解析三大槓桿工具！')">
         <div class="vthumb">
           <img src="https://img.youtube.com/vi/-8VmnBwc1xM/mqdefault.jpg" alt="信貸正二質押三階段">
@@ -1263,16 +1278,16 @@ canvas{display:block;width:100%!important;height:auto!important;}
         </div>
         <div class="vinfo"><div class="vtitle">威利財經角｜槓桿開多少才安全</div><div class="vdesc">極端壓力測試：活得久比賺得快更重要</div></div>
       </div>
-      <div class="vcard" onclick="openVideoModal('yjr1RolL7DU','威利財經角 S26EP7｜你以為沒有負債才安全？','很多人一輩子存不到錢，是因為太早把債還光了')">
+      <div class="vcard" onclick="openVideoModal('empty_s26ep7','威利財經角 S26EP7｜你以為沒有負債才安全？','很多人一輩子存不到錢，是因為太早把債還光了')">
         <div class="vthumb">
-          <img src="https://img.youtube.com/vi/yjr1RolL7DU/mqdefault.jpg" alt="沒有負債才安全">
+          <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1280&q=80" alt="沒有負債才安全">
           <div class="vplay">▶ 點擊播放</div>
         </div>
         <div class="vinfo"><div class="vtitle">威利財經角 S26EP7｜你以為沒有負債才安全？</div><div class="vdesc">很多人之所以存不到錢，是因為太早把債還光了</div></div>
       </div>
-      <div class="vcard" onclick="openVideoModal('3lXTQo5SWCk','A8阿吧 EP107｜長期投資賣出心理陷阱','長期投資正2別再犯這種錯！一旦賣出就很難買回')">
+      <div class="vcard" onclick="openVideoModal('empty_ep107','A8阿吧 EP107｜長期投資賣出心理陷阱','長期投資正2別再犯這種錯！一旦賣出就很難買回')">
         <div class="vthumb">
-          <img src="https://img.youtube.com/vi/3lXTQo5SWCk/mqdefault.jpg" alt="長期投資心理陷阱">
+          <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1280&q=80" alt="長期投資心理陷阱">
           <div class="vplay">▶ 點擊播放</div>
         </div>
         <div class="vinfo"><div class="vtitle">A8阿吧 EP107｜長期投資賣出心理陷阱</div><div class="vdesc">長期投資正2別再犯這種錯！克服落袋為安的恐懼</div></div>
