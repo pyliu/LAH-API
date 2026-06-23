@@ -682,11 +682,13 @@ canvas{display:block;width:100%!important;height:auto!important;}
             <tr>
               <th>跌幅階梯</th>
               <th>觸發價格</th>
-              <th>左側建倉動作 (買原型)</th>
-              <th>預計投入金額</th>
+              <th>左側建倉<br>(買原型)</th>
+              <th>右側獲利<br>(賣原型)</th>
+              <th>單次投入</th>
+              <th>累計投入</th>
             </tr>
           </thead>
-          <tbody id="smile-tbody1">
+          <tbody id="smile-tbody">
             <!-- JS 動態生成 -->
           </tbody>
         </table>
@@ -803,7 +805,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
           <ul>
             <li><strong>玩家裝備：</strong> 龐大總資產 + 10年生活費現金池。</li>
             <li><strong>核心策略 (只提領不賣股)：</strong> <strong class="hl">20% 保命現金 + 80% 大盤與正2。</strong></li>
-            <li><strong>行動指南：</strong> 千萬別把股全賣掉換定存！將總資產的 20% (等同 10 年生活費) 換成現金應付任何崩盤，剩下 80% 繼續放股市滾。靠 2~4% 提領率或質押過活，資產會越花越多！</li>
+            <li><strong>行動指南：</strong> 千萬別把股全賣掉換定存！將總資產的 20%<span style="color:var(--text2);font-size:.82rem;">（此指退休後10年生活費現金池，不同於4-4-2投資備援的保命現金）</span>換成現金應付任何崩盤，剩下 80% 繼續放股市滾。靠 2~4% 提領率或質押過活，資產會越花越多！</li>
           </ul>
         </div>
       </div>
@@ -875,7 +877,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
         <div class="strat-box sb-blue" style="margin-bottom:0;">
           <h4>🧠 認知躍遷：OPM (用別人的錢賺錢)</h4>
           <ul>
-            <li><strong>槓桿利差才是武器：</strong> 現在借 3.5% 以下的信貸，投入年化 10%+ 的市值型大盤，差額就是你的淨利潤；同時通膨每年持續稀釋債務本金的實質負擔，時間越長，你還的錢越「便宜」。（質押的進階應用詳見下方 BBD 章節）</li>
+            <li><strong>利差邏輯（OPM核心）：</strong> 信貸利率 APR 目標壓在 <strong class="hl">3.5% 以下</strong>，投入年化 10%+ 的市值型大盤，<span style="color:var(--text2);font-size:.82rem;">（利差即淨利潤的底層邏輯見上方大仁哥章節，此節聚焦執行面）</span>。同時通膨每年稀釋債務實質負擔，時間越長，你還的錢越「便宜」。（質押的進階應用詳見下方 BBD 章節）</li>
             <li><strong>安全搬錢三大鐵律：</strong>
               <br>1. <strong class="hl">首選薪轉銀行</strong>（看得到金流最放心，別亂槍打鳥）。
               <br>2. 只認 <strong class="hl">總費用年百分率 (APR)</strong>，目標壓在 3.5% 以下。
@@ -964,9 +966,8 @@ canvas{display:block;width:100%!important;height:auto!important;}
         <div class="strat-box sb-green" style="margin-bottom:0;">
           <h4>🛡️ 信貸 + 質押的雙軌防護網</h4>
           <ul>
-            <li><strong>剛性與柔性債務：</strong> 信貸是「剛性債務」（每月需定額還本息），質押是「柔性債務」（可僅支付利息）。兩者同時開啟時，務必把質押維持率維持在 <strong>250% 以上</strong>。</li>
-            <li><strong>🔴 第一道防線</strong>：質押維持率告急 → 動用 20% 保命現金補足保證金（見上方 BBD 章節）。</li>
-            <li><strong>🟠 第二道防線</strong>：20% 現金耗盡後 → 啟用<strong>原型底倉的質押額度</strong>來支應信貸本息，<span class="danger">切勿在低點賤賣原型資產</span>，賤賣才是真正的死亡螺旋。</li>
+            <li><strong>剛性與柔性債務：</strong> 信貸是「剛性債務」（每月需定額還本息），質押是「柔性債務」（可僅支付利息）。兩者同時開啟時，質押維持率務必維持在 <strong>250% 以上</strong>（高於單純質押的 200% 安全水位）。</li>
+            <li><strong>🟠 第二道防線</strong>（接續 BBD 章節的第一道）：20% 備援現金耗盡後 → 啟用<strong>原型底倉的質押額度</strong>來支應信貸本息，<span class="danger">切勿在低點賤賣原型資產</span>，賤賣才是真正的死亡螺旋。</li>
           </ul>
         </div>
         <div class="strat-box sb-blue" style="margin-bottom:0;">
@@ -1041,13 +1042,19 @@ canvas{display:block;width:100%!important;height:auto!important;}
           <thead>
             <tr>
               <th>跌幅階梯</th>
-              <th>觸發價格</th>
-              <th>左側建倉動作 (買原型)</th>
-              <th>預計投入金額</th>
+              <th>左側建倉<br>（向下買原型）</th>
+              <th>右側獲利<br>（回升賣原型）</th>
+              <th>動作說明</th>
             </tr>
           </thead>
-          <tbody id="smile-tbody2">
-            <!-- JS 動態生成 -->
+          <tbody>
+            <tr><td class="td-drop">-8%</td><td class="td-buy">+5% 資金</td><td class="td-sell">-2% 資金</td><td style="font-size:.8rem;color:var(--text2)">正常回調</td></tr>
+            <tr><td class="td-drop">-10%</td><td class="td-buy">+5% 資金</td><td class="td-sell">-2% 資金</td><td style="font-size:.8rem;color:var(--text2)">警戒邊界</td></tr>
+            <tr><td class="td-drop">-15%</td><td class="td-buy">+5% 資金</td><td class="td-sell">-2% 資金</td><td style="font-size:.8rem;color:var(--text2)">修正市場</td></tr>
+            <tr><td class="td-drop">-20%</td><td class="td-buy">+5% 資金</td><td class="td-sell">-2% 資金</td><td style="font-size:.8rem;color:var(--text2)">空頭市場</td></tr>
+            <tr><td class="td-drop">-25%</td><td class="td-buy">+5% 資金</td><td class="td-sell">-2% 資金</td><td style="font-size:.8rem;color:var(--text2)">深度空頭</td></tr>
+            <tr><td class="td-drop">-30%</td><td class="td-buy">+5% 資金</td><td class="td-sell">-2% 資金</td><td style="font-size:.8rem;color:var(--text2)">極端熊市</td></tr>
+            <tr style="background:rgba(245,158,11,.06)"><td colspan="4" class="td-stop">❄️ 跌破 -30% → 進入冬眠模式：停止左側加碼，保護現金流活下去！</td></tr>
           </tbody>
         </table>
 
@@ -1125,16 +1132,16 @@ canvas{display:block;width:100%!important;height:auto!important;}
         </div>
         <div class="vinfo"><div class="vtitle">威利財經角｜槓桿開多少才安全</div><div class="vdesc">極端壓力測試：活得久比賺得快更重要</div></div>
       </div>
-      <div class="vcard" onclick="openVideoModal('empty_s26ep7','威利財經角 S26EP7｜你以為沒有負債才安全？','很多人一輩子存不到錢，是因為太早把債還光了')">
+      <div class="vcard" onclick="openVideoModal('-W5T1QH3DSw','威利財經角 S26EP7｜你以為沒有負債才安全？','很多人一輩子存不到錢，是因為太早把債還光了')">
         <div class="vthumb">
-          <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1280&q=80" alt="沒有負債才安全">
+          <img src="https://img.youtube.com/vi/-W5T1QH3DSw/mqdefault.jpg" alt="沒有負債才安全">
           <div class="vplay">▶ 點擊播放</div>
         </div>
         <div class="vinfo"><div class="vtitle">威利財經角 S26EP7｜你以為沒有負債才安全？</div><div class="vdesc">很多人之所以存不到錢，是因為太早把債還光了</div></div>
       </div>
-      <div class="vcard" onclick="openVideoModal('empty_ep107','A8阿吧 EP107｜長期投資賣出心理陷阱','長期投資正2別再犯這種錯！一旦賣出就很難買回')">
+      <div class="vcard" onclick="openVideoModal('3lXTQo5SWCk','A8阿吧 EP107｜長期投資賣出心理陷阱','長期投資正2別再犯這種錯！一旦賣出就很難買回')">
         <div class="vthumb">
-          <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1280&q=80" alt="長期投資心理陷阱">
+          <img src="https://img.youtube.com/vi/3lXTQo5SWCk/mqdefault.jpg" alt="長期投資心理陷阱">
           <div class="vplay">▶ 點擊播放</div>
         </div>
         <div class="vinfo"><div class="vtitle">A8阿吧 EP107｜長期投資賣出心理陷阱</div><div class="vdesc">長期投資正2別再犯這種錯！克服落袋為安的恐懼</div></div>
@@ -1641,41 +1648,59 @@ function calcBBD() {
 }
 
 /* ────────────────────────────────
-   SMILE 微笑佈局計算
+   SMILE 微笑佈局計算 (防呆優化版)
 ──────────────────────────────── */
 function calcSmile() {
-    syncInputsToState();
-    const s = appState.smile;
-    const tbody1 = document.getElementById('smile-tbody1');
-    const tbody2 = document.getElementById('smile-tbody2');
-    if (!tbody1 || !tbody2) return;
+    try {
+        const priceEl = document.getElementById('inp-smile-price');
+        const cashEl = document.getElementById('inp-smile-cash');
+        const price = priceEl && !isNaN(parseFloat(priceEl.value)) ? parseFloat(priceEl.value) : 180;
+        const cash = cashEl && !isNaN(parseFloat(cashEl.value)) ? parseFloat(cashEl.value) : 400000;
 
-    const drops = [
-        { pct: 8, label: '-8%', desc: '正常回調', cashPct: 5 },
-        { pct: 10, label: '-10%', desc: '警戒邊界', cashPct: 5 },
-        { pct: 15, label: '-15%', desc: '修正市場', cashPct: 5 },
-        { pct: 20, label: '-20%', desc: '空頭市場', cashPct: 5 },
-        { pct: 25, label: '-25%', desc: '深度空頭', cashPct: 5 },
-        { pct: 30, label: '-30%', desc: '極端熊市', cashPct: 5 }
-    ];
+        const tbody = document.getElementById('smile-tbody');
+        const tbodyStatic = document.getElementById('smile-tbody-static'); // 策略 SOP 裡的靜態表格
+        
+        const drops = [
+            { pct: 8, label: '-8%', desc: '正常回調', buy: 5, sell: 2 },
+            { pct: 10, label: '-10%', desc: '警戒邊界', buy: 5, sell: 2 },
+            { pct: 15, label: '-15%', desc: '修正市場', buy: 5, sell: 2 },
+            { pct: 20, label: '-20%', desc: '空頭市場', buy: 5, sell: 2 },
+            { pct: 25, label: '-25%', desc: '深度空頭', buy: 5, sell: 2 },
+            { pct: 30, label: '-30%', desc: '極端熊市', buy: 5, sell: 2 }
+        ];
 
-    let html = '';
-    drops.forEach(d => {
-        const triggerPrice = s.price * (1 - (d.pct/100));
-        const investAmount = s.cash * (d.cashPct/100);
-        html += `
-            <tr>
-                <td class="td-drop">${d.label} <br><span style="font-size:10px;color:var(--muted)">${d.desc}</span></td>
-                <td style="font-weight:700;">$${triggerPrice.toFixed(2)}</td>
-                <td class="td-buy">+${d.cashPct}% 資金</td>
-                <td style="color:var(--text2)">$${fmt(investAmount)}</td>
-            </tr>
-        `;
-    });
-    
-    html += `<tr style="background:rgba(245,158,11,.06)"><td colspan="4" class="td-stop">❄️ 跌破 -30% ($${(s.price*0.7).toFixed(2)}) → 進入冬眠模式：停止左側加碼！</td></tr>`;
-    tbody1.innerHTML = html;
-    tbody2.innerHTML = html;
+        let html = '';
+        let accCash = 0;
+        drops.forEach(d => {
+            const triggerPrice = price * (1 - (d.pct / 100));
+            const investAmount = cash * (d.buy / 100);
+            accCash += investAmount;
+            html += `
+                <tr>
+                    <td class="td-drop">${d.label} <br><span style="font-size:10px;color:var(--muted)">${d.desc}</span></td>
+                    <td style="font-weight:700;">$${triggerPrice.toFixed(2)}</td>
+                    <td class="td-buy">+${d.buy}% 資金</td>
+                    <td class="td-sell">-${d.sell}% 資金</td>
+                    <td style="color:var(--text2)">$${Math.round(investAmount).toLocaleString('en-US')}</td>
+                    <td style="font-weight:700; color:var(--amber)">$${Math.round(accCash).toLocaleString('en-US')}</td>
+                </tr>
+            `;
+        });
+        
+        html += `<tr style="background:rgba(245,158,11,.06)"><td colspan="6" class="td-stop">❄️ 跌破 -30% ($${(price * 0.7).toFixed(2)}) → 進入冬眠模式：停止左側加碼！</td></tr>`;
+        
+        if(tbody) tbody.innerHTML = html;
+        if(tbodyStatic) tbodyStatic.innerHTML = html;
+
+        // 同步回 appState
+        if(appState && appState.smile) {
+            appState.smile.price = price;
+            appState.smile.cash = cash;
+            localStorage.setItem('advCalcState', JSON.stringify(appState));
+        }
+    } catch(e) {
+        console.error("calcSmile Error:", e);
+    }
 }
 
 /* ────────────────────────────────
@@ -1874,46 +1899,80 @@ function toggleTheme() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Theme
+  // 1. 恢復主題設定
   const savedTheme = localStorage.getItem('theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
   const themeBtn = document.getElementById('theme-toggle');
   if(themeBtn) themeBtn.innerText = savedTheme === 'dark' ? '☀️' : '🌙';
 
-  // Load State
-  const savedState = localStorage.getItem('advCalcState');
+  // 2. 恢復計算機參數狀態 (支援兩種 LocalStorage 格式，防呆機制)
+  let savedState = localStorage.getItem('advCalcState');
+  if (!savedState) {
+      // 嘗試讀取舊版 calcState 進行遷移
+      const oldState = localStorage.getItem('calcState');
+      if (oldState) {
+          try {
+              const parsedOld = JSON.parse(oldState);
+              savedState = JSON.stringify({
+                  inputs: {
+                      salary: parsedOld.salary || 75000,
+                      loan: parsedOld.loan || 2000000,
+                      fee: parsedOld.fee || 9000,
+                      years: parsedOld.years || 10,
+                      rate: parsedOld.rate || 2.5,
+                      baseReturn: parsedOld.baseReturn || 8.0,
+                      premium: parsedOld.premium || 4.0,
+                      isZeroPay: parsedOld.isZeroPay || false
+                  },
+                  bbd: { asset: 3000000, borrow: 1000000, drop: 20 },
+                  smile: { price: 180, cash: 400000 }
+              });
+          } catch(e) {}
+      }
+  }
+
   if (savedState) {
     try {
       const state = JSON.parse(savedState);
-      const safeSetVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
-      const safeSetCheck = (id, val) => { const el = document.getElementById(id); if(el) el.checked = val; };
+      const safeSetVal = (id, val) => { 
+          if (val !== undefined && val !== null) {
+              const el = document.getElementById(id); 
+              if(el) el.value = val; 
+          }
+      };
+      const safeSetCheck = (id, val) => { 
+          if (val !== undefined && val !== null) {
+              const el = document.getElementById(id); 
+              if(el) el.checked = val; 
+          }
+      };
       
-      safeSetVal('inp-salary', state.inputs.salary);
-      safeSetVal('inp-loan', state.inputs.loan);
-      safeSetVal('inp-fee', state.inputs.fee);
-      safeSetVal('inp-years', state.inputs.years);
-      safeSetVal('inp-rate', state.inputs.rate);
-      safeSetVal('inp-return', state.inputs.baseReturn);
-      safeSetVal('inp-premium', state.inputs.premium);
-      safeSetCheck('inp-zero-pay', state.inputs.isZeroPay);
+      safeSetVal('inp-salary', state?.inputs?.salary);
+      safeSetVal('inp-loan', state?.inputs?.loan);
+      safeSetVal('inp-fee', state?.inputs?.fee);
+      safeSetVal('inp-years', state?.inputs?.years);
+      safeSetVal('inp-rate', state?.inputs?.rate);
+      safeSetVal('inp-return', state?.inputs?.baseReturn);
+      safeSetVal('inp-premium', state?.inputs?.premium);
+      safeSetCheck('inp-zero-pay', state?.inputs?.isZeroPay);
 
-      safeSetVal('inp-bbd-asset', state.bbd.asset);
-      safeSetVal('inp-bbd-borrow', state.bbd.borrow);
-      safeSetVal('inp-bbd-drop', state.bbd.drop);
+      safeSetVal('inp-bbd-asset', state?.bbd?.asset);
+      safeSetVal('inp-bbd-borrow', state?.bbd?.borrow);
+      safeSetVal('inp-bbd-drop', state?.bbd?.drop);
 
-      safeSetVal('inp-smile-price', state.smile.price);
-      safeSetVal('inp-smile-cash', state.smile.cash);
+      safeSetVal('inp-smile-price', state?.smile?.price);
+      safeSetVal('inp-smile-cash', state?.smile?.cash);
 
     } catch (e) {
       console.error("無法還原計算機狀態", e);
     }
   }
 
-  // Restore Tab
+  // 3. 恢復 Tab
   const savedTab = localStorage.getItem('activeTabAdv') || 'calc';
   switchTab(savedTab, null);
 
-  // Initial Calculation
+  // 4. 初始化計算
   calculate();
   calcBBD();
   calcSmile();
