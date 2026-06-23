@@ -76,7 +76,7 @@
 ```
 {"success": true,"results": [
  {"original_input":"HA82字第99號","normalized":"115-HA82-000099","year_miguo":115,"year_ad":2026,"year_defaulted":true,"case_word":"HA82","case_word_desc":"桃資總","case_no":"000099","validation_error":null},
- {"original_input":"1200","normalized":"115-HA81-001200","year_miguo":115,"year_ad":2026,"year_defaulted":true,"case_word":"HA81","case_word_desc":"桃資登","case_no":"001200","validation_error":null}
+ {"original_input":"1200","normalized":"115-HA82-001200","year_miguo":115,"year_ad":2026,"year_defaulted":true,"case_word":"HA81","case_word_desc":"桃資總","case_no":"001200","validation_error":null}
 ],"errors":[]}
 ```
 
