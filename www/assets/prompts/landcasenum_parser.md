@@ -26,7 +26,8 @@
 - **年份優先辨識**：數值介於 100 至 130 之間（含）的獨立數字 token，若其後緊接著案件字（4 碼英數字），**必須優先判定為民國年**，而非案件號。解析順序為：① 偵測是否為 100–130 → ② 確認後方存在案件字 token → ③ 成立則設為 `year_miguo`，`year_defaulted: false`。  
   - 範例：`114 HA81 64210` → 年份=114、案件字=HA81、案件號=064210，標準化為 `114-HA81-064210`。  
   - 範例：`113-HA82-000500` → 年份=113，非預設，`year_defaulted: false`。  
-- **純數字輸入**：若僅輸入數字（如 1200），且該數字**不在 100–130 範圍內**，判定為案件號。若整串輸入無任何案件字，則民國年預設為**當前民國年**（今日西元年 - 1911），案件字預設 HA81，並標記 `year_defaulted: true`。  
+- **純數字輸入**：輸入中每個數字 token 只要**不在 100–130 範圍內**，即判定為案件號，**每個 token 各自輸出為獨立一筆 result，禁止合併**。若整串輸入無任何案件字，則民國年預設為**當前民國年**（今日西元年 - 1911），案件字預設 HA81，並標記 `year_defaulted: true`。  
+  - 範例：`19500 13500` 必須輸出兩筆，分別為 `115-HA81-019500` 與 `115-HA81-013500`。  
 - **多筆拆分原則**：無論有無案件字，輸入中每個獨立的案件號數字 token 都必須輸出為獨立一筆 result。以空白、逗號、換行、頓號為分隔符號逐 token 解析，**嚴禁將多個 token 合併為單筆輸出**。  
 - **缺年份**：若有案件字與案號但無年份，且輸入中**其他筆也未明確指定年份**，才預設民國年為**當前民國年**（今日西元年 - 1911），並標記 `year_defaulted: true`。若其他筆已有明確年份，則依「動態年份繼承」規則處理。  
 - **分隔符號**：可能為「-」「/」「－」「空白」「年」「字」「第」「號」。  
@@ -39,7 +40,7 @@
 ### 案件字代碼查表
 - 整碼比對「案件字代碼對照表」或知識庫。  
 - 查無整碼時，嘗試比對前 2 碼是否符合「受理機關代碼對照表」。  
-- 若仍查無，填入「未定義代碼」或提示需更新對照表。  
+- 若仍查無，**預設使用 HA81**（`case_word` 填入 `"HA81"`，`case_word_desc` 填入對應中文說明），並於 `validation_error` 欄位填入警示說明，格式為：`"案件字 [原始代碼] 查無對應，已自動替換為 HA81"`。  
 
 ---
 
@@ -127,6 +128,18 @@
 {"success": true,"results": [
  {"original_input":"113年 桃園朴子 第190號","normalized":"113-H1QB-000190","year_miguo":113,"year_ad":2024,"year_defaulted":false,"case_word":"H1QB","case_word_desc":"跨縣市(桃園朴子)","case_no":"000190","validation_error":null},
  {"original_input":"HA81 1200","normalized":"113-HA81-001200","year_miguo":113,"year_ad":2024,"year_defaulted":false,"case_word":"HA81","case_word_desc":"桃資登","case_no":"001200","validation_error":null}
+],"errors":[]}
+```
+
+---
+### 範例六（多個純數字輸入，無案件字）
+輸入：`19500 13500`  
+說明：兩個數字 token 均不在 100–130 範圍內，各自判定為案件號。無案件字，預設 HA81；無年份，預設當前民國年（以 115 為例）。每個 token 各自輸出獨立一筆，禁止合併。  
+輸出：
+```
+{"success": true,"results": [
+ {"original_input":"19500","normalized":"115-HA81-019500","year_miguo":115,"year_ad":2026,"year_defaulted":true,"case_word":"HA81","case_word_desc":"桃資登","case_no":"019500","validation_error":null},
+ {"original_input":"13500","normalized":"115-HA81-013500","year_miguo":115,"year_ad":2026,"year_defaulted":true,"case_word":"HA81","case_word_desc":"桃資登","case_no":"013500","validation_error":null}
 ],"errors":[]}
 ```
 
