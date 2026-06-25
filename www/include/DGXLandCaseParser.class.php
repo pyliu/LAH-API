@@ -1,10 +1,29 @@
 <?php
-
+/**
+### 1. 服務狀態與網路配置
+Ollama 在 DGX OS 內以 Systemd 服務運行。必須將其監聽地址改為 `0.0.0.0`，後端的 PHP 7.x 伺服器才能跨機呼叫。
+```bash
+# 建立環境變數覆蓋檔，設定監聽全網段
+sudo mkdir -p /etc/systemd/system/ollama.service.d
+sudo tee /etc/systemd/system/ollama.service.d/override.conf <<'EOF'
+[Service]
+Environment="OLLAMA_HOST=0.0.0.0"
+EOF
+# 套用設定並重啟服務
+sudo systemctl daemon-reload
+sudo systemctl restart ollama
+# 檢查服務狀態
+sudo systemctl status ollama
+# 系統防火牆放行 11434 連接埠
+sudo ufw allow 11434/tcp
+sudo ufw status
+```
+ */
 class DGXLandCaseParser
 {
     // ⚠️ 直連 Ollama 的 OpenAI 相容端點
     private $apiUrl  = 'http://192.168.13.195:11434/v1/chat/completions';
-    private $model   = 'gemma3:latest'; 
+    private $model   = 'gemma3:latest'; // llama3:latest, gemma3:latest, gemma4:12b
     private $timeout = 60; 
 
     /**
