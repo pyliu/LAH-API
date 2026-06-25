@@ -18,6 +18,12 @@ sudo systemctl status ollama
 sudo ufw allow 11434/tcp
 sudo ufw status
 ```
+根據你的 DGX Spark 環境與速度優先的考量，建議如下：
+推薦：gemma3:latest（3.3 GB）
+理由：
+  - gemma4:12b 7.6GB 12B 慢 複雜推理
+  - llama3:latest 4.7GB 8B 中 通用任務
+  - gemma3:latest 3.3GB ~4B 最快 結構化輸出
  */
 class DGXLandCaseParser
 {
