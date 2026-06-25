@@ -38,18 +38,18 @@ try {
     // echo print_r(REG_CODE, true) . "\n\n";
     $parser = new DGXLandCaseParser();
     // 測試案例一：混合輸入
-    $testInput1 = "幫我查 南投桃園 第190號，還有 1200";
+    $testInput1 = "幫我查113年 桃園朴子 第190號，還有 114 HA81 1200 ";
     $result1 = $parser->parse($testInput1);
 
     // 測試案例二：多筆純數字繼承
-    $testInput2 = "HA85 1200 1300 1400";
-    $result2 = $parser->parse($testInput2);
+    // $testInput2 = "HA85 1200 1300 1400";
+    // $result2 = $parser->parse($testInput2);
 
     echo json_encode(array(
         'case_1_input' => $testInput1,
         'case_1_output' => $result1,
-        'case_2_input' => $testInput2,
-        'case_2_output' => $result2
+        // 'case_2_input' => $testInput2,
+        // 'case_2_output' => $result2
     ), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     
 } catch (Exception $ex) {
