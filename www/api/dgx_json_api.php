@@ -69,7 +69,7 @@ try {
             // 6. 成功回傳
             http_response_code(200);
             echo json_encode([
-                'status' => 'success',
+                'status' => STATUS_CODE::SUCCESS_NORMAL,
                 'raw' => $parsedResult['results'] ?? []
             ], JSON_THROW_ON_ERROR); // PHP 7.3 特性: 發生編碼錯誤時拋出 JsonException
             break;
