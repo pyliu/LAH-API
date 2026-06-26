@@ -59,7 +59,7 @@ try {
                 
                 http_response_code(422); // 422 Unprocessable Entity
                 echo json_encode([
-                    'status' => 'error',
+                    'status' => STATUS_CODE::DEFAULT_FAIL,
                     'message' => $errorMessage,
                     'raw_output' => $parsedResult['raw_output'] ?? null
                 ], JSON_THROW_ON_ERROR);
