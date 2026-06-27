@@ -9,6 +9,67 @@
 
 declare(strict_types=1);
 
+// ── 速率限制設定 ──────────────────────────────────────────────
+// 每個來源 IP，在 RATE_LIMIT_WINDOW_SEC 秒內最多允許 N 次請求
+// 觸發後回傳 HTTP 429，避免 LLM 推理資源被意外耗盡
+define('RATE_LIMIT_MAX_REQUESTS', 10);
+define('RATE_LIMIT_WINDOW_SEC',   60);
+
+/**
+ * 簡易 IP 速率限制 (File-based, PHP 7.3 相容)
+ *
+ * 以系統臨時目錄記錄各 IP 的請求時間戳。
+ * 採排他鎖 (LOCK_EX) 確保高併發下計數正確。
+ * Fail-open：若檔案系統操作失敗，一律放行，不阻斷正常業務。
+ *
+ * @param  string $ip        請求端 IP
+ * @param  int    $maxReqs   時間窗口內最大請求數
+ * @param  int    $windowSec 時間窗口（秒）
+ * @return bool   true = 允許通過，false = 超出限制
+ */
+function checkRateLimit(string $ip, int $maxReqs, int $windowSec): bool
+{
+    $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'dgx_rl';
+
+    // 併發安全建目錄：先 mkdir 再 is_dir，避免 race condition
+    if (!is_dir($dir) && !@mkdir($dir, 0700, true) && !is_dir($dir)) {
+        return true; // fail-open
+    }
+
+    // 用 IP 的 MD5 做檔名，迴避 IPv6 冒號等特殊字元
+    $file = $dir . DIRECTORY_SEPARATOR . md5($ip) . '.json';
+    $fp   = @fopen($file, 'c+'); // 'c+' = 不存在則建立，不截斷，可讀寫
+    if ($fp === false) {
+        return true; // fail-open
+    }
+
+    flock($fp, LOCK_EX); // 取得排他鎖，阻塞直到獲得
+
+    $raw        = stream_get_contents($fp);
+    $timestamps = (array) (json_decode($raw ?: '[]', true) ?: []);
+    $now        = time();
+
+    // 移除窗口期外的過期時間戳（加型別保護，防止檔案被污染）
+    $timestamps = array_values(array_filter($timestamps, function ($t) use ($now, $windowSec) {
+        return is_int($t) && ($now - $t) < $windowSec;
+    }));
+
+    $allowed = count($timestamps) < $maxReqs;
+    if ($allowed) {
+        $timestamps[] = $now;
+    }
+
+    // 回寫更新後的時間戳陣列
+    ftruncate($fp, 0);
+    rewind($fp);
+    fwrite($fp, json_encode($timestamps));
+
+    flock($fp, LOCK_UN);
+    fclose($fp);
+
+    return $allowed;
+}
+
 // 引入既有系統底層與自動加載 (依循原系統架構)
 require_once dirname(__DIR__) . '/include/init.php';
 require_once INC_DIR . '/System.class.php';
@@ -27,12 +88,27 @@ try {
     }
 
     $reqIp = $_POST['req_ip'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+
+    // 2. 速率限制：防止 LLM 推理資源被頻繁請求耗盡
+    if (!checkRateLimit($reqIp, RATE_LIMIT_MAX_REQUESTS, RATE_LIMIT_WINDOW_SEC)) {
+        $logger->warning(sprintf(
+            "XHR [dgx_json_api] 速率限制觸發，IP: %s（%d 次/%d 秒）",
+            $reqIp, RATE_LIMIT_MAX_REQUESTS, RATE_LIMIT_WINDOW_SEC
+        ));
+        http_response_code(429); // Too Many Requests
+        echo json_encode([
+            'status'  => 'error',
+            'message' => sprintf('請求過於頻繁，每 %d 秒最多 %d 次，請稍後再試。', RATE_LIMIT_WINDOW_SEC, RATE_LIMIT_MAX_REQUESTS)
+        ]);
+        exit;
+    }
+
+    // 3. 針對 POST 的 type 參數進行分流
     $type = $_POST['type'] ?? '';
 
-    // 2. 針對 POST 的 type 參數進行分流
     switch ($type) {
         case 'case_ids':
-            // 3. 取得並驗證輸入參數
+            // 4. 取得並驗證輸入參數
             $inputString = trim($_POST['input_string'] ?? '');
             
             if ($inputString === '') {
@@ -46,13 +122,13 @@ try {
 
             $logger->info(sprintf("XHR [dgx_json_api] 收到來自 IP: %s 的 case_ids 解析請求", $reqIp));
 
-            // 4. 實例化解析器並執行
+            // 5. 實例化解析器並執行
             $parser = new DGXLandCaseParser();
             
             // 呼叫解析器
             $parsedResult = $parser->parse($inputString);
 
-            // 5. 處理業務邏輯錯誤
+            // 6. 處理業務邏輯錯誤
             if (isset($parsedResult['success']) && $parsedResult['success'] === false) {
                 $errorMessage = $parsedResult['error'] ?? '模型解析失敗';
                 $logger->warning(sprintf("XHR [dgx_json_api] 解析失敗: %s", $errorMessage));
@@ -66,7 +142,7 @@ try {
                 exit;
             }
 
-            // 6. 成功回傳
+            // 7. 成功回傳
             http_response_code(200);
             echo json_encode([
                 'status' => STATUS_CODE::SUCCESS_NORMAL,
