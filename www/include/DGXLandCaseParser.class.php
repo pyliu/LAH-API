@@ -27,10 +27,19 @@ sudo ufw status
  */
 class DGXLandCaseParser
 {
-    // ⚠️ 直連 Ollama 的 OpenAI 相容端點
-    private $apiUrl  = 'http://192.168.13.195:11434/v1/chat/completions';
-    private $model   = 'gemma3:latest'; // llama3:latest, gemma3:latest, gemma4:12b
-    private $timeout = 60; 
+    // ⚠️ 直連 Ollama 的 OpenAI 相容端點 (由 init.php 常數決定，避免硬編碼)
+    private $apiUrl;
+    private $model;
+    private $timeout = 60;
+    private $regMap  = null; // 懶載入快取，避免同一 request 重複建構陣列
+
+    public function __construct()
+    {
+        $ip         = defined('DGX_OLLAMA_IP')    ? DGX_OLLAMA_IP    : '192.168.13.195';
+        $port       = defined('DGX_OLLAMA_PORT')  ? DGX_OLLAMA_PORT  : '11434';
+        $this->apiUrl = "http://{$ip}:{$port}/v1/chat/completions";
+        $this->model  = defined('DGX_OLLAMA_MODEL') ? DGX_OLLAMA_MODEL : 'gemma3:latest';
+    }
 
     /**
      * 取得系統提示詞 (已移除肥大的字典對照表，減輕模型負擔)
@@ -63,7 +72,10 @@ class DGXLandCaseParser
      */
     private function getRegMap()
     {
-        return array(
+        if ($this->regMap !== null) {
+            return $this->regMap;
+        }
+        $this->regMap = array(
             // 本所與轄內跨所
             'HA81' => '桃資登', 'HA82' => '桃資總', 'HA85' => '桃資速', 'HA87' => '桃資標', 'HAX2' => '桃園跨',
             'HAA1' => '桃桃登跨', 'HBA1' => '桃壢登跨', 'HFA1' => '桃德登跨', 'HCA1' => '桃溪登跨',
@@ -136,6 +148,7 @@ class DGXLandCaseParser
             'H1WA' => '跨縣市(桃園金門)', 'H1XA' => '跨縣市(桃園澎湖)', 'H1ZA' => '跨縣市(桃園連江)',
             'X1HA' => '跨縣市(澎湖桃園)', 'Z1HA' => '跨縣市(連江桃園)'
         );
+        return $this->regMap;
     }
 
     /**
@@ -156,11 +169,7 @@ class DGXLandCaseParser
             }
         }
         
-        // 為了避免短詞 (例如單一的 桃園) 干擾，以陣列 Key 的長度由長到短排序
-        uksort($reverseMap, function($a, $b) {
-            return mb_strlen($b, 'UTF-8') - mb_strlen($a, 'UTF-8');
-        });
-
+        // strtr() 傳入陣列時，PHP 原生即為 longest-key-first 匹配，無需手動排序
         // 執行無損替換
         $processed = strtr($input, $reverseMap);
         
@@ -179,7 +188,7 @@ class DGXLandCaseParser
         $map = $this->getRegMap();
 
         foreach ($results as &$item) {
-            $code = strtoupper(trim(isset($item['case_word']) ? $item['case_word'] : ''));
+            $code = strtoupper(trim($item['case_word'] ?? ''));
             if (!empty($code)) {
                 if (isset($map[$code])) {
                     $item['case_word_desc'] = $map[$code];
@@ -189,6 +198,7 @@ class DGXLandCaseParser
                 }
             }
         }
+        unset($item); // 解除最後一個元素的 reference，防止後續操作意外修改陣列
         return $results;
     }
 
