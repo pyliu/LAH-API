@@ -18,6 +18,7 @@ abstract class STATUS_CODE {
 }
 
 define('ROOT_DIR', dirname(dirname(__FILE__)));
+define('ASSETS_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'assets');
 define('EXPORT_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'export');
 define('IMPORT_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'import');
 define('LOG_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'log');
@@ -32,6 +33,14 @@ define('XLSX_TPL_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR
 define('DB_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db");
 define('DEF_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."LAH.db");
 define('ORACLE_ENCODING', 'CP950');
+// ==========================================
+// AI 提示詞路徑定義
+// ==========================================
+define('DGX_PROMPTS_PATH', ASSETS_DIR.DIRECTORY_SEPARATOR.'prompts');
+define('DGX_LAND_CASE_NUM_PROMPT', 'landcasenum_parser.md');
+// ==========================================
+// DGX Spark Ollama Server 設定
+// ==========================================
 define('DGX_OLLAMA_IP', '192.168.13.195');
 define('DGX_OLLAMA_PORT', '11434');
 define('DGX_OLLAMA_MODEL', 'gemma3:latest');
