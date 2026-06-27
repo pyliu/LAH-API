@@ -25,6 +25,8 @@ sudo ufw status
   - llama3:latest 4.7GB 8B 中 通用任務
   - gemma3:latest 3.3GB ~4B 最快 結構化輸出
  */
+// Loading global consts and functions
+require_once('init.php');
 class DGXLandCaseParser
 {
     // ⚠️ 直連 Ollama 的 OpenAI 相容端點 (由 init.php 常數決定，避免硬編碼)
@@ -46,7 +48,7 @@ class DGXLandCaseParser
      */
     private function getSystemPrompt()
     {
-        $promptPath = __DIR__ . '/../assets/prompts/landcasenum_parser.md';
+        $promptPath = DGX_PROMPTS_PATH.DIRECTORY_SEPARATOR.DGX_LAND_CASE_NUM_PROMPT;
         Logger::getInstance()->info("DGXLandCaseParser: 開始讀取系統提示詞檔案 [{$promptPath}]");
         
         $content = @file_get_contents($promptPath);
