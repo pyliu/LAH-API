@@ -39,7 +39,32 @@ define('ORACLE_ENCODING', 'CP950');
 define('DGX_PROMPTS_PATH', ASSETS_DIR.DIRECTORY_SEPARATOR.'prompts');
 define('DGX_LAND_CASE_NUM_PROMPT', 'landcasenum_parser.md');
 // ==========================================
-// DGX Spark Ollama Server 設定
+/**
+	### 1. DGX Spark Ollama Server 服務狀態與網路設定
+	Ollama 在 DGX OS 內以 Systemd 服務運行。必須將其監聽地址改為 `0.0.0.0`，後端的 PHP 7.x 伺服器才能跨機呼叫。
+	```bash
+	# 建立環境變數覆蓋檔，設定監聽全網段
+	sudo mkdir -p /etc/systemd/system/ollama.service.d
+	sudo tee /etc/systemd/system/ollama.service.d/override.conf <<'EOF'
+	[Service]
+	Environment="OLLAMA_HOST=0.0.0.0"
+	EOF
+	# 套用設定並重啟服務
+	sudo systemctl daemon-reload
+	sudo systemctl restart ollama
+	# 檢查服務狀態
+	sudo systemctl status ollama
+	# 系統防火牆放行 11434 連接埠
+	sudo ufw allow 11434/tcp
+	sudo ufw status
+	```
+	根據你的 DGX Spark 環境與速度優先的考量，建議如下：
+	推薦：gemma3:latest（3.3 GB）
+	理由：
+	  - gemma4:12b 7.6GB 12B 慢 複雜推理
+	  - llama3:latest 4.7GB 8B 中 通用任務
+	  - gemma3:latest 3.3GB ~4B 最快 結構化輸出
+*/
 // ==========================================
 define('DGX_OLLAMA_IP', '192.168.13.195');
 define('DGX_OLLAMA_PORT', '11434');
