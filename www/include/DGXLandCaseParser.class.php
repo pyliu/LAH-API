@@ -185,6 +185,11 @@ class DGXLandCaseParser
         // ⚠️ 關鍵：呼叫 LLM 之前，將「跨縣市(水上桃園)」變成「Q3HA」
         $processedInput = $this->preprocessInput($input);
 
+        // ⚠️ 修正：動態注入當前日期，否則落地端模型無法得知「當前民國年」
+        $currentYearAd = (int)date('Y');
+        $currentYearMiguo = $currentYearAd - 1911;
+        $timeContext = "\n\n【系統環境時間提示】當前西元年：{$currentYearAd}年，當前民國年：{$currentYearMiguo}年。若使用者未指定年份，請以此計算。";
+        
         $payloadData = array(
             'model'    => (string) $this->model,
             'stream'   => false,
@@ -200,7 +205,8 @@ class DGXLandCaseParser
                 ),
                 array(
                     'role' => 'user', 
-                    'content' => $processedInput
+                    // 注入時間脈絡
+                    'content' => $processedInput. $timeContext
                 )
             ),
             'response_format' => array(
