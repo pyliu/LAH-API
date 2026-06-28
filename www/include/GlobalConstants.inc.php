@@ -67,8 +67,8 @@ define('DGX_LAND_CASE_NUM_PROMPT', 'landcasenum_parser.md');
 */
 // ==========================================
 define('DGX_IP', '192.168.13.195');
-define('DGX_OLLAMA_PORT', '11434');
-define('DGX_OLLAMA_MODEL', 'gemma3:latest');
+define('DGX_vLLM_PORT', '11434');
+define('DGX_vLLM_MODEL', 'gemma3:latest');
 
 define('CASE_STATUS',[
     "A" => "初審",
