@@ -12,9 +12,9 @@ class DGXLandCaseParser
     public function __construct()
     {
         $ip         = defined('DGX_IP')    ? DGX_IP    : '192.168.13.195';
-        $port       = defined('DGX_OLLAMA_PORT')  ? DGX_OLLAMA_PORT  : '11434';
+        $port       = defined('DGX_vLLM_PORT')  ? DGX_vLLM_PORT  : '11434';
         $this->apiUrl = "http://{$ip}:{$port}/v1/chat/completions";
-        $this->model  = defined('DGX_OLLAMA_MODEL') ? DGX_OLLAMA_MODEL : 'gemma3:latest';
+        $this->model  = defined('DGX_vLLM_MODEL') ? DGX_vLLM_MODEL : 'gemma3:latest';
     }
 
     /**
