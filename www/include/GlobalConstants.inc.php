@@ -66,7 +66,7 @@ define('DGX_LAND_CASE_NUM_PROMPT', 'landcasenum_parser.md');
 	  - gemma3:latest 3.3GB ~4B 最快 結構化輸出
 */
 // ==========================================
-define('DGX_OLLAMA_IP', '192.168.13.195');
+define('DGX_IP', '192.168.13.195');
 define('DGX_OLLAMA_PORT', '11434');
 define('DGX_OLLAMA_MODEL', 'gemma3:latest');
 
