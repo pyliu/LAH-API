@@ -36,7 +36,7 @@
 - **分隔符號**：可能為「-」「/」「－」「空白」「年」「字」「第」「號」。  
 - **大小寫**：英文字母不分大小寫，輸出統一大寫。  
 - **全形數字**：需轉半形再處理。  
-- **案件號補零**：不足 6 碼需補零。  
+- **案件號補零**：不足 6 碼需補零，這很重要，數字字數超過6碼前面的數字不須補0。  
 
 ---
 
@@ -167,6 +167,20 @@
 {"success": true,"results": [
  {"original_input":"15000","normalized":"114-HA81-015000","year_miguo":114,"year_ad":2025,"year_defaulted":false,"case_word":"HA81","case_word_desc":"桃資登","case_no":"015000","validation_error":null},
  {"original_input":"1600","normalized":"114-HA81-001600","year_miguo":114,"year_ad":2025,"year_defaulted":false,"case_word":"HA81","case_word_desc":"桃資登","case_no":"001600","validation_error":null}
+],"errors":[]}
+```
+
+---
+
+---
+
+### 範例九（純數字，無案件字，無年分）
+輸入：`112460`  
+說明：數字6碼，無案件字預設 HA81；無年份，預設當前民國年（以 115 為例）。每個 token 各自輸出獨立一筆，禁止合併。  
+輸出：
+```
+{"success": true,"results": [
+ {"original_input":"112460","normalized":"115-HA81-112460","year_miguo":114,"year_ad":2025,"year_defaulted":false,"case_word":"HA81","case_word_desc":"桃資登","case_no":"112460","validation_error":null}
 ],"errors":[]}
 ```
 
