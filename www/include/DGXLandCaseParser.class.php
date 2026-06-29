@@ -126,6 +126,54 @@ class DGXLandCaseParser
         );
         return $this->regMap;
     }
+    /**
+     * ⚠️ 新增：利用 Regex 嘗試直接從輸入文字中解析案件號（不呼叫 AI）
+     * 支援格式：{3位民國年}-{4碼英數代碼}-{6位流水號}
+     * 範例：115-HA81-000140、115-HBA1-000150
+     * 成功回傳結果陣列；找不到任何符合的案件號則回傳 null（讓 AI 接手）
+     */
+    private function regexParse($input)
+    {
+        // 民國年(3碼) + 分隔(連字號或空白) + 案碼(4碼英數) + 分隔 + 流水號(1~6碼，不足自動補零)
+        $pattern = '/\b(\d{3})[\s\-]+([A-Z0-9]{4})[\s\-]+(\d{1,6})\b/i';
+
+        if (!preg_match_all($pattern, $input, $matches, PREG_SET_ORDER)) {
+            return null; // 未命中，交給 AI
+        }
+
+        $results = array();
+        foreach ($matches as $m) {
+            $yearMiguo = (int)$m[1];
+            $caseWord  = strtoupper($m[2]);
+            $caseNo    = str_pad($m[3], 6, '0', STR_PAD_LEFT);
+
+            $results[] = array(
+                'original_input'   => $m[0],                              // 匹配到的原始片段
+                'normalized'       => "{$yearMiguo}-{$caseWord}-{$caseNo}", // 標準化案件號
+                'year_miguo'       => $yearMiguo,                          // 民國年 (int)
+                'year_ad'          => $yearMiguo + 1911,                   // 西元年 (int)
+                'year_defaulted'   => false,                               // regex 明確解析，非預設值
+                'case_word'        => $caseWord,
+                'case_word_desc'   => '',                                  // 由 enrichResults() 填入
+                'case_no'          => $caseNo,
+                'validation_error' => null,
+            );
+        }
+
+        // 共用 enrichResults()，補齊 case_word_desc
+        $results = $this->enrichResults($results);
+
+        Logger::getInstance()->info(
+            "DGXLandCaseParser: [Regex] 直接解析成功，共 " . count($results) . " 筆。\n" .
+            print_r($results, true)
+        );
+
+        return array(
+            'success' => true,
+            'results' => $results,
+            'errors'  => array(),
+        );
+    }
 
     /**
      * ⚠️ 新增：預處理輸入，把使用者的「中文描述」直接無縫替換成「4 碼代號」
@@ -182,8 +230,16 @@ class DGXLandCaseParser
     {
         Logger::getInstance()->info("DGXLandCaseParser: 收到解析請求: [{$input}]");
 
-        // ⚠️ 關鍵：呼叫 LLM 之前，將「跨縣市(水上桃園)」變成「Q3HA」
+        // ⚠️ 先預處理（中文描述 → 代碼），讓 Regex 也能處理類似「114 桃楊登跨 1000」這類輸入
         $processedInput = $this->preprocessInput($input);
+
+        // ⚠️ 新增：以 Regex 嘗試快速解析，成功則直接回傳，跳過 AI 呼叫
+        $regexResult = $this->regexParse($processedInput);
+        if ($regexResult !== null) {
+            Logger::getInstance()->info("DGXLandCaseParser: [Regex] 命中，跳過 AI 呼叫。");
+            return $regexResult;
+        }
+        Logger::getInstance()->info("DGXLandCaseParser: [Regex] 未命中，交由 AI 處理。");
 
         // ⚠️ 修正：動態注入當前日期至 system 訊息尾端（勿放入 user 訊息，避免干擾年份辨識）
         $currentYearAd = (int)date('Y');
