@@ -109,7 +109,7 @@ try {
     switch ($type) {
         case 'case_ids':
             // 4. 取得並驗證輸入參數
-            $inputString = trim($_POST['input_string'] ?? '');
+            $inputString = trim($_POST['text'] ?? '');
             
             if ($inputString === '') {
                 throw new InvalidArgumentException('輸入字串不能為空', 400);
@@ -137,7 +137,7 @@ try {
                 echo json_encode([
                     'status' => STATUS_CODE::DEFAULT_FAIL,
                     'message' => $errorMessage,
-                    'raw_output' => $parsedResult['raw_output'] ?? null
+                    'raw' => $parsedResult['raw_output'] ?? null
                 ], JSON_THROW_ON_ERROR);
                 exit;
             }
