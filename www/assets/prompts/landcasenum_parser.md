@@ -23,8 +23,9 @@
 - **動態年份繼承**：若輸入中任一筆明確指定了民國年（`year_defaulted: false`），後續所有缺少年份的案件**必須繼承該年份**，而非套用當前年份預設值。年份與案件字的繼承機制相互獨立，可分別觸發。  
   - 重要：「後續缺年份」判斷以「該筆 token 中未出現任何 100–130 數字」為準，絕不可因後方有案件字就把繼承來的年份覆蓋。  
   - 範例：`113年 H1QB 第190號，還有 HA81 1200` → 第二筆繼承年份 113，輸出 `113-HA81-001200`，`year_defaulted: false`。  
-- **年份優先辨識**：數值介於 100 至 130 之間（含）的獨立數字 token，若其後緊接著案件字（4 碼英數字），**必須優先判定為民國年**，而非案件號。解析順序為：① 偵測是否為 100–130 → ② 確認後方存在案件字 token → ③ 成立則設為 `year_miguo`，`year_defaulted: false`。  
+- **年份優先辨識**：數值介於 100 至 130 之間（含）的獨立數字 token，**只要其後方存在任何其他 token**（無論是案件字或案件號數字），**必須優先判定為民國年**，而非案件號，`year_defaulted: false`。解析順序為：① 偵測是否為 100–130 → ② 確認後方存在任何 token → ③ 成立則設為 `year_miguo`，`year_defaulted: false`。  
   - 範例：`114 HA81 64210` → 年份=114、案件字=HA81、案件號=064210，標準化為 `114-HA81-064210`。  
+  - 範例：`113 12500` → 年份=113（後方有純數字 token，觸發年份優先辨識）、案件字=HA81（預設）、案件號=012500，標準化為 `113-HA81-012500`，`year_defaulted: false`。  
   - 範例：`113-HA82-000500` → 年份=113，非預設，`year_defaulted: false`。  
 - **純數字輸入**：輸入中每個數字 token 只要**不在 100–130 範圍內**，即判定為案件號，**每個 token 各自輸出為獨立一筆 result，禁止合併**。若整串輸入無任何案件字，則民國年預設為**當前民國年**（今日西元年 - 1911），案件字預設 HA81，並標記 `year_defaulted: true`。  
   - 範例：`19500 13500` 必須輸出兩筆，分別為 `115-HA81-019500` 與 `115-HA81-013500`。  
@@ -140,6 +141,17 @@
 {"success": true,"results": [
  {"original_input":"19500","normalized":"115-HA81-019500","year_miguo":115,"year_ad":2026,"year_defaulted":true,"case_word":"HA81","case_word_desc":"桃資登","case_no":"019500","validation_error":null},
  {"original_input":"13500","normalized":"115-HA81-013500","year_miguo":115,"year_ad":2026,"year_defaulted":true,"case_word":"HA81","case_word_desc":"桃資登","case_no":"013500","validation_error":null}
+],"errors":[]}
+```
+
+---
+### 範例七（年份 + 純數字，無案件字）
+輸入：`113 12500`  
+說明：113 介於 100–130，後方存在 token（12500），**觸發年份優先辨識**，判定為民國年 113，`year_defaulted: false`。12500 為案件號，無案件字則預設 HA81。  
+輸出：
+```
+{"success": true,"results": [
+ {"original_input":"113 12500","normalized":"113-HA81-012500","year_miguo":113,"year_ad":2024,"year_defaulted":false,"case_word":"HA81","case_word_desc":"桃資登","case_no":"012500","validation_error":null}
 ],"errors":[]}
 ```
 

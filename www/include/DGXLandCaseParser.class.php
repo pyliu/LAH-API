@@ -185,10 +185,12 @@ class DGXLandCaseParser
         // ⚠️ 關鍵：呼叫 LLM 之前，將「跨縣市(水上桃園)」變成「Q3HA」
         $processedInput = $this->preprocessInput($input);
 
-        // ⚠️ 修正：動態注入當前日期，否則落地端模型無法得知「當前民國年」
+        // ⚠️ 修正：動態注入當前日期至 system 訊息尾端（勿放入 user 訊息，避免干擾年份辨識）
         $currentYearAd = (int)date('Y');
         $currentYearMiguo = $currentYearAd - 1911;
-        $timeContext = "\n\n【系統環境時間提示】當前西元年：{$currentYearAd}年，當前民國年：{$currentYearMiguo}年。若使用者未指定年份，請以此計算。";
+        $timeContext = "\n\n【系統環境時間提示】當前西元年：{$currentYearAd}年，當前民國年：{$currentYearMiguo}年。" .
+                       "僅當使用者輸入中完全找不到 100–130 範圍內的獨立數字時，才以此年份作為預設值。" .
+                       "若使用者輸入含有 100–130 範圍的數字，無論後接何種 token，均應優先辨識為民國年。";
         
         $payloadData = array(
             'model'    => (string) $this->model,
@@ -201,12 +203,13 @@ class DGXLandCaseParser
             'messages' => array(
                 array(
                     'role' => 'system', 
-                    'content' => $this->getSystemPrompt()
+                    // ✅ timeContext 掛在 system 訊息尾端，不污染使用者輸入
+                    'content' => $this->getSystemPrompt() . $timeContext
                 ),
                 array(
                     'role' => 'user', 
-                    // 注入時間脈絡
-                    'content' => $processedInput. $timeContext
+                    // ✅ 使用者訊息保持純淨，只含輸入內容
+                    'content' => $processedInput
                 )
             ),
             'response_format' => array(
