@@ -128,36 +128,59 @@ class DGXLandCaseParser
     }
     /**
      * ⚠️ 新增：利用 Regex 嘗試直接從輸入文字中解析案件號（不呼叫 AI）
-     * 支援格式：{3位民國年}-{4碼英數代碼}-{6位流水號}
-     * 範例：115-HA81-000140、115-HBA1-000150
-     * 成功回傳結果陣列；找不到任何符合的案件號則回傳 null（讓 AI 接手）
+     *
+     * 支援格式：{民國年(3碼)} {分隔} {案碼(4碼英數)} {分隔} {第一流水號} [, 追加流水號 ...]
+     * 分隔符：連字號或空白；追加流水號以逗號或空白分隔
+     * 範例：
+     *   "114 HA81 1000, 1200"       → 114-HA81-001000 、 114-HA81-001200
+     *   "114-HA81-001000"           → 114-HA81-001000
+     *   "114 HA81 1000 115 HBA1 2" → 114-HA81-001000 、 115-HBA1-000002（兩筆獨立錨點）
+     *
+     * Negative Lookahead 防止把下一筆案件的年份誤判為追加流水號：
+     *   追加數字前若能匹配 \d{3}[\s\-]+[A-Z][A-Z0-9]{3}[\s\-]（像是新錨點的起頭），則停止追加
+     *
+     * 找不到任何符合格式的案件號則回傳 null，讓 AI 接手處理
      */
     private function regexParse($input)
     {
-        // 民國年(3碼) + 分隔(連字號或空白) + 案碼(4碼英數) + 分隔 + 流水號(1~6碼，不足自動補零)
-        $pattern = '/\b(\d{3})[\s\-]+([A-Z0-9]{4})[\s\-]+(\d{1,6})\b/i';
+        // 案碼首碼強制為字母（排除純數字 case_word），追加號碼以 negative lookahead 防跨案誤判
+        $pattern = '/\b(\d{3})[\s\-]+([A-Z][A-Z0-9]{3})[\s\-]+(\d{1,6})((?:[,\s]+(?!\d{3}[\s\-]+[A-Z][A-Z0-9]{3}[\s\-])\d{1,6})*)/i';
 
-        if (!preg_match_all($pattern, $input, $matches, PREG_SET_ORDER)) {
+        if (!preg_match_all($pattern, $input, $anchors, PREG_SET_ORDER)) {
             return null; // 未命中，交給 AI
         }
 
         $results = array();
-        foreach ($matches as $m) {
-            $yearMiguo = (int)$m[1];
-            $caseWord  = strtoupper($m[2]);
-            $caseNo    = str_pad($m[3], 6, '0', STR_PAD_LEFT);
 
-            $results[] = array(
-                'original_input'   => $m[0],                              // 匹配到的原始片段
-                'normalized'       => "{$yearMiguo}-{$caseWord}-{$caseNo}", // 標準化案件號
-                'year_miguo'       => $yearMiguo,                          // 民國年 (int)
-                'year_ad'          => $yearMiguo + 1911,                   // 西元年 (int)
-                'year_defaulted'   => false,                               // regex 明確解析，非預設值
-                'case_word'        => $caseWord,
-                'case_word_desc'   => '',                                  // 由 enrichResults() 填入
-                'case_no'          => $caseNo,
-                'validation_error' => null,
-            );
+        foreach ($anchors as $anchor) {
+            $yearMiguo = (int)$anchor[1];
+            $caseWord  = strtoupper($anchor[2]);
+
+            // 收集所有流水號：第一個必有，後續從 group[4] 中萃取
+            $allNums = array($anchor[3]);
+            if (!empty(trim($anchor[4]))) {
+                preg_match_all('/\d{1,6}/', $anchor[4], $extraNums);
+                $allNums = array_merge($allNums, $extraNums[0]);
+            }
+
+            foreach ($allNums as $num) {
+                $caseNo = str_pad($num, 6, '0', STR_PAD_LEFT);
+                $results[] = array(
+                    'original_input'   => trim($anchor[0]),
+                    'normalized'       => "{$yearMiguo}-{$caseWord}-{$caseNo}",
+                    'year_miguo'       => $yearMiguo,
+                    'year_ad'          => $yearMiguo + 1911,
+                    'year_defaulted'   => false,
+                    'case_word'        => $caseWord,
+                    'case_word_desc'   => '',       // 由 enrichResults() 填入
+                    'case_no'          => $caseNo,
+                    'validation_error' => null,
+                );
+            }
+        }
+
+        if (empty($results)) {
+            return null;
         }
 
         // 共用 enrichResults()，補齊 case_word_desc
@@ -174,6 +197,7 @@ class DGXLandCaseParser
             'errors'  => array(),
         );
     }
+
 
     /**
      * ⚠️ 新增：預處理輸入，把使用者的「中文描述」直接無縫替換成「4 碼代號」
@@ -230,7 +254,7 @@ class DGXLandCaseParser
     {
         Logger::getInstance()->info("DGXLandCaseParser: 收到解析請求: [{$input}]");
 
-        // ⚠️ 先預處理（中文描述 → 代碼），讓 Regex 也能處理類似「114 桃楊登跨 1000」這類輸入
+        // ⚠️ 先預處理（中文描述 → 代碼），讓 Regex 也能處理「114 桃楷登跨 1000」這類輸入
         $processedInput = $this->preprocessInput($input);
 
         // ⚠️ 新增：以 Regex 嘗試快速解析，成功則直接回傳，跳過 AI 呼叫
