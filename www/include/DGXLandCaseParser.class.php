@@ -8,7 +8,7 @@ class DGXLandCaseParser
     private $model;
     private $timeout = 60;
     private $regMap  = null; // 懶載入快取，避免同一 request 重複建構陣列
-    private $reverseMap = null; // ⚠️ 新增：懶載入快取反向字典
+    private $reverseMap = null; // 懶載入快取反向字典
 
     public function __construct()
     {
@@ -102,7 +102,7 @@ class DGXLandCaseParser
             
             // 彰化縣
             'H1NA' => '跨縣市(桃園彰化)', 'H1NB' => '跨縣市(桃園和美)', 'H1NC' => '跨縣市(桃園鹿港)', 'H1ND' => '跨縣市(桃園員林)', 'H1NE' => '跨縣市(桃園田中)', 'H1NF' => '跨縣市(桃園北斗)', 'H1NG' => '跨縣市(桃園二林)', 'H1NH' => '跨縣市(桃園溪湖)',
-            'N1HA' => '跨縣市(彰化桃園)', 'N2HA' => '跨縣市(和美桃園)', 'N3HA' => '跨縣市(鹿港桃園)', 'N4HA' => '跨縣市(員林桃園)', 'N5HA' => '跨縣市(田中桃園)', 'N6HA' => '跨縣市(北斗桃園)', 'N7HA' => '跨縣市(二林桃園)', 'N8HA' => '跨縣市(溪湖桃園)',
+            'N1HA' => '跨縣市(彰化桃園)', 'N2HA' => '跨縣市(和美桃園)', 'N3HA' => '跨縣市(鹿港桃園)', 'N4HA' => '跨縣市(员林桃園)', 'N5HA' => '跨縣市(田中桃園)', 'N6HA' => '跨縣市(北斗桃園)', 'N7HA' => '跨縣市(二林桃園)', 'N8HA' => '跨縣市(溪湖桃園)',
             
             // 雲林縣
             'H1PA' => '跨縣市(桃園斗六)', 'H1PB' => '跨縣市(桃園斗南)', 'H1PC' => '跨縣市(桃園西螺)', 'H1PD' => '跨縣市(桃園虎尾)', 'H1PE' => '跨縣市(桃園北港)', 'H1PF' => '跨縣市(桃園台西)',
@@ -129,8 +129,8 @@ class DGXLandCaseParser
     }
 
     /**
-     * ⚠️ 新增：獲取反向對照表 (中文描述/簡稱 -> 代碼)
-     * 將供 preprocessInput 與 enrichResults 共同使用，提高效能並 DRY。
+     * 獲取反向對照表 (中文描述/簡稱 -> 代碼)
+     * 供 preprocessInput 與 enrichResults 共同使用。
      */
     private function getReverseMap()
     {
@@ -178,14 +178,20 @@ class DGXLandCaseParser
     }
 
     /**
-     * ⚠️ 修改：預處理輸入，把使用者的「中文描述」直接無縫替換成「4 碼代號」
+     * ⚠️ 修改：預處理輸入，替換為代碼時「強制補上空白」，避免「桃楊543」因相連而無法解析
      */
     private function preprocessInput($input)
     {
         $reverseMap = $this->getReverseMap();
         
+        $spacedReverseMap = array();
+        foreach ($reverseMap as $key => $val) {
+            // 前後加上空白，確保 "115年 桃楊543 10號" 會變成 "115年  HDA1 543 10號"
+            $spacedReverseMap[$key] = " {$val} ";
+        }
+        
         // strtr() 傳入陣列時，PHP 原生即為 longest-key-first (最長鍵優先) 匹配，無損替換
-        $processed = strtr($input, $reverseMap);
+        $processed = strtr($input, $spacedReverseMap);
         
         if ($input !== $processed) {
             Logger::getInstance()->info("DGXLandCaseParser: 輸入預處理 (口語轉代碼)\n原輸入: [{$input}]\n處理後: [{$processed}]");
@@ -195,15 +201,7 @@ class DGXLandCaseParser
     }
 
     /**
-     * 利用 Regex 嘗試直接從輸入文字中解析案件號（不呼叫 AI）
-     *
-     * 支援格式：
-     * Phase 1: {民國年(3碼)} {分隔} {案碼(4碼英數)} {分隔} {第一流水號} [, 追加流水號 ...]
-     * Phase 2: {案碼(4碼英數)} {分隔} {第一流水號} [, 追加流水號 ...] (無年份，自動預設今年)
-     * Phase 3: {民國年(3碼)} {分隔} {第一流水號} [, 追加流水號 ...] (無案碼，預設案件字 HA81)
-     * Phase 4: {第一流水號} [, 追加流水號 ...] (純數字，無年份與案碼，自動預設今年與指定案碼)
-     *
-     * 找不到任何符合格式的案件號則回傳 null，讓 AI 接手處理
+     * ⚠️ 修改：全面升級 Regex 匹配規則，利用 [^\da-zA-Z]+ 穿透各種中文雜訊與無意義的標點
      */
     private function regexParse($input)
     {
@@ -218,16 +216,17 @@ class DGXLandCaseParser
         // ==========================================
         // Phase 1: 包含民國年的完整格式
         // ==========================================
-        $pattern1 = '/\b(\d{3})[\s\-]+([A-Z][A-Z0-9]{3})[\s\-]+(\d{1,6})((?:[,\s]+(?!\d{3}[\s\-]+[A-Z][A-Z0-9]{3}[\s\-])\d{1,6})*)/i';
+        // [^\da-zA-Z]+ 允許匹配任意非英數字元（如 "年 "、" 不知所謂"），完美跳過雜訊
+        $pattern1 = '/(?<!\d)(1\d{2})[^\da-zA-Z]+([A-Z][A-Z0-9]{3})[^\da-zA-Z]+(\d{1,6})((?:[^\da-zA-Z]+(?!\d{3}[^\da-zA-Z]+[A-Z])(?![A-Z][A-Z0-9]{3})\d{1,6})*)/iu';
 
         if (preg_match_all($pattern1, $remainingInput, $anchors1, PREG_SET_ORDER)) {
             foreach ($anchors1 as $anchor) {
                 $yearMiguo = (int)$anchor[1];
                 $caseWord  = strtoupper($anchor[2]);
 
-                // 收集所有流水號：第一個必有，後續從 group[4] 中萃取
                 $allNums = array($anchor[3]);
                 if (!empty(trim($anchor[4]))) {
+                    // 自動忽視 "號" 或 "、"，純粹抽取出所有數字
                     preg_match_all('/\d{1,6}/', $anchor[4], $extraNums);
                     $allNums = array_merge($allNums, $extraNums[0]);
                 }
@@ -241,13 +240,12 @@ class DGXLandCaseParser
                         'year_ad'          => $yearMiguo + 1911,
                         'year_defaulted'   => false,
                         'case_word'        => $caseWord,
-                        'case_word_desc'   => '',       // 由 enrichResults() 填入
+                        'case_word_desc'   => '',       
                         'case_no'          => $caseNo,
                         'validation_error' => null,
                     );
                 }
                 
-                // 將匹配到的字串從 remainingInput 移除，避免 Phase 2 重複解析
                 $remainingInput = str_replace($anchor[0], ' ', $remainingInput);
             }
         }
@@ -255,7 +253,7 @@ class DGXLandCaseParser
         // ==========================================
         // Phase 2: 無民國年的格式 (預設為今年)
         // ==========================================
-        $pattern2 = '/\b([A-Z][A-Z0-9]{3})[\s\-]+(\d{1,6})((?:[,\s]+\d{1,6})*)/i';
+        $pattern2 = '/(?<![a-zA-Z0-9])([A-Z][A-Z0-9]{3})[^\da-zA-Z]+(\d{1,6})((?:[^\da-zA-Z]+(?![A-Z][A-Z0-9]{3})\d{1,6})*)/iu';
 
         if (preg_match_all($pattern2, $remainingInput, $anchors2, PREG_SET_ORDER)) {
             foreach ($anchors2 as $anchor) {
@@ -275,7 +273,7 @@ class DGXLandCaseParser
                         'normalized'       => "{$yearMiguo}-{$caseWord}-{$caseNo}",
                         'year_miguo'       => $yearMiguo,
                         'year_ad'          => $yearMiguo + 1911,
-                        'year_defaulted'   => true, // 標記為預設年份
+                        'year_defaulted'   => true, 
                         'case_word'        => $caseWord,
                         'case_word_desc'   => '',
                         'case_no'          => $caseNo,
@@ -283,7 +281,6 @@ class DGXLandCaseParser
                     );
                 }
                 
-                // 將匹配到的字串從 remainingInput 移除，避免後續 Phase 重複解析
                 $remainingInput = str_replace($anchor[0], ' ', $remainingInput);
             }
         }
@@ -291,13 +288,12 @@ class DGXLandCaseParser
         // ==========================================
         // Phase 3: 包含民國年，但無案件字的格式 (預設案件字)
         // ==========================================
-        // 限定年份為 1 開頭的三位數 (100~199)，避免與一般流水號混淆
-        $pattern3 = '/\b(1\d{2})[\s\-]+(\d{1,6})((?:[,\s]+\d{1,6})*)/i';
+        $pattern3 = '/(?<!\d)(1\d{2})[^\da-zA-Z]+(\d{1,6})((?:[^\da-zA-Z]+(?!1\d{2}[^\da-zA-Z]+)\d{1,6})*)/iu';
 
         if (preg_match_all($pattern3, $remainingInput, $anchors3, PREG_SET_ORDER)) {
             foreach ($anchors3 as $anchor) {
                 $yearMiguo = (int)$anchor[1];
-                $caseWord  = $defaultCaseWord; // 預設使用 HA81
+                $caseWord  = $defaultCaseWord; 
 
                 $allNums = array($anchor[2]);
                 if (!empty(trim($anchor[3]))) {
@@ -312,7 +308,7 @@ class DGXLandCaseParser
                         'normalized'       => "{$yearMiguo}-{$caseWord}-{$caseNo}",
                         'year_miguo'       => $yearMiguo,
                         'year_ad'          => $yearMiguo + 1911,
-                        'year_defaulted'   => false, // 年份為使用者輸入
+                        'year_defaulted'   => false, 
                         'case_word'        => $caseWord,
                         'case_word_desc'   => '',
                         'case_no'          => $caseNo,
@@ -320,7 +316,6 @@ class DGXLandCaseParser
                     );
                 }
                 
-                // 移除已匹配字串
                 $remainingInput = str_replace($anchor[0], ' ', $remainingInput);
             }
         }
@@ -328,14 +323,11 @@ class DGXLandCaseParser
         // ==========================================
         // Phase 4: 純數字格式 (無年份、無案碼，全預設)
         // ==========================================
-        // 嚴格檢查剩下的字串是否「僅包含」數字與分隔符（空白、逗號、減號）
-        // 若包含其他文字（如「幫我查 1200」），則判定為自然語言，不在此攔截，交由 AI 處理。
         if (trim($remainingInput) !== '' && preg_match('/^[\d\s,\-]+$/', $remainingInput)) {
-            // 擷取所有 1~6 碼的數字
             if (preg_match_all('/(?<!\d)\d{1,6}(?!\d)/', $remainingInput, $anchors4)) {
                 foreach ($anchors4[0] as $num) {
-                    $yearMiguo = $currentYearMiguo;     // 預設今年
-                    $caseWord  = $defaultCaseWord;      // 預設指定案碼
+                    $yearMiguo = $currentYearMiguo;     
+                    $caseWord  = $defaultCaseWord;      
                     $caseNo    = str_pad($num, 6, '0', STR_PAD_LEFT);
 
                     $results[] = array(
@@ -343,14 +335,14 @@ class DGXLandCaseParser
                         'normalized'       => "{$yearMiguo}-{$caseWord}-{$caseNo}",
                         'year_miguo'       => $yearMiguo,
                         'year_ad'          => $yearMiguo + 1911,
-                        'year_defaulted'   => true, // 預設為系統今年
+                        'year_defaulted'   => true, 
                         'case_word'        => $caseWord,
                         'case_word_desc'   => '',
                         'case_no'          => $caseNo,
                         'validation_error' => null,
                     );
                 }
-                $remainingInput = ''; // 標記為已完全處理
+                $remainingInput = ''; 
             }
         }
 
@@ -385,8 +377,7 @@ class DGXLandCaseParser
             $originalWord = trim($item['case_word'] ?? '');
             $code = strtoupper($originalWord);
             
-            // ⚠️ 新增容錯機制：如果 AI 模型在 JSON token (case_word) 裡回傳了中文描述（例如 "桃壢"），
-            // 我們會透過反向字典攔截，將其自動校正回標準 4 碼代號（HBA1），避免無法辨識。
+            // 容錯機制：如果 AI 回傳了中文描述（例如 "桃壢"），攔截並校正回標準 4 碼代號（HBA1）
             if (!empty($originalWord) && !isset($map[$code])) {
                 if (isset($reverseMap[$originalWord])) {
                     $code = $reverseMap[$originalWord];
@@ -404,7 +395,7 @@ class DGXLandCaseParser
                 }
             }
         }
-        unset($item); // 解除最後一個元素的 reference，防止後續操作意外修改陣列
+        unset($item); // 解除最後一個元素的 reference
         return $results;
     }
 
@@ -412,10 +403,10 @@ class DGXLandCaseParser
     {
         Logger::getInstance()->info("DGXLandCaseParser: 收到解析請求: [{$input}]");
 
-        // 先預處理（中文描述/簡稱 → 代碼），讓 Regex 也能處理「114 桃壢 1000」這類輸入
+        // 預處理
         $processedInput = $this->preprocessInput($input);
 
-        // 以 Regex 嘗試快速解析，成功則直接回傳，跳過 AI 呼叫
+        // Regex 嘗試快速解析
         $regexResult = $this->regexParse($processedInput);
         if ($regexResult !== null) {
             Logger::getInstance()->info("DGXLandCaseParser: [Regex] 命中，跳過 AI 呼叫。");
@@ -423,7 +414,7 @@ class DGXLandCaseParser
         }
         Logger::getInstance()->info("DGXLandCaseParser: [Regex] 未命中，交由 AI 處理。");
 
-        // 動態注入當前日期至 system 訊息尾端（勿放入 user 訊息，避免干擾年份辨識）
+        // 動態注入當前日期至 system 訊息尾端
         $currentYearAd = (int)date('Y');
         $currentYearMiguo = $currentYearAd - 1911;
         $timeContext = "\n\n【系統環境時間提示】當前西元年：{$currentYearAd}年，當前民國年：{$currentYearMiguo}年。" .
@@ -433,7 +424,6 @@ class DGXLandCaseParser
         $payloadData = array(
             'model'    => (string) $this->model,
             'stream'   => false,
-            // 給予 Ollama 相容選項，將 Context 放大，防止截斷崩潰
             'options'  => array(
                 'temperature' => 0.0,
                 'num_ctx'     => 8192
@@ -495,13 +485,11 @@ class DGXLandCaseParser
         if (isset($apiResult['choices'][0]['message']['content'])) {
             $modelOutput = trim($apiResult['choices'][0]['message']['content']);
             
-            // 強化 JSON 擷取正則，避免被模型附加思考過程干擾
             $modelOutput = preg_replace('/^```json\s*/i', '', $modelOutput);
             $modelOutput = preg_replace('/^```\s*/i',     '', $modelOutput);
             $modelOutput = preg_replace('/```$/m',        '', $modelOutput);
             $modelOutput = trim($modelOutput);
 
-            // 暴力擷取最外層的大括號
             $start = strpos($modelOutput, '{');
             $end   = strrpos($modelOutput, '}');
             if ($start !== false && $end !== false && $end > $start) {
@@ -511,7 +499,6 @@ class DGXLandCaseParser
             $parsedJson = json_decode($modelOutput, true);
             if (json_last_error() === JSON_ERROR_NONE) {
                 
-                // ✅ PHP 後端補齊查表，確保絕對精確
                 if (!empty($parsedJson['results'])) {
                     $parsedJson['results'] = $this->enrichResults($parsedJson['results']);
                 }
