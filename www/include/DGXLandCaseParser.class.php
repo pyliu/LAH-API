@@ -8,6 +8,7 @@ class DGXLandCaseParser
     private $model;
     private $timeout = 60;
     private $regMap  = null; // 懶載入快取，避免同一 request 重複建構陣列
+    private $reverseMap = null; // ⚠️ 新增：懶載入快取反向字典
 
     public function __construct()
     {
@@ -64,8 +65,8 @@ class DGXLandCaseParser
             'A1HA' => '跨縣市(古亭桃園)', 'A2HA' => '跨縣市(建成桃園)', 'A3HA' => '跨縣市(中山桃園)', 'A4HA' => '跨縣市(松山桃園)', 'A5HA' => '跨縣市(士林桃園)', 'A6HA' => '跨縣市(大安桃園)',
             
             // 台中市
-            'H1BA' => '跨縣市(桃園中山)', 'H1BB' => '跨縣市(桃園中正)', 'H1BC' => '跨縣市(桃園中興)', 'H1BD' => '跨縣市(桃園豐原)', 'H1BE' => '跨縣市(桃園大甲)', 'H1BF' => '跨縣市(桃園清水)', 'H1BG' => '跨縣市(桃園東勢)', 'H1BH' => '跨縣市(桃園雅潭)', 'H1BI' => '跨縣市(桃園大里)', 'H1BJ' => '跨縣市(桃園太平)', 'H1BK' => '跨縣市(桃園龍井)',
-            'B1HA' => '跨縣市(中山桃園)', 'B2HA' => '跨縣市(中正桃園)', 'B3HA' => '跨縣市(中興桃園)', 'B4HA' => '跨縣市(豐原桃園)', 'B5HA' => '跨縣市(大甲桃園)', 'B6HA' => '跨縣市(清水桃園)', 'B7HA' => '跨縣市(東勢桃園)', 'B8HA' => '跨縣市(雅潭桃園)', 'B9HA' => '跨縣市(大里桃園)', 'BZHA' => '跨縣市(太平桃園)', 'BYHA' => '跨縣市(龍井桃園)',
+            'H1BA' => '跨縣市(桃園中山)', 'H1BB' => '跨縣市(桃園中正)', 'H1BC' => '跨縣市(桃園中興)', 'H1BD' => '跨縣市(桃園丰原)', 'H1BE' => '跨縣市(桃園大甲)', 'H1BF' => '跨縣市(桃園清水)', 'H1BG' => '跨縣市(桃園東勢)', 'H1BH' => '跨縣市(桃園雅潭)', 'H1BI' => '跨縣市(桃園大里)', 'H1BJ' => '跨縣市(桃園太平)', 'H1BK' => '跨縣市(桃園龍井)',
+            'B1HA' => '跨縣市(中山桃園)', 'B2HA' => '跨縣市(中正桃園)', 'B3HA' => '跨縣市(中興桃園)', 'B4HA' => '跨縣市(丰原桃園)', 'B5HA' => '跨縣市(大甲桃園)', 'B6HA' => '跨縣市(清水桃園)', 'B7HA' => '跨縣市(東勢桃園)', 'B8HA' => '跨縣市(雅潭桃園)', 'B9HA' => '跨縣市(大里桃園)', 'BZHA' => '跨縣市(太平桃園)', 'BYHA' => '跨縣市(龍井桃園)',
             
             // 基隆市
             'H1CD' => '跨縣市(桃園基隆)', 'C3HA' => '跨縣市(基隆桃園)',
@@ -126,8 +127,75 @@ class DGXLandCaseParser
         );
         return $this->regMap;
     }
+
     /**
-     * ⚠️ 新增：利用 Regex 嘗試直接從輸入文字中解析案件號（不呼叫 AI）
+     * ⚠️ 新增：獲取反向對照表 (中文描述/簡稱 -> 代碼)
+     * 將供 preprocessInput 與 enrichResults 共同使用，提高效能並 DRY。
+     */
+    private function getReverseMap()
+    {
+        if ($this->reverseMap !== null) {
+            return $this->reverseMap;
+        }
+
+        $map = $this->getRegMap();
+        $this->reverseMap = array();
+        
+        // 建立反向對照表： 中文完整描述 -> 代碼
+        foreach ($map as $code => $desc) {
+            $this->reverseMap[$desc] = $code;
+            
+            // 如果是跨縣市，使用者可能只打「水上桃園」或「桃園古亭」，同樣支援翻譯
+            if (preg_match('/跨縣市\((.+)\)/u', $desc, $matches)) {
+                $this->reverseMap[$matches[1]] = $code;
+            }
+        }
+
+        // 轄內跨所的常用簡稱對照表
+        $localAliases = array(
+            "桃壢" => "HBA1",
+            "桃溪" => "HCA1",
+            "桃楊" => "HDA1",
+            "桃蘆" => "HEA1",
+            "桃德" => "HFA1",
+            "桃平" => "HGA1",
+            "桃山" => "HHA1",
+            "壢桃" => "HAB1",
+            "溪桃" => "HAC1",
+            "楊桃" => "HAD1",
+            "蘆桃" => "HAE1",
+            "德桃" => "HAF1",
+            "平桃" => "HAG1",
+            "山桃" => "HAH1"
+        );
+        
+        // 將簡稱也加入反向對照表
+        foreach ($localAliases as $alias => $code) {
+            $this->reverseMap[$alias] = $code;
+        }
+        
+        return $this->reverseMap;
+    }
+
+    /**
+     * ⚠️ 修改：預處理輸入，把使用者的「中文描述」直接無縫替換成「4 碼代號」
+     */
+    private function preprocessInput($input)
+    {
+        $reverseMap = $this->getReverseMap();
+        
+        // strtr() 傳入陣列時，PHP 原生即為 longest-key-first (最長鍵優先) 匹配，無損替換
+        $processed = strtr($input, $reverseMap);
+        
+        if ($input !== $processed) {
+            Logger::getInstance()->info("DGXLandCaseParser: 輸入預處理 (口語轉代碼)\n原輸入: [{$input}]\n處理後: [{$processed}]");
+        }
+        
+        return $processed;
+    }
+
+    /**
+     * 利用 Regex 嘗試直接從輸入文字中解析案件號（不呼叫 AI）
      *
      * 支援格式：
      * Phase 1: {民國年(3碼)} {分隔} {案碼(4碼英數)} {分隔} {第一流水號} [, 追加流水號 ...]
@@ -145,7 +213,7 @@ class DGXLandCaseParser
         // 動態取得今年年份
         $currentYearAd = (int)date('Y');
         $currentYearMiguo = $currentYearAd - 1911;
-        $defaultCaseWord = 'HA81'; // ⚠️ 預設案件字
+        $defaultCaseWord = 'HA81'; // 預設案件字
 
         // ==========================================
         // Phase 1: 包含民國年的完整格式
@@ -179,7 +247,7 @@ class DGXLandCaseParser
                     );
                 }
                 
-                // ⚠️ 將匹配到的字串從 remainingInput 移除，避免 Phase 2 重複解析
+                // 將匹配到的字串從 remainingInput 移除，避免 Phase 2 重複解析
                 $remainingInput = str_replace($anchor[0], ' ', $remainingInput);
             }
         }
@@ -207,7 +275,7 @@ class DGXLandCaseParser
                         'normalized'       => "{$yearMiguo}-{$caseWord}-{$caseNo}",
                         'year_miguo'       => $yearMiguo,
                         'year_ad'          => $yearMiguo + 1911,
-                        'year_defaulted'   => true, // ⚠️ 標記為預設年份
+                        'year_defaulted'   => true, // 標記為預設年份
                         'case_word'        => $caseWord,
                         'case_word_desc'   => '',
                         'case_no'          => $caseNo,
@@ -215,7 +283,7 @@ class DGXLandCaseParser
                     );
                 }
                 
-                // ⚠️ 將匹配到的字串從 remainingInput 移除，避免後續 Phase 重複解析
+                // 將匹配到的字串從 remainingInput 移除，避免後續 Phase 重複解析
                 $remainingInput = str_replace($anchor[0], ' ', $remainingInput);
             }
         }
@@ -252,7 +320,7 @@ class DGXLandCaseParser
                     );
                 }
                 
-                // ⚠️ 移除已匹配字串
+                // 移除已匹配字串
                 $remainingInput = str_replace($anchor[0], ' ', $remainingInput);
             }
         }
@@ -305,68 +373,28 @@ class DGXLandCaseParser
         );
     }
 
-
     /**
-     * ⚠️ 新增：預處理輸入，把使用者的「中文描述」直接無縫替換成「4 碼代號」
-     */
-    private function preprocessInput($input)
-    {
-        $map = $this->getRegMap();
-        $reverseMap = array();
-        
-        // 建立反向對照表： 中文描述 -> 代碼
-        foreach ($map as $code => $desc) {
-            $reverseMap[$desc] = $code;
-            
-            // 如果是跨縣市，使用者可能只打「水上桃園」或「桃園古亭」，同樣支援翻譯
-            if (preg_match('/跨縣市\((.+)\)/u', $desc, $matches)) {
-                $reverseMap[$matches[1]] = $code;
-            }
-        }
-
-        // ⚠️ 新增：轄內跨所的常用簡稱對照表
-        $localAliases = array(
-            "桃壢" => "HBA1",
-            "桃溪" => "HCA1",
-            "桃楊" => "HDA1",
-            "桃蘆" => "HEA1",
-            "桃德" => "HFA1",
-            "桃平" => "HGA1",
-            "桃山" => "HHA1",
-            "壢桃" => "HAB1",
-            "溪桃" => "HAC1",
-            "楊桃" => "HAD1",
-            "蘆桃" => "HAE1",
-            "德桃" => "HAF1",
-            "平桃" => "HAG1",
-            "山桃" => "HAH1"
-        );
-        
-        // 將簡稱也加入反向對照表
-        foreach ($localAliases as $alias => $code) {
-            $reverseMap[$alias] = $code;
-        }
-        
-        // strtr() 傳入陣列時，PHP 原生即為 longest-key-first 匹配，無需手動排序
-        // 執行無損替換
-        $processed = strtr($input, $reverseMap);
-        
-        if ($input !== $processed) {
-            Logger::getInstance()->info("DGXLandCaseParser: 輸入預處理 (口語轉代碼)\n原輸入: [{$input}]\n處理後: [{$processed}]");
-        }
-        
-        return $processed;
-    }
-
-    /**
-     * 透過 PHP 精確為模型解析出的代碼補上中文描述
+     * 透過 PHP 精確為模型解析出的代碼補上中文描述，並具備 AI 幻覺容錯校正能力
      */
     private function enrichResults($results)
     {
         $map = $this->getRegMap();
+        $reverseMap = $this->getReverseMap();
 
         foreach ($results as &$item) {
-            $code = strtoupper(trim($item['case_word'] ?? ''));
+            $originalWord = trim($item['case_word'] ?? '');
+            $code = strtoupper($originalWord);
+            
+            // ⚠️ 新增容錯機制：如果 AI 模型在 JSON token (case_word) 裡回傳了中文描述（例如 "桃壢"），
+            // 我們會透過反向字典攔截，將其自動校正回標準 4 碼代號（HBA1），避免無法辨識。
+            if (!empty($originalWord) && !isset($map[$code])) {
+                if (isset($reverseMap[$originalWord])) {
+                    $code = $reverseMap[$originalWord];
+                    $item['case_word'] = $code; // 覆寫回正確的代碼
+                    Logger::getInstance()->info("DGXLandCaseParser: AI 回傳了中文或簡稱案字 [{$originalWord}]，已自動校正為代碼 [{$code}]");
+                }
+            }
+
             if (!empty($code)) {
                 if (isset($map[$code])) {
                     $item['case_word_desc'] = $map[$code];
@@ -384,10 +412,10 @@ class DGXLandCaseParser
     {
         Logger::getInstance()->info("DGXLandCaseParser: 收到解析請求: [{$input}]");
 
-        // ⚠️ 先預處理（中文描述 → 代碼），讓 Regex 也能處理「114 桃楷登跨 1000」這類輸入
+        // 先預處理（中文描述/簡稱 → 代碼），讓 Regex 也能處理「114 桃壢 1000」這類輸入
         $processedInput = $this->preprocessInput($input);
 
-        // ⚠️ 新增：以 Regex 嘗試快速解析，成功則直接回傳，跳過 AI 呼叫
+        // 以 Regex 嘗試快速解析，成功則直接回傳，跳過 AI 呼叫
         $regexResult = $this->regexParse($processedInput);
         if ($regexResult !== null) {
             Logger::getInstance()->info("DGXLandCaseParser: [Regex] 命中，跳過 AI 呼叫。");
@@ -395,7 +423,7 @@ class DGXLandCaseParser
         }
         Logger::getInstance()->info("DGXLandCaseParser: [Regex] 未命中，交由 AI 處理。");
 
-        // ⚠️ 修正：動態注入當前日期至 system 訊息尾端（勿放入 user 訊息，避免干擾年份辨識）
+        // 動態注入當前日期至 system 訊息尾端（勿放入 user 訊息，避免干擾年份辨識）
         $currentYearAd = (int)date('Y');
         $currentYearMiguo = $currentYearAd - 1911;
         $timeContext = "\n\n【系統環境時間提示】當前西元年：{$currentYearAd}年，當前民國年：{$currentYearMiguo}年。" .
@@ -413,12 +441,10 @@ class DGXLandCaseParser
             'messages' => array(
                 array(
                     'role' => 'system', 
-                    // ✅ timeContext 掛在 system 訊息尾端，不污染使用者輸入
                     'content' => $this->getSystemPrompt() . $timeContext
                 ),
                 array(
                     'role' => 'user', 
-                    // ✅ 使用者訊息保持純淨，只含輸入內容
                     'content' => $processedInput
                 )
             ),
