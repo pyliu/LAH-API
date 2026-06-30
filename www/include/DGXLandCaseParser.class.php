@@ -129,58 +129,93 @@ class DGXLandCaseParser
     /**
      * ⚠️ 新增：利用 Regex 嘗試直接從輸入文字中解析案件號（不呼叫 AI）
      *
-     * 支援格式：{民國年(3碼)} {分隔} {案碼(4碼英數)} {分隔} {第一流水號} [, 追加流水號 ...]
-     * 分隔符：連字號或空白；追加流水號以逗號或空白分隔
-     * 範例：
-     *   "114 HA81 1000, 1200"       → 114-HA81-001000 、 114-HA81-001200
-     *   "114-HA81-001000"           → 114-HA81-001000
-     *   "114 HA81 1000 115 HBA1 2" → 114-HA81-001000 、 115-HBA1-000002（兩筆獨立錨點）
-     *
-     * Negative Lookahead 防止把下一筆案件的年份誤判為追加流水號：
-     *   追加數字前若能匹配 \d{3}[\s\-]+[A-Z][A-Z0-9]{3}[\s\-]（像是新錨點的起頭），則停止追加
+     * 支援格式：
+     * Phase 1: {民國年(3碼)} {分隔} {案碼(4碼英數)} {分隔} {第一流水號} [, 追加流水號 ...]
+     * Phase 2: {案碼(4碼英數)} {分隔} {第一流水號} [, 追加流水號 ...] (無年份，自動預設今年)
      *
      * 找不到任何符合格式的案件號則回傳 null，讓 AI 接手處理
      */
     private function regexParse($input)
     {
-        // 案碼首碼強制為字母（排除純數字 case_word），追加號碼以 negative lookahead 防跨案誤判
-        $pattern = '/\b(\d{3})[\s\-]+([A-Z][A-Z0-9]{3})[\s\-]+(\d{1,6})((?:[,\s]+(?!\d{3}[\s\-]+[A-Z][A-Z0-9]{3}[\s\-])\d{1,6})*)/i';
+        $results = array();
+        $remainingInput = $input;
+        
+        // 動態取得今年年份
+        $currentYearAd = (int)date('Y');
+        $currentYearMiguo = $currentYearAd - 1911;
 
-        if (!preg_match_all($pattern, $input, $anchors, PREG_SET_ORDER)) {
-            return null; // 未命中，交給 AI
+        // ==========================================
+        // Phase 1: 包含民國年的完整格式
+        // ==========================================
+        $pattern1 = '/\b(\d{3})[\s\-]+([A-Z][A-Z0-9]{3})[\s\-]+(\d{1,6})((?:[,\s]+(?!\d{3}[\s\-]+[A-Z][A-Z0-9]{3}[\s\-])\d{1,6})*)/i';
+
+        if (preg_match_all($pattern1, $remainingInput, $anchors1, PREG_SET_ORDER)) {
+            foreach ($anchors1 as $anchor) {
+                $yearMiguo = (int)$anchor[1];
+                $caseWord  = strtoupper($anchor[2]);
+
+                // 收集所有流水號：第一個必有，後續從 group[4] 中萃取
+                $allNums = array($anchor[3]);
+                if (!empty(trim($anchor[4]))) {
+                    preg_match_all('/\d{1,6}/', $anchor[4], $extraNums);
+                    $allNums = array_merge($allNums, $extraNums[0]);
+                }
+
+                foreach ($allNums as $num) {
+                    $caseNo = str_pad($num, 6, '0', STR_PAD_LEFT);
+                    $results[] = array(
+                        'original_input'   => trim($anchor[0]),
+                        'normalized'       => "{$yearMiguo}-{$caseWord}-{$caseNo}",
+                        'year_miguo'       => $yearMiguo,
+                        'year_ad'          => $yearMiguo + 1911,
+                        'year_defaulted'   => false,
+                        'case_word'        => $caseWord,
+                        'case_word_desc'   => '',       // 由 enrichResults() 填入
+                        'case_no'          => $caseNo,
+                        'validation_error' => null,
+                    );
+                }
+                
+                // ⚠️ 將匹配到的字串從 remainingInput 移除，避免 Phase 2 重複解析
+                $remainingInput = str_replace($anchor[0], ' ', $remainingInput);
+            }
         }
 
-        $results = array();
+        // ==========================================
+        // Phase 2: 無民國年的格式 (預設為今年)
+        // ==========================================
+        $pattern2 = '/\b([A-Z][A-Z0-9]{3})[\s\-]+(\d{1,6})((?:[,\s]+\d{1,6})*)/i';
 
-        foreach ($anchors as $anchor) {
-            $yearMiguo = (int)$anchor[1];
-            $caseWord  = strtoupper($anchor[2]);
+        if (preg_match_all($pattern2, $remainingInput, $anchors2, PREG_SET_ORDER)) {
+            foreach ($anchors2 as $anchor) {
+                $yearMiguo = $currentYearMiguo; // 預設使用今年
+                $caseWord  = strtoupper($anchor[1]);
 
-            // 收集所有流水號：第一個必有，後續從 group[4] 中萃取
-            $allNums = array($anchor[3]);
-            if (!empty(trim($anchor[4]))) {
-                preg_match_all('/\d{1,6}/', $anchor[4], $extraNums);
-                $allNums = array_merge($allNums, $extraNums[0]);
-            }
+                $allNums = array($anchor[2]);
+                if (!empty(trim($anchor[3]))) {
+                    preg_match_all('/\d{1,6}/', $anchor[3], $extraNums);
+                    $allNums = array_merge($allNums, $extraNums[0]);
+                }
 
-            foreach ($allNums as $num) {
-                $caseNo = str_pad($num, 6, '0', STR_PAD_LEFT);
-                $results[] = array(
-                    'original_input'   => trim($anchor[0]),
-                    'normalized'       => "{$yearMiguo}-{$caseWord}-{$caseNo}",
-                    'year_miguo'       => $yearMiguo,
-                    'year_ad'          => $yearMiguo + 1911,
-                    'year_defaulted'   => false,
-                    'case_word'        => $caseWord,
-                    'case_word_desc'   => '',       // 由 enrichResults() 填入
-                    'case_no'          => $caseNo,
-                    'validation_error' => null,
-                );
+                foreach ($allNums as $num) {
+                    $caseNo = str_pad($num, 6, '0', STR_PAD_LEFT);
+                    $results[] = array(
+                        'original_input'   => trim($anchor[0]),
+                        'normalized'       => "{$yearMiguo}-{$caseWord}-{$caseNo}",
+                        'year_miguo'       => $yearMiguo,
+                        'year_ad'          => $yearMiguo + 1911,
+                        'year_defaulted'   => true, // ⚠️ 標記為預設年份
+                        'case_word'        => $caseWord,
+                        'case_word_desc'   => '',
+                        'case_no'          => $caseNo,
+                        'validation_error' => null,
+                    );
+                }
             }
         }
 
         if (empty($results)) {
-            return null;
+            return null; // 皆未命中，交給 AI
         }
 
         // 共用 enrichResults()，補齊 case_word_desc
