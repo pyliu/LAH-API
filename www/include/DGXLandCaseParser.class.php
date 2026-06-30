@@ -323,6 +323,29 @@ class DGXLandCaseParser
                 $reverseMap[$matches[1]] = $code;
             }
         }
+
+        // ⚠️ 新增：轄內跨所的常用簡稱對照表
+        $localAliases = array(
+            "桃壢" => "HBA1",
+            "桃溪" => "HCA1",
+            "桃楊" => "HDA1",
+            "桃蘆" => "HEA1",
+            "桃德" => "HFA1",
+            "桃平" => "HGA1",
+            "桃山" => "HHA1",
+            "壢桃" => "HAB1",
+            "溪桃" => "HAC1",
+            "楊桃" => "HAD1",
+            "蘆桃" => "HAE1",
+            "德桃" => "HAF1",
+            "平桃" => "HAG1",
+            "山桃" => "HAH1"
+        );
+        
+        // 將簡稱也加入反向對照表
+        foreach ($localAliases as $alias => $code) {
+            $reverseMap[$alias] = $code;
+        }
         
         // strtr() 傳入陣列時，PHP 原生即為 longest-key-first 匹配，無需手動排序
         // 執行無損替換
