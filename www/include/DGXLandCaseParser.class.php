@@ -132,7 +132,8 @@ class DGXLandCaseParser
      * 支援格式：
      * Phase 1: {民國年(3碼)} {分隔} {案碼(4碼英數)} {分隔} {第一流水號} [, 追加流水號 ...]
      * Phase 2: {案碼(4碼英數)} {分隔} {第一流水號} [, 追加流水號 ...] (無年份，自動預設今年)
-     * Phase 3: {第一流水號} [, 追加流水號 ...] (純數字，無年份與案碼，自動預設今年與指定案碼)
+     * Phase 3: {民國年(3碼)} {分隔} {第一流水號} [, 追加流水號 ...] (無案碼，預設案件字 HA81)
+     * Phase 4: {第一流水號} [, 追加流水號 ...] (純數字，無年份與案碼，自動預設今年與指定案碼)
      *
      * 找不到任何符合格式的案件號則回傳 null，讓 AI 接手處理
      */
@@ -144,6 +145,7 @@ class DGXLandCaseParser
         // 動態取得今年年份
         $currentYearAd = (int)date('Y');
         $currentYearMiguo = $currentYearAd - 1911;
+        $defaultCaseWord = 'HA81'; // ⚠️ 預設案件字
 
         // ==========================================
         // Phase 1: 包含民國年的完整格式
@@ -213,22 +215,57 @@ class DGXLandCaseParser
                     );
                 }
                 
-                // ⚠️ 將匹配到的字串從 remainingInput 移除，避免 Phase 3 重複解析
+                // ⚠️ 將匹配到的字串從 remainingInput 移除，避免後續 Phase 重複解析
                 $remainingInput = str_replace($anchor[0], ' ', $remainingInput);
             }
         }
 
         // ==========================================
-        // Phase 3: 純數字格式 (無年份、無案碼，全預設)
+        // Phase 3: 包含民國年，但無案件字的格式 (預設案件字)
+        // ==========================================
+        // 限定年份為 1 開頭的三位數 (100~199)，避免與一般流水號混淆
+        $pattern3 = '/\b(1\d{2})[\s\-]+(\d{1,6})((?:[,\s]+\d{1,6})*)/i';
+
+        if (preg_match_all($pattern3, $remainingInput, $anchors3, PREG_SET_ORDER)) {
+            foreach ($anchors3 as $anchor) {
+                $yearMiguo = (int)$anchor[1];
+                $caseWord  = $defaultCaseWord; // 預設使用 HA81
+
+                $allNums = array($anchor[2]);
+                if (!empty(trim($anchor[3]))) {
+                    preg_match_all('/\d{1,6}/', $anchor[3], $extraNums);
+                    $allNums = array_merge($allNums, $extraNums[0]);
+                }
+
+                foreach ($allNums as $num) {
+                    $caseNo = str_pad($num, 6, '0', STR_PAD_LEFT);
+                    $results[] = array(
+                        'original_input'   => trim($anchor[0]),
+                        'normalized'       => "{$yearMiguo}-{$caseWord}-{$caseNo}",
+                        'year_miguo'       => $yearMiguo,
+                        'year_ad'          => $yearMiguo + 1911,
+                        'year_defaulted'   => false, // 年份為使用者輸入
+                        'case_word'        => $caseWord,
+                        'case_word_desc'   => '',
+                        'case_no'          => $caseNo,
+                        'validation_error' => null,
+                    );
+                }
+                
+                // ⚠️ 移除已匹配字串
+                $remainingInput = str_replace($anchor[0], ' ', $remainingInput);
+            }
+        }
+
+        // ==========================================
+        // Phase 4: 純數字格式 (無年份、無案碼，全預設)
         // ==========================================
         // 嚴格檢查剩下的字串是否「僅包含」數字與分隔符（空白、逗號、減號）
         // 若包含其他文字（如「幫我查 1200」），則判定為自然語言，不在此攔截，交由 AI 處理。
         if (trim($remainingInput) !== '' && preg_match('/^[\d\s,\-]+$/', $remainingInput)) {
-            $defaultCaseWord = 'HA81'; // ⚠️ 預設案件字
-
             // 擷取所有 1~6 碼的數字
-            if (preg_match_all('/(?<!\d)\d{1,6}(?!\d)/', $remainingInput, $anchors3)) {
-                foreach ($anchors3[0] as $num) {
+            if (preg_match_all('/(?<!\d)\d{1,6}(?!\d)/', $remainingInput, $anchors4)) {
+                foreach ($anchors4[0] as $num) {
                     $yearMiguo = $currentYearMiguo;     // 預設今年
                     $caseWord  = $defaultCaseWord;      // 預設指定案碼
                     $caseNo    = str_pad($num, 6, '0', STR_PAD_LEFT);
@@ -238,7 +275,7 @@ class DGXLandCaseParser
                         'normalized'       => "{$yearMiguo}-{$caseWord}-{$caseNo}",
                         'year_miguo'       => $yearMiguo,
                         'year_ad'          => $yearMiguo + 1911,
-                        'year_defaulted'   => true,
+                        'year_defaulted'   => true, // 預設為系統今年
                         'case_word'        => $caseWord,
                         'case_word_desc'   => '',
                         'case_no'          => $caseNo,
