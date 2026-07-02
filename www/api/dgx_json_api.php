@@ -3,11 +3,15 @@
  * DGX 地政案件編號解析 API (PHP 7.3 相容)
  * * 接收使用者輸入字串，透過 DGXLandCaseParser 解析為標準化的案件陣列。
  * * 支援多種 type 分流處理，目前實作：case_ids
+ * * 整合 IP 速率限制與本地調用次數計數器 (持久化至 assets 目錄)
  * * @author Senior PHP Developer
  * @since 2017/2026
  */
 
 declare(strict_types=1);
+
+// 引入既有系統底層與自動加載 (依賴 init.php 的 autoload 機制)
+require_once dirname(__DIR__) . '/include/init.php';
 
 // ── 速率限制設定 ──────────────────────────────────────────────
 // 每個來源 IP，在 RATE_LIMIT_WINDOW_SEC 秒內最多允許 N 次請求
@@ -18,7 +22,7 @@ define('RATE_LIMIT_WINDOW_SEC',   60);
 /**
  * 簡易 IP 速率限制 (File-based, PHP 7.3 相容)
  *
- * 以系統臨時目錄記錄各 IP 的請求時間戳。
+ * 以系統臨時目錄記錄各 IP 的請求時間戳 (暫時性資料適合放 tmp)。
  * 採排他鎖 (LOCK_EX) 確保高併發下計數正確。
  * Fail-open：若檔案系統操作失敗，一律放行，不阻斷正常業務。
  *
@@ -27,53 +31,87 @@ define('RATE_LIMIT_WINDOW_SEC',   60);
  * @param  int    $windowSec 時間窗口（秒）
  * @return bool   true = 允許通過，false = 超出限制
  */
-function checkRateLimit(string $ip, int $maxReqs, int $windowSec): bool
-{
-    $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'dgx_rl';
-
-    // 併發安全建目錄：先 mkdir 再 is_dir，避免 race condition
-    if (!is_dir($dir) && !@mkdir($dir, 0700, true) && !is_dir($dir)) {
-        return true; // fail-open
+function checkRateLimit(string $ip, int $maxReqs = RATE_LIMIT_MAX_REQUESTS, int $windowSec = RATE_LIMIT_WINDOW_SEC): bool {
+    $filePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'dgx_api_rate_' . md5($ip) . '.txt';
+    $fp = @fopen($filePath, 'c+');
+    
+    if (!$fp) {
+        return true; // Fail-open
     }
 
-    // 用 IP 的 MD5 做檔名，迴避 IPv6 冒號等特殊字元
-    $file = $dir . DIRECTORY_SEPARATOR . md5($ip) . '.json';
-    $fp   = @fopen($file, 'c+'); // 'c+' = 不存在則建立，不截斷，可讀寫
-    if ($fp === false) {
-        return true; // fail-open
+    if (@flock($fp, LOCK_EX)) {
+        $content = stream_get_contents($fp);
+        $timestamps = $content ? explode(',', trim($content)) : [];
+        $now = time();
+
+        // 過濾掉超過時間窗口的舊紀錄
+        $validTimestamps = array_filter($timestamps, function($ts) use ($now, $windowSec) {
+            return ($now - (int)$ts) <= $windowSec;
+        });
+
+        if (count($validTimestamps) >= $maxReqs) {
+            @flock($fp, LOCK_UN);
+            @fclose($fp);
+            return false; // 超出限制
+        }
+
+        // 加入本次請求時間
+        $validTimestamps[] = $now;
+        
+        rewind($fp);
+        ftruncate($fp, 0);
+        fwrite($fp, implode(',', $validTimestamps));
+        
+        @flock($fp, LOCK_UN);
     }
-
-    flock($fp, LOCK_EX); // 取得排他鎖，阻塞直到獲得
-
-    $raw        = stream_get_contents($fp);
-    $timestamps = (array) (json_decode($raw ?: '[]', true) ?: []);
-    $now        = time();
-
-    // 移除窗口期外的過期時間戳（加型別保護，防止檔案被污染）
-    $timestamps = array_values(array_filter($timestamps, function ($t) use ($now, $windowSec) {
-        return is_int($t) && ($now - $t) < $windowSec;
-    }));
-
-    $allowed = count($timestamps) < $maxReqs;
-    if ($allowed) {
-        $timestamps[] = $now;
-    }
-
-    // 回寫更新後的時間戳陣列
-    ftruncate($fp, 0);
-    rewind($fp);
-    fwrite($fp, json_encode($timestamps));
-
-    flock($fp, LOCK_UN);
-    fclose($fp);
-
-    return $allowed;
+    @fclose($fp);
+    
+    return true;
 }
 
-// 引入既有系統底層與自動加載 (依循原系統架構)
-require_once dirname(__DIR__) . '/include/init.php';
-require_once INC_DIR . '/System.class.php';
-require_once INC_DIR . '/DGXLandCaseParser.class.php';
+/**
+ * 簡易檔案型計數器 (持久化保存版)
+ * 利用 flock 確保高併發請求下的計數安全性，並儲存於上一層的 assets 目錄
+ *
+ * @param string $type 查詢的分類名稱
+ * @return int 目前的總調用次數
+ */
+function incrementQueryCount(string $type): int {
+    // 檔名過濾避免 Path Traversal
+    $safeType = preg_replace('/[^a-zA-Z0-9_]/', '', $type);
+    
+    // 設定儲存路徑為: 上一層目錄/assets/
+    $targetDir = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'assets';
+    
+    // 確保 assets 目錄存在
+    if (!is_dir($targetDir)) {
+        @mkdir($targetDir, 0755, true);
+    }
+    
+    // 產出如: ai_case_ids_count.txt 的檔名
+    $filePath = $targetDir . DIRECTORY_SEPARATOR . 'ai_' . $safeType . '_count.txt';
+    $count = 0;
+    
+    $fp = @fopen($filePath, 'c+');
+    if ($fp) {
+        if (@flock($fp, LOCK_EX)) {
+            $content = stream_get_contents($fp);
+            $count = is_numeric($content) ? (int)$content : 0;
+            $count++; // 計數加一
+            
+            rewind($fp);
+            ftruncate($fp, 0);
+            fwrite($fp, (string)$count);
+            
+            @flock($fp, LOCK_UN);
+        }
+        @fclose($fp);
+    }
+    
+    return $count;
+}
+
+// ── 主程式邏輯 ──────────────────────────────────────────────
 
 // 設定標頭為 JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -88,27 +126,18 @@ try {
     }
 
     $reqIp = $_POST['req_ip'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-
-    // 2. 速率限制：防止 LLM 推理資源被頻繁請求耗盡
-    if (!checkRateLimit($reqIp, RATE_LIMIT_MAX_REQUESTS, RATE_LIMIT_WINDOW_SEC)) {
-        $logger->warning(sprintf(
-            "XHR [dgx_json_api] 速率限制觸發，IP: %s（%d 次/%d 秒）",
-            $reqIp, RATE_LIMIT_MAX_REQUESTS, RATE_LIMIT_WINDOW_SEC
-        ));
-        http_response_code(429); // Too Many Requests
-        echo json_encode([
-            'status'  => 'error',
-            'message' => sprintf('請求過於頻繁，每 %d 秒最多 %d 次，請稍後再試。', RATE_LIMIT_WINDOW_SEC, RATE_LIMIT_MAX_REQUESTS)
-        ]);
-        exit;
+    
+    // 2. 執行速率限制 (Rate Limiting) 檢查
+    if (!checkRateLimit($reqIp)) {
+        $logger->warning(sprintf("XHR [dgx_json_api] IP: %s 觸發速率限制 (HTTP 429)", $reqIp));
+        throw new RuntimeException('請求過於頻繁，請稍後再試', 429);
     }
 
-    // 3. 針對 POST 的 type 參數進行分流
     $type = $_POST['type'] ?? '';
 
+    // 3. 針對 POST 的 type 參數進行分流
     switch ($type) {
         case 'case_ids':
-            // 4. 取得並驗證輸入參數
             $inputString = trim($_POST['text'] ?? '');
             
             if ($inputString === '') {
@@ -122,44 +151,40 @@ try {
 
             $logger->info(sprintf("XHR [dgx_json_api] 收到來自 IP: %s 的 case_ids 解析請求", $reqIp));
 
-            // 5. 實例化解析器並執行
+            // 4. 實例化解析器並執行
             $parser = new DGXLandCaseParser();
-            
-            // 呼叫解析器
             $parsedResult = $parser->parse($inputString);
 
-            // 6. 處理業務邏輯錯誤
+            // 5. 處理業務邏輯錯誤
             if (isset($parsedResult['success']) && $parsedResult['success'] === false) {
                 $errorMessage = $parsedResult['error'] ?? '模型解析失敗';
                 $logger->warning(sprintf("XHR [dgx_json_api] 解析失敗: %s", $errorMessage));
                 
                 http_response_code(422); // 422 Unprocessable Entity
                 echo json_encode([
-                    'status' => STATUS_CODE::DEFAULT_FAIL,
+                    'status' => 'error',
                     'message' => $errorMessage,
-                    'raw' => $parsedResult['raw_output'] ?? null
+                    'raw_output' => $parsedResult['raw_output'] ?? null
                 ], JSON_THROW_ON_ERROR);
                 exit;
             }
 
-            // 7. 成功回傳
+            // 6. 紀錄查詢次數並成功回傳
+            $queryCount = incrementQueryCount($type);
+
             http_response_code(200);
             echo json_encode([
-                'status' => STATUS_CODE::SUCCESS_NORMAL,
-                'raw' => $parsedResult['results'] ?? []
-            ], JSON_THROW_ON_ERROR); // PHP 7.3 特性: 發生編碼錯誤時拋出 JsonException
+                'status' => 'success',
+                'data' => $parsedResult['results'] ?? [],
+                'query_count' => $queryCount
+            ], JSON_THROW_ON_ERROR);
             break;
-
-        // 若未來有其他 type 需求，可在此處擴充
-        // case 'other_type':
-        //     break;
 
         default:
             throw new InvalidArgumentException('未指定或不支援的操作類型 (type)', 400);
     }
 
 } catch (InvalidArgumentException $e) {
-    // 處理客戶端輸入錯誤
     if (isset($logger)) {
         $logger->warning("XHR [dgx_json_api] 參數錯誤: " . $e->getMessage());
     }
@@ -167,15 +192,15 @@ try {
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 
 } catch (RuntimeException $e) {
-    // 處理狀態與執行環境錯誤
     if (isset($logger)) {
-        $logger->error("XHR [dgx_json_api] 執行時錯誤: " . $e->getMessage());
+        // 429 或 405 不算系統嚴重的內部錯誤，以 warning 層級記錄即可
+        $level = $e->getCode() < 500 ? 'warning' : 'error';
+        $logger->$level("XHR [dgx_json_api] 執行狀態異常: " . $e->getMessage());
     }
     http_response_code($e->getCode() ?: 500);
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 
 } catch (JsonException $e) {
-    // PHP 7.3: 處理 JSON 編碼/解碼例外
     if (isset($logger)) {
         $logger->error("XHR [dgx_json_api] JSON 處理失敗: " . $e->getMessage());
     }
@@ -183,11 +208,9 @@ try {
     echo json_encode(['status' => 'error', 'message' => '伺服器資料格式化失敗']);
 
 } catch (Throwable $e) {
-    // 捕捉所有未預期錯誤 (PHP 7 的 Throwable 包含 Error 與 Exception)
     if (isset($logger)) {
         $logger->error("XHR [dgx_json_api] 系統發生未預期錯誤: " . $e->getMessage());
     }
     http_response_code(500);
-    // 基於安全考量，對外不拋出真實的 Call Stack
     echo json_encode(['status' => 'error', 'message' => '伺服器內部錯誤，請聯繫管理員']);
 }
