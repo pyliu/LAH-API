@@ -4,13 +4,14 @@
  * * 接收使用者輸入字串，透過 DGXLandCaseParser 解析為標準化的案件陣列。
  * * 支援多種 type 分流處理，目前實作：case_ids
  * * 整合 IP 速率限制與本地調用次數計數器 (持久化至 assets 目錄)
+ * * 回傳狀態碼整合 STATUS_CODE 常數定義
  * * @author Senior PHP Developer
  * @since 2017/2026
  */
 
 declare(strict_types=1);
 
-// 引入既有系統底層與自動加載 (依賴 init.php 的 autoload 機制)
+// 引入既有系統底層與自動加載 (依賴 init.php 的 autoload 機制與 GlobalConstants)
 require_once dirname(__DIR__) . '/include/init.php';
 
 // ── 速率限制設定 ──────────────────────────────────────────────
@@ -138,6 +139,7 @@ try {
     // 3. 針對 POST 的 type 參數進行分流
     switch ($type) {
         case 'case_ids':
+            // 接收參數為 text
             $inputString = trim($_POST['text'] ?? '');
             
             if ($inputString === '') {
@@ -162,55 +164,69 @@ try {
                 
                 http_response_code(422); // 422 Unprocessable Entity
                 echo json_encode([
-                    'status' => 'error',
+                    'status' => STATUS_CODE::DEFAULT_FAIL,
                     'message' => $errorMessage,
                     'raw_output' => $parsedResult['raw_output'] ?? null
                 ], JSON_THROW_ON_ERROR);
                 exit;
             }
 
-            // 6. 紀錄查詢次數並成功回傳
+            // 6. 紀錄查詢次數並寫入 Log
             $queryCount = incrementQueryCount($type);
+            $logger->info(sprintf("XHR [dgx_json_api] 解析成功，[%s] 累積查詢次數更新為: %d", $type, $queryCount));
 
+            // 7. 成功回傳
             http_response_code(200);
             echo json_encode([
-                'status' => 'success',
+                'status' => STATUS_CODE::SUCCESS_NORMAL,
                 'data' => $parsedResult['results'] ?? [],
                 'query_count' => $queryCount
             ], JSON_THROW_ON_ERROR);
             break;
 
         default:
-            throw new InvalidArgumentException('未指定或不支援的操作類型 (type)', 400);
+            // 拋出 OutOfBoundsException 以便在 Catch 中特別區分「不支援的類型」
+            throw new OutOfBoundsException('未指定或不支援的操作類型 (type)', 400);
     }
 
-} catch (InvalidArgumentException $e) {
+} catch (OutOfBoundsException $e) {
+    // 處理不支援的操作類型 (對應 UNSUPPORT_FAIL)
     if (isset($logger)) {
         $logger->warning("XHR [dgx_json_api] 參數錯誤: " . $e->getMessage());
     }
     http_response_code($e->getCode() ?: 400);
-    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    echo json_encode(['status' => STATUS_CODE::UNSUPPORT_FAIL, 'message' => $e->getMessage()]);
+
+} catch (InvalidArgumentException $e) {
+    // 處理客戶端輸入資料錯誤
+    if (isset($logger)) {
+        $logger->warning("XHR [dgx_json_api] 參數錯誤: " . $e->getMessage());
+    }
+    http_response_code($e->getCode() ?: 400);
+    echo json_encode(['status' => STATUS_CODE::DEFAULT_FAIL, 'message' => $e->getMessage()]);
 
 } catch (RuntimeException $e) {
+    // 處理狀態與執行環境錯誤 (如 429 Rate Limit 或 405 Method Not Allowed)
     if (isset($logger)) {
-        // 429 或 405 不算系統嚴重的內部錯誤，以 warning 層級記錄即可
         $level = $e->getCode() < 500 ? 'warning' : 'error';
         $logger->$level("XHR [dgx_json_api] 執行狀態異常: " . $e->getMessage());
     }
     http_response_code($e->getCode() ?: 500);
-    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    echo json_encode(['status' => STATUS_CODE::DEFAULT_FAIL, 'message' => $e->getMessage()]);
 
 } catch (JsonException $e) {
+    // PHP 7.3: 處理 JSON 編碼/解碼例外
     if (isset($logger)) {
         $logger->error("XHR [dgx_json_api] JSON 處理失敗: " . $e->getMessage());
     }
     http_response_code(500);
-    echo json_encode(['status' => 'error', 'message' => '伺服器資料格式化失敗']);
+    echo json_encode(['status' => STATUS_CODE::FAIL_JSON_ENCODE, 'message' => '伺服器資料格式化失敗']);
 
 } catch (Throwable $e) {
+    // 捕捉所有未預期錯誤 (PHP 7 的 Throwable 包含 Error 與 Exception)
     if (isset($logger)) {
         $logger->error("XHR [dgx_json_api] 系統發生未預期錯誤: " . $e->getMessage());
     }
     http_response_code(500);
-    echo json_encode(['status' => 'error', 'message' => '伺服器內部錯誤，請聯繫管理員']);
+    echo json_encode(['status' => STATUS_CODE::DEFAULT_FAIL, 'message' => '伺服器內部錯誤，請聯繫管理員']);
 }
