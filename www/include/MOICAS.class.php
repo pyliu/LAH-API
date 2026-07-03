@@ -835,11 +835,11 @@ class MOICAS
 	 * @return array 包含登記案件字、中文名稱與使用次數的關聯陣列
 	 */
 	public function getMostPopularRM02() {
-		$this->db_wrapper->getDB()->query("
+		$this->db_wrapper->getDB()->parse("
 			SELECT 
-				t.RM02 AS \"" . mb_convert_encoding("登記案件字", ORACLE_ENCODING, "UTF-8") . "\",
-				r.KCNT AS \"" . mb_convert_encoding("案件字中文名稱", ORACLE_ENCODING, "UTF-8") . "\",
-				COUNT(*) AS \"" . mb_convert_encoding("近一年使用次數", ORACLE_ENCODING, "UTF-8") . "\"
+				t.RM02 AS \"CASE_WORD\",
+				r.KCNT AS \"CASE_NAME\",
+				COUNT(*) AS \"COUNT\"
 			FROM MOICAS.CRSMS t
 			-- 關聯代碼檔 (KCDE_1 = '04' 代表收件字代碼) 取得中文名稱
 			LEFT JOIN MOIADM.RKEYN r ON r.KCDE_1 = '04' AND t.RM02 = r.KCDE_2
@@ -847,7 +847,7 @@ class MOICAS
 			  -- 篩選近一年（系統時間往回推 365 天並轉換為民國年月日格式 YYYMMDD）
 			  AND t.RM07_1 >= TO_CHAR(TO_CHAR(SYSDATE - 365, 'YYYYMMDD') - 19110000)
 			GROUP BY t.RM02, r.KCNT
-			ORDER BY \"" . mb_convert_encoding("近一年使用次數", ORACLE_ENCODING, "UTF-8") . "\" DESC
+			ORDER BY \"COUNT\" DESC
 		");
 
 		Logger::getInstance()->info(__METHOD__.": 查詢近一年最常用的登記案件字");
