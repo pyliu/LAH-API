@@ -1,10 +1,5 @@
 <?php
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."include".DIRECTORY_SEPARATOR."init.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."Cache.class.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."MOICAS.class.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."MOICAS.class.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."RegCaseData.class.php");
 
 $cache = Cache::getInstance();
 $system = System::getInstance();
@@ -207,13 +202,22 @@ switch ($_POST["type"]) {
 			Logger::getInstance()->info("XHR [crsms_rm106_case] $message");
 			echoJSONResponse($message, $response_code, array( "baked" => $baked ));
 			break;
-		case "counter_printer_map":
+	case "counter_printer_map":
 			Logger::getInstance()->info("XHR [counter_printer_map] get counter printer map request.");
 			$rows = $mock ? $cache->get('counter_printer_map') : $moicas->getCounterPrinterMap();
 			$cache->set('counter_printer_map', $rows);
 			$response_code = count($rows) > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
 			$message = '已找到'.count($rows).'筆櫃台人員對應印表機紀錄';
 			Logger::getInstance()->info("XHR [counter_printer_map] $message");
+			echoJSONResponse($message, $response_code, array( "raw" => $rows ));
+			break;
+	case "most_popular_rm02":
+			Logger::getInstance()->info("XHR [most_popular_rm02] get most popular RM02 request.");
+			$rows = $mock ? $cache->get('most_popular_rm02') : $moicas->getMostPopularRM02($_POST['filter']);
+			$cache->set('most_popular_rm02', $rows);
+			$response_code = count($rows) > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+			$message = '已找到'.count($rows).'筆熱門 RM02 資料';
+			Logger::getInstance()->info("XHR [most_popular_rm02] $message");
 			echoJSONResponse($message, $response_code, array( "raw" => $rows ));
 			break;
 	default:
