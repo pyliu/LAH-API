@@ -837,6 +837,7 @@ class MOICAS
 	public function getMostPopularRM02($filter = '') {
 		// 系統暫存檔路徑
 		$cacheFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'moicas_popular_rm02_cache.json';
+		Logger::getInstance()->info(__METHOD__.": 暫存檔路徑: $cacheFile");
 		$cacheLifetime = 86400; // 暫存存活時間：24小時 (秒)
 		$result = [];
 		$fromCache = false;
