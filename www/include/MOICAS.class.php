@@ -828,40 +828,72 @@ class MOICAS
 		Logger::getInstance()->info(__METHOD__.": 取得目前地政系統人員使用印表機對應表：".count($arr)." 筆。");
 
 		return $arr;
-	}
-	/**
+	}/**
 	 * 取得近一年使用最頻繁的登記案件字
 	 *
+	 * @param string $filter 案件字前綴篩選
 	 * @return array 包含登記案件字、中文名稱與使用次數的關聯陣列
 	 */
 	public function getMostPopularRM02($filter = '') {
-		if (!$this->db_wrapper->reachable()) {
-			Logger::getInstance()->error(__METHOD__.": 資料庫無法存取，無法取得近一年使用最頻繁的登記案件字。");
-			return array();
+		// 系統暫存檔路徑
+		$cacheFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'moicas_popular_rm02_cache.json';
+		$cacheLifetime = 86400; // 暫存存活時間：24小時 (秒)
+		$result = [];
+		$fromCache = false;
+
+		// 1. 檢查暫存檔是否存在，以及寫入時間是否在一天內
+		if (file_exists($cacheFile)) {
+			$fileMTime = filemtime($cacheFile);
+			if ((time() - $fileMTime) <= $cacheLifetime) {
+				$cacheData = file_get_contents($cacheFile);
+				$decodedData = json_decode($cacheData, true);
+				if (is_array($decodedData)) {
+					$result = $decodedData;
+					$fromCache = true;
+					Logger::getInstance()->info(__METHOD__.": 命中快取，從暫存檔讀取熱門 RM02 資料。");
+				}
+			}
 		}
-		$this->db_wrapper->getDB()->parse("
-			SELECT 
-				t.RM02 AS \"CASE_WORD\",
-				r.KCNT AS \"CASE_NAME\",
-				COUNT(*) AS \"COUNT\"
-			FROM MOICAS.CRSMS t
-			-- 關聯代碼檔 (KCDE_1 = '04' 代表收件字代碼) 取得中文名稱
-			LEFT JOIN MOIADM.RKEYN r ON r.KCDE_1 = '04' AND t.RM02 = r.KCDE_2
-			WHERE 1 = 1
-			  -- 篩選近一年（系統時間往回推 365 天並轉換為民國年月日格式 YYYMMDD）
-			  AND t.RM07_1 >= TO_CHAR(TO_CHAR(SYSDATE - 365, 'YYYYMMDD') - 19110000)
-			GROUP BY t.RM02, r.KCNT
-			ORDER BY \"COUNT\" DESC
-		");
 
+		// 2. 如果暫存檔失效或不存在，則從資料庫查詢並更新暫存檔
+		if (!$fromCache) {
+			if (!$this->db_wrapper->reachable()) {
+				Logger::getInstance()->error(__METHOD__.": 資料庫無法存取，無法取得近一年使用最頻繁的登記案件字。");
+				return array();
+			}
 
-		$this->db_wrapper->getDB()->execute();
-		$result = $this->db_wrapper->getDB()->fetchAll();
+			$this->db_wrapper->getDB()->parse("
+				SELECT 
+					t.RM02 AS \"CASE_WORD\",
+					r.KCNT AS \"CASE_NAME\",
+					COUNT(*) AS \"COUNT\"
+				FROM MOICAS.CRSMS t
+				-- 關聯代碼檔 (KCDE_1 = '04' 代表收件字代碼) 取得中文名稱
+				LEFT JOIN MOIADM.RKEYN r ON r.KCDE_1 = '04' AND t.RM02 = r.KCDE_2
+				WHERE 1 = 1
+				  -- 篩選近一年（系統時間往回推 365 天並轉換為民國年月日格式 YYYMMDD）
+				  AND t.RM07_1 >= TO_CHAR(TO_CHAR(SYSDATE - 365, 'YYYYMMDD') - 19110000)
+				GROUP BY t.RM02, r.KCNT
+				ORDER BY \"COUNT\" DESC
+			");
+
+			$this->db_wrapper->getDB()->execute();
+			$result = $this->db_wrapper->getDB()->fetchAll();
+
+			// 將未過濾的結果寫入暫存檔
+			if (!empty($result)) {
+				file_put_contents($cacheFile, json_encode($result, JSON_UNESCAPED_UNICODE));
+				Logger::getInstance()->info(__METHOD__.": DB 查詢完畢，已更新熱門 RM02 資料至暫存檔。");
+			}
+		}
+
+		// 3. 執行後端記憶體層級的資料篩選
 		if (empty($filter)) {
 			return $result;
 		}
+
 		return array_filter($result, function($item) use ($filter) {
-    	return strpos($item['CASE_WORD'], $filter) === 0;
+			return strpos($item['CASE_WORD'], $filter) === 0;
 		});
 	}
 }
