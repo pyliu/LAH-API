@@ -834,7 +834,11 @@ class MOICAS
 	 *
 	 * @return array 包含登記案件字、中文名稱與使用次數的關聯陣列
 	 */
-	public function getMostPopularRM02() {
+	public function getMostPopularRM02($filter = '') {
+		if (!$this->db_wrapper->reachable()) {
+			Logger::getInstance()->error(__METHOD__.": 資料庫無法存取，無法取得近一年使用最頻繁的登記案件字。");
+			return array();
+		}
 		$this->db_wrapper->getDB()->parse("
 			SELECT 
 				t.RM02 AS \"CASE_WORD\",
@@ -850,9 +854,14 @@ class MOICAS
 			ORDER BY \"COUNT\" DESC
 		");
 
-		Logger::getInstance()->info(__METHOD__.": 查詢近一年最常用的登記案件字");
 
 		$this->db_wrapper->getDB()->execute();
-		return $this->db_wrapper->getDB()->fetchAll();
+		$result = $this->db_wrapper->getDB()->fetchAll();
+		if (empty($filter)) {
+			return $result;
+		}
+		return array_filter($result, function($item) use ($filter) {
+    	return strpos($item['CASE_WORD'], $filter) === 0;
+		});
 	}
 }
