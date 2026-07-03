@@ -45,21 +45,39 @@ class DGXLandCaseParser
     }
 
     /**
-     * 獲取完整的地政代碼對照表 (由 map.md 轉換而來)
+     * 獲取完整的地政代碼對照表
      */
     private function getRegMap()
     {
         if ($this->regMap !== null) {
             return $this->regMap;
         }
+        // HA
+        $siteCode = System::getInstance()->getSiteCode();
+        // 桃園
+        $siteName = System::getInstance()->getSiteName($siteCode);
+        // H1
+        $siteCodeCross = $siteCode[0] . (System::getInstance()->getSiteNumber() + 1);
+        // 產製本所端案件號對應表
+        $moicas = new MOICAS();
+        $popular = $moicas->getMostPopularRM02();
+        /**
+         * 將 RM02 結果轉成
+         *
+         * array(
+         *     'HA81' => '桃資登',
+         *     'HA82' => '桃資總',
+         *     ...
+         * )
+         */
+        $ownMap = array();
+        foreach ($popular as $row) {
+            if (!empty($row['CASE_WORD']) && !empty($row['CASE_NAME'])) {
+                $ownMap[$row['CASE_WORD']] = $row['CASE_NAME'];
+            }
+        }
+
         $this->regMap = array(
-            // 本所與轄內跨所
-            'HA81' => '桃資登', 'HA82' => '桃資總', 'HA85' => '桃資速', 'HA87' => '桃資標', 'HAX2' => '桃園跨',
-            'HBA1' => '桃壢登跨', 'HFA1' => '桃德登跨', 'HCA1' => '桃溪登跨',
-            'HGA1' => '桃平登跨', 'HDA1' => '桃楊登跨', 'HEA1' => '桃蘆登跨', 'HHA1' => '桃山登跨',
-            'HAB1' => '壢桃登跨', 'HAG1' => '平桃登跨', 'HAE1' => '蘆桃登跨', 'HAH1' => '山桃登跨', 
-            'HAF1' => '德桃登跨', 'HAD1' => '楊桃登跨', 'HAC1' => '溪桃登跨',
-            
             // 台北市
             'H1AA' => '跨縣市(桃園古亭)', 'H1AB' => '跨縣市(桃園建成)', 'H1AC' => '跨縣市(桃園中山)', 'H1AD' => '跨縣市(桃園松山)', 'H1AE' => '跨縣市(桃園士林)', 'H1AF' => '跨縣市(桃園大安)',
             'A1HA' => '跨縣市(古亭桃園)', 'A2HA' => '跨縣市(建成桃園)', 'A3HA' => '跨縣市(中山桃園)', 'A4HA' => '跨縣市(松山桃園)', 'A5HA' => '跨縣市(士林桃園)', 'A6HA' => '跨縣市(大安桃園)',
@@ -125,6 +143,35 @@ class DGXLandCaseParser
             'H1WA' => '跨縣市(桃園金門)', 'H1XA' => '跨縣市(桃園澎湖)', 'H1ZA' => '跨縣市(桃園連江)',
             'X1HA' => '跨縣市(澎湖桃園)', 'Z1HA' => '跨縣市(連江桃園)'
         );
+        /**
+         * -------------------------------------------------------
+         * 將寫死的桃園代碼改成目前站所
+         * -------------------------------------------------------
+         */
+        $replaceMap = array(
+            'H1'   => $siteCodeCross,
+            'HA'   => $siteCode,
+            '桃園' => $siteName
+        );
+        $newRegMap = array();
+        foreach ($this->regMap as $key => $value) {
+            $newRegMap[
+                str_replace(
+                    array_keys($replaceMap),
+                    array_values($replaceMap),
+                    $key
+                )
+            ] = str_replace(
+                array_keys($replaceMap),
+                array_values($replaceMap),
+                $value
+            );
+        }
+        /**
+         * 合併本所案件代碼
+         * (若有相同 Key，以 RM02 為主)
+         */
+        $this->regMap = array_merge($newRegMap, $ownMap);
         return $this->regMap;
     }
 
@@ -151,26 +198,57 @@ class DGXLandCaseParser
             }
         }
 
-        // 轄內跨所的常用簡稱對照表
-        $localAliases = array(
-            "桃壢" => "HBA1",
-            "桃溪" => "HCA1",
-            "桃楊" => "HDA1",
-            "桃蘆" => "HEA1",
-            "桃德" => "HFA1",
-            "桃平" => "HGA1",
-            "桃山" => "HHA1",
-            "壢桃" => "HAB1",
-            "溪桃" => "HAC1",
-            "楊桃" => "HAD1",
-            "蘆桃" => "HAE1",
-            "德桃" => "HAF1",
-            "平桃" => "HAG1",
-            "山桃" => "HAH1"
+        // HA、HB、HC...
+        $siteCode = System::getInstance()->getSiteCode();
+        // 桃園、中壢、大溪...
+        $siteName = System::getInstance()->getSiteName($siteCode);
+        // A、B、C...
+        $siteAlphabet = System::getInstance()->getSiteAlphabet();
+        /**
+         * 各所簡稱
+         */
+        $officeMap = array(
+            'A' => '桃',
+            'B' => '壢',
+            'C' => '溪',
+            'D' => '楊',
+            'E' => '蘆',
+            'F' => '德',
+            'G' => '平',
+            'H' => '山'
         );
-        
-        // 將簡稱也加入反向對照表
-        foreach ($localAliases as $alias => $code) {
+        /**
+         * 動態建立轄內跨所簡稱
+         *
+         * 例如目前站所為：
+         * HA(桃園)
+         *
+         * 桃壢 => HBA1
+         * 壢桃 => HAB1
+         *
+         * 若目前站所為：
+         * HC(大溪)
+         *
+         * 溪壢 => HBC1
+         * 壢溪 => HCB1
+         */
+        foreach ($officeMap as $alphabet => $shortName) {
+
+            // 自己不用加入
+            if ($alphabet === $siteAlphabet) {
+                continue;
+            }
+
+            // 本所 -> 他所
+            $alias = mb_substr($siteName, 0, 1, 'UTF-8') . $shortName;
+            $code  = 'H' . $alphabet . $siteAlphabet . '1';
+
+            $this->reverseMap[$alias] = $code;
+
+            // 他所 -> 本所
+            $alias = $shortName . mb_substr($siteName, 0, 1, 'UTF-8');
+            $code  = 'H' . $siteAlphabet . $alphabet . '1';
+
             $this->reverseMap[$alias] = $code;
         }
         
@@ -354,8 +432,8 @@ class DGXLandCaseParser
         $results = $this->enrichResults($results);
 
         Logger::getInstance()->info(
-            "DGXLandCaseParser: [Regex] 直接解析成功，共 " . count($results) . " 筆。\n" .
-            print_r($results, true)
+            "DGXLandCaseParser: [Regex] 直接解析成功，共 " . count($results) . " 筆。\n"
+            // print_r($results, true)
         );
 
         return array(
@@ -370,8 +448,13 @@ class DGXLandCaseParser
      */
     private function enrichResults($results)
     {
+        Logger::getInstance()->info("DGXLandCaseParser: enrichResults() 開始補齊中文描述，並檢查是否有 AI 回傳中文描述的情況。");
+
         $map = $this->getRegMap();
         $reverseMap = $this->getReverseMap();
+
+        // Logger::getInstance()->info("DGXLandCaseParser: 目前案件字對照表共 " . count($map) . " 筆。\n\n".print_r($map, true));
+        // Logger::getInstance()->info("DGXLandCaseParser: 目前案件字反向對照表共 " . count($reverseMap) . " 筆。\n\n".print_r($reverseMap, true));
 
         foreach ($results as &$item) {
             $originalWord = trim($item['case_word'] ?? '');
