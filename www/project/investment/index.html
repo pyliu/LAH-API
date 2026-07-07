@@ -2105,8 +2105,11 @@ function renderSopSlide(animateResize = true) {
   const hasPrev = animateResize && prevHeight > 0;
 
   if (hasPrev) {
+    // 先清空高度鎖定 (交還 auto)，讓瀏覽器等一下能依「新內容」重新計算真實高度
+    // 注意：若此時還鎖在舊高度，scrollHeight 永遠不會小於目前容器高度，
+    // 內容變短時就量不出真正該縮小的目標值 → 這是先前縮放失敗的根因。
     stage.style.transition = 'none';
-    stage.style.height = prevHeight + 'px';
+    stage.style.height = '';
   }
 
   stage.innerHTML = '';
@@ -2115,9 +2118,11 @@ function renderSopSlide(animateResize = true) {
   stage.appendChild(clone);
 
   if (hasPrev) {
+    // 此時 stage 高度已由瀏覽器依新內容 (並受 max-height 限制) 自然計算好，直接讀取即為目標高度
+    const targetHeight = stage.offsetHeight;
+    // 立刻鎖回舊高度（同一輪同步流程內完成，不會被畫面繪製出來），準備開始動畫
+    stage.style.height = prevHeight + 'px';
     void stage.offsetHeight; // 強制 reflow，讓起始高度先套用再開始動畫
-    const maxH = parseFloat(getComputedStyle(stage).maxHeight) || Infinity;
-    const targetHeight = Math.min(stage.scrollHeight, maxH);
     stage.style.transition = 'height .35s ease';
     requestAnimationFrame(() => { stage.style.height = targetHeight + 'px'; });
     stage.addEventListener('transitionend', function sopOnResizeEnd(e) {
