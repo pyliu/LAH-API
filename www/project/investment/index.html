@@ -372,13 +372,34 @@ canvas{display:block;width:100%!important;height:auto!important;}
   letter-spacing:.03em; display:flex; align-items:center; gap:6px;
 }
 .sop-slide-counter{ font-size:.78rem; color:var(--text2); font-weight:700; }
-.sop-slide-stage{
-  padding:16px 24px; max-height:58vh; overflow-y:auto;
+.sop-slide-meta{ display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.sop-slide-countdown{
+  font-size:.78rem; color:var(--green); font-weight:800;
+  background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.3);
+  padding:2px 9px; border-radius:999px; min-width:52px; text-align:center;
+  transition:.2s;
 }
-.sop-slide-stage .strat-box{ margin:0 !important; animation: sopFadeIn .35s ease; }
+.sop-slide-countdown.paused{
+  color:var(--amber); background:rgba(245,158,11,.12); border-color:rgba(245,158,11,.3);
+}
+.sop-slide-stage{
+  padding:16px 24px; max-height:58vh; overflow-y:auto; perspective:900px;
+}
+.sop-slide-stage .strat-box{ margin:0 !important; }
 .sop-slide-stage .strat-box h4{ font-size:1.125rem; }
 .sop-slide-stage .strat-box li{ font-size:1.0625rem; }
 @keyframes sopFadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+@keyframes sopSlideRight{ from{opacity:0; transform:translateX(48px);} to{opacity:1; transform:translateX(0);} }
+@keyframes sopSlideLeft{ from{opacity:0; transform:translateX(-48px);} to{opacity:1; transform:translateX(0);} }
+@keyframes sopSlideUp{ from{opacity:0; transform:translateY(28px);} to{opacity:1; transform:translateY(0);} }
+@keyframes sopZoomIn{ from{opacity:0; transform:scale(.86);} to{opacity:1; transform:scale(1);} }
+@keyframes sopFlipIn{ from{opacity:0; transform:rotateY(35deg);} to{opacity:1; transform:rotateY(0);} }
+.sop-anim-fade{ animation: sopFadeIn .4s ease; }
+.sop-anim-right{ animation: sopSlideRight .4s ease; }
+.sop-anim-left{ animation: sopSlideLeft .4s ease; }
+.sop-anim-up{ animation: sopSlideUp .4s ease; }
+.sop-anim-zoom{ animation: sopZoomIn .4s ease; }
+.sop-anim-flip{ animation: sopFlipIn .45s ease; transform-style:preserve-3d; }
 .sop-slide-controls{
   display:flex; align-items:center; justify-content:space-between;
   gap:12px; padding:4px 24px 22px;
@@ -1372,7 +1393,10 @@ canvas{display:block;width:100%!important;height:auto!important;}
     <button class="modal-close" aria-label="關閉輪播" onclick="closeSopSlideshow()">×</button>
     <div class="sop-slide-header">
       <span class="sop-slide-badge">💤 閒置自動輪播．策略 SOP 精華回顧</span>
-      <span class="sop-slide-counter" id="sop-slide-counter">1 / 1</span>
+      <span class="sop-slide-meta">
+        <span class="sop-slide-countdown" id="sop-slide-countdown">⏱ 9s</span>
+        <span class="sop-slide-counter" id="sop-slide-counter">1 / 1</span>
+      </span>
     </div>
     <div class="sop-slide-stage" id="sop-slide-content"></div>
     <div class="sop-slide-controls">
@@ -2032,13 +2056,18 @@ function toggleTheme() {
 /* ────────────────────────────────
    策略 SOP 閒置輪播 (5分鐘無互動觸發)
    + KONAMI CODE 直接啟動
+   + 倒數秒數 / 滑鼠暫停 / 隨機轉場動畫
 ──────────────────────────────── */
 const SOP_IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 閒置 5 分鐘
-const SOP_SLIDE_INTERVAL_MS = 9000;        // 每則輪播停留 9 秒
+const SOP_SLIDE_INTERVAL_SEC = 9;          // 每則輪播停留 9 秒
+const SOP_ANIMATIONS = ['sop-anim-fade','sop-anim-right','sop-anim-left','sop-anim-up','sop-anim-zoom','sop-anim-flip'];
 let sopIdleTimer = null;
 let sopAutoAdvanceTimer = null;
 let sopSlides = [];
 let sopSlideIndex = 0;
+let sopCountdown = SOP_SLIDE_INTERVAL_SEC;
+let sopPaused = false;
+let sopLastAnim = null;
 
 function sopIsShowing() {
   const overlay = document.getElementById('sop-slideshow');
@@ -2057,6 +2086,15 @@ function collectSopSlides() {
   return Array.from(panel.querySelectorAll('.strat-box'));
 }
 
+function sopPickAnimation() {
+  // 避免連續兩次抽到同一種轉場，看起來更活潑
+  let choices = SOP_ANIMATIONS;
+  if (sopLastAnim) choices = SOP_ANIMATIONS.filter(a => a !== sopLastAnim);
+  const pick = choices[Math.floor(Math.random() * choices.length)];
+  sopLastAnim = pick;
+  return pick;
+}
+
 function renderSopSlide() {
   const stage = document.getElementById('sop-slide-content');
   const counter = document.getElementById('sop-slide-counter');
@@ -2065,6 +2103,7 @@ function renderSopSlide() {
 
   stage.innerHTML = '';
   const clone = sopSlides[sopSlideIndex].cloneNode(true);
+  clone.classList.add(sopPickAnimation());
   stage.appendChild(clone);
 
   if (counter) counter.textContent = `${sopSlideIndex + 1} / ${sopSlides.length}`;
@@ -2093,18 +2132,54 @@ function sopPrevSlide() {
   renderSopSlide();
 }
 
+function sopUpdateCountdownDisplay() {
+  const el = document.getElementById('sop-slide-countdown');
+  if (!el) return;
+  if (sopPaused) {
+    el.textContent = '⏸ 已暫停';
+    el.classList.add('paused');
+  } else {
+    el.textContent = `⏱ ${sopCountdown}s`;
+    el.classList.remove('paused');
+  }
+}
+
+function sopTick() {
+  if (sopPaused) return; // 滑鼠停留在輪播上時暫停倒數
+  sopCountdown--;
+  if (sopCountdown <= 0) {
+    sopNextSlide();
+    sopCountdown = SOP_SLIDE_INTERVAL_SEC;
+  }
+  sopUpdateCountdownDisplay();
+}
+
 function sopRestartAutoAdvance() {
   clearInterval(sopAutoAdvanceTimer);
-  sopAutoAdvanceTimer = setInterval(sopNextSlide, SOP_SLIDE_INTERVAL_MS);
+  sopCountdown = SOP_SLIDE_INTERVAL_SEC;
+  sopUpdateCountdownDisplay();
+  sopAutoAdvanceTimer = setInterval(sopTick, 1000);
+}
+
+function sopHandleMouseEnter() {
+  sopPaused = true;
+  sopUpdateCountdownDisplay();
+}
+
+function sopHandleMouseLeave() {
+  sopPaused = false;
+  sopUpdateCountdownDisplay();
 }
 
 function openSopSlideshow() {
   sopSlides = collectSopSlides();
   if (!sopSlides.length) return; // 沒有內容可輪播就不開啟
   sopSlideIndex = 0;
+  sopLastAnim = null;
   const overlay = document.getElementById('sop-slideshow');
   if (!overlay) return;
   overlay.classList.add('active');
+  sopPaused = false;
   renderSopSlide();
   sopRestartAutoAdvance();
 }
@@ -2113,6 +2188,7 @@ function closeSopSlideshow() {
   const overlay = document.getElementById('sop-slideshow');
   if (overlay) overlay.classList.remove('active');
   clearInterval(sopAutoAdvanceTimer);
+  sopPaused = false;
   resetSopIdleTimer(); // 關閉後重新開始計算下一次閒置時間
 }
 
@@ -2219,6 +2295,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 5. 啟動策略 SOP 閒置輪播計時器
   resetSopIdleTimer();
+
+  // 6. 滑鼠移入輪播暫停、移開繼續
+  const sopWrap = document.querySelector('.sop-slide-content-wrap');
+  if (sopWrap) {
+    sopWrap.addEventListener('mouseenter', sopHandleMouseEnter);
+    sopWrap.addEventListener('mouseleave', sopHandleMouseLeave);
+  }
 });
 </script>
 </body>
