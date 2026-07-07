@@ -354,6 +354,51 @@ canvas{display:block;width:100%!important;height:auto!important;}
   .modal-close { top: 8px; right: 8px; width: 32px; height: 32px; font-size: 18px; }
   .g2, .g3 { grid-template-columns: 1fr; }
 }
+
+/* ────────────────────────────────
+   策略 SOP 閒置輪播 / KONAMI CODE
+──────────────────────────────── */
+.sop-slide-content-wrap{
+  max-width:760px; width:100%; background:var(--bg2);
+  border:1px solid var(--border); display:flex; flex-direction:column;
+}
+.sop-slide-header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 24px 0; gap:12px; flex-wrap:wrap;
+}
+.sop-slide-badge{
+  font-size:.78rem; font-weight:800; color:var(--amber);
+  letter-spacing:.03em; display:flex; align-items:center; gap:6px;
+}
+.sop-slide-counter{ font-size:.78rem; color:var(--text2); font-weight:700; }
+.sop-slide-stage{
+  padding:16px 24px; max-height:58vh; overflow-y:auto;
+}
+.sop-slide-stage .strat-box{ margin:0 !important; animation: sopFadeIn .35s ease; }
+@keyframes sopFadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+.sop-slide-controls{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:4px 24px 22px;
+}
+.sop-nav-btn{
+  background:var(--bg3); border:1px solid var(--border); color:var(--text);
+  padding:8px 16px; border-radius:8px; font-size:.85rem; font-weight:700;
+  cursor:pointer; font-family:inherit; transition:.2s; flex-shrink:0;
+}
+.sop-nav-btn:hover{ border-color:var(--green); color:var(--green); }
+.sop-slide-dots{
+  display:flex; gap:6px; flex-wrap:wrap; justify-content:center; flex:1;
+}
+.sop-dot{
+  width:8px; height:8px; border-radius:50%; background:var(--border);
+  cursor:pointer; transition:.2s; border:none; padding:0; flex-shrink:0;
+}
+.sop-dot.active{ background:var(--green); width:20px; border-radius:4px; }
+@media(max-width:640px){
+  .sop-slide-controls{ flex-wrap:wrap; }
+  .sop-slide-dots{ order:3; width:100%; }
+  .sop-slide-stage{ max-height:50vh; }
+}
 </style>
 </head>
 <body>
@@ -1318,6 +1363,23 @@ canvas{display:block;width:100%!important;height:auto!important;}
   </div>
 </div>
 
+<!-- 策略 SOP 閒置輪播 / KONAMI CODE 觸發 -->
+<div class="modal-overlay" id="sop-slideshow">
+  <div class="modal-content sop-slide-content-wrap" onclick="event.stopPropagation()">
+    <button class="modal-close" aria-label="關閉輪播" onclick="closeSopSlideshow()">×</button>
+    <div class="sop-slide-header">
+      <span class="sop-slide-badge">💤 閒置自動輪播．策略 SOP 精華回顧</span>
+      <span class="sop-slide-counter" id="sop-slide-counter">1 / 1</span>
+    </div>
+    <div class="sop-slide-stage" id="sop-slide-content"></div>
+    <div class="sop-slide-controls">
+      <button class="sop-nav-btn" onclick="sopPrevSlide(); sopRestartAutoAdvance();">‹ 上一則</button>
+      <div class="sop-slide-dots" id="sop-slide-dots"></div>
+      <button class="sop-nav-btn" onclick="sopNextSlide(); sopRestartAutoAdvance();">下一則 ›</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ────────────────────────────────
    VIDEO MODAL HELPER
@@ -1964,6 +2026,115 @@ function toggleTheme() {
   if (document.getElementById('tab-charts')?.classList.contains('active')) { resizeCanvas(); } 
 }
 
+/* ────────────────────────────────
+   策略 SOP 閒置輪播 (5分鐘無互動觸發)
+   + KONAMI CODE 直接啟動
+──────────────────────────────── */
+const SOP_IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 閒置 5 分鐘
+const SOP_SLIDE_INTERVAL_MS = 9000;        // 每則輪播停留 9 秒
+let sopIdleTimer = null;
+let sopAutoAdvanceTimer = null;
+let sopSlides = [];
+let sopSlideIndex = 0;
+
+function sopIsShowing() {
+  const overlay = document.getElementById('sop-slideshow');
+  return !!overlay && overlay.classList.contains('active');
+}
+
+function resetSopIdleTimer() {
+  clearTimeout(sopIdleTimer);
+  if (sopIsShowing()) return; // 輪播中不重複倒數，避免自我觸發
+  sopIdleTimer = setTimeout(openSopSlideshow, SOP_IDLE_TIMEOUT_MS);
+}
+
+function collectSopSlides() {
+  const panel = document.getElementById('tab-strategy');
+  if (!panel) return [];
+  return Array.from(panel.querySelectorAll('.strat-box'));
+}
+
+function renderSopSlide() {
+  const stage = document.getElementById('sop-slide-content');
+  const counter = document.getElementById('sop-slide-counter');
+  const dotsWrap = document.getElementById('sop-slide-dots');
+  if (!stage || !sopSlides.length) return;
+
+  stage.innerHTML = '';
+  const clone = sopSlides[sopSlideIndex].cloneNode(true);
+  stage.appendChild(clone);
+
+  if (counter) counter.textContent = `${sopSlideIndex + 1} / ${sopSlides.length}`;
+
+  if (dotsWrap) {
+    dotsWrap.innerHTML = '';
+    sopSlides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'sop-dot' + (i === sopSlideIndex ? ' active' : '');
+      dot.setAttribute('aria-label', `第 ${i + 1} 則`);
+      dot.onclick = () => { sopSlideIndex = i; renderSopSlide(); sopRestartAutoAdvance(); };
+      dotsWrap.appendChild(dot);
+    });
+  }
+}
+
+function sopNextSlide() {
+  if (!sopSlides.length) return;
+  sopSlideIndex = (sopSlideIndex + 1) % sopSlides.length;
+  renderSopSlide();
+}
+
+function sopPrevSlide() {
+  if (!sopSlides.length) return;
+  sopSlideIndex = (sopSlideIndex - 1 + sopSlides.length) % sopSlides.length;
+  renderSopSlide();
+}
+
+function sopRestartAutoAdvance() {
+  clearInterval(sopAutoAdvanceTimer);
+  sopAutoAdvanceTimer = setInterval(sopNextSlide, SOP_SLIDE_INTERVAL_MS);
+}
+
+function openSopSlideshow() {
+  sopSlides = collectSopSlides();
+  if (!sopSlides.length) return; // 沒有內容可輪播就不開啟
+  sopSlideIndex = 0;
+  const overlay = document.getElementById('sop-slideshow');
+  if (!overlay) return;
+  overlay.classList.add('active');
+  renderSopSlide();
+  sopRestartAutoAdvance();
+}
+
+function closeSopSlideshow() {
+  const overlay = document.getElementById('sop-slideshow');
+  if (overlay) overlay.classList.remove('active');
+  clearInterval(sopAutoAdvanceTimer);
+  resetSopIdleTimer(); // 關閉後重新開始計算下一次閒置時間
+}
+
+// 任何使用者互動都重置閒置計時器 (輪播開啟時會被 resetSopIdleTimer 內部擋下，不會提早關閉)
+['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'wheel'].forEach(evt => {
+  window.addEventListener(evt, resetSopIdleTimer, { passive: true });
+});
+
+/* KONAMI CODE：↑ ↑ ↓ ↓ ← → ← → B A → 直接開啟 SOP 輪播 */
+const SOP_KONAMI_SEQUENCE = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let sopKonamiProgress = 0;
+window.addEventListener('keydown', (e) => {
+  const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  const expected = SOP_KONAMI_SEQUENCE[sopKonamiProgress];
+  if (key === expected) {
+    sopKonamiProgress++;
+    if (sopKonamiProgress === SOP_KONAMI_SEQUENCE.length) {
+      sopKonamiProgress = 0;
+      openSopSlideshow(); // 手動關閉前輪播不會自動消失
+    }
+  } else {
+    sopKonamiProgress = (key === SOP_KONAMI_SEQUENCE[0]) ? 1 : 0;
+  }
+});
+
 document.addEventListener("DOMContentLoaded", () => {
   // 1. 恢復主題設定
   const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -2042,6 +2213,9 @@ document.addEventListener("DOMContentLoaded", () => {
   calculate();
   calcBBD();
   calcSmile();
+
+  // 5. 啟動策略 SOP 閒置輪播計時器
+  resetSopIdleTimer();
 });
 </script>
 </body>
