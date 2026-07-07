@@ -2094,16 +2094,42 @@ function sopPickAnimation() {
   return pick;
 }
 
-function renderSopSlide() {
+function renderSopSlide(animateResize = true) {
   const stage = document.getElementById('sop-slide-content');
   const counter = document.getElementById('sop-slide-counter');
   const dotsWrap = document.getElementById('sop-slide-dots');
   if (!stage || !sopSlides.length) return;
 
+  // 記錄切換前的高度，稍後用來做平順的縮放過渡動畫
+  const prevHeight = stage.offsetHeight;
+  const hasPrev = animateResize && prevHeight > 0;
+
+  if (hasPrev) {
+    stage.style.transition = 'none';
+    stage.style.height = prevHeight + 'px';
+  }
+
   stage.innerHTML = '';
   const clone = sopSlides[sopSlideIndex].cloneNode(true);
   clone.classList.add(sopPickAnimation());
   stage.appendChild(clone);
+
+  if (hasPrev) {
+    void stage.offsetHeight; // 強制 reflow，讓起始高度先套用再開始動畫
+    const maxH = parseFloat(getComputedStyle(stage).maxHeight) || Infinity;
+    const targetHeight = Math.min(stage.scrollHeight, maxH);
+    stage.style.transition = 'height .35s ease';
+    requestAnimationFrame(() => { stage.style.height = targetHeight + 'px'; });
+    stage.addEventListener('transitionend', function sopOnResizeEnd(e) {
+      if (e.propertyName !== 'height') return;
+      stage.style.transition = '';
+      stage.style.height = ''; // 動畫結束後交還給CSS的auto/max-height控制
+      stage.removeEventListener('transitionend', sopOnResizeEnd);
+    }, { once: true });
+  } else {
+    stage.style.height = '';
+    stage.style.transition = '';
+  }
 
   if (counter) counter.textContent = `${sopSlideIndex + 1} / ${sopSlides.length}`;
 
@@ -2179,7 +2205,7 @@ function openSopSlideshow() {
   if (!overlay) return;
   overlay.classList.add('active');
   sopPaused = false;
-  renderSopSlide();
+  renderSopSlide(false); // 首次開啟不需要高度縮放過渡，交給Modal本身的淡入縮放動畫
   sopRestartAutoAdvance();
 }
 
