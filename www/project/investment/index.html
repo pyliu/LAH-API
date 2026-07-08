@@ -2076,7 +2076,10 @@ function sopIsShowing() {
 function resetSopIdleTimer() {
   clearTimeout(sopIdleTimer);
   if (sopIsShowing()) return; // 輪播中不重複倒數，避免自我觸發
-  sopIdleTimer = setTimeout(openSopSlideshow, SOP_IDLE_TIMEOUT_MS);
+  if (document.hidden) return; // 分頁在背景不可見時不計時，避免累積閒置時間
+  sopIdleTimer = setTimeout(() => {
+    if (!sopIsShowing()) openSopSlideshow(); // 保險起見，避免輪播開著時被閒置計時器打斷重播
+  }, SOP_IDLE_TIMEOUT_MS);
 }
 
 function collectSopSlides() {
@@ -2227,6 +2230,17 @@ function closeSopSlideshow() {
   window.addEventListener(evt, resetSopIdleTimer, { passive: true });
 });
 
+// 分頁切到背景時暫停閒置倒數；切回前景/取得焦點時才重新開始計時
+// (避免分頁停在背景默默倒數完，切回來時感覺像「一進網站就播放」)
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearTimeout(sopIdleTimer);
+  } else {
+    resetSopIdleTimer();
+  }
+});
+window.addEventListener('focus', resetSopIdleTimer);
+
 /* KONAMI CODE：↑ ↑ ↓ ↓ ← → ← → B A → 直接開啟 SOP 輪播 */
 const SOP_KONAMI_SEQUENCE = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 let sopKonamiProgress = 0;
@@ -2332,6 +2346,10 @@ document.addEventListener("DOMContentLoaded", () => {
     sopWrap.addEventListener('mouseenter', sopHandleMouseEnter);
     sopWrap.addEventListener('mouseleave', sopHandleMouseLeave);
   }
+
+  // 7. 每次進站/重新整頁都自動播放一次策略SOP輪播，幫助剛進站的人快速了解網站在幹嘛
+  //    稍微延遲一下讓頁面先渲染完成，畫面比較不會顯得突兀
+  setTimeout(openSopSlideshow, 900);
 });
 </script>
 </body>
