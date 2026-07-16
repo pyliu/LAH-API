@@ -1,6 +1,7 @@
 <?php
 // Loading global consts and functions
 require_once('init.php');
+
 class DGXLandCaseParser
 {
     // ⚠️ 直連 Ollama 的 OpenAI 相容端點 (由 init.php 常數決定，避免硬編碼)
@@ -61,15 +62,7 @@ class DGXLandCaseParser
         // 產製本所端案件號對應表
         $moicas = new MOICAS();
         $popular = $moicas->getMostPopularRM02();
-        /**
-         * 將 RM02 結果轉成
-         *
-         * array(
-         *     'HA81' => '桃資登',
-         *     'HA82' => '桃資總',
-         *     ...
-         * )
-         */
+        
         $ownMap = array();
         foreach ($popular as $row) {
             if (!empty($row['CASE_WORD']) && !empty($row['CASE_NAME'])) {
@@ -143,11 +136,7 @@ class DGXLandCaseParser
             'H1WA' => '跨縣市(桃園金門)', 'H1XA' => '跨縣市(桃園澎湖)', 'H1ZA' => '跨縣市(桃園連江)',
             'X1HA' => '跨縣市(澎湖桃園)', 'Z1HA' => '跨縣市(連江桃園)'
         );
-        /**
-         * -------------------------------------------------------
-         * 將寫死的桃園代碼改成目前站所
-         * -------------------------------------------------------
-         */
+
         $replaceMap = array(
             'H1'   => $siteCodeCross,
             'HA'   => $siteCode,
@@ -167,11 +156,40 @@ class DGXLandCaseParser
                 $value
             );
         }
+
+        /**
+         * 動態產生桃園轄內 8 所跨所案件代碼對照表
+         * 例如：桃園中壢 => HBA1
+         * 避免直接手寫，同時修正使用者可能發生的筆誤 (如龜山大溪應為 HCH1，非 HCC1)
+         */
+        $taoyuanOffices = array(
+            'A' => '桃園',
+            'B' => '中壢',
+            'C' => '大溪',
+            'D' => '楊梅',
+            'E' => '蘆竹',
+            'F' => '八德',
+            'G' => '平鎮',
+            'H' => '龜山'
+        );
+        $crossCityMap = array();
+        foreach ($taoyuanOffices as $srcCode => $srcName) {
+            foreach ($taoyuanOffices as $dstCode => $dstName) {
+                if ($srcCode === $dstCode) {
+                    continue;
+                }
+                // 代碼組合規則: H + 目標代碼 + 來源代碼 + 1
+                $code = 'H' . $dstCode . $srcCode . '1';
+                $desc = $srcName . $dstName; // 例如 '桃園中壢'
+                $crossCityMap[$code] = $desc;
+            }
+        }
+
         /**
          * 合併本所案件代碼
-         * (若有相同 Key，以 RM02 為主)
+         * 順序：取代後的跨縣市表 -> 桃園跨所自動生成表 -> 本所 RM02 表 (最優先覆蓋)
          */
-        $this->regMap = array_merge($newRegMap, $ownMap);
+        $this->regMap = array_merge($newRegMap, $crossCityMap, $ownMap);
         return $this->regMap;
     }
 
@@ -198,65 +216,55 @@ class DGXLandCaseParser
             }
         }
 
-        // HA、HB、HC...
-        $siteCode = System::getInstance()->getSiteCode();
-        // 桃園、中壢、大溪...
-        $siteName = System::getInstance()->getSiteName($siteCode);
-        // A、B、C...
-        $siteAlphabet = System::getInstance()->getSiteAlphabet();
         /**
-         * 各所簡稱
+         * 桃園 8 所基本資料
          */
-        $officeMap = array(
-            'A' => '桃',
-            'B' => '壢',
-            'C' => '溪',
-            'D' => '楊',
-            'E' => '蘆',
-            'F' => '德',
-            'G' => '平',
-            'H' => '山'
+        $offices = array(
+            'A' => array('name' => '桃園', 'short' => '桃'),
+            'B' => array('name' => '中壢', 'short' => '壢'),
+            'C' => array('name' => '大溪', 'short' => '溪'),
+            'D' => array('name' => '楊梅', 'short' => '楊'),
+            'E' => array('name' => '蘆竹', 'short' => '蘆'),
+            'F' => array('name' => '八德', 'short' => '德'),
+            'G' => array('name' => '平鎮', 'short' => '平'),
+            'H' => array('name' => '龜山', 'short' => '山')
         );
+
         /**
-         * 動態建立轄內跨所簡稱
-         *
-         * 例如目前站所為：
-         * HA(桃園)
-         *
-         * 桃壢 => HBA1
-         * 壢桃 => HAB1
-         *
-         * 若目前站所為：
-         * HC(大溪)
-         *
-         * 溪壢 => HBC1
-         * 壢溪 => HCB1
+         * 動態建立轄內所有跨所簡稱 (共 56 組矩陣支援)
+         * 取代以往僅依賴「目前站所」的有限對應
          */
-        foreach ($officeMap as $alphabet => $shortName) {
+        foreach ($offices as $srcCode => $srcData) {
+            foreach ($offices as $dstCode => $dstData) {
+                if ($srcCode === $dstCode) {
+                    continue;
+                }
+                
+                $code  = 'H' . $dstCode . $srcCode . '1';
+                
+                // 0. 來源所全名 + 目標所全名 (補回因 RM02 覆蓋而遺失的全稱特徵，例：桃園龜山)
+                $alias0 = $srcData['name'] . $dstData['name'];
+                $this->reverseMap[$alias0] = $code;
 
-            // 自己不用加入
-            if ($alphabet === $siteAlphabet) {
-                continue;
+                // 1. 來源所首字 + 目標所簡稱 (相容原有：本所 -> 他所，例：桃壢)
+                $alias1 = mb_substr($srcData['name'], 0, 1, 'UTF-8') . $dstData['short'];
+                $this->reverseMap[$alias1] = $code;
+
+                // 2. 來源所簡稱 + 目標所首字 (相容原有：他所 -> 本所，例：壢桃)
+                $alias2 = $srcData['short'] . mb_substr($dstData['name'], 0, 1, 'UTF-8');
+                $this->reverseMap[$alias2] = $code;
+                
+                // 3. 純簡稱互串 (額外支援延伸，例：壢溪)
+                $alias3 = $srcData['short'] . $dstData['short'];
+                $this->reverseMap[$alias3] = $code;
             }
-
-            // 本所 -> 他所
-            $alias = mb_substr($siteName, 0, 1, 'UTF-8') . $shortName;
-            $code  = 'H' . $alphabet . $siteAlphabet . '1';
-
-            $this->reverseMap[$alias] = $code;
-
-            // 他所 -> 本所
-            $alias = $shortName . mb_substr($siteName, 0, 1, 'UTF-8');
-            $code  = 'H' . $siteAlphabet . $alphabet . '1';
-
-            $this->reverseMap[$alias] = $code;
         }
         
         return $this->reverseMap;
     }
 
     /**
-     * ⚠️ 修改：預處理輸入，替換為代碼時「強制補上空白」，避免「桃楊543」因相連而無法解析
+     * 預處理輸入，替換為代碼時「強制補上空白」，避免「桃楊543」因相連而無法解析
      */
     private function preprocessInput($input)
     {
@@ -279,7 +287,7 @@ class DGXLandCaseParser
     }
 
     /**
-     * ⚠️ 修改：全面升級 Regex 匹配規則，利用 [^\da-zA-Z]+ 穿透各種中文雜訊與無意義的標點
+     * 全面升級 Regex 匹配規則，利用 [^\da-zA-Z]+ 穿透各種中文雜訊與無意義的標點
      */
     private function regexParse($input)
     {
@@ -294,7 +302,6 @@ class DGXLandCaseParser
         // ==========================================
         // Phase 1: 包含民國年的完整格式
         // ==========================================
-        // [^\da-zA-Z]+ 允許匹配任意非英數字元（如 "年 "、" 不知所謂"），完美跳過雜訊
         $pattern1 = '/(?<!\d)(1\d{2})[^\da-zA-Z]+([A-Z][A-Z0-9]{3})[^\da-zA-Z]+(\d{1,6})((?:[^\da-zA-Z]+(?!\d{3}[^\da-zA-Z]+[A-Z])(?![A-Z][A-Z0-9]{3})\d{1,6})*)/iu';
 
         if (preg_match_all($pattern1, $remainingInput, $anchors1, PREG_SET_ORDER)) {
@@ -433,7 +440,6 @@ class DGXLandCaseParser
 
         Logger::getInstance()->info(
             "DGXLandCaseParser: [Regex] 直接解析成功，共 " . count($results) . " 筆。\n"
-            // print_r($results, true)
         );
 
         return array(
@@ -452,9 +458,6 @@ class DGXLandCaseParser
 
         $map = $this->getRegMap();
         $reverseMap = $this->getReverseMap();
-
-        // Logger::getInstance()->info("DGXLandCaseParser: 目前案件字對照表共 " . count($map) . " 筆。\n\n".print_r($map, true));
-        // Logger::getInstance()->info("DGXLandCaseParser: 目前案件字反向對照表共 " . count($reverseMap) . " 筆。\n\n".print_r($reverseMap, true));
 
         foreach ($results as &$item) {
             $originalWord = trim($item['case_word'] ?? '');
