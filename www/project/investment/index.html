@@ -2261,6 +2261,38 @@ function sopHandleMouseLeave() {
   sopUpdateCountdownDisplay();
 }
 
+/* 觸控支援：手指按住時暫停，左右滑動可切換上一則/下一則 */
+const SOP_SWIPE_THRESHOLD = 50; // 水平滑動需超過這個px距離才視為換頁手勢
+let sopTouchStartX = 0;
+let sopTouchStartY = 0;
+
+function sopHandleTouchStart(e) {
+  if (!e.touches || !e.touches.length) return;
+  sopPaused = true; // 手指按住視同暫停，避免滑動途中被自動切換打斷
+  sopUpdateCountdownDisplay();
+  sopTouchStartX = e.touches[0].clientX;
+  sopTouchStartY = e.touches[0].clientY;
+}
+
+function sopHandleTouchEnd(e) {
+  if (e.changedTouches && e.changedTouches.length) {
+    const dx = e.changedTouches[0].clientX - sopTouchStartX;
+    const dy = e.changedTouches[0].clientY - sopTouchStartY;
+    // 水平滑動距離夠大、且明顯大於垂直滑動時才判定為換頁手勢，避免和上下捲動衝突
+    if (Math.abs(dx) > SOP_SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0) { sopNextSlide(); } else { sopPrevSlide(); }
+      sopRestartAutoAdvance();
+    }
+  }
+  sopPaused = false; // 放開手指恢復自動輪播倒數
+  sopUpdateCountdownDisplay();
+}
+
+function sopHandleTouchCancel() {
+  sopPaused = false;
+  sopUpdateCountdownDisplay();
+}
+
 function openSopSlideshow() {
   sopSlides = collectSopSlides();
   if (!sopSlides.length) return; // 沒有內容可輪播就不開啟
@@ -2402,6 +2434,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (sopWrap) {
     sopWrap.addEventListener('mouseenter', sopHandleMouseEnter);
     sopWrap.addEventListener('mouseleave', sopHandleMouseLeave);
+    sopWrap.addEventListener('touchstart', sopHandleTouchStart, { passive: true });
+    sopWrap.addEventListener('touchend', sopHandleTouchEnd, { passive: true });
+    sopWrap.addEventListener('touchcancel', sopHandleTouchCancel, { passive: true });
   }
 
   // 7. 每次進站/重新整頁都自動播放一次策略SOP輪播，幫助剛進站的人快速了解網站在幹嘛
