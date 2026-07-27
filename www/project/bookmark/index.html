@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>桃園地所書籤索引</title>
-    
+
     <!-- 禁止快取的 Meta 標籤 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -25,7 +25,7 @@
             --bootstrap-primary: #0d6efd;
             --bootstrap-primary-hover: #0b5ed7;
             --bootstrap-primary-active: #0a58ca;
-            
+
             /* 預設為淺色主題 */
             --highlight-bg: #fffbe0;
             --highlight-border: #fcd34d;
@@ -70,7 +70,7 @@
             color: var(--body-color);
             transition: background-color 0.3s, color 0.3s;
         }
-        
+
         body.modal-open {
             overflow: hidden;
         }
@@ -115,7 +115,7 @@
             z-index: 0;
             opacity: 0.5;
         }
-        
+
         .modal-backdrop {
             background-color: var(--modal-bg);
         }
@@ -124,20 +124,28 @@
             background-color: var(--modal-content-bg);
         }
 
-        .fade-enter-active, .fade-leave-active {
+        .fade-enter-active,
+        .fade-leave-active {
             transition: opacity 0.3s ease;
         }
-        .fade-enter-from, .fade-leave-to {
+
+        .fade-enter-from,
+        .fade-leave-to {
             opacity: 0;
         }
 
-        .list-enter-active, .list-leave-active, .list-move {
+        .list-enter-active,
+        .list-leave-active,
+        .list-move {
             transition: all 0.5s ease;
         }
-        .list-enter-from, .list-leave-to {
+
+        .list-enter-from,
+        .list-leave-to {
             opacity: 0;
             transform: translateY(30px);
         }
+
         .list-leave-active {
             position: absolute;
         }
@@ -147,12 +155,17 @@
 <body class="font-sans antialiased">
     <div id="app" class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside id="sidebar" :class="['flex-shrink-0 transition-all duration-300', isSidebarCollapsed ? 'w-16' : 'w-48']">
+        <aside id="sidebar"
+            :class="['flex-shrink-0 transition-all duration-300', isSidebarCollapsed ? 'w-16' : 'w-48']">
             <div class="flex flex-col h-full">
                 <!-- Logo -->
                 <div class="p-4 border-b" :style="{ borderColor: 'var(--sidebar-border)' }">
                     <div class="flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="text-blue-500">
+                            <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path>
+                        </svg>
                         <h1 v-show="!isSidebarCollapsed" class="ml-2 text-xl font-semibold whitespace-nowrap">書籤索引</h1>
                     </div>
                 </div>
@@ -160,8 +173,8 @@
                 <!-- Navigation Links -->
                 <nav class="flex-1 p-2 space-y-1 overflow-y-auto">
                     <a v-for="category in bookmarks" :key="category.id" href="#"
-                       @click.prevent="selectCategory(category.id)"
-                       :class="['flex items-center p-2 rounded-md transition-colors', { 'active': currentCategoryId === category.id, 'justify-center': isSidebarCollapsed }]">
+                        @click.prevent="selectCategory(category.id)"
+                        :class="['flex items-center p-2 rounded-md transition-colors', { 'active': currentCategoryId === category.id, 'justify-center': isSidebarCollapsed }]">
                         <i :data-lucide="category.icon" class="w-5 h-5"></i>
                         <span v-show="!isSidebarCollapsed" class="ml-3">{{ category.category }}</span>
                     </a>
@@ -170,23 +183,29 @@
                 <!-- Footer Controls and Time -->
                 <div class="p-2 border-t" :style="{ borderColor: 'var(--sidebar-border)' }">
                     <!-- Control Buttons -->
-                    <button @click="toggleTheme" class="w-full flex items-center p-2 rounded-md" :class="{'justify-center': isSidebarCollapsed}" :aria-label="theme === 'dark' ? '切換為淺色模式' : '切換為深色模式'">
+                    <button @click="toggleTheme" class="w-full flex items-center p-2 rounded-md"
+                        :class="{'justify-center': isSidebarCollapsed}"
+                        :aria-label="theme === 'dark' ? '切換為淺色模式' : '切換為深色模式'">
                         <!-- 修正: 加入 span wrapper 隔離 Vue 與 Lucide 的 DOM 操作 -->
                         <span :key="'theme-icon-' + theme" class="inline-flex flex-shrink-0">
                             <i :data-lucide="theme === 'dark' ? 'sun' : 'moon'" class="w-5 h-5"></i>
                         </span>
                         <span v-show="!isSidebarCollapsed" class="ml-3">切換主題</span>
                     </button>
-                    <button @click="toggleFontSize" class="w-full flex items-center p-2 rounded-md" :class="{'justify-center': isSidebarCollapsed}" aria-label="調整字體大小">
+                    <button @click="toggleFontSize" class="w-full flex items-center p-2 rounded-md"
+                        :class="{'justify-center': isSidebarCollapsed}" aria-label="調整字體大小">
                         <span class="inline-flex flex-shrink-0">
                             <i data-lucide="text" class="w-5 h-5"></i>
                         </span>
                         <span v-show="!isSidebarCollapsed" class="ml-3">調整字體 ({{ fontSizeLabel }})</span>
                     </button>
-                    <button @click="toggleSidebar" class="w-full flex items-center p-2 rounded-md" :class="{'justify-center': isSidebarCollapsed}" :aria-label="isSidebarCollapsed ? '展開側邊欄' : '收合側邊欄'">
+                    <button @click="toggleSidebar" class="w-full flex items-center p-2 rounded-md"
+                        :class="{'justify-center': isSidebarCollapsed}"
+                        :aria-label="isSidebarCollapsed ? '展開側邊欄' : '收合側邊欄'">
                         <!-- 修正: 加入 span wrapper 隔離 Vue 與 Lucide 的 DOM 操作 -->
                         <span :key="'sidebar-icon-' + isSidebarCollapsed" class="inline-flex flex-shrink-0">
-                            <i :data-lucide="isSidebarCollapsed ? 'panel-right-open' : 'panel-left-close'" class="w-5 h-5"></i>
+                            <i :data-lucide="isSidebarCollapsed ? 'panel-right-open' : 'panel-left-close'"
+                                class="w-5 h-5"></i>
                         </span>
                         <span v-show="!isSidebarCollapsed" class="ml-3">收合側邊欄</span>
                     </button>
@@ -201,20 +220,21 @@
 
         <!-- Main Content -->
         <main class="flex-1 flex flex-col overflow-hidden">
-            <header class="flex items-center justify-between p-4 border-b" :style="{ borderColor: 'var(--sidebar-border)' }">
+            <header class="flex items-center justify-between p-4 border-b"
+                :style="{ borderColor: 'var(--sidebar-border)' }">
                 <h2 class="text-2xl font-bold">{{ currentCategory.category }}</h2>
             </header>
             <div id="bookmarks-content" class="flex-1 p-4 overflow-y-auto">
-                <transition-group name="list" tag="div" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+                <transition-group name="list" tag="div"
+                    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
                     <div v-for="link in currentCategoryLinks" :key="link.id"
-                         class="bookmark-card-styled relative rounded-lg p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1 overflow-hidden"
-                         :class="{ 'recent': recentLinks.includes(link.id) }"
-                         :style="getRecentHighlightStyle(link)">
-                        
+                        class="bookmark-card-styled relative rounded-lg p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1 overflow-hidden"
+                        :class="{ 'recent': recentLinks.includes(link.id) }" :style="getRecentHighlightStyle(link)">
+
                         <!-- *** FIX: 移除 .prevent 修飾符 *** -->
                         <a :href="link.href" :target="getLinkTarget(link.href)" @click="handleLinkClick(link, $event)"
-                           @mouseover="handlePdfHover($event, link.href)" @mouseleave="hidePdfPopover"
-                           class="flex flex-col items-center justify-center w-full h-full z-10">
+                            @mouseover="handlePdfHover($event, link.href)" @mouseleave="hidePdfPopover"
+                            class="flex flex-col items-center justify-center w-full h-full z-10">
                             <i :data-lucide="link.icon || 'globe'" class="w-10 h-10 mb-2 text-blue-500"></i>
                             <h3 class="font-semibold">{{ link.title }}</h3>
                             <p v-if="link.description || link.nextMonthHtml" class="text-xs text-gray-500 mt-1">
@@ -222,11 +242,13 @@
                                 <span v-if="link.nextMonthHtml" v-html="link.nextMonthHtml"></span>
                             </p>
                         </a>
-                        
-                        <div v-if="isDownloadable(link.href) || link.href.toLowerCase().endsWith('.pdf')" class="absolute bottom-2 right-2 z-20">
-                            <button @click.stop="openPdfModal(link.href)" v-if="link.href.toLowerCase().endsWith('.pdf')"
-                                    class="p-1.5 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-gray-700 dark:text-gray-200"
-                                    aria-label="預覽PDF">
+
+                        <div v-if="isDownloadable(link.href) || link.href.toLowerCase().endsWith('.pdf')"
+                            class="absolute bottom-2 right-2 z-20">
+                            <button @click.stop="openPdfModal(link.href)"
+                                v-if="link.href.toLowerCase().endsWith('.pdf')"
+                                class="p-1.5 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-gray-700 dark:text-gray-200"
+                                aria-label="預覽PDF">
                                 <i data-lucide="eye" class="w-4 h-4"></i>
                             </button>
                         </div>
@@ -234,7 +256,7 @@
                 </transition-group>
             </div>
         </main>
-        
+
         <!-- PDF Modal -->
         <transition name="fade">
             <div v-if="pdfModal.visible" class="fixed inset-0 z-50 flex items-center justify-center">
@@ -242,7 +264,8 @@
                 <div class="modal-content relative w-11/12 h-5/6 max-w-4xl rounded-lg shadow-xl flex flex-col">
                     <header class="flex items-center justify-between p-4 border-b">
                         <h3 class="font-semibold text-lg">PDF 預覽</h3>
-                        <button @click="closePdfModal" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600" aria-label="關閉">
+                        <button @click="closePdfModal" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
+                            aria-label="關閉">
                             <i data-lucide="x" class="w-6 h-6"></i>
                         </button>
                     </header>
@@ -255,26 +278,30 @@
 
         <!-- IFrame Modal -->
         <transition name="fade">
-            <div v-if="iframeModal.visible" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-8">
+            <div v-if="iframeModal.visible"
+                class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-8">
                 <div class="modal-backdrop absolute inset-0" @click="closeIframeModal"></div>
                 <div class="modal-content relative w-full h-full rounded-lg shadow-xl flex flex-col">
                     <header class="flex items-center justify-between p-4 border-b">
                         <h3 class="font-semibold text-lg truncate pr-4">{{ iframeModal.title }}</h3>
-                        <button @click="closeIframeModal" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 flex-shrink-0" aria-label="關閉">
+                        <button @click="closeIframeModal"
+                            class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 flex-shrink-0"
+                            aria-label="關閉">
                             <i data-lucide="x" class="w-6 h-6"></i>
                         </button>
                     </header>
                     <div class="flex-1 p-2">
-                        <iframe :src="iframeModal.url" class="w-full h-full border-0" :title="iframeModal.title"></iframe>
+                        <iframe :src="iframeModal.url" class="w-full h-full border-0"
+                            :title="iframeModal.title"></iframe>
                     </div>
                 </div>
             </div>
         </transition>
 
         <!-- PDF Popover -->
-        <div ref="pdfPopover" v-show="pdfPopoverState.visible" 
-             :style="{ top: pdfPopoverState.y + 'px', left: pdfPopoverState.x + 'px' }"
-             class="fixed z-50 w-80 h-96 bg-white border border-gray-300 rounded-lg shadow-lg pointer-events-none">
+        <div ref="pdfPopover" v-show="pdfPopoverState.visible"
+            :style="{ top: pdfPopoverState.y + 'px', left: pdfPopoverState.x + 'px' }"
+            class="fixed z-50 w-80 h-96 bg-white border border-gray-300 rounded-lg shadow-lg pointer-events-none">
             <iframe :src="pdfPopoverState.url" class="w-full h-full border-0" title="PDF Popover"></iframe>
         </div>
     </div>
@@ -331,7 +358,7 @@
             { "title": "地政局-私法人購置住宅", "href": "http://220.1.33.80/PcQ.aspx", "description": "私法人購置住宅 http://220.1.33.80/PcQ.aspx", "icon": "building" },
             { "title": "內政部-地籍總歸戶系統", "href": "https://landowners.land.moi.gov.tw/", "description": "個人地籍資料集中查詢平台，整合土地、建物所有權資訊 https://landowners.land.moi.gov.tw/", "icon": "folder-lock" },
             { "title": "內政部-數位櫃台", "href": "http://220.5.61.14/", "description": "內政部數位櫃臺公務端網站 http://220.5.61.14/", "icon": "monitor-smartphone" },
-            { "title": "內政部-罕用字查詢系統", "href": "http://220.5.61.32/MOILAND/", "description": "內政部開發建置之罕用字查詢系統 http://220.5.61.32/MOILAND/", "icon": "spell-check" },
+            { "title": "內政部-罕用字查詢系統", "href": "https://220.5.61.32/MOILAND/", "description": "內政部開發建置之罕用字查詢系統 https://220.5.61.32/MOILAND/", "icon": "spell-check" },
             { "title": "內政部-戶役政電子閘門系統", "href": "https://210.241.18.131/", "description": "內政部戶役政電子閘門系統 https://210.241.18.131/", "icon": "door-open" },
             { "title": "內政部-未辦繼承", "href": "http://220.1.33.37:8091/OIB6/Login.jsp", "description": "內政部未辦繼承登記土地及建物管理系統 http://220.1.33.37:8091/OIB6/Login.jsp", "icon": "user-x" },
             { "title": "內政部-地籍清理", "href": "http://220.1.33.79:8080/TAZQ/index.jsp", "description": "內政部地籍清理管理系統 http://220.1.33.79:8080/TAZQ/index.jsp", "icon": "files" },
@@ -458,7 +485,7 @@
         }
     ]
     </script>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const { createApp, ref, reactive, computed, watch, onMounted, nextTick } = Vue;
@@ -537,7 +564,7 @@
 
                 return { currentTime, currentDate };
             }
-            
+
             /**
              * @description 管理字體大小的 Composable
              */
@@ -582,7 +609,7 @@
                 const handleKeyDown = (e) => {
                     // 避免在輸入框內打字時觸發
                     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-                    
+
                     // 將方向鍵對應到單一字母，其餘按鍵轉小寫
                     const keyMap = {
                         'arrowup': 'u',
@@ -592,7 +619,7 @@
                     };
                     const key = e.key.toLowerCase();
                     const mappedKey = keyMap[key] || key;
-                    
+
                     inputBuffer += mappedKey;
                     // 保持 buffer 長度
                     if (inputBuffer.length > secretCode.length) {
@@ -601,7 +628,7 @@
                     // 觸發解鎖
                     if (inputBuffer === secretCode) {
                         isKonamiUnlocked.value = true;
-                        inputBuffer = ''; 
+                        inputBuffer = '';
                     }
                 };
 
@@ -621,7 +648,7 @@
                     const now = new Date();
                     const rocYear = now.getFullYear() - 1911;
                     const currentMonth = now.getMonth() + 1;
-                    
+
                     const bookmarksCopy = JSON.parse(JSON.stringify(rawBookmarksData));
 
                     // 更新 "常用表單下載" 的大門輪值表
@@ -646,7 +673,7 @@
                             infoDutyRosterLink.description = `資訊課本月份每日工作輪值表`;
                         }
                     }
-                    
+
                     // 為每個 link 加上唯一的 ID 和新的 nextMonthHtml 屬性
                     return bookmarksCopy.map(category => ({
                         ...category,
@@ -657,7 +684,7 @@
                         }))
                     }));
                 };
-                
+
                 const bookmarks = reactive(getInitialBookmarks());
 
                 /**
@@ -666,7 +693,7 @@
                 const checkNextMonthRosters = async () => {
                     const now = new Date();
                     const rocYear = now.getFullYear() - 1911;
-                    
+
                     let nextMonth = now.getMonth() + 2; // getMonth() 是 0-11，所以 +2
                     let nextMonthRocYear = rocYear;
                     if (nextMonth > 12) {
@@ -678,7 +705,7 @@
                     const mainGateRoster = bookmarks
                         .find(c => c.id === 'files')?.links
                         .find(l => l.linkId === 'main-gate-roster');
-                    
+
                     if (mainGateRoster) {
                         const nextMonthUrl = `http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/photogallery/%E8%BC%AA%E5%80%BC%E8%A1%A8/${nextMonthRocYear}/${nextMonth}%E6%9C%88%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf`;
                         try {
@@ -710,11 +737,11 @@
                         }
                     }
                 };
-                
+
                 const currentCategoryId = ref(localStorage.getItem('lastSelectedCategory') || (bookmarks.length > 0 ? bookmarks[0].id : null));
                 const clickCounts = ref(JSON.parse(localStorage.getItem('clickCounts') || '{}'));
                 const recentLinks = ref(JSON.parse(localStorage.getItem('recentLinks') || '[]'));
-                
+
                 const selectCategory = (id) => {
                     currentCategoryId.value = id;
                 };
@@ -740,7 +767,7 @@
 
                     return links;
                 });
-                
+
                 // *** FIX: 修改點擊事件處理邏輯以解決巢狀連結問題 ***
                 const handleLinkClick = (link, event) => {
                     const clickedAnchor = event.target.closest('a');
@@ -749,7 +776,7 @@
                     if (clickedAnchor && clickedAnchor !== event.currentTarget) {
                         return;
                     }
-                    
+
                     // 阻止卡片本身的預設導航行為
                     event.preventDefault();
 
@@ -796,10 +823,10 @@
                 watch(recentLinks, (newLinks) => {
                     localStorage.setItem('recentLinks', JSON.stringify(newLinks));
                 }, { deep: true });
-                
+
                 watch(currentCategoryId, (newId) => {
                     if (newId) {
-                       localStorage.setItem('lastSelectedCategory', newId);
+                        localStorage.setItem('lastSelectedCategory', newId);
                     }
                 });
 
@@ -816,11 +843,11 @@
                     return /\.(zip|rar|7z|exe|dmg|doc|docx|xls|xlsx|ppt|pptx)$/i.test(url);
                 };
 
-                return { 
-                    bookmarks, 
-                    currentCategoryId, 
-                    selectCategory, 
-                    currentCategory, 
+                return {
+                    bookmarks,
+                    currentCategoryId,
+                    selectCategory,
+                    currentCategory,
                     currentCategoryLinks,
                     clickCounts,
                     recentLinks,
@@ -853,11 +880,11 @@
 
                 const handlePdfHover = (event, url) => {
                     if (!url.toLowerCase().endsWith('.pdf')) return;
-                    
+
                     clearTimeout(popoverTimeout);
                     popoverTimeout = setTimeout(() => {
                         pdfPopoverState.url = `${url}#view=FitH&toolbar=0&navpanes=0`;
-                        const popoverWidth = 480; 
+                        const popoverWidth = 480;
                         const popoverHeight = 576;
                         const viewportWidth = window.innerWidth;
                         const viewportHeight = window.innerHeight;
@@ -873,7 +900,7 @@
                         pdfPopoverState.visible = true;
                     }, 500);
                 };
-                
+
                 const hidePdfPopover = () => {
                     clearTimeout(popoverTimeout);
                     pdfPopoverState.visible = false;
@@ -908,7 +935,7 @@
                 watch(() => iframeModal.visible, (isVisible) => {
                     // 只有在沒有其他 modal 打開時才切換 class
                     if (!document.querySelector('.modal-content')) {
-                       document.body.classList.toggle('modal-open', isVisible);
+                        document.body.classList.toggle('modal-open', isVisible);
                     }
                 });
 
@@ -936,7 +963,7 @@
                     );
                     return marked.parse(textWithLinkedUrls, { breaks: true, gfm: true });
                 };
-                
+
                 return { markdownToHtml };
             }
 
@@ -961,8 +988,8 @@
                         bookmarkManager.checkNextMonthRosters();
                         lucide.createIcons();
                         watch([
-                            themeManager.theme, 
-                            sidebarManager.isSidebarCollapsed, 
+                            themeManager.theme,
+                            sidebarManager.isSidebarCollapsed,
                             bookmarkManager.currentCategoryLinks
                         ], () => {
                             nextTick(() => {
