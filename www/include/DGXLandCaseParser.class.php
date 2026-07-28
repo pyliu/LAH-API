@@ -14,9 +14,11 @@ class DGXLandCaseParser
     public function __construct()
     {
         $ip         = defined('DGX_IP')    ? DGX_IP    : '192.168.13.195';
-        $port       = defined('DGX_vLLM_PORT')  ? DGX_vLLM_PORT  : '11434';
+        // ⚠️ 已改連 vLLM (原 Ollama port 11434 → vLLM port 8002)
+        $port       = defined('DGX_vLLM_PORT')  ? DGX_vLLM_PORT  : '8002';
         $this->apiUrl = "http://{$ip}:{$port}/v1/chat/completions";
-        $this->model  = defined('DGX_vLLM_MODEL') ? DGX_vLLM_MODEL : 'gemma3:latest';
+        // ⚠️ 需與 vLLM 容器啟動參數 --served-model-name 完全一致，否則 API 回 404
+        $this->model  = defined('DGX_vLLM_MODEL') ? DGX_vLLM_MODEL : 'gemma-4-26b-a4b';
     }
 
     /**
@@ -508,12 +510,11 @@ class DGXLandCaseParser
                        "若使用者輸入含有 100–130 範圍的數字，無論後接何種 token，均應優先辨識為民國年。";
         
         $payloadData = array(
-            'model'    => (string) $this->model,
-            'stream'   => false,
-            'options'  => array(
-                'temperature' => 0.0,
-                'num_ctx'     => 8192
-            ),
+            'model'       => (string) $this->model,
+            'stream'      => false,
+            // ⚠️ vLLM 的 OpenAI 相容端點不吃 Ollama 專屬的 'options'/'num_ctx'，
+            // temperature 需放在最外層；context 長度由 vLLM 啟動時的 --max-model-len 決定，不是每次請求傳
+            'temperature' => 0.0,
             'messages' => array(
                 array(
                     'role' => 'system', 
