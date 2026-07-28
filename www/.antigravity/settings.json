@@ -1,0 +1,17 @@
+{
+  "antigravity.customProviders": [
+    {
+      "providerName": "NVIDIA DGX Spark",
+      "baseUrl": "http://192.168.13.195:8002/v1",
+      "apiKey": "dgx-local-key",
+      "models": [
+        {
+          "id": "gemma-4-26b-a4b",
+          "name": "DGX Spark - Gemma 4 26B-A4B (vLLM)",
+          "contextWindow": 32768,
+          "maxTokens": 4096
+        }
+      ]
+    }
+  ]
+}
