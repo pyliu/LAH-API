@@ -56,7 +56,7 @@ switch ($_POST["type"]) {
 				'WS_SERVER_PORT' => $system->get('WS_SERVER_PORT')
 			)
 		);
-		Logger::getInstance()->info("XHR [login] config 資訊：\n".print_r($configs, true));
+		// Logger::getInstance()->info("XHR [login] config 資訊：\n".print_r($configs, true));
     echoJSONResponse('取得 '.$_POST['req_ip'].' 登入資訊', STATUS_CODE::SUCCESS_NORMAL, $configs);
 		break;
 	default:
