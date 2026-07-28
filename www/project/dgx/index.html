@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DGX Spark 落地大模型部署與整合指南</title>
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --emerald-600: #059669;
+            --emerald-700: #047857;
+            --emerald-800: #065f46;
+            --emerald-light: #ecfdf5;
+            --emerald-border: #a7f3d0;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            --border-color: #e2e8f0;
+            --rose-600: #e11d48;
+            --rose-light: #fff1f2;
+            --font-main: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-code: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header.navbar {
+            background-color: var(--emerald-700);
+            color: #ffffff;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1150px;
+            margin: 0 auto;
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 0.025em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--emerald-border);
+        }
+
+        main {
+            max-width: 1150px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 1.75rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--emerald-700);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-title.danger {
+            color: var(--rose-600);
+        }
+
+        .card-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-box {
+            background-color: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .metric-box.highlight {
+            background-color: var(--emerald-light);
+            border-color: var(--emerald-border);
+        }
+
+        .metric-value {
+            font-size: 1.85rem;
+            font-weight: 900;
+            color: var(--text-primary);
+        }
+
+        .metric-box.highlight .metric-value {
+            color: var(--emerald-700);
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .chart-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .chart-card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .stepper-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .stepper-layout {
+                flex-direction: row;
+            }
+        }
+
+        .stepper-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .step-btn {
+            text-align: left;
+            padding: 0.85rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            background-color: #f1f5f9;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .step-btn:hover {
+            background-color: #e2e8f0;
+        }
+
+        .step-btn.active {
+            background-color: var(--emerald-600);
+            color: #ffffff;
+            border-color: var(--emerald-600);
+        }
+
+        .stepper-content-panel {
+            flex: 2;
+            background-color: var(--slate-900);
+            color: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .step-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #34d399;
+            margin-bottom: 0.75rem;
+        }
+
+        .step-description {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+
+        pre.code-block {
+            font-family: var(--font-code);
+            font-size: 0.85rem;
+            background-color: #000000;
+            color: #6ee7b7;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            overflow-x: auto;
+            white-space: pre;
+            border: 1px solid #1e293b;
+            line-height: 1.45;
+        }
+
+        .tab-buttons {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 1.25rem;
+        }
+
+        .tab-btn {
+            padding: 0.6rem 1.25rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--emerald-600);
+        }
+
+        .tab-btn.active {
+            color: var(--emerald-600);
+            border-bottom-color: var(--emerald-600);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-content pre.code-block {
+            background-color: #f8fafc;
+            color: #0f172a;
+            border-color: var(--border-color);
+        }
+
+        .accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            width: 100%;
+            text-align: left;
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            background-color: #f8fafc;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .accordion-header:hover {
+            background-color: #f1f5f9;
+        }
+
+        .accordion-icon {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--text-muted);
+        }
+
+        .accordion-body {
+            display: none;
+            padding: 1rem 1.25rem;
+            background-color: #ffffff;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .accordion-body strong {
+            color: var(--text-primary);
+        }
+
+        footer {
+            background-color: var(--slate-900);
+            color: #94a3b8;
+            text-align: center;
+            padding: 1.5rem 1rem;
+            font-size: 0.875rem;
+            margin-top: auto;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            .nav-links { display: none; }
+            .hero-title { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Chosen Palette: Slate & Emerald (純靜態 CSS，無外部 CDN 依賴) -->
+    
+    <!-- Application Structure Plan: [Dashboard layout with thematic sections. Designed without any external CSS/JS dependencies. 1. Hardware & Performance Metrics featuring custom HTML5 Canvas rendering engine. 2. Interactive Step-by-Step Stepper for deployment. 3. System Integration Hub with native tabs. 4. Troubleshooting Accordion matrix.] -->
+    
+    <!-- Visualization & Content Choices: [1. Report Info: Inference Speed & Memory Allocations. Goal: Compare vLLM vs Ollama and Dense models. Viz: Pure HTML5 Canvas 2D bar and pie charts rendered via vanilla JS. Interaction: Dynamic drawing on page load. Justification: Ensures 100% offline capability with zero CDN dependency while keeping interactive visual clarity. Confirming NO SVG/Mermaid used.] -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <header class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">DGX Spark 部署控制台</h1>
+            <nav class="nav-links">
+                <a href="#overview">硬體與效能</a>
+                <a href="#deployment">vLLM 部署</a>
+                <a href="#integration">API 整合</a>
+                <a href="#troubleshooting">障礙排除</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+
+        <section class="hero-section">
+            <h2 class="hero-title">Gemma 4 26B-A4B NVFP4 本地端部署指南</h2>
+            <p class="hero-subtitle">本控制台將 NVIDIA DGX Spark 的技術手冊轉化為純 HTML/CSS/JS 的互動體驗。完全不載入外部 CDN，可在離線內網環境順暢運行與展示。</p>
+        </section>
+
+        <!-- Section 1: Overview & Performance -->
+        <section id="overview" class="card">
+            <div class="card-header">
+                <h3 class="card-title">硬體與效能概覽</h3>
+                <p class="card-desc">本區塊展示 DGX Spark 的核心硬體指標，並透過原生 Canvas 繪製之圖表說明為何選擇 vLLM 搭配 Gemma 4 (MoE) 能發揮系統最大效能，避免傳統 Dense 模型造成的記憶體頻寬瓶頸。</p>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <div class="metric-value">GB10</div>
+                    <div class="metric-label">Grace Blackwell 晶片</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value">128GB</div>
+                    <div class="metric-label">統一記憶體 (Unified)</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value">273 GB/s</div>
+                    <div class="metric-label">記憶體頻寬</div>
+                </div>
+                <div class="metric-box highlight">
+                    <div class="metric-value">52 tok/s</div>
+                    <div class="metric-label">實測推論速度 (vLLM)</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h4 class="chart-card-title">推論引擎與架構速度比較 (Tokens/s)</h4>
+                    <div class="chart-container">
+                        <canvas id="speedCanvas" width="400" height="300"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h4 class="chart-card-title">DGX Spark 128GB 記憶體分配 (vLLM 0.35)</h4>
+                    <div class="chart-container">
+                        <canvas id="memoryCanvas" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Interactive Stepper -->
+        <section id="deployment" class="card">
+            <div class="card-header">
+                <h3 class="card-title">互動式部署流程</h3>
+                <p class="card-desc">提供清晰的建置步驟。點擊左側流程節點，即可閱讀對應操作指令與踩坑注意事項。</p>
+            </div>
+
+            <div class="stepper-layout">
+                <div class="stepper-buttons">
+                    <button class="step-btn active" onclick="switchStep('step1', this)">1. 環境清理與準備</button>
+                    <button class="step-btn" onclick="switchStep('step2', this)">2. 下載模型權重</button>
+                    <button class="step-btn" onclick="switchStep('step3', this)">3. 映像檔與修補檔</button>
+                    <button class="step-btn" onclick="switchStep('step4', this)">4. Compose 配置與啟動</button>
+                </div>
+
+                <div class="stepper-content-panel">
+                    <div id="step1" class="step-content active">
+                        <h4 class="step-title">步驟一：前置作業與資源清理</h4>
+                        <p class="step-description">必須關閉 Ollama 服務避免 GB10 記憶體衝突，防止模型被退回 ARM CPU 慢速運算。</p>
+                        <pre class="code-block">sudo systemctl stop ollama
+sudo systemctl disable ollama
+sudo killall -9 ollama python3 2>/dev/null
+free -h # 確保 Free Memory 高於 60GB
+docker rm -f vllm-gemma-4 vllm-gemma4-26b 2>/dev/null</pre>
+                    </div>
+
+                    <div id="step2" class="step-content">
+                        <h4 class="step-title">步驟二：下載模型權重</h4>
+                        <p class="step-description">使用 hf 下載 NVFP4 量化權重（約 16.5 GB）。處理 PEP 668 環境限制。</p>
+                        <pre class="code-block">mkdir -p ~/vllm-models
+cd ~/vllm-models
+pip install --user --break-system-packages -U "huggingface_hub[cli]"
+export PATH="$HOME/.local/bin:$PATH"
+hf download bg-digitalservices/Gemma-4-26B-A4B-it-NVFP4 \
+  --local-dir Gemma-4-26B-A4B-it-NVFP4</pre>
+                    </div>
+
+                    <div id="step3" class="step-content">
+                        <h4 class="step-title">步驟三：拉取映像檔與產生 Patch</h4>
+                        <p class="step-description">修復 vLLM 讀取 NVFP4 專家層權重的 KeyError 問題 (vLLM Issue #38912)。</p>
+                        <pre class="code-block">docker pull vllm/vllm-openai:gemma4-cu130
+mkdir -p ~/vllm-patches
+docker run --rm vllm/vllm-openai:gemma4-cu130 \
+  cat /usr/local/lib/python3.12/dist-packages/vllm/model_executor/models/gemma4.py \
+  > ~/vllm-patches/gemma4_patched.py
+sed -i 's/param = params_dict\[name\]/param = params_dict.get(name, None)\n            if param is None: continue/g' \
+  ~/vllm-patches/gemma4_patched.py</pre>
+                    </div>
+
+                    <div id="step4" class="step-content">
+                        <h4 class="step-title">步驟四：Compose 配置與啟動</h4>
+                        <p class="step-description">於 ~/vllm-compose/docker-compose.yml 配置卷冊與監聽埠，記憶體利用率設為 0.35。</p>
+                        <pre class="code-block"># docker-compose.yml 關鍵配置：
+# volumes:
+#   - ${HOME}/vllm-models/Gemma-4-26B-A4B-it-NVFP4:/model
+#   - ${HOME}/vllm-patches/gemma4_patched.py:/usr/local/.../gemma4.py:ro
+# command:
+#   - /model
+#   - --served-model-name
+#   - gemma-4-26b-a4b
+#   - --host
+#   - "0.0.0.0"
+#   - --port
+#   - "8002"
+#   - --gpu-memory-utilization
+#   - "0.35"
+
+cd ~/vllm-compose
+docker compose up -d</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Integration Hub -->
+        <section id="integration" class="card">
+            <div class="card-header">
+                <h3 class="card-title">全端整合樞紐</h3>
+                <p class="card-desc">提供與現有業務系統對接的程式範例。包含相容於 PHP 7.x 的 cURL 呼叫段落，以及 Antigravity IDE 的模型對接配置。</p>
+            </div>
+
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('php-tab', this)">PHP 7.x API</button>
+                <button class="tab-btn" onclick="switchTab('ide-tab', this)">Antigravity IDE</button>
+            </div>
+
+            <div id="php-tab" class="tab-content active">
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem;">相容於 PHP 7.x 語法，透過 cURL 呼叫 vLLM OpenAI 相容端點進行地政案件號碼解析。</p>
+                <pre class="code-block">&lt;?php
+$dgx_ip = '192.168.13.195'; 
+$apiUrl = "http://{$dgx_ip}:8002/v1/chat/completions";
+
+$payload = [
+    'model' => 'gemma-4-26b-a4b',
+    'messages' => [
+        ['role' => 'system', 'content' => '你是一位地政案件解析助手。'],
+        ['role' => 'user', 'content' => '請查115年桃資速1200號']
+    ],
+    'temperature' => 0.1
+];
+
+$ch = curl_init($apiUrl);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$result = json_decode($response, true);
+echo $result['choices'][0]['message']['content'];
+?&gt;</pre>
+            </div>
+
+            <div id="ide-tab" class="tab-content">
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem;">修改專案根目錄下的 <code>.antigravity/settings.json</code> 將 DGX vLLM 設為主推論模型。</p>
+                <pre class="code-block">{
+  "antigravity.customProviders": [
+    {
+      "providerName": "NVIDIA DGX Spark",
+      "baseUrl": "http://192.168.13.195:8002/v1",
+      "apiKey": "dgx-local-key",
+      "models": [
+        {
+          "id": "gemma-4-26b-a4b",
+          "name": "DGX Spark - Gemma 4 26B-A4B (vLLM)",
+          "contextWindow": 32768,
+          "maxTokens": 4096
+        }
+      ]
+    }
+  ]
+}</pre>
+            </div>
+        </section>
+
+        <!-- Section 4: Troubleshooting -->
+        <section id="troubleshooting" class="card">
+            <div class="card-header">
+                <h3 class="card-title danger">常見障礙排除 (Troubleshooting)</h3>
+                <p class="card-desc">點擊常見錯誤徵兆，檢視 Root Cause 與最小修補方案。</p>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>OOM: Free memory on device cuda:0 is less than desired</span>
+                        <span class="accordion-icon">+</span>
+                    </button>
+                    <div class="accordion-body">
+                        <strong>原因：</strong> 背景有 Ollama 佔用，或 <code>--gpu-memory-utilization</code> 設太高 (如 0.60)。<br>
+                        <strong>解法：</strong> 執行 <code>sudo systemctl stop ollama</code> 與刪除舊容器。將利用率參數調降為 <code>0.35</code> (約 42GB)。
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>KeyError: 'layers.0.moe.experts.0.down_proj.weight'</span>
+                        <span class="accordion-icon">+</span>
+                    </button>
+                    <div class="accordion-body">
+                        <strong>原因：</strong> vLLM NVFP4 解析迴圈缺陷，找不到被 ModelOpt 轉置的專家權重。<br>
+                        <strong>解法：</strong> 確保 <code>gemma4_patched.py</code> 成功以唯讀 <code>:ro</code> 權限掛載至容器內覆蓋預設腳本。
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>連線被對方重設 (Connection reset by peer)</span>
+                        <span class="accordion-icon">+</span>
+                    </button>
+                    <div class="accordion-body">
+                        <strong>原因：</strong> vLLM 預設監聽 8000 Port，但 docker 映射了 8002，導致封包無法送達。<br>
+                        <strong>解法：</strong> 必須在 docker run 的 command 中明確加入 <code>--host 0.0.0.0</code> 與 <code>--port 8002</code>。
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>舊容器自動重啟 / 刪除後又跑出來</span>
+                        <span class="accordion-icon">+</span>
+                    </button>
+                    <div class="accordion-body">
+                        <strong>原因：</strong> 舊容器設定了 <code>--restart always</code>，單純 stop 無效。<br>
+                        <strong>解法：</strong> 執行 <code>docker rm -f vllm-gemma-4</code> 強制徹底刪除。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>NVIDIA DGX Spark × vLLM 部署知識庫 &copy; 2026 (Pure Local HTML)</p>
+    </footer>
+
+    <script>
+        // Native Canvas Drawing Engine (No External Library)
+        function renderSpeedChart() {
+            const canvas = document.getElementById('speedCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            const data = [
+                { label: 'vLLM (MoE)', val: 52, color: '#059669' },
+                { label: 'Ollama', val: 15, color: '#64748b' },
+                { label: 'Dense 31B', val: 7, color: '#e11d48' }
+            ];
+
+            const maxVal = 60;
+            const paddingLeft = 100;
+            const paddingBottom = 40;
+            const chartWidth = w - paddingLeft - 30;
+            const chartHeight = h - paddingBottom - 20;
+
+            // Grid Lines & Y Axis
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#64748b';
+            ctx.font = '12px Segoe UI, sans-serif';
+
+            for (let i = 0; i <= 3; i++) {
+                const yVal = (maxVal / 3) * i;
+                const yPos = h - paddingBottom - (chartHeight / 3) * i;
+                
+                ctx.beginPath();
+                ctx.moveTo(paddingLeft - 10, yPos);
+                ctx.lineTo(w - 20, yPos);
+                ctx.stroke();
+
+                ctx.textAlign = 'right';
+                ctx.fillText(yVal + ' t/s', paddingLeft - 15, yPos + 4);
+            }
+
+            // Draw Bars
+            const barWidth = 45;
+            const gap = (chartWidth - barWidth * data.length) / (data.length + 1);
+
+            data.forEach((item, index) => {
+                const xPos = paddingLeft + gap + index * (barWidth + gap);
+                const barH = (item.val / maxVal) * chartHeight;
+                const yPos = h - paddingBottom - barH;
+
+                // Bar
+                ctx.fillStyle = item.color;
+                ctx.fillRect(xPos, yPos, barWidth, barH);
+
+                // Value label on top
+                ctx.fillStyle = '#0f172a';
+                ctx.font = 'bold 12px Segoe UI, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(item.val, xPos + barWidth / 2, yPos - 6);
+
+                // X Axis Label
+                ctx.fillStyle = '#475569';
+                ctx.font = '11px Segoe UI, sans-serif';
+                ctx.fillText(item.label, xPos + barWidth / 2, h - 15);
+            });
+        }
+
+        function renderMemoryChart() {
+            const canvas = document.getElementById('memoryCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            const slices = [
+                { label: '模型權重 (16.5GB)', val: 16.5, color: '#059669' },
+                { label: 'KV Cache (25.5GB)', val: 25.5, color: '#3b82f6' },
+                { label: '系統可用 (86GB)', val: 86.0, color: '#cbd5e1' }
+            ];
+
+            const total = slices.reduce((sum, s) => sum + s.val, 0);
+            const centerX = w / 2;
+            const centerY = h / 2 - 15;
+            const outerRadius = 80;
+            const innerRadius = 45;
+
+            let startAngle = -Math.PI / 2;
+
+            slices.forEach(slice => {
+                const sliceAngle = (slice.val / total) * 2 * Math.PI;
+                const endAngle = startAngle + sliceAngle;
+
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, outerRadius, startAngle, endAngle);
+                ctx.arc(centerX, centerY, innerRadius, endAngle, startAngle, true);
+                ctx.closePath();
+                ctx.fillStyle = slice.color;
+                ctx.fill();
+
+                startAngle = endAngle;
+            });
+
+            // Center Text
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 14px Segoe UI, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('128 GB', centerX, centerY + 5);
+
+            // Legend
+            const legendY = h - 35;
+            const itemWidth = w / 3;
+
+            slices.forEach((slice, i) => {
+                const lx = i * itemWidth + 10;
+                
+                ctx.fillStyle = slice.color;
+                ctx.fillRect(lx, legendY, 10, 10);
+
+                ctx.fillStyle = '#475569';
+                ctx.font = '11px Segoe UI, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(slice.label, lx + 15, legendY + 9);
+            });
+        }
+
+        // Stepper Interactive Logic
+        function switchStep(stepId, btn) {
+            document.querySelectorAll('.stepper-buttons .step-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.stepper-content-panel .step-content').forEach(c => c.classList.remove('active'));
+
+            btn.classList.add('active');
+            document.getElementById(stepId).classList.add('active');
+        }
+
+        // Tab Interactive Logic
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-buttons .tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('#integration .tab-content').forEach(c => c.classList.remove('active'));
+
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Accordion Interactive Logic
+        function toggleAccordion(btn) {
+            const body = btn.nextElementSibling;
+            const icon = btn.querySelector('.accordion-icon');
+            const isOpen = body.style.display === 'block';
+
+            if (isOpen) {
+                body.style.display = 'none';
+                icon.textContent = '+';
+            } else {
+                body.style.display = 'block';
+                icon.textContent = '-';
+            }
+        }
+
+        // Initialize Native Charts on load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderSpeedChart();
+            renderMemoryChart();
+        });
+    </script>
+</body>
+</html>
