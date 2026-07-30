@@ -807,17 +807,17 @@ canvas{display:block;width:100%!important;height:auto!important;}
             <div class="dl-item" style="background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.3)">
               <div class="dl-swatch" style="background:var(--blue)"></div>
               <div><div class="dl-name" style="color:var(--blue)">原型底倉</div><div class="dl-desc">例：0050 / QQQ</div></div>
-              <div class="dl-pct" style="color:var(--blue)">40%</div>
+              <div class="dl-pct" style="color:var(--blue)">40%<div id="dl-amt-etf" style="font-size:.68rem;font-weight:600;color:var(--text2);">--</div></div>
             </div>
             <div class="dl-item" style="background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.3)">
               <div class="dl-swatch" style="background:var(--purple)"></div>
               <div><div class="dl-name" style="color:var(--purple)">正2攻擊部隊</div><div class="dl-desc">自帶隱形逆價差配息</div></div>
-              <div class="dl-pct" style="color:var(--purple)">40%</div>
+              <div class="dl-pct" style="color:var(--purple)">40%<div id="dl-amt-lev" style="font-size:.68rem;font-weight:600;color:var(--text2);">--</div></div>
             </div>
             <div class="dl-item" style="background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.3)">
               <div class="dl-swatch" style="background:var(--green)"></div>
               <div><div class="dl-name" style="color:var(--green)">現金保命金</div><div class="dl-desc">高利活存/預留還款金</div></div>
-              <div class="dl-pct" style="color:var(--green)">20%</div>
+              <div class="dl-pct" style="color:var(--green)">20%<div id="dl-amt-cash" style="font-size:.68rem;font-weight:600;color:var(--text2);">--</div></div>
             </div>
             <div style="text-align:center;margin-top:14px;padding:12px;background:var(--bg3);border-radius:var(--r2);">
               <div style="font-size:.8rem;color:var(--text2)">組合整體年化報酬</div>
@@ -1180,7 +1180,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
            <div class="flow-row">
               <!-- 左半部：年線上 -->
               <div class="flow-col">
-                 <div class="flow-box" style="border-color:var(--green);"><strong style="color:var(--green)">📈 年線之上 (多頭)</strong><br><span style="font-size:11px;color:var(--text2)">40%原型 + 40%正2 + 20%現金</span></div>
+                 <div class="flow-box" style="border-color:var(--green);"><strong style="color:var(--green)">📈 年線之上 (多頭)</strong><br><span style="font-size:11px;color:var(--text2)">40%原型 + 40%正2 + 20%現金</span><br><span id="flow-amt-bull" style="font-size:11px;font-weight:700;color:var(--green)">--</span></div>
                  <div class="flow-arrow">⬇</div>
                  <div class="flow-box flow-cond">跌破年線 <strong>-3%</strong> 連 <strong>3日</strong> 站不回<br>或 單日暴跌貫穿 <strong>-5%</strong></div>
                  <div class="flow-arrow">⬇</div>
@@ -1189,7 +1189,7 @@ canvas{display:block;width:100%!important;height:auto!important;}
 
               <!-- 右半部：年線下 -->
               <div class="flow-col">
-                 <div class="flow-box" style="border-color:var(--red);"><strong style="color:var(--red)">📉 年線之下 (空頭)</strong><br><span style="font-size:11px;color:var(--text2)">80%原型 + 0%正2 + 20%現金</span></div>
+                 <div class="flow-box" style="border-color:var(--red);"><strong style="color:var(--red)">📉 年線之下 (空頭)</strong><br><span style="font-size:11px;color:var(--text2)">80%原型 + 0%正2 + 20%現金</span><br><span id="flow-amt-bear" style="font-size:11px;font-weight:700;color:var(--red)">--</span></div>
                  <div class="flow-arrow">⬇</div>
                  <div class="flow-box flow-cond">站上年線 <strong>+3%</strong> 連 <strong>3日</strong> 站穩<br>或 單日大漲貫穿 <strong>+5%</strong></div>
                  <div class="flow-arrow">⬇</div>
@@ -1769,6 +1769,16 @@ function updateKPIs() {
     safeText('val-asset', fmtM(c.data[c.data.length - 1].a));
     safeText('val-net', (netGain >= 0 ? '+' : '') + fmtM(netGain));
     safeClass('val-net', 'kpi-val ' + (netGain >= 0 ? 'good' : 'danger'));
+
+    // 4-4-2 資金配置：帶入目前貸款總額換算的實際金額 (統一以「萬」為單位，避免小於100萬時fmtM顯示成純數字)
+    const fmtWan = n => (n/10000).toFixed(1) + '萬';
+    safeText('dl-amt-etf', fmtWan(s.loan * 0.4));
+    safeText('dl-amt-lev', fmtWan(s.loan * 0.4));
+    safeText('dl-amt-cash', fmtWan(s.loan * 0.2));
+
+    // 正2實戰決策樹：年線之上(4-4-2)／年線之下(8-0-2)的實際金額
+    safeText('flow-amt-bull', `${fmtWan(s.loan*0.4)} + ${fmtWan(s.loan*0.4)} + ${fmtWan(s.loan*0.2)}`);
+    safeText('flow-amt-bear', `${fmtWan(s.loan*0.8)} + 0 + ${fmtWan(s.loan*0.2)}`);
 
     // Breakeven
     if (c.breakevenMonth !== null) {
