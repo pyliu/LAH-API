@@ -38,3 +38,4 @@ node_modules
 **/include/config/AD.INVALID.php
 **/include/config/AD.ALL.php
 **/include/config/AD.LOCKED.php
+**/project/novel/assets/txt/*
