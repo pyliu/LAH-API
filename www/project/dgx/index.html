@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -302,6 +303,8 @@
             display: flex;
             border-bottom: 2px solid var(--border-color);
             margin-bottom: 1.25rem;
+            gap: 0.5rem;
+            overflow-x: auto;
         }
 
         .tab-btn {
@@ -315,6 +318,7 @@
             margin-bottom: -2px;
             cursor: pointer;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .tab-btn:hover {
@@ -401,24 +405,37 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @media (max-width: 640px) {
-            .nav-links { display: none; }
-            .hero-title { font-size: 1.6rem; }
+            .nav-links {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 1.6rem;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <!-- Chosen Palette: Slate & Emerald (純靜態 CSS，無外部 CDN 依賴) -->
-    
-    <!-- Application Structure Plan: [Dashboard layout with thematic sections. Designed without any external CSS/JS dependencies. 1. Hardware & Performance Metrics featuring custom HTML5 Canvas rendering engine. 2. Interactive Step-by-Step Stepper for deployment. 3. System Integration Hub with native tabs. 4. Troubleshooting Accordion matrix.] -->
-    
+
+    <!-- Application Structure Plan: [Dashboard layout with thematic sections. Designed without any external CSS/JS dependencies. 1. Hardware & Performance Metrics featuring custom HTML5 Canvas rendering engine. 2. Interactive Step-by-Step Stepper for deployment. 3. System Integration Hub with native tabs including Netplan static routing. 4. Troubleshooting Accordion matrix.] -->
+
     <!-- Visualization & Content Choices: [1. Report Info: Inference Speed & Memory Allocations. Goal: Compare vLLM vs Ollama and Dense models. Viz: Pure HTML5 Canvas 2D bar and pie charts rendered via vanilla JS. Interaction: Dynamic drawing on page load. Justification: Ensures 100% offline capability with zero CDN dependency while keeping interactive visual clarity. Confirming NO SVG/Mermaid used.] -->
-    
+
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
     <header class="navbar">
@@ -427,7 +444,7 @@
             <nav class="nav-links">
                 <a href="#overview">硬體與效能</a>
                 <a href="#deployment">vLLM 部署</a>
-                <a href="#integration">API 整合</a>
+                <a href="#integration">API 與網路整合</a>
                 <a href="#troubleshooting">障礙排除</a>
             </nav>
         </div>
@@ -444,7 +461,8 @@
         <section id="overview" class="card">
             <div class="card-header">
                 <h3 class="card-title">硬體與效能概覽</h3>
-                <p class="card-desc">本區塊展示 DGX Spark 的核心硬體指標，並透過原生 Canvas 繪製之圖表說明為何選擇 vLLM 搭配 Gemma 4 (MoE) 能發揮系統最大效能，避免傳統 Dense 模型造成的記憶體頻寬瓶頸。</p>
+                <p class="card-desc">本區塊展示 DGX Spark 的核心硬體指標，並透過原生 Canvas 繪製之圖表說明為何選擇 vLLM 搭配 Gemma 4 (MoE)
+                    能發揮系統最大效能，避免傳統 Dense 模型造成的記憶體頻寬瓶頸。</p>
             </div>
 
             <div class="metrics-grid">
@@ -533,7 +551,8 @@ sed -i 's/param = params_dict\[name\]/param = params_dict.get(name, None)\n     
 
                     <div id="step4" class="step-content">
                         <h4 class="step-title">步驟四：Compose 配置與啟動</h4>
-                        <p class="step-description">於 ~/vllm-compose/docker-compose.yml 配置卷冊與監聽埠，記憶體利用率設為 0.35。</p>
+                        <p class="step-description">於 ~/vllm-compose/docker-compose.yml 配置卷冊與監聽埠，記憶體利用率設為 0.35 並啟用
+                            Prefix Caching。</p>
                         <pre class="code-block"># docker-compose.yml 關鍵配置：
 # volumes:
 #   - ${HOME}/vllm-models/Gemma-4-26B-A4B-it-NVFP4:/model
@@ -546,6 +565,7 @@ sed -i 's/param = params_dict\[name\]/param = params_dict.get(name, None)\n     
 #   - "0.0.0.0"
 #   - --port
 #   - "8002"
+#   - --enable-prefix-caching
 #   - --gpu-memory-utilization
 #   - "0.35"
 
@@ -559,17 +579,19 @@ docker compose up -d</pre>
         <!-- Section 3: Integration Hub -->
         <section id="integration" class="card">
             <div class="card-header">
-                <h3 class="card-title">全端整合樞紐</h3>
-                <p class="card-desc">提供與現有業務系統對接的程式範例。包含相容於 PHP 7.x 的 cURL 呼叫段落，以及 Antigravity IDE 的模型對接配置。</p>
+                <h3 class="card-title">全端與網路整合樞紐</h3>
+                <p class="card-desc">提供與現有業務系統對接的程式範例、IDE 模型配置，以及 DGX 主機端跨網段靜態路由 (Netplan) 設定。</p>
             </div>
 
             <div class="tab-buttons">
                 <button class="tab-btn active" onclick="switchTab('php-tab', this)">PHP 7.x API</button>
                 <button class="tab-btn" onclick="switchTab('ide-tab', this)">Antigravity IDE</button>
+                <button class="tab-btn" onclick="switchTab('netplan-tab', this)">Netplan 靜態路由</button>
             </div>
 
             <div id="php-tab" class="tab-content active">
-                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem;">相容於 PHP 7.x 語法，透過 cURL 呼叫 vLLM OpenAI 相容端點進行地政案件號碼解析。</p>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem;">相容於 PHP 7.x 語法，透過
+                    cURL 呼叫 vLLM OpenAI 相容端點進行地政案件號碼解析。</p>
                 <pre class="code-block">&lt;?php
 $dgx_ip = '192.168.13.195'; 
 $apiUrl = "http://{$dgx_ip}:8002/v1/chat/completions";
@@ -599,7 +621,8 @@ echo $result['choices'][0]['message']['content'];
             </div>
 
             <div id="ide-tab" class="tab-content">
-                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem;">修改專案根目錄下的 <code>.antigravity/settings.json</code> 將 DGX vLLM 設為主推論模型。</p>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem;">修改專案根目錄下的
+                    <code>.antigravity/settings.json</code> 將 DGX vLLM 設為主推論模型。</p>
                 <pre class="code-block">{
   "antigravity.customProviders": [
     {
@@ -618,6 +641,29 @@ echo $result['choices'][0]['message']['content'];
   ]
 }</pre>
             </div>
+
+            <div id="netplan-tab" class="tab-content">
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem;">當跨網段主機（如
+                    <code>220.1.34.75</code>）連線 DGX（<code>192.168.13.195</code>）出現 Timeout 時，需於 Netplan 設定檔（如
+                    <code>/etc/netplan/01-netcfg.yaml</code>）指定靜態路由與 Gateway：</p>
+                <pre class="code-block">network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enP7s7:
+      dhcp4: false
+      addresses:
+        - 192.168.13.195/24
+      routes:
+        - to: 220.1.34.0/24
+          via: 192.168.13.254
+        - to: 192.168.0.0/16
+          via: 192.168.13.254</pre>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.75rem; margin-bottom: 0.5rem;">
+                    存檔後執行套用與路由表驗證：</p>
+                <pre class="code-block">sudo netplan apply
+ip route show</pre>
+            </div>
         </section>
 
         <!-- Section 4: Troubleshooting -->
@@ -630,12 +676,26 @@ echo $result['choices'][0]['message']['content'];
             <div class="accordion">
                 <div class="accordion-item">
                     <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>跨網段連線 Timeout (例如 220.1.34.x 無法連線 192.168.13.195)</span>
+                        <span class="accordion-icon">+</span>
+                    </button>
+                    <div class="accordion-body">
+                        <strong>原因：</strong> DGX 主機未設定預設閘道 (Default Gateway) 或缺乏至該網段的靜態路由 (Static Route)。<br>
+                        <strong>解法：</strong> 編輯 <code>/etc/netplan/01-netcfg.yaml</code>，於對應網卡 (enP7s7) 的
+                        <code>routes</code> 補上對應網段與 <code>via: 192.168.13.254</code>，並執行
+                        <code>sudo netplan apply</code>。
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
                         <span>OOM: Free memory on device cuda:0 is less than desired</span>
                         <span class="accordion-icon">+</span>
                     </button>
                     <div class="accordion-body">
                         <strong>原因：</strong> 背景有 Ollama 佔用，或 <code>--gpu-memory-utilization</code> 設太高 (如 0.60)。<br>
-                        <strong>解法：</strong> 執行 <code>sudo systemctl stop ollama</code> 與刪除舊容器。將利用率參數調降為 <code>0.35</code> (約 42GB)。
+                        <strong>解法：</strong> 執行 <code>sudo systemctl stop ollama</code> 與刪除舊容器。將利用率參數調降為
+                        <code>0.35</code> (約 42GB)。
                     </div>
                 </div>
 
@@ -657,7 +717,8 @@ echo $result['choices'][0]['message']['content'];
                     </button>
                     <div class="accordion-body">
                         <strong>原因：</strong> vLLM 預設監聽 8000 Port，但 docker 映射了 8002，導致封包無法送達。<br>
-                        <strong>解法：</strong> 必須在 docker run 的 command 中明確加入 <code>--host 0.0.0.0</code> 與 <code>--port 8002</code>。
+                        <strong>解法：</strong> 必須在 docker run 的 command 中明確加入 <code>--host 0.0.0.0</code> 與
+                        <code>--port 8002</code>。
                     </div>
                 </div>
 
@@ -712,7 +773,7 @@ echo $result['choices'][0]['message']['content'];
             for (let i = 0; i <= 3; i++) {
                 const yVal = (maxVal / 3) * i;
                 const yPos = h - paddingBottom - (chartHeight / 3) * i;
-                
+
                 ctx.beginPath();
                 ctx.moveTo(paddingLeft - 10, yPos);
                 ctx.lineTo(w - 20, yPos);
@@ -797,7 +858,7 @@ echo $result['choices'][0]['message']['content'];
 
             slices.forEach((slice, i) => {
                 const lx = i * itemWidth + 10;
-                
+
                 ctx.fillStyle = slice.color;
                 ctx.fillRect(lx, legendY, 10, 10);
 
@@ -848,4 +909,5 @@ echo $result['choices'][0]['message']['content'];
         });
     </script>
 </body>
+
 </html>
