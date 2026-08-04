@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>凡人修仙傳 Web 閱讀器 | 現代化系統儀表板與文檔中心</title>
+    <!-- 系統字體設定 -->
+    <style>
+        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+    </style>
+    <style>
+        :root, html.light {
+            --bg-base: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-subtle: #f8fafc;
+            --border-color: #e2e8f0;
+            --border-highlight: #c7d2fe;
+            
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-glow: rgba(79, 70, 229, 0.12);
+            
+            --cyan: #0284c7;
+            --cyan-glow: rgba(2, 132, 199, 0.12);
+            
+            --emerald: #059669;
+            --emerald-glow: rgba(5, 150, 105, 0.12);
+            
+            --amber: #d97706;
+            --purple: #7c3aed;
+            --rose: #e11d48;
+            
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --text-dim: #64748b;
+            
+            --sidebar-width: 280px;
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            
+            --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+
+            --box-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+            --box-shadow-md: 0 4px 16px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
+            --box-shadow-lg: 0 12px 32px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+
+            --badge-danger-bg: #ffe4e6; --badge-danger-text: #e11d48; --badge-danger-border: #fecdd3;
+            --badge-warning-bg: #fef3c7; --badge-warning-text: #d97706; --badge-warning-border: #fde68a;
+            --badge-info-bg: #e0f2fe; --badge-info-text: #0284c7; --badge-info-border: #bae6fd;
+            --badge-purple-bg: #f3e8ff; --badge-purple-text: #7c3aed; --badge-purple-border: #e9d5ff;
+
+            --problem-box-bg: #fff1f2; --problem-box-desc: #881337; --problem-box-title: #be123c;
+            --solution-box-bg: #ecfdf5; --solution-box-desc: #064e3b; --solution-box-title: #047857;
+
+            --calc-widget-bg: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+            --calc-widget-border: #bae6fd;
+            --calc-input-bg: #ffffff;
+            --calc-input-color: #0f172a;
+            --calc-res-bg: #ffffff;
+
+            --btn-theme-bg: #f1f5f9;
+            --btn-theme-border: #cbd5e1;
+            --btn-theme-text: #334155;
+        }
+
+        html.dark {
+            --bg-base: #060911;
+            --bg-surface: #0e1424;
+            --bg-card: rgba(18, 26, 45, 0.75);
+            --bg-card-subtle: rgba(10, 15, 26, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(99, 102, 241, 0.35);
+            
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-glow: rgba(99, 102, 241, 0.25);
+            
+            --cyan: #06b6d4;
+            --cyan-glow: rgba(6, 182, 212, 0.2);
+            
+            --emerald: #10b981;
+            --emerald-glow: rgba(16, 185, 129, 0.2);
+            
+            --amber: #f59e0b;
+            --purple: #a855f7;
+            --rose: #f43f5e;
+            
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            
+            --box-shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --box-shadow-md: 0 8px 25px rgba(0, 0, 0, 0.4);
+            --box-shadow-lg: 0 12px 35px rgba(0, 0, 0, 0.5);
+
+            --badge-danger-bg: rgba(244, 63, 94, 0.15); --badge-danger-text: #f43f5e; --badge-danger-border: rgba(244, 63, 94, 0.3);
+            --badge-warning-bg: rgba(245, 158, 11, 0.15); --badge-warning-text: #f59e0b; --badge-warning-border: rgba(245, 158, 11, 0.3);
+            --badge-info-bg: rgba(6, 182, 212, 0.15); --badge-info-text: #06b6d4; --badge-info-border: rgba(6, 182, 212, 0.3);
+            --badge-purple-bg: rgba(168, 85, 247, 0.15); --badge-purple-text: #a855f7; --badge-purple-border: rgba(168, 85, 247, 0.3);
+
+            --problem-box-bg: rgba(0, 0, 0, 0.25); --problem-box-desc: #cbd5e1; --problem-box-title: #f43f5e;
+            --solution-box-bg: rgba(0, 0, 0, 0.25); --solution-box-desc: #cbd5e1; --solution-box-title: #10b981;
+
+            --calc-widget-bg: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(6, 182, 212, 0.05) 100%);
+            --calc-widget-border: rgba(99, 102, 241, 0.35);
+            --calc-input-bg: #04070d;
+            --calc-input-color: #ffffff;
+            --calc-res-bg: rgba(0, 0, 0, 0.3);
+
+            --btn-theme-bg: rgba(255, 255, 255, 0.06);
+            --btn-theme-border: rgba(255, 255, 255, 0.12);
+            --btn-theme-text: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 15px;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.05) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(2, 132, 199, 0.05) 0%, transparent 45%),
+                radial-gradient(circle at 50% 30%, rgba(5, 150, 105, 0.03) 0%, transparent 50%);
+            background-attachment: fixed;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-base);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-surface);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            padding: 1.5rem 1rem;
+            box-shadow: 2px 0 12px rgba(15, 23, 42, 0.03);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--cyan));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        }
+
+        .brand-text h1 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+        }
+
+        .brand-text span {
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.92rem;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .nav-item a:hover {
+            color: var(--primary);
+            background: var(--bg-card-subtle);
+            border-color: var(--border-color);
+        }
+
+        .nav-item a.active {
+            color: var(--primary);
+            background: var(--primary-glow);
+            border-color: var(--border-highlight);
+            font-weight: 700;
+        }
+
+        .nav-item a svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2.2;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 0.75rem 0;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Theme Toggle Button replacing static status */
+        .theme-toggle-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem;
+            padding: 0.7rem 0.9rem;
+            background: var(--btn-theme-bg);
+            border: 1px solid var(--btn-theme-border);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--btn-theme-text);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .theme-toggle-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+
+        .theme-btn-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main Content Layout */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 2.5rem 3rem;
+            max-width: 1400px;
+        }
+
+        /* Top Header Area */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-title h2 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text-main);
+        }
+
+        .header-title p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.25rem;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #4338ca);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        /* Key Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        @media (max-width: 1280px) {
+            .metrics-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.1rem 1.15rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--box-shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--border-highlight);
+            box-shadow: var(--box-shadow-md);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--card-accent, var(--primary)), transparent);
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 0.65rem;
+            white-space: nowrap;
+        }
+
+        .metric-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--bg-card-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--card-accent, var(--primary));
+            flex-shrink: 0;
+        }
+
+        .metric-value {
+            font-size: 1.65rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text-main);
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+        }
+
+        .metric-sub {
+            font-size: 0.76rem;
+            color: var(--text-dim);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .metric-sub.positive {
+            color: var(--emerald);
+            font-weight: 600;
+        }
+
+        /* Section Cards */
+        .dashboard-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2.25rem;
+            margin-bottom: 2.5rem;
+            box-shadow: var(--box-shadow-sm);
+            position: relative;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.75rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-tag {
+            padding: 0.25rem 0.6rem;
+            background: var(--primary-glow);
+            border: 1px solid var(--border-highlight);
+            color: var(--primary);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .section-title {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        /* Tech Stack Grid */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .tech-item {
+            background: var(--bg-card-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            display: flex;
+            gap: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .tech-item:hover {
+            border-color: var(--border-highlight);
+            background: var(--bg-card);
+            box-shadow: var(--box-shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .tech-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+            box-shadow: var(--box-shadow-sm);
+        }
+
+        .tech-info h4 {
+            font-size: 1.05rem;
+            color: var(--text-main);
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .tech-badge {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            background: var(--border-color);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-family: var(--font-mono);
+        }
+
+        .tech-info p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        /* Operation Guide Steps */
+        .step-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+        }
+
+        .step-timeline::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            bottom: 20px;
+            left: 20px;
+            width: 2px;
+            background: var(--border-color);
+        }
+
+        .step-item {
+            display: flex;
+            gap: 1.5rem;
+            position: relative;
+        }
+
+        .step-number {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            flex-shrink: 0;
+            z-index: 1;
+            box-shadow: 0 0 12px var(--primary-glow);
+        }
+
+        .step-body {
+            background: var(--bg-card-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem 1.5rem;
+            flex: 1;
+        }
+
+        .step-body h4 {
+            font-size: 1.08rem;
+            color: var(--text-main);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-body p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        /* Code Snippet Box (Dark contrast inside dashboard) */
+        .code-snippet {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: var(--radius-sm);
+            padding: 0.85rem 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #38bdf8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            overflow-x: auto;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+        }
+
+        .code-snippet code {
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .btn-copy {
+            background: rgba(255, 255, 255, 0.12);
+            border: none;
+            color: #cbd5e1;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            margin-left: 1rem;
+            font-weight: 600;
+        }
+
+        .btn-copy:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+        }
+
+        /* Technical Challenges Accordion / Cards */
+        .challenge-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .challenge-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--box-shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .challenge-card:hover {
+            border-color: var(--border-highlight);
+            box-shadow: var(--box-shadow-md);
+        }
+
+        .challenge-header {
+            padding: 1.25rem 1.5rem;
+            background: var(--bg-card-subtle);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .challenge-title-group {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .challenge-badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            font-family: var(--font-mono);
+        }
+
+        .badge-danger { background: var(--badge-danger-bg); color: var(--badge-danger-text); border: 1px solid var(--badge-danger-border); }
+        .badge-warning { background: var(--badge-warning-bg); color: var(--badge-warning-text); border: 1px solid var(--badge-warning-border); }
+        .badge-info { background: var(--badge-info-bg); color: var(--badge-info-text); border: 1px solid var(--badge-info-border); }
+        .badge-purple { background: var(--badge-purple-bg); color: var(--badge-purple-text); border: 1px solid var(--badge-purple-border); }
+
+        .challenge-header h4 {
+            font-size: 1.08rem;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .challenge-content {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .challenge-content { grid-template-columns: 1fr; }
+        }
+
+        .problem-box {
+            background: var(--problem-box-bg);
+            border-radius: var(--radius-sm);
+            padding: 1.1rem 1.25rem;
+            border-left: 4px solid var(--rose);
+        }
+
+        .solution-box {
+            background: var(--solution-box-bg);
+            border-radius: var(--radius-sm);
+            padding: 1.1rem 1.25rem;
+            border-left: 4px solid var(--emerald);
+        }
+
+        .box-title {
+            font-size: 0.82rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .problem-box .box-title { color: var(--problem-box-title); }
+        .solution-box .box-title { color: var(--solution-box-title); }
+
+        .problem-box .box-desc { color: var(--problem-box-desc); font-size: 0.88rem; line-height: 1.6; }
+        .solution-box .box-desc { color: var(--solution-box-desc); font-size: 0.88rem; line-height: 1.6; }
+
+        /* File Structure Grid */
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .file-card {
+            background: var(--bg-card-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .file-card:hover {
+            border-color: var(--border-highlight);
+            background: var(--bg-card);
+            box-shadow: var(--box-shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .file-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+        }
+
+        .file-name {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--cyan);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-size {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+            background: var(--border-color);
+            padding: 0.15rem 0.45rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .file-desc {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            line-height: 1.55;
+        }
+
+        .file-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .file-tag {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            background: var(--primary-glow);
+            color: var(--primary);
+            border: 1px solid var(--border-highlight);
+            font-weight: 600;
+        }
+
+        /* Interactive Estimator Tool Widget */
+        .calculator-widget {
+            background: var(--calc-widget-bg);
+            border: 1px solid var(--calc-widget-border);
+            border-radius: var(--radius-md);
+            padding: 1.75rem;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 1.5rem;
+            align-items: center;
+            box-shadow: var(--box-shadow-sm);
+        }
+
+        @media (max-width: 800px) {
+            .calculator-widget { grid-template-columns: 1fr; }
+        }
+
+        .calc-input-group label {
+            display: block;
+            font-size: 0.88rem;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .calc-input {
+            width: 100%;
+            background: var(--calc-input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--calc-input-color);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-mono);
+            font-size: 1.05rem;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .calc-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .calc-result-box {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            background: var(--calc-res-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 1.1rem;
+            text-align: center;
+            box-shadow: var(--box-shadow-sm);
+        }
+
+        .calc-res-title {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .calc-res-val {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--cyan);
+            font-family: var(--font-mono);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    <path d="M12 6v6"></path>
+                    <path d="M15 9l-3-3-3 3"></path>
+                </svg>
+            </div>
+            <div class="brand-text">
+                <h1>凡人修仙傳</h1>
+                <span>Novel Downloader v2.4</span>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="#overview" class="active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    概覽與核心指標
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#tech-stack">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                    技術 Stack 說明
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#operation-guide">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                    詳細操作指南
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#technical-challenges">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    遇到的難題與解法
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#file-breakdown">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                    專案檔案結構說明
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#installation-build">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                    安裝與建置流程
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#batch-simulator">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+                    Gemini Notebook 分批試算
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()">
+                <div class="theme-btn-icon" id="themeBtnIcon">
+                    <!-- Dynamic Sun / Moon Icon -->
+                </div>
+                <span id="themeBtnText">切換主題模式</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header" id="overview">
+            <div class="header-title">
+                <h2>系統設計概念與控制台</h2>
+                <p>專為大型網路小說爬取、繁簡文字校正與 AI (Gemini Notebook) 友善 PDF 渲染打造的自動化工具</p>
+            </div>
+            <div class="header-actions">
+                <a href="#operation-guide" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    開始使用
+                </a>
+            </div>
+        </header>
+
+        <!-- Key Metrics Cards -->
+        <div class="metrics-grid">
+            <div class="metric-card" style="--card-accent: var(--primary)">
+                <div class="metric-header">
+                    <span>人界篇章節</span>
+                    <div class="metric-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                    </div>
+                </div>
+                <div class="metric-value">1,260 章</div>
+                <div class="metric-sub positive">
+                    <span>凡人修仙傳人界篇全本</span>
+                </div>
+            </div>
+
+            <div class="metric-card" style="--card-accent: var(--rose)">
+                <div class="metric-header">
+                    <span>靈界篇章節</span>
+                    <div class="metric-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    </div>
+                </div>
+                <div class="metric-value">1,210 章</div>
+                <div class="metric-sub positive">
+                    <span>含感言與靈界篇外傳補充</span>
+                </div>
+            </div>
+
+            <div class="metric-card" style="--card-accent: var(--purple)">
+                <div class="metric-header">
+                    <span>仙界篇章節</span>
+                    <div class="metric-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                    </div>
+                </div>
+                <div class="metric-value">1,394 章</div>
+                <div class="metric-sub positive">
+                    <span>仙界篇全本目錄 + 仙界外傳</span>
+                </div>
+            </div>
+
+            <div class="metric-card" style="--card-accent: var(--emerald)">
+                <div class="metric-header">
+                    <span>全書總章節數</span>
+                    <div class="metric-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    </div>
+                </div>
+                <div class="metric-value">3,864 章</div>
+                <div class="metric-sub positive">
+                    <span>雙大篇章總計 385 萬+ 字</span>
+                </div>
+            </div>
+
+            <div class="metric-card" style="--card-accent: var(--cyan)">
+                <div class="metric-header">
+                    <span>Gemini Notebook 容量邊距</span>
+                    <div class="metric-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    </div>
+                </div>
+                <div class="metric-value">270,000 字</div>
+                <div class="metric-sub">
+                    <span>上限 50 萬字/500 頁之 54% 保守邊距</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Section 1: Tech Stack -->
+        <section class="dashboard-section" id="tech-stack">
+            <div class="section-header">
+                <span class="section-tag">Architecture</span>
+                <h3 class="section-title">1. 使用技術 Stack (Technology Stack)</h3>
+            </div>
+            
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <div class="tech-icon">🐍</div>
+                    <div class="tech-info">
+                        <h4>Python 3.10+ <span class="tech-badge">Core Engine</span></h4>
+                        <p>主控語言環境，提供豐富的標準函式庫與跨平台動態執行能力，支援智慧編碼重構與流式 I/O。</p>
+                    </div>
+                </div>
+
+                <div class="tech-item">
+                    <div class="tech-icon">🌐</div>
+                    <div class="tech-info">
+                        <h4>Requests & urllib <span class="tech-badge">Web Scraping</span></h4>
+                        <p>負責 HTTP/HTTPS 請求處理，具備 Headers 輪換偽裝、網路 Session 逾時自動重試與 URL 相對路徑補齊。</p>
+                    </div>
+                </div>
+
+                <div class="tech-item">
+                    <div class="tech-icon">🥣</div>
+                    <div class="tech-info">
+                        <h4>BeautifulSoup4 <span class="tech-badge">DOM Parser</span></h4>
+                        <p>精準解析 HTML DOM 結構，自動抽取小說目錄連結、正文段落，過濾無關廣告標籤與 script 雜訊。</p>
+                    </div>
+                </div>
+
+                <div class="tech-item">
+                    <div class="tech-icon">📄</div>
+                    <div class="tech-info">
+                        <h4>ReportLab PDF <span class="tech-badge">Layout Engine</span></h4>
+                        <p>採用商業級 PDF 模板渲染器 (`BaseDocTemplate`, `PageTemplate`, `Frame`, `TableOfContents`)，實現動態 TOC 目錄與 PDF 書籤大綱。</p>
+                    </div>
+                </div>
+
+                <div class="tech-item">
+                    <div class="tech-icon">🔤</div>
+                    <div class="tech-info">
+                        <h4>corrections.py <span class="tech-badge">NLP Engine</span></h4>
+                        <p>自訂修仙專有名詞與台灣繁體習慣用語替換字典，包含動態 Regex 替換演算法，精準修正小說錯字。</p>
+                    </div>
+                </div>
+
+                <div class="tech-item">
+                    <div class="tech-icon">💾</div>
+                    <div class="tech-info">
+                        <h4>JSON State Database <span class="tech-badge">Persistence</span></h4>
+                        <p>使用輕量級 JSON 狀態檔（如 `progress_人靈界篇.json`）進行斷點續傳快取，確保意外中斷時無縫續接。</p>
+                    </div>
+                </div>
+
+                <div class="tech-item">
+                    <div class="tech-icon">🐘</div>
+                    <div class="tech-info">
+                        <h4>PHP 5+ Backend <span class="tech-badge">API Server</span></h4>
+                        <p>輕量級的儲存中介層，搭配 .env 處理 PIN 碼驗證，安全地將前端修改的錯字回寫至伺服器文字檔中。</p>
+                    </div>
+                </div>
+
+                <div class="tech-item">
+                    <div class="tech-icon">🟢</div>
+                    <div class="tech-info">
+                        <h4>Vue 3 + Tailwind CSS <span class="tech-badge">Frontend UI</span></h4>
+                        <p>以純前端框架打造流暢的跨裝置閱讀與即時編輯體驗，並已全面離線化所有依賴資源。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Operation Guide -->
+        <section class="dashboard-section" id="operation-guide">
+            <div class="section-header">
+                <span class="section-tag">User Manual</span>
+                <h3 class="section-title">2. 操作說明 (Usage & Operator Guide)</h3>
+            </div>
+
+            <div class="step-timeline">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-body">
+                        <h4>準備環境與字型驗證</h4>
+                        <p>確定系統已安裝 Python 3.8 或以上版本。Windows 系統預設已內建標楷體 (`C:/Windows/Fonts/kaiu.ttf`)。若為 Linux/macOS，請確認系統已有 Traditional Chinese 字型並修改路徑。</p>
+                        <div class="code-snippet">
+                            <code>python --version</code>
+                            <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-body">
+                        <h4>安裝依賴套件 (Dependencies)</h4>
+                        <p>開啟終端機執行 pip 命令，一次安裝爬蟲與 PDF 生成所需的套件：</p>
+                        <div class="code-snippet">
+                            <code>pip install requests beautifulsoup4 reportlab</code>
+                            <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-body">
+                        <h4>執行主要爬蟲與 PDF 匯出任務</h4>
+                        <p>執行 `build_catalog.py` 開始抓取《凡人修仙傳》人靈界篇。程式會自動建立 `output/人靈界篇/` 資料夾，下載正文並動態生成包含目錄的 PDF 批次檔。</p>
+                        <div class="code-snippet">
+                            <code>python build_catalog.py</code>
+                            <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-number">4</div>
+                    <div class="step-body">
+                        <h4>補充篇章與離線文字檔處理（選用）</h4>
+                        <p>若需抓取特定的外傳感言，可執行 `build_extra_pdf.py`；若已有本地文字檔（例如 `assets/本文/仙界篇/`），可執行 `make_batch001.py` 進行手動打包。</p>
+                        <div class="code-snippet">
+                            <code>python build_extra_pdf.py  # 下載外傳篇章&#10;python make_batch001.py   # 將本地 1~55 TXT 轉為 Batch 001 PDF</code>
+                            <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-number">5</div>
+                    <div class="step-body">
+                        <h4>上傳至 Gemini Notebook 進行 AI 閱讀與問答</h4>
+                        <p>開啟 Google Gemini Notebook 介面，將 `output/` 目錄下產出的分批 PDF 檔案拖拽上傳。由於每個 Batch 嚴格控制在 27 萬字與 270 頁以內，可 100% 成功解析且不會被告警退件！</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Technical Challenges -->
+        <section class="dashboard-section" id="technical-challenges">
+            <div class="section-header">
+                <span class="section-tag">Deep Dive</span>
+                <h3 class="section-title">3. 遇到的難題與技術解決方案 (Technical Challenges)</h3>
+            </div>
+
+            <div class="challenge-cards">
+                <!-- Challenge 1 -->
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-title-group">
+                            <span class="challenge-badge badge-danger">難題 1</span>
+                            <h4>Windows CLI UTF-8 / CP950 編碼崩潰 (UnicodeEncodeError)</h4>
+                        </div>
+                        <span style="color: var(--text-dim); font-size: 0.85rem; font-weight: 600;">[系統與 Terminal]</span>
+                    </div>
+                    <div class="challenge-content">
+                        <div class="problem-box">
+                            <div class="box-title">⚠️ 問題現象與原因</div>
+                            <div class="box-desc">
+                                Windows 命令提示字元 (cmd) 預設為 CP950 編碼。當爬蟲在印出進度日誌或章節標題時（包含 Emoji 符號如 🚀、📥 或簡轉繁罕見字），會直接拋出 `UnicodeEncodeError: 'cp950' codec can't encode character` 導致腳本中斷。
+                            </div>
+                        </div>
+                        <div class="problem-box solution-box">
+                            <div class="box-title">✅ 解決方案與核心程式碼</div>
+                            <div class="box-desc">
+                                在程式啟動極早期，檢測 `sys.stdout` 與 `sys.stderr` 的 encoding，若是 CP950，強制調用 `reconfigure(encoding="utf-8", errors="replace")` 重構標準輸出串流。
+                                <div class="code-snippet" style="margin-top:0.6rem;">
+                                    <code>if sys.stdout.encoding.upper() not in ("UTF-8", "UTF8"):&#10;    sys.stdout.reconfigure(encoding="utf-8", errors="replace")</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Challenge 2 -->
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-title-group">
+                            <span class="challenge-badge badge-warning">難題 2</span>
+                            <h4>Gemini Notebook 嚴格容量限制與 PDF 排版頁數溢估問題</h4>
+                        </div>
+                        <span style="color: var(--text-dim); font-size: 0.85rem; font-weight: 600;">[演算法與分批]</span>
+                    </div>
+                    <div class="challenge-content">
+                        <div class="problem-box">
+                            <div class="box-title">⚠️ 問題現象與原因</div>
+                            <div class="box-desc">
+                                Gemini Notebook 限制每個文件上限 50 萬字與 500 頁。若依常規 A4 每頁 600 字計算，未考慮段落縮排、空行、標題與目錄頁佔用，實際生成的 PDF 經常在第 450 章節時暴增至 520 頁，被 Gemini Notebook 拒絕上傳。
+                            </div>
+                        </div>
+                        <div class="problem-box solution-box">
+                            <div class="box-title">✅ 解決方案與核心程式碼</div>
+                            <div class="box-desc">
+                                建立 54% 保守安全邊距策略：將上限設為 270,000 字 / 270 頁。並修正估算模型為 450 字/頁 (`CHARS_PER_PAGE_EST = 450`)，雙重閥值動態觸發新 Batch 生成，達成 100% 安全 Pass。
+                                <div class="code-snippet" style="margin-top:0.6rem;">
+                                    <code>MAX_CHARS_PER_BATCH = 270_000 # 54% 安全邊距&#10;MAX_PAGES_PER_BATCH = 270     # 54% 頁數邊距</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Challenge 3 -->
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-title-group">
+                            <span class="challenge-badge badge-purple">難題 3</span>
+                            <h4>ReportLab 雙 Pass 動態目錄 (TOC) 與 PDF 導覽書籤同步</h4>
+                        </div>
+                        <span style="color: var(--text-dim); font-size: 0.85rem; font-weight: 600;">[PDF Layout 引擎]</span>
+                    </div>
+                    <div class="challenge-content">
+                        <div class="problem-box">
+                            <div class="box-title">⚠️ 問題現象與原因</div>
+                            <div class="box-desc">
+                                ReportLab 在繪製 Table of Contents (TOC) 時，目錄位於文件開頭，但在渲染開頭時無法預知幾百章之後的章節會落在實體 PDF 的第幾頁。且標準模板不會自動在 PDF 左側邊欄建立可點擊的章節書籤。
+                            </div>
+                        </div>
+                        <div class="problem-box solution-box">
+                            <div class="box-title">✅ 解決方案與核心程式碼</div>
+                            <div class="box-desc">
+                                繼承 `BaseDocTemplate` 實作自訂 `TocDocTemplate`。覆寫 `afterFlowable` 鉤子，在渲染章節標題時發送 `TOCEntry` 通知並呼叫 `self.canv.bookmarkPage(key)`，搭配 ReportLab 兩次渲染運算自動計算正確頁碼與書籤導覽。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Challenge 4 -->
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-title-group">
+                            <span class="challenge-badge badge-info">難題 4</span>
+                            <h4>目標網站反爬蟲 (Anti-Scraping) 與長效下載中斷復原</h4>
+                        </div>
+                        <span style="color: var(--text-dim); font-size: 0.85rem; font-weight: 600;">[網路與持久化]</span>
+                    </div>
+                    <div class="challenge-content">
+                        <div class="problem-box">
+                            <div class="box-title">⚠️ 問題現象與原因</div>
+                            <div class="box-desc">
+                                長達 2400 多章節的連鎖下載，若固定請求頻率容易觸發伺服器 HTTP 429 Rate Limit、503 Service Unavailable 或 IP 暫時封鎖。一旦網路發生閃斷，若無狀態記錄將導致整批作業重新開始。
+                            </div>
+                        </div>
+                        <div class="problem-box solution-box">
+                            <div class="box-title">✅ 解決方案與核心程式碼</div>
+                            <div class="box-desc">
+                                (1) 建置 `USER_AGENTS` 陣列隨機輪換 Header。(2) 採用 `random.uniform(3.0, 8.0)` 浮動隨機延遲。(3) 實作 JSON 斷點續傳持久化，每成功抓取一章即時 append 寫入 `progress_*.json`。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Challenge 5 -->
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-title-group">
+                            <span class="challenge-badge badge-danger">難題 5</span>
+                            <h4>修仙小說專有名詞繁簡轉換與錯別字成詞校正</h4>
+                        </div>
+                        <span style="color: var(--text-dim); font-size: 0.85rem; font-weight: 600;">[NLP 語意處理]</span>
+                    </div>
+                    <div class="challenge-content">
+                        <div class="problem-box">
+                            <div class="box-title">⚠️ 問題現象與原因</div>
+                            <div class="box-desc">
+                                一般的 OpenCC 或簡單繁簡轉換套件，常誤將修仙專有名詞轉錯（例如將「乾坤」轉為「干坤」、「符籙」轉為「符箓」）或無法辨識簡體小說網常見的掃描錯別字。
+                            </div>
+                        </div>
+                        <div class="problem-box solution-box">
+                            <div class="box-title">✅ 解決方案與核心程式碼</div>
+                            <div class="box-desc">
+                                專為修仙題材開發 `corrections.py` 字典與 `apply_corrections(text)` 函式，建立優先級正則替換矩陣，精準修正台灣慣用語、特殊修仙功法名稱與標點符號排版。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: File Breakdown -->
+        <section class="dashboard-section" id="file-breakdown">
+            <div class="section-header">
+                <span class="section-tag">Components</span>
+                <h3 class="section-title">4. 各檔案的說明 (File Structure & Component Explanation)</h3>
+            </div>
+
+            <div class="file-grid">
+                <div class="file-card">
+                    <div class="file-head">
+                        <div class="file-name">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+                            novel.html / app.js
+                        </div>
+                        <span class="file-size">Frontend</span>
+                    </div>
+                    <div class="file-desc">
+                        現代化網頁閱讀器介面與核心邏輯，提供目錄導覽、搜尋、樣式切換與段落點擊編輯功能。
+                    </div>
+                    <div class="file-tags">
+                        <span class="file-tag">Vue 3</span>
+                        <span class="file-tag">TailwindCSS</span>
+                        <span class="file-tag">Offline</span>
+                    </div>
+                </div>
+
+                <div class="file-card">
+                    <div class="file-head">
+                        <div class="file-name">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+                            save_chapter.php / .env
+                        </div>
+                        <span class="file-size">Backend</span>
+                    </div>
+                    <div class="file-desc">
+                        負責接收前端編輯請求，透過 .env 中的 PIN 碼進行身分驗證，並安全地覆寫伺服器端的文本檔案。
+                    </div>
+                    <div class="file-tags">
+                        <span class="file-tag">PHP API</span>
+                        <span class="file-tag">Security</span>
+                    </div>
+                </div>
+
+                <div class="file-card">
+                    <div class="file-head">
+                        <div class="file-name">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+                            build_catalog.py
+                        </div>
+                        <span class="file-size">25.4 KB</span>
+                    </div>
+                    <div class="file-desc">
+                        專案的主核心程式。負責爬取目錄頁面、解析章節連結、輪換 User-Agent、發送 HTTP 請求、維護 JSON 斷點續傳進度、調用 ReportLab 渲染 TOC 與切分 Batch PDF。
+                    </div>
+                    <div class="file-tags">
+                        <span class="file-tag">Main Logic</span>
+                        <span class="file-tag">Crawler</span>
+                        <span class="file-tag">PDF Renderer</span>
+                    </div>
+                </div>
+
+                <div class="file-card">
+                    <div class="file-head">
+                        <div class="file-name">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+                            corrections.py
+                        </div>
+                        <span class="file-size">20.4 KB</span>
+                    </div>
+                    <div class="file-desc">
+                        文字校正對照表與轉換引擎。內建台灣修仙用語、專有名詞修正字典與 `apply_corrections(text)` 正則過濾函式，消除簡體轉繁體造成的用語扭曲。
+                    </div>
+                    <div class="file-tags">
+                        <span class="file-tag">NLP</span>
+                        <span class="file-tag">Text Correction</span>
+                        <span class="file-tag">Dictionary</span>
+                    </div>
+                </div>
+
+                <div class="file-card">
+                    <div class="file-head">
+                        <div class="file-name">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+                            build_extra_pdf.py
+                        </div>
+                        <span class="file-size">8.9 KB</span>
+                    </div>
+                    <div class="file-desc">
+                        專項抓取腳本。針對《人靈界篇》與《仙界篇》的特定外傳、感言或補充篇章進行精準白名單比對與獨立 PDF 生成。
+                    </div>
+                    <div class="file-tags">
+                        <span class="file-tag">Extra Chapters</span>
+                        <span class="file-tag">Side Story</span>
+                    </div>
+                </div>
+
+
+                <div class="file-card">
+                    <div class="file-head">
+                        <div class="file-name">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+                            design.html
+                        </div>
+                        <span class="file-size">Current</span>
+                    </div>
+                    <div class="file-desc">
+                        現代化儀表板與文檔中心（即本頁面）。提供系統架構說明、技術指標、操作指南、難題分析與動態試算工具。
+                    </div>
+                    <div class="file-tags">
+                        <span class="file-tag">Dashboard</span>
+                        <span class="file-tag">Documentation UI</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Installation & Build -->
+        <section class="dashboard-section" id="installation-build">
+            <div class="section-header">
+                <span class="section-tag">Setup Guide</span>
+                <h3 class="section-title">5. 安裝建置流程 (Installation & Build Flow)</h3>
+            </div>
+
+            <div style="background: var(--bg-card-subtle); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+                <h4 style="color: var(--text-main); margin-bottom: 1rem; font-size: 1.1rem; font-weight: 700;">完整安裝建置步驟命令</h4>
+                
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.75rem; font-weight: 600;">1. 克隆專案或準備專案目錄：</p>
+                <div class="code-snippet" style="margin-bottom: 1.25rem;">
+                    <code>cd c:\Temp\mortal_to_immortal_novel</code>
+                    <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                </div>
+
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.75rem; font-weight: 600;">2. 建立並啟用 Python 虛擬環境 (推薦)：</p>
+                <div class="code-snippet" style="margin-bottom: 1.25rem;">
+                    <code>python -m venv venv&#10;# Windows 啟用&#10;venv\Scripts\activate&#10;# Linux / macOS 啟用&#10;source venv/bin/activate</code>
+                    <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                </div>
+
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.75rem; font-weight: 600;">3. 安裝核心依賴庫：</p>
+                <div class="code-snippet" style="margin-bottom: 1.25rem;">
+                    <code>pip install --upgrade pip&#10;pip install requests beautifulsoup4 reportlab</code>
+                    <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                </div>
+
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.75rem; font-weight: 600;">4. 驗證字型檔 (`kaiu.ttf`)：</p>
+                <p style="color: var(--text-dim); font-size: 0.88rem; margin-bottom: 0.75rem; line-height: 1.55;">
+                    Windows 預設路徑為 `C:/Windows/Fonts/kaiu.ttf`。若於 Linux 或 macOS 執行，請將系統中文字型檔複製至專案目錄或修改 `build_catalog.py` 中 `FONT_PATH` 設定。
+                </p>
+
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.75rem; font-weight: 600;">5. 啟動建置與 PDF 匯出驗證：</p>
+                <div class="code-snippet">
+                    <code>python build_catalog.py</code>
+                    <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Interactive Batch Simulator -->
+        <section class="dashboard-section" id="batch-simulator">
+            <div class="section-header">
+                <span class="section-tag">Interactive Widget</span>
+                <h3 class="section-title">Gemini Notebook 分批容量動態試算工具</h3>
+            </div>
+
+            <div class="calculator-widget">
+                <div class="calc-input-group">
+                    <label for="charCountInput">請輸入要下載/轉換的小說預估總字數：</label>
+                    <input type="number" id="charCountInput" class="calc-input" value="2500000" step="50000" oninput="calculateBatch()">
+                    <span style="font-size: 0.78rem; color: var(--text-dim); margin-top: 0.4rem; display: block; font-weight: 500;">
+                        * 預設《凡人修仙傳》人靈界篇約 250 萬字
+                    </span>
+                </div>
+
+                <div class="calc-result-box">
+                    <div>
+                        <div class="calc-res-title">預計切割 PDF 批次</div>
+                        <div class="calc-res-val" id="resBatches">10 個</div>
+                    </div>
+                    <div>
+                        <div class="calc-res-title">單檔案平均頁數</div>
+                        <div class="calc-res-val" id="resPages">270 頁</div>
+                    </div>
+                    <div>
+                        <div class="calc-res-title">Gemini Notebook 相容度</div>
+                        <div class="calc-res-val" id="resSafety" style="color: var(--emerald);">100% Safe</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2026 凡人修仙傳 Web 閱讀器 (Mortal to Immortal Novel Web Reader) | Built for High Efficiency & AI Reading Experience</p>
+        </footer>
+    </main>
+
+    <!-- JavaScript Interactive Code -->
+    <script>
+        // Theme Management (Light / Dark Mode Toggle)
+        function initTheme() {
+            const savedTheme = localStorage.getItem('dashboard_theme') || 'light';
+            setTheme(savedTheme);
+        }
+
+        function setTheme(theme) {
+            const html = document.documentElement;
+            const btnText = document.getElementById('themeBtnText');
+            const btnIcon = document.getElementById('themeBtnIcon');
+
+            if (theme === 'dark') {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                localStorage.setItem('dashboard_theme', 'dark');
+                if (btnText) btnText.innerText = '切換明亮模式';
+                if (btnIcon) {
+                    btnIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+                }
+            } else {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                localStorage.setItem('dashboard_theme', 'light');
+                if (btnText) btnText.innerText = '切換暗色模式';
+                if (btnIcon) {
+                    btnIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+                }
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        }
+
+        // Initialize Theme on Load
+        initTheme();
+
+        // Smooth scrolling active link highlight
+        const navLinks = document.querySelectorAll('.nav-item a');
+        const sections = document.querySelectorAll('section, header');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= (sectionTop - 150)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Copy code snippet function
+        function copyCode(button) {
+            const codeText = button.previousElementSibling.innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                const originalText = button.innerText;
+                button.innerText = 'Copied!';
+                button.style.background = 'rgba(5, 150, 105, 0.3)';
+                button.style.color = '#34d399';
+                setTimeout(() => {
+                    button.innerText = originalText;
+                    button.style.background = '';
+                    button.style.color = '';
+                }, 2000);
+            });
+        }
+
+        // Batch Calculation Function
+        function calculateBatch() {
+            const chars = parseInt(document.getElementById('charCountInput').value) || 0;
+            const maxCharsPerBatch = 270000;
+            const charsPerPage = 450;
+
+            const batches = Math.ceil(chars / maxCharsPerBatch) || 1;
+            const avgCharsPerBatch = Math.min(chars, maxCharsPerBatch);
+            const avgPages = Math.round(avgCharsPerBatch / charsPerPage);
+
+            document.getElementById('resBatches').innerText = batches + ' 個';
+            document.getElementById('resPages').innerText = avgPages + ' 頁';
+
+            const resSafety = document.getElementById('resSafety');
+            if (avgPages <= 270 && avgCharsPerBatch <= 270000) {
+                resSafety.innerText = '100% Safe';
+                resSafety.style.color = 'var(--emerald)';
+            } else if (avgPages <= 450) {
+                resSafety.innerText = 'Warning';
+                resSafety.style.color = 'var(--amber)';
+            } else {
+                resSafety.innerText = 'Over Limit';
+                resSafety.style.color = 'var(--rose)';
+            }
+        }
+
+        // Run calculation on load
+        calculateBatch();
+    </script>
+</body>
+</html>
