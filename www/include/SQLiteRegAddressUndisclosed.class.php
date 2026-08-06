@@ -24,6 +24,17 @@ class SQLiteRegAddressUndisclosed {
         $this->db->exec("PRAGMA journal_mode = WAL");
         $this->db->exec("PRAGMA cache_size = 100000");
         $this->db->exec("PRAGMA temp_store = MEMORY");
+        // 若 serial_no 欄位不存在則新增（向下相容既有資料）
+        $col_result = $this->db->query("PRAGMA table_info(reg_address_undisclosed)");
+        $columns = [];
+        if ($col_result) {
+            while ($col_row = $col_result->fetchArray(SQLITE3_ASSOC)) {
+                $columns[] = $col_row['name'];
+            }
+        }
+        if (!in_array('serial_no', $columns)) {
+            $this->db->exec("ALTER TABLE reg_address_undisclosed ADD COLUMN serial_no TEXT DEFAULT ''");
+        }
         $this->db->exec("BEGIN TRANSACTION");
     }
 
@@ -93,15 +104,34 @@ class SQLiteRegAddressUndisclosed {
         return $result;
     }
 
+    private function generateSerialNo() {
+        $roc_year = (int)date('Y') - 1911;
+        $month_day = date('md'); // e.g. "0806"
+        $today_start = mktime(0, 0, 0);
+        $today_end   = mktime(23, 59, 59);
+        $count_stm = $this->db->prepare('SELECT COUNT(*) AS cnt FROM reg_address_undisclosed WHERE createtime BETWEEN :bv_start AND :bv_end');
+        $count_stm->bindValue(':bv_start', $today_start);
+        $count_stm->bindValue(':bv_end',   $today_end);
+        $count_result = $count_stm->execute();
+        $cnt = 0;
+        if ($count_result) {
+            $row = $count_result->fetchArray(SQLITE3_ASSOC);
+            $cnt = $row ? (int)$row['cnt'] : 0;
+        }
+        return $roc_year . $month_day . str_pad($cnt + 1, 3, '0', STR_PAD_LEFT);
+    }
+
     public function add($post) {
+        $serial_no = $this->generateSerialNo();
         $stm = $this->db->prepare("
-            INSERT INTO reg_address_undisclosed ('applicant', 'receiving_type', 'receiving_caseno', 'note', 'createtime', 'modifytime')
-            VALUES (:applicant, :receiving_type, :receiving_caseno, :note, :createtime, :modifytime)
+            INSERT INTO reg_address_undisclosed ('applicant', 'receiving_type', 'receiving_caseno', 'note', 'serial_no', 'createtime', 'modifytime')
+            VALUES (:applicant, :receiving_type, :receiving_caseno, :note, :serial_no, :createtime, :modifytime)
         ");
         $stm->bindParam(':applicant', $post['applicant']);
         $stm->bindValue(':receiving_type', isset($post['receiving_type']) ? (int)$post['receiving_type'] : 0);
         $stm->bindValue(':receiving_caseno', isset($post['receiving_caseno']) ? $post['receiving_caseno'] : '');
         $stm->bindParam(':note', $post['note']);
+        $stm->bindParam(':serial_no', $serial_no);
         $stm->bindValue(':createtime', time());
         $stm->bindValue(':modifytime', time());
 

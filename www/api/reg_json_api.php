@@ -6,6 +6,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRegForeignerPDF.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRegForeignerRestriction.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRegAddressUndisclosed.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."RegCaseData.class.php");
 
 $query = new RegQuery();
 $cache = Cache::getInstance();
@@ -243,6 +244,44 @@ switch ($_POST["type"]) {
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已刪除住址隱匿資料 ($id)" : "無法刪除住址隱匿資料 ($id)";
         Logger::getInstance()->info("XHR [remove_address_undisclosed] $message");
         echoJSONResponse($message, $response_code);
+        break;
+    case "get_case_applicants":
+        Logger::getInstance()->info("XHR [get_case_applicants] get case applicants request.");
+        $caseno = isset($_POST['caseno']) ? trim($_POST['caseno']) : '';
+        // 移除 - 分隔符號，轉為 13 碼純字串
+        $caseno_raw = str_replace('-', '', $caseno);
+        if (strlen($caseno_raw) !== 13) {
+            $message = "案件號格式錯誤，應為 13 碼（去除 - 後）";
+            Logger::getInstance()->warning("XHR [get_case_applicants] $message ($caseno)");
+            echoJSONResponse($message, STATUS_CODE::FAIL_NOT_VALID_SERVER);
+            break;
+        }
+        $case_data = new RegCaseData($caseno_raw);
+        $baked = $case_data->getBakedData();
+        $applicants = array();
+        // 代理人
+        if (!empty($baked['代理人姓名'])) {
+            $applicants[] = array(
+                'role'   => '代理人',
+                'name'   => $baked['代理人姓名'],
+                'id_no'  => $baked['代理人統編'] ?? ''
+            );
+        }
+        // 權利人
+        if (!empty($baked['權利人姓名'])) {
+            $applicants[] = array(
+                'role'   => '權利人',
+                'name'   => $baked['權利人姓名'],
+                'id_no'  => $baked['權利人統編'] ?? ''
+            );
+        }
+        $response_code = empty($baked) ? STATUS_CODE::FAIL_NOT_FOUND : STATUS_CODE::SUCCESS_NORMAL;
+        if (empty($applicants) && $response_code === STATUS_CODE::SUCCESS_NORMAL) {
+            $response_code = STATUS_CODE::SUCCESS_WITH_NO_RECORD;
+        }
+        $message = $response_code > 0 ? "已取得案件 {$caseno} 相關人員" : "查無案件 {$caseno} 資料";
+        Logger::getInstance()->info("XHR [get_case_applicants] $message");
+        echoJSONResponse($message, $response_code, array('applicants' => $applicants));
         break;
     default:
         Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");

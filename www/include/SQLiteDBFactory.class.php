@@ -91,9 +91,10 @@ class SQLiteDBFactory {
         $sqlite->createTableBySQL('
             CREATE TABLE IF NOT EXISTS "reg_address_undisclosed" (
                 "id"	INTEGER NOT NULL,
+                "serial_no"   TEXT DEFAULT "",
                 "applicant"   TEXT NOT NULL,
                 "receiving_type"   INTEGER NOT NULL DEFAULT 0,
-                "receiving_caseno"   TEXT DEFAULT "",                
+                "receiving_caseno"   TEXT DEFAULT "",
                 "note"	TEXT,
                 "createtime"	INTEGER NOT NULL,
                 "modifytime"	INTEGER,
