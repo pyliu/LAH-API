@@ -3,10 +3,11 @@ require_once("init.php");
 require_once("System.class.php");
 require_once("RegCaseData.class.php");
 require_once("SQLiteRegForeignerPDF.class.php");
+require_once("SQLiteRegAddressUndisclosed.class.php");
 
 class RegQuery {
 
-	function __construct() { }
+	function __construct() {}
 	function __destruct() {}
 
 	public function getRegForeignerPDF($st, $ed, $keyword = '') {
@@ -32,5 +33,11 @@ class RegQuery {
 			Logger::getInstance()->warning(__METHOD__.": ⚠️ foreigner record does not remove.");
 		}
 		return false;
+	}
+
+	public function getRegAddressUndisclosed($st, $ed, $keyword = '') {
+		$sqlite_raud = new SQLiteRegAddressUndisclosed();
+		$rows = $sqlite_raud->search($st, $ed, $keyword);
+		return $rows;
 	}
 }

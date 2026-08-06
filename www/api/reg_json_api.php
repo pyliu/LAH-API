@@ -5,6 +5,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."Cache.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRegForeignerPDF.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRegForeignerRestriction.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRegAddressUndisclosed.class.php");
 
 $query = new RegQuery();
 $cache = Cache::getInstance();
@@ -186,6 +187,61 @@ switch ($_POST["type"]) {
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已刪除外國人管制資料 ($pkey)" : "無法刪除外國人管制資料 ($pkey)";
         Logger::getInstance()->info("XHR [remove_foreigner_pdf] $message");
+        echoJSONResponse($message, $response_code);
+        break;
+    case "address_undisclosed_list":
+        Logger::getInstance()->info("XHR [address_undisclosed_list] get address undisclosed list request.");
+        $result = $query->getRegAddressUndisclosed($_POST['start_ts'], $_POST['end_ts'], $_POST['keyword']);
+        $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已取得住址隱匿資料" : "無法取得住址隱匿資料";
+        Logger::getInstance()->info("XHR [address_undisclosed_list] $message");
+        echoJSONResponse($message, $response_code, array( "raw" => $result ));
+        break;
+    case "add_address_undisclosed":
+        Logger::getInstance()->info("XHR [add_address_undisclosed] add address undisclosed request.");
+        $data = $_POST['data'];
+        $srau = new SQLiteRegAddressUndisclosed();
+        $result = $srau->add($data);
+        $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已新增住址隱匿資料" : "無法新增住址隱匿資料";
+        Logger::getInstance()->info("XHR [add_address_undisclosed] $message");
+        echoJSONResponse($message, $response_code);
+        break;
+    case "edit_address_undisclosed":
+        Logger::getInstance()->info("XHR [edit_address_undisclosed] edit address undisclosed request.");
+        $status = STATUS_CODE::DEFAULT_FAIL;
+        $message = '未知的失敗';
+        $payload = array();
+        $id = $_POST['id'];
+        $payload['id'] = $id;
+        $srau = new SQLiteRegAddressUndisclosed();
+        $record = $srau->getOne($id);
+        if ($record === false) {
+            $status = STATUS_CODE::FAIL_NOT_FOUND;
+            $message = "資料庫無法找到住址隱匿資料 ($id)";
+        } else {
+            $data = $_POST['data'];
+            $data['id'] = $id;
+            $result = $srau->update($data);
+            if ($result === true) {
+                $status = STATUS_CODE::SUCCESS_NORMAL;
+                $message = "已更新住址隱匿資料 ($id)";
+            } else {
+                $status = STATUS_CODE::FAIL_DB_ERROR;
+                $message = "更新住址隱匿資料失敗 ($id)";
+            }
+        }
+        Logger::getInstance()->info("XHR [edit_address_undisclosed] $message");
+        echoJSONResponse($message, $status, array( 'payload' => $payload ));
+        break;
+    case "remove_address_undisclosed":
+        Logger::getInstance()->info("XHR [remove_address_undisclosed] remove address undisclosed request.");
+        $id = $_POST['id'];
+        $srau = new SQLiteRegAddressUndisclosed();
+        $result = $srau->delete($id);
+        $response_code = $result === false ? STATUS_CODE::FAIL_DB_ERROR : STATUS_CODE::SUCCESS_NORMAL;
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已刪除住址隱匿資料 ($id)" : "無法刪除住址隱匿資料 ($id)";
+        Logger::getInstance()->info("XHR [remove_address_undisclosed] $message");
         echoJSONResponse($message, $response_code);
         break;
     default:

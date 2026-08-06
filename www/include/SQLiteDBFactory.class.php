@@ -84,6 +84,25 @@ class SQLiteDBFactory {
         return $path;
     }
 
+    public static function getRegAddressUndisclosedDB() {
+        $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."reg_address_undisclosed.db";
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "reg_address_undisclosed" (
+                "id"	INTEGER NOT NULL,
+                "applicant"   TEXT NOT NULL,
+                "receiving_type"   INTEGER NOT NULL DEFAULT 0,
+                "receiving_caseno"   TEXT DEFAULT "",                
+                "note"	TEXT,
+                "createtime"	INTEGER NOT NULL,
+                "modifytime"	INTEGER,
+                PRIMARY KEY("id" AUTOINCREMENT)
+            )
+        ');
+        return $path;
+    }
+
     public static function getAdmReserveFilePDFDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."adm_reserve_file_pdf.db";
         $sqlite = new DynamicSQLite($path);
