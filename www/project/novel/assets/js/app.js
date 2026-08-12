@@ -21,6 +21,9 @@ const app = createApp({
         const showUI = ref(true);
         const showSidebar = ref(false);
         const isRestoringScroll = ref(false);
+        const highlightedParagraphIndex = ref(-1);
+        const activeParagraphIndex = ref(-1);
+        const targetParagraphIndexToScroll = ref(-1);
         let uiHideTimer = null;
 
         // --- 外觀設定 ---
@@ -273,11 +276,32 @@ const app = createApp({
                     isRestoringScroll.value = true;
                     
                     if (isRestore) {
-                        const savedScroll = localStorage.getItem(`rm_scroll_${category.value}`);
-                        if (savedScroll) {
-                            window.scrollTo({ top: parseInt(savedScroll, 10), behavior: 'auto' });
+                        if (targetParagraphIndexToScroll.value !== -1) {
+                            const paragraphs = document.querySelectorAll('.chapter-content p');
+                            const target = paragraphs[targetParagraphIndexToScroll.value];
+                            if (target) {
+                                const y = target.getBoundingClientRect().top + window.scrollY - 120;
+                                window.scrollTo({ top: y, behavior: 'auto' });
+                                
+                                highlightedParagraphIndex.value = targetParagraphIndexToScroll.value;
+                                setTimeout(() => {
+                                    if (highlightedParagraphIndex.value === targetParagraphIndexToScroll.value) {
+                                        highlightedParagraphIndex.value = -1;
+                                    }
+                                }, 2500);
+                                
+                                localStorage.setItem(`rm_scroll_${category.value}`, Math.round(window.scrollY));
+                            }
+                            targetParagraphIndexToScroll.value = -1;
+                            activeParagraphIndex.value = -1;
                         } else {
-                            window.scrollTo({ top: 0, behavior: 'auto' });
+                            const savedScroll = localStorage.getItem(`rm_scroll_${category.value}`);
+                            if (savedScroll) {
+                                window.scrollTo({ top: parseInt(savedScroll, 10), behavior: 'auto' });
+                                highlightCurrentView();
+                            } else {
+                                window.scrollTo({ top: 0, behavior: 'auto' });
+                            }
                         }
                     } else {
                         // 切換新章節後回到頂部，並重置該篇章的捲動記憶
@@ -300,6 +324,7 @@ const app = createApp({
                 error.value = err.message;
             } finally {
                 loading.value = false;
+                activeParagraphIndex.value = -1;
             }
         }
 
@@ -325,12 +350,76 @@ const app = createApp({
             chapterParagraphs.value = contentLines;
         }
 
+        function highlightCurrentView() {
+            setTimeout(() => {
+                const paragraphs = document.querySelectorAll('.chapter-content p');
+                let closestIndex = -1;
+                let minDistance = Infinity;
+                for (let i = 0; i < paragraphs.length; i++) {
+                    const rect = paragraphs[i].getBoundingClientRect();
+                    const distance = Math.abs(rect.top - 120);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestIndex = i;
+                    }
+                }
+                if (closestIndex !== -1) {
+                    highlightedParagraphIndex.value = closestIndex;
+                    setTimeout(() => {
+                        if (highlightedParagraphIndex.value === closestIndex) {
+                            highlightedParagraphIndex.value = -1;
+                        }
+                    }, 2500);
+                }
+            }, 100);
+        }
+
+        function setMemoryPoint(index) {
+            activeParagraphIndex.value = index;
+            // 短暫高亮作為反饋，讓使用者知道記憶點已更新
+            highlightedParagraphIndex.value = index;
+            setTimeout(() => {
+                if (highlightedParagraphIndex.value === index) {
+                    highlightedParagraphIndex.value = -1;
+                }
+            }, 1000);
+        }
+
+        function reloadAndHighlight() {
+            if (activeParagraphIndex.value !== -1) {
+                // 記錄目標段落索引，讓 fetchChapter(true) 能夠基於新 DOM 無視 padding 差異精準定位
+                targetParagraphIndexToScroll.value = activeParagraphIndex.value;
+            } else {
+                localStorage.setItem(`rm_scroll_${category.value}`, Math.round(window.scrollY));
+            }
+            fetchChapter(true);
+        }
+
+        function cancelEdit() {
+            isEditing.value = false;
+            reloadAndHighlight();
+        }
+
         function handleEditClick() {
             if (isEditing.value) {
-                isEditing.value = false;
-                fetchChapter(); // 還原
+                cancelEdit();
             } else if (editPin.value) {
                 isEditing.value = true;
+                if (activeParagraphIndex.value !== -1) {
+                    const paragraphs = document.querySelectorAll('.chapter-content p');
+                    if (paragraphs[activeParagraphIndex.value]) {
+                        const y = paragraphs[activeParagraphIndex.value].getBoundingClientRect().top + window.scrollY - 120;
+                        window.scrollTo({ top: y, behavior: 'smooth' });
+                        highlightedParagraphIndex.value = activeParagraphIndex.value;
+                        setTimeout(() => {
+                            if (highlightedParagraphIndex.value === activeParagraphIndex.value) {
+                                highlightedParagraphIndex.value = -1;
+                            }
+                        }, 2500);
+                    }
+                } else {
+                    highlightCurrentView();
+                }
             } else {
                 showPinModal.value = true;
                 pinInput.value = '';
@@ -355,6 +444,7 @@ const app = createApp({
                     sessionStorage.setItem('rm_edit_pin', editPin.value);
                     showPinModal.value = false;
                     isEditing.value = true;
+                    highlightCurrentView();
                 } else {
                     alert('密碼錯誤，請重新輸入！');
                     pinInput.value = '';
@@ -389,6 +479,7 @@ const app = createApp({
                     saveStatus.value = '儲存成功！';
                     isEditing.value = false;
                     setTimeout(() => saveStatus.value = '', 2000);
+                    reloadAndHighlight();
                 } else if (response.status === 403) {
                     saveStatus.value = '密碼錯誤！請重新輸入';
                     isEditing.value = false;
@@ -469,6 +560,7 @@ const app = createApp({
             error,
             chapterTitle,
             chapterParagraphs,
+            highlightedParagraphIndex,
             isEditing,
             saveStatus,
             showPinModal,
@@ -491,6 +583,8 @@ const app = createApp({
             goToFirst,
             fetchChapter,
             handleEditClick,
+            cancelEdit,
+            setMemoryPoint,
             submitPin,
             cancelPin,
             saveChapter

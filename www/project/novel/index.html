@@ -135,6 +135,16 @@
             opacity: 0;
             transform: translateY(10px);
         }
+        
+        /* 記憶位置的高亮動畫 */
+        @keyframes memory-flash {
+            0%, 100% { background-color: transparent; color: inherit; box-shadow: none; }
+            15%, 75% { background-color: var(--highlight-color); color: var(--bg-color); box-shadow: 0 0 12px var(--highlight-color); }
+        }
+        .memory-highlight {
+            animation: memory-flash 2.5s ease-in-out;
+            border-radius: 0.25rem;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -283,7 +293,11 @@
                             <p v-for="(p, index) in chapterParagraphs" :key="index" 
                                :contenteditable="isEditing" 
                                @blur="chapterParagraphs[index] = $event.target.innerText"
-                               :class="{'ring-2 ring-blue-400 ring-opacity-30 p-2 rounded-lg outline-none hover:bg-black hover:bg-opacity-5 transition cursor-text': isEditing}">
+                               @click="setMemoryPoint(index)"
+                               :class="[
+                                   {'ring-2 ring-blue-400 ring-opacity-30 p-2 rounded-lg outline-none hover:bg-black hover:bg-opacity-5 transition cursor-text': isEditing},
+                                   {'memory-highlight': index === highlightedParagraphIndex}
+                               ]">
                                 {{ p }}
                             </p>
                         </div>
@@ -293,7 +307,7 @@
                             <button @click="saveChapter" style="width: 3.5rem; height: 3.5rem; background-color: #2563eb; color: white; border-radius: 9999px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" title="儲存變更">
                                 <i class="fa-solid fa-floppy-disk" style="font-size: 1.25rem;"></i>
                             </button>
-                            <button @click="isEditing = false; fetchChapter()" style="width: 3rem; height: 3rem; background-color: rgba(75, 85, 99, 0.9); color: white; border-radius: 9999px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" title="取消編輯 (還原)">
+                            <button @click="cancelEdit" style="width: 3rem; height: 3rem; background-color: rgba(75, 85, 99, 0.9); color: white; border-radius: 9999px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" title="取消編輯 (還原)">
                                 <i class="fa-solid fa-xmark" style="font-size: 1.125rem;"></i>
                             </button>
                         </div>
