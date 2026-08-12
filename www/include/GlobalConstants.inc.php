@@ -38,7 +38,7 @@ define('ORACLE_ENCODING', 'CP950');
 // ==========================================
 define('DGX_PROMPTS_PATH', ASSETS_DIR.DIRECTORY_SEPARATOR.'prompts');
 define('DGX_LAND_CASE_NUM_PROMPT', 'landcasenum_parser.md');
-define('DGX_IP', '192.168.13.195');
+define('DGX_IP', '220.1.34.195');
 define('DGX_vLLM_PORT', '8002');
 define('DGX_vLLM_MODEL', 'gemma-4-26b-a4b');
 
