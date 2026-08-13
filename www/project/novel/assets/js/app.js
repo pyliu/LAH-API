@@ -30,6 +30,9 @@ const app = createApp({
         const themes = ['theme-dark', 'theme-light', 'theme-sepia'];
         const themeIndex = ref(0);
         const fontSize = ref(20);
+
+        // --- 文字風格：'cn' = 大陸版(assets/txt)，'tw' = 台灣版(assets/txt_tw) ---
+        const textStyle = ref('cn');
         
         const themeClass = computed(() => themes[themeIndex.value]);
         const lineHeight = computed(() => Math.round(fontSize.value * 1.8) + 'px');
@@ -50,6 +53,12 @@ const app = createApp({
                 item.title.toLowerCase().includes(query) || 
                 item.id.toString().includes(query)
             );
+        });
+
+        const chapterWordCount = computed(() => {
+            let count = chapterTitle.value.replace(/\s/g, '').length;
+            chapterParagraphs.value.forEach(p => count += p.replace(/\s/g, '').length);
+            return count;
         });
 
         // --- 生命週期與儲存 ---
@@ -103,9 +112,11 @@ const app = createApp({
 
             const savedTheme = localStorage.getItem('rm_theme_idx');
             const savedSize = localStorage.getItem('rm_font_size');
+            const savedStyle = localStorage.getItem('rm_text_style');
             
             if (savedTheme) themeIndex.value = parseInt(savedTheme, 10);
             if (savedSize) fontSize.value = parseInt(savedSize, 10);
+            if (savedStyle) textStyle.value = savedStyle;
         }
 
         function saveSettings() {
@@ -116,9 +127,10 @@ const app = createApp({
             localStorage.setItem('rm_chapter', chapter.value);
             localStorage.setItem('rm_theme_idx', themeIndex.value);
             localStorage.setItem('rm_font_size', fontSize.value);
+            localStorage.setItem('rm_text_style', textStyle.value);
         }
 
-        watch([category, chapter, themeIndex, fontSize], () => {
+        watch([category, chapter, themeIndex, fontSize, textStyle], () => {
             saveSettings();
         });
 
@@ -130,6 +142,12 @@ const app = createApp({
         // --- 介面控制 ---
         function cycleTheme() {
             themeIndex.value = (themeIndex.value + 1) % themes.length;
+        }
+
+        function toggleTextStyle() {
+            textStyle.value = textStyle.value === 'cn' ? 'tw' : 'cn';
+            // 切換風格後重新載入當前章節
+            fetchChapter(false);
         }
 
         function changeFontSize(delta) {
@@ -254,7 +272,8 @@ const app = createApp({
                 }
             }
 
-            const url = `./assets/txt/${category.value}/${chapter.value}.txt`;
+            const txtBase = textStyle.value === 'tw' ? './assets/txt_tw' : './assets/txt';
+            const url = `${txtBase}/${category.value}/${chapter.value}.txt`;
             
             try {
                 // 強制加入些微延遲讓淡出動畫能順暢播放
@@ -560,6 +579,7 @@ const app = createApp({
             error,
             chapterTitle,
             chapterParagraphs,
+            chapterWordCount,
             highlightedParagraphIndex,
             isEditing,
             saveStatus,
@@ -571,9 +591,11 @@ const app = createApp({
             fontSize,
             lineHeight,
             isFirstChapter,
+            textStyle,
             
             cycleTheme,
             changeFontSize,
+            toggleTextStyle,
             toggleUI,
             toggleSidebar,
             selectChapter,
