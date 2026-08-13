@@ -104,6 +104,26 @@ class SQLiteDBFactory {
         return $path;
     }
 
+    public static function getRegPropertyAlertDB() {
+        $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."reg_property_alert.db";
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "reg_property_alert" (
+                "id"	INTEGER NOT NULL,
+                "serial_no"   TEXT DEFAULT "",
+                "applicant"   TEXT NOT NULL,
+                "receiving_type"   INTEGER NOT NULL DEFAULT 0,
+                "receiving_caseno"   TEXT DEFAULT "",
+                "note"	TEXT,
+                "createtime"	INTEGER NOT NULL,
+                "modifytime"	INTEGER,
+                PRIMARY KEY("id" AUTOINCREMENT)
+            )
+        ');
+        return $path;
+    }
+
     public static function getAdmReserveFilePDFDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."adm_reserve_file_pdf.db";
         $sqlite = new DynamicSQLite($path);

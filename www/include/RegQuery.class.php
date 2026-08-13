@@ -4,6 +4,7 @@ require_once("System.class.php");
 require_once("RegCaseData.class.php");
 require_once("SQLiteRegForeignerPDF.class.php");
 require_once("SQLiteRegAddressUndisclosed.class.php");
+require_once("SQLiteRegPropertyAlert.class.php");
 
 class RegQuery {
 
@@ -38,6 +39,12 @@ class RegQuery {
 	public function getRegAddressUndisclosed($st, $ed, $keyword = '') {
 		$sqlite_raud = new SQLiteRegAddressUndisclosed();
 		$rows = $sqlite_raud->search($st, $ed, $keyword);
+		return $rows;
+	}
+
+	public function getRegPropertyAlert($st, $ed, $keyword = '') {
+		$sqlite_rpa = new SQLiteRegPropertyAlert();
+		$rows = $sqlite_rpa->search($st, $ed, $keyword);
 		return $rows;
 	}
 }

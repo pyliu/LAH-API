@@ -6,6 +6,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRegForeignerPDF.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRegForeignerRestriction.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRegAddressUndisclosed.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRegPropertyAlert.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."RegCaseData.class.php");
 
 $query = new RegQuery();
@@ -282,6 +283,61 @@ switch ($_POST["type"]) {
         $message = $response_code > 0 ? "已取得案件 {$caseno} 相關人員" : "查無案件 {$caseno} 資料";
         Logger::getInstance()->info("XHR [get_case_applicants] $message");
         echoJSONResponse($message, $response_code, array('applicants' => $applicants));
+        break;
+    case "property_alert_list":
+        Logger::getInstance()->info("XHR [property_alert_list] get property alert list request.");
+        $result = $query->getRegPropertyAlert($_POST['start_ts'], $_POST['end_ts'], $_POST['keyword']);
+        $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已取得地籍異動即時通資料" : "無法取得地籍異動即時通資料";
+        Logger::getInstance()->info("XHR [property_alert_list] $message");
+        echoJSONResponse($message, $response_code, array( "raw" => $result ));
+        break;
+    case "add_property_alert":
+        Logger::getInstance()->info("XHR [add_property_alert] add property alert request.");
+        $data = $_POST['data'];
+        $srpa = new SQLiteRegPropertyAlert();
+        $result = $srpa->add($data);
+        $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已新增地籍異動即時通資料" : "無法新增地籍異動即時通資料";
+        Logger::getInstance()->info("XHR [add_property_alert] $message");
+        echoJSONResponse($message, $response_code);
+        break;
+    case "edit_property_alert":
+        Logger::getInstance()->info("XHR [edit_property_alert] edit property alert request.");
+        $status = STATUS_CODE::DEFAULT_FAIL;
+        $message = '未知的失敗';
+        $payload = array();
+        $id = $_POST['id'];
+        $payload['id'] = $id;
+        $srpa = new SQLiteRegPropertyAlert();
+        $record = $srpa->getOne($id);
+        if ($record === false) {
+            $status = STATUS_CODE::FAIL_NOT_FOUND;
+            $message = "資料庫無法找到地籍異動即時通資料 ($id)";
+        } else {
+            $data = $_POST['data'];
+            $data['id'] = $id;
+            $result = $srpa->update($data);
+            if ($result === true) {
+                $status = STATUS_CODE::SUCCESS_NORMAL;
+                $message = "已更新地籍異動即時通資料 ($id)";
+            } else {
+                $status = STATUS_CODE::FAIL_DB_ERROR;
+                $message = "更新地籍異動即時通資料失敗 ($id)";
+            }
+        }
+        Logger::getInstance()->info("XHR [edit_property_alert] $message");
+        echoJSONResponse($message, $status, array( 'payload' => $payload ));
+        break;
+    case "remove_property_alert":
+        Logger::getInstance()->info("XHR [remove_property_alert] remove property alert request.");
+        $id = $_POST['id'];
+        $srpa = new SQLiteRegPropertyAlert();
+        $result = $srpa->delete($id);
+        $response_code = $result === false ? STATUS_CODE::FAIL_DB_ERROR : STATUS_CODE::SUCCESS_NORMAL;
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已刪除地籍異動即時通資料 ($id)" : "無法刪除地籍異動即時通資料 ($id)";
+        Logger::getInstance()->info("XHR [remove_property_alert] $message");
+        echoJSONResponse($message, $response_code);
         break;
     default:
         Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
