@@ -490,7 +490,8 @@ const app = createApp({
                         category: category.value,
                         chapter: chapter.value,
                         content: newContent,
-                        pin: editPin.value
+                        pin: editPin.value,
+                        textStyle: textStyle.value   // 'cn' 或 'tw'，決定寫入哪個目錄
                     })
                 });
                 

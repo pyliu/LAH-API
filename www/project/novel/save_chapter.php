@@ -54,9 +54,10 @@ if (!isset($data['category']) || !isset($data['chapter']) || !isset($data['conte
     exit;
 }
 
-$category = $data['category'];
-$chapter = $data['chapter'];
-$content = $data['content'];
+$category   = $data['category'];
+$chapter    = $data['chapter'];
+$content    = $data['content'];
+$textStyle  = isset($data['textStyle']) ? $data['textStyle'] : 'cn'; // 'cn' 或 'tw'
 
 // 安全性檢查：防止目錄穿越 (Directory Traversal)
 if (preg_match('/[^a-zA-Z0-9\x{4e00}-\x{9fa5}_]/u', $category)) {
@@ -71,7 +72,9 @@ if (!is_numeric($chapter)) {
     exit;
 }
 
-$filePath = __DIR__ . '/assets/txt/' . $category . '/' . $chapter . '.txt';
+// 根據文字風格決定寫入哪個目錄
+$txtDir   = ($textStyle === 'tw') ? 'txt_tw' : 'txt';
+$filePath = __DIR__ . '/assets/' . $txtDir . '/' . $category . '/' . $chapter . '.txt';
 
 // 檢查檔案是否存在
 if (!file_exists($filePath)) {
