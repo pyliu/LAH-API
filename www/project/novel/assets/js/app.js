@@ -5,7 +5,7 @@ const app = createApp({
         // --- 狀態定義 ---
         const category = ref('人界篇');
         const chapter = ref(1);
-        
+
         const loading = ref(false);
         const error = ref('');
         const chapterTitle = ref('');
@@ -13,11 +13,12 @@ const app = createApp({
         const isEditing = ref(false);
         const saveStatus = ref('');
         const editPin = ref('');
+
         const showPinModal = ref(false);
         const pinInput = ref('');
         const catalog = ref({});
         const searchQuery = ref('');
-        
+
         const showUI = ref(true);
         const showSidebar = ref(false);
         const isRestoringScroll = ref(false);
@@ -31,10 +32,18 @@ const app = createApp({
         const themeIndex = ref(0);
         const fontSize = ref(20);
 
-        // --- 文字風格：'cn' = 大陸版(assets/txt)，'tw' = 台灣版(assets/txt_tw) ---
-        const textStyle = ref('cn');
-        
+        // --- 文字風格：'cn' = 大陸版(assets/txt)，'tw' = 台灣版(assets/txt_tw)，'alt' = 改寫版(assets/txt_tw/*-alt.txt) ---
+        const textStyle = ref('alt');
+        const hasAltVersion = ref(false);
+        const displayTextStyle = computed(() => {
+            if (textStyle.value === 'alt' && !hasAltVersion.value) {
+                return 'tw';
+            }
+            return textStyle.value;
+        });
+
         const themeClass = computed(() => themes[themeIndex.value]);
+        const styleClass = computed(() => 'style-' + displayTextStyle.value);
         const lineHeight = computed(() => Math.round(fontSize.value * 1.8) + 'px');
 
         const isFirstChapter = computed(() => {
@@ -45,12 +54,12 @@ const app = createApp({
         const filteredCatalog = computed(() => {
             const currentCat = catalog.value[category.value];
             if (!currentCat) return [];
-            
+
             const query = searchQuery.value.trim().toLowerCase();
             if (!query) return currentCat;
-            
-            return currentCat.filter(item => 
-                item.title.toLowerCase().includes(query) || 
+
+            return currentCat.filter(item =>
+                item.title.toLowerCase().includes(query) ||
                 item.id.toString().includes(query)
             );
         });
@@ -65,17 +74,17 @@ const app = createApp({
         onMounted(async () => {
             loadSettings();
             editPin.value = sessionStorage.getItem('rm_edit_pin') || '';
-            
+
             // 先載入目錄
             await fetchCatalog();
-            
+
             // 再載入文章
             fetchChapter(true);
             scrollToCurrentChapter();
-            
+
             // 監聽滾動，自動隱藏 UI
             window.addEventListener('scroll', handleScroll);
-            
+
             // 監聽觸控手勢
             window.addEventListener('touchstart', handleTouchStart, { passive: true });
             window.addEventListener('touchend', handleTouchEnd, { passive: true });
@@ -113,10 +122,14 @@ const app = createApp({
             const savedTheme = localStorage.getItem('rm_theme_idx');
             const savedSize = localStorage.getItem('rm_font_size');
             const savedStyle = localStorage.getItem('rm_text_style');
-            
+
             if (savedTheme) themeIndex.value = parseInt(savedTheme, 10);
             if (savedSize) fontSize.value = parseInt(savedSize, 10);
-            if (savedStyle) textStyle.value = savedStyle;
+            if (savedStyle) {
+                textStyle.value = savedStyle;
+            } else {
+                textStyle.value = 'alt';
+            }
         }
 
         function saveSettings() {
@@ -134,9 +147,11 @@ const app = createApp({
             saveSettings();
         });
 
-        watch(themeClass, (newClass, oldClass) => {
-            if (oldClass) document.body.classList.remove(oldClass);
-            if (newClass) document.body.classList.add(newClass);
+        watch([themeClass, styleClass], ([newTheme, newStyle], [oldTheme, oldStyle] = []) => {
+            if (oldTheme) document.body.classList.remove(oldTheme);
+            if (oldStyle) document.body.classList.remove(oldStyle);
+            if (newTheme) document.body.classList.add(newTheme);
+            if (newStyle) document.body.classList.add(newStyle);
         }, { immediate: true });
 
         // --- 介面控制 ---
@@ -145,7 +160,13 @@ const app = createApp({
         }
 
         function toggleTextStyle() {
-            textStyle.value = textStyle.value === 'cn' ? 'tw' : 'cn';
+            if (displayTextStyle.value === 'cn') {
+                textStyle.value = 'tw';
+            } else if (displayTextStyle.value === 'tw') {
+                textStyle.value = hasAltVersion.value ? 'alt' : 'cn';
+            } else {
+                textStyle.value = 'cn';
+            }
             // 切換風格後重新載入當前章節
             fetchChapter(false);
         }
@@ -184,10 +205,10 @@ const app = createApp({
         function handleScroll() {
             // 如果側邊欄開著就不自動隱藏
             if (showSidebar.value) return;
-            
+
             // 防止載入中或還原捲動位置時，因為 DOM 變動導致 scrollY 為 0 覆寫掉原有紀錄
             if (loading.value || error.value || isRestoringScroll.value) return;
-            
+
             // 記錄捲動位置 (使用 debounce 避免頻繁寫入)
             if (scrollSaveTimer) clearTimeout(scrollSaveTimer);
             scrollSaveTimer = setTimeout(() => {
@@ -217,7 +238,7 @@ const app = createApp({
 
             const touchEndX = e.changedTouches[0].screenX;
             const touchEndY = e.changedTouches[0].screenY;
-            
+
             const deltaX = touchEndX - touchStartX;
             const deltaY = touchEndY - touchStartY;
 
@@ -248,7 +269,7 @@ const app = createApp({
         async function fetchChapter(isRestore = false) {
             loading.value = true;
             error.value = '';
-            
+
             // 處理跨篇章自動切換 (人界篇 <-> 靈界篇 <-> 仙界篇)
             if (category.value === '人界篇' && chapter.value > 1260) {
                 category.value = '靈界篇';
@@ -272,28 +293,42 @@ const app = createApp({
                 }
             }
 
-            const txtBase = textStyle.value === 'tw' ? './assets/txt_tw' : './assets/txt';
-            const url = `${txtBase}/${category.value}/${chapter.value}.txt`;
-            
+            // 檢查當前章節是否存在改寫版 (-alt.txt)
+            try {
+                const altUrl = `./assets/txt_tw/${category.value}/${chapter.value}-alt.txt`;
+                const altCheck = await fetch(altUrl, { method: 'HEAD', cache: 'no-store' });
+                hasAltVersion.value = altCheck.ok;
+            } catch (e) {
+                hasAltVersion.value = false;
+            }
+
+            // 依據目前實際應顯示之風格決定請求路徑
+            let url = `./assets/txt/${category.value}/${chapter.value}.txt`;
+            if (displayTextStyle.value === 'tw') {
+                url = `./assets/txt_tw/${category.value}/${chapter.value}.txt`;
+            } else if (displayTextStyle.value === 'alt') {
+                url = `./assets/txt_tw/${category.value}/${chapter.value}-alt.txt`;
+            }
+
             try {
                 // 強制加入些微延遲讓淡出動畫能順暢播放
                 const [response] = await Promise.all([
                     fetch(url, { cache: 'no-store' }),
                     new Promise(resolve => setTimeout(resolve, 300))
                 ]);
-                
+
                 if (!response.ok) {
                     throw new Error(`找不到第 ${chapter.value} 章`);
                 }
-                
+
                 const text = await response.text();
                 parseChapter(text);
-                
+
                 // 因為有 <transition mode="out-in"> 的 0.3 秒淡出動畫
                 // 必須等待動畫結束且 Vue 將新 DOM 掛載後，元素才會有高度
                 setTimeout(() => {
                     isRestoringScroll.value = true;
-                    
+
                     if (isRestore) {
                         if (targetParagraphIndexToScroll.value !== -1) {
                             const paragraphs = document.querySelectorAll('.chapter-content p');
@@ -301,14 +336,14 @@ const app = createApp({
                             if (target) {
                                 const y = target.getBoundingClientRect().top + window.scrollY - 120;
                                 window.scrollTo({ top: y, behavior: 'auto' });
-                                
+
                                 highlightedParagraphIndex.value = targetParagraphIndexToScroll.value;
                                 setTimeout(() => {
                                     if (highlightedParagraphIndex.value === targetParagraphIndexToScroll.value) {
                                         highlightedParagraphIndex.value = -1;
                                     }
-                                }, 2500);
-                                
+                                }, 3000);
+
                                 localStorage.setItem(`rm_scroll_${category.value}`, Math.round(window.scrollY));
                             }
                             targetParagraphIndexToScroll.value = -1;
@@ -327,18 +362,18 @@ const app = createApp({
                         window.scrollTo({ top: 0, behavior: 'auto' });
                         localStorage.setItem(`rm_scroll_${category.value}`, 0);
                     }
-                    
+
                     // 等待瀏覽器完成滾動，避免觸發錯誤的 handleScroll
                     setTimeout(() => {
                         isRestoringScroll.value = false;
                     }, 300);
                 }, 600);
-                
+
                 // 切換章節後短暫顯示 UI 讓使用者知道成功跳轉
                 showUI.value = true;
                 if (uiHideTimer) clearTimeout(uiHideTimer);
                 uiHideTimer = setTimeout(() => { showUI.value = false; }, 3000);
-                
+
             } catch (err) {
                 error.value = err.message;
             } finally {
@@ -350,21 +385,21 @@ const app = createApp({
         function parseChapter(text) {
             // 移除前後空白並將 \r\n 轉為 \n
             let lines = text.replace(/\r\n/g, '\n').split('\n').map(l => l.trim()).filter(l => l.length > 0);
-            
+
             if (lines.length === 0) {
                 error.value = '檔案內容為空';
                 return;
             }
-            
+
             // 第一行通常是標題
             chapterTitle.value = lines[0];
-            
+
             // 有些標題會在前幾行重複，簡單過濾掉
             let contentLines = lines.slice(1);
             if (contentLines.length > 0 && contentLines[0].includes(chapterTitle.value)) {
                 contentLines = contentLines.slice(1);
             }
-            
+
             // 組合 HTML 段落改為陣列
             chapterParagraphs.value = contentLines;
         }
@@ -388,20 +423,27 @@ const app = createApp({
                         if (highlightedParagraphIndex.value === closestIndex) {
                             highlightedParagraphIndex.value = -1;
                         }
-                    }, 2500);
+                    }, 3000);
                 }
             }, 100);
         }
 
         function setMemoryPoint(index) {
-            activeParagraphIndex.value = index;
-            // 短暫高亮作為反饋，讓使用者知道記憶點已更新
-            highlightedParagraphIndex.value = index;
-            setTimeout(() => {
-                if (highlightedParagraphIndex.value === index) {
-                    highlightedParagraphIndex.value = -1;
-                }
-            }, 1000);
+            if (isEditing.value) return;
+
+            if (activeParagraphIndex.value === index) {
+                // 再次點選同一段落時取消保留的高亮
+                activeParagraphIndex.value = -1;
+            } else {
+                // 點選段落時保留高亮
+                activeParagraphIndex.value = index;
+            }
+
+            // 點擊段落（無論高亮還是取消）強制顯示 UI 導航列，以便可以按編輯
+            showUI.value = true;
+
+            // 清除自動隱藏計時器，避免 UI 剛跑出來又馬上因為先前的計時而被隱藏
+            if (uiHideTimer) clearTimeout(uiHideTimer);
         }
 
         function reloadAndHighlight() {
@@ -434,7 +476,7 @@ const app = createApp({
                             if (highlightedParagraphIndex.value === activeParagraphIndex.value) {
                                 highlightedParagraphIndex.value = -1;
                             }
-                        }, 2500);
+                        }, 3000);
                     }
                 } else {
                     highlightCurrentView();
@@ -447,7 +489,7 @@ const app = createApp({
 
         async function submitPin() {
             if (!pinInput.value) return;
-            
+
             try {
                 const response = await fetch('./save_chapter.php', {
                     method: 'POST',
@@ -457,7 +499,7 @@ const app = createApp({
                         pin: pinInput.value
                     })
                 });
-                
+
                 if (response.ok) {
                     editPin.value = pinInput.value;
                     sessionStorage.setItem('rm_edit_pin', editPin.value);
@@ -480,7 +522,7 @@ const app = createApp({
         async function saveChapter() {
             // 組合新內容
             const newContent = [chapterTitle.value, ...chapterParagraphs.value].join('\n\n');
-            
+
             saveStatus.value = '儲存中...';
             try {
                 const response = await fetch('./save_chapter.php', {
@@ -491,10 +533,10 @@ const app = createApp({
                         chapter: chapter.value,
                         content: newContent,
                         pin: editPin.value,
-                        textStyle: textStyle.value   // 'cn' 或 'tw'，決定寫入哪個目錄
+                        textStyle: displayTextStyle.value   // 'cn' 或 'tw' 或 'alt'
                     })
                 });
-                
+
                 if (response.ok) {
                     saveStatus.value = '儲存成功！';
                     isEditing.value = false;
@@ -526,7 +568,7 @@ const app = createApp({
 
         function prevChapter() {
             if (isFirstChapter.value) return;
-            
+
             chapter.value--;
             fetchChapter();
             scrollToCurrentChapter();
@@ -545,12 +587,12 @@ const app = createApp({
 
             if (savedChapter) {
                 targetChapter = parseInt(savedChapter, 10);
-                
+
                 // 防呆：如果讀取到的章節不屬於該篇章的範圍，則捨棄（修復 localStorage 污染的問題）
                 if (newCategory === '人界篇' && targetChapter > 1260) targetChapter = null;
                 if (newCategory === '靈界篇' && (targetChapter <= 1260 || targetChapter > 2443)) targetChapter = null;
             }
-            
+
             if (targetChapter) {
                 chapter.value = targetChapter;
             } else {
@@ -559,9 +601,9 @@ const app = createApp({
                 else if (newCategory === '靈界篇') chapter.value = 1261;
                 else if (newCategory === '仙界篇' || newCategory === '非正式篇章') chapter.value = 1;
             }
-            
+
             category.value = newCategory;
-            
+
             fetchChapter(true);
             scrollToCurrentChapter();
         }
@@ -581,6 +623,7 @@ const app = createApp({
             chapterTitle,
             chapterParagraphs,
             chapterWordCount,
+            activeParagraphIndex,
             highlightedParagraphIndex,
             isEditing,
             saveStatus,
@@ -589,11 +632,15 @@ const app = createApp({
             showUI,
             showSidebar,
             themeClass,
+            styleClass,
+            themeIndex,
             fontSize,
             lineHeight,
             isFirstChapter,
             textStyle,
-            
+            displayTextStyle,
+            hasAltVersion,
+
             cycleTheme,
             changeFontSize,
             toggleTextStyle,
