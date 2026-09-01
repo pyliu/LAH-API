@@ -284,6 +284,32 @@
             border-radius: 0.25rem;
             box-shadow: 0 0 10px var(--active-p-bg);
         }
+
+        /* 字元書籤 highlight（caretRangeFromPoint 精準定位後注入的 <mark>）*/
+        @keyframes char-bookmark-fade {
+            0%   { background-color: var(--bookmark-mark-bg); }
+            65%  { background-color: var(--bookmark-mark-bg); }
+            100% { background-color: transparent; }
+        }
+
+        mark.char-bookmark {
+            background-color: var(--bookmark-mark-bg, rgba(250, 204, 21, 0.45));
+            color: inherit;
+            border-radius: 3px;
+            padding: 0 1px;
+            animation: char-bookmark-fade 3s ease forwards;
+        }
+
+        /* 各主題的書籤 highlight 底色 */
+        body.style-alt.theme-dark  { --bookmark-mark-bg: rgba(167, 139, 250, 0.50); }
+        body.style-alt.theme-light { --bookmark-mark-bg: rgba(124,  58, 237, 0.35); }
+        body.style-alt.theme-sepia { --bookmark-mark-bg: rgba(147,  51, 234, 0.35); }
+        body.style-tw.theme-dark   { --bookmark-mark-bg: rgba( 52, 211, 153, 0.50); }
+        body.style-tw.theme-light  { --bookmark-mark-bg: rgba(  5, 150, 105, 0.35); }
+        body.style-tw.theme-sepia  { --bookmark-mark-bg: rgba( 21, 128,  61, 0.35); }
+        body.style-cn.theme-dark   { --bookmark-mark-bg: rgba(248, 113, 113, 0.50); }
+        body.style-cn.theme-light  { --bookmark-mark-bg: rgba(220,  38,  38, 0.35); }
+        body.style-cn.theme-sepia  { --bookmark-mark-bg: rgba(185,  28,  28, 0.35); }
     </style>
 </head>
 
@@ -443,6 +469,15 @@
                         <button @click="changeFontSize(2)"
                             class="w-8 h-8 rounded-full hover:bg-black hover:bg-opacity-10 transition text-sm font-bold">A+</button>
                     </div>
+                    <!-- 預載快取狀態圖示 -->
+                    <span
+                        :title="cacheStatus === 'prefetching' ? '正在預載下三章...' : (cacheStatus === 'done' ? '下三章已快取，可離線閱讀' : '')"
+                        class="w-7 h-7 flex items-center justify-center text-xs opacity-60 transition"
+                        :class="{'opacity-100': cacheStatus !== 'idle'}">
+                        <i v-if="cacheStatus === 'prefetching'" class="fa-solid fa-cloud-arrow-down fa-spin"></i>
+                        <i v-else-if="cacheStatus === 'done'" class="fa-solid fa-cloud-check" style="color: var(--highlight-color);"></i>
+                        <i v-else class="fa-solid fa-cloud opacity-30"></i>
+                    </span>
                 </div>
             </div>
         </header>
@@ -486,7 +521,7 @@
                         <div class="relative">
                             <p v-for="(p, index) in chapterParagraphs" :key="index" :contenteditable="isEditing"
                                 @blur="chapterParagraphs[index] = $event.target.innerText"
-                                @click.stop="setMemoryPoint(index)" :class="[
+                                @click.stop="setMemoryPoint(index, $event)" :class="[
                                    {'ring-2 ring-blue-400 ring-opacity-30 p-2 rounded-lg outline-none hover:bg-black hover:bg-opacity-5 transition cursor-text': isEditing},
                                    {'active-paragraph': index === activeParagraphIndex && !isEditing},
                                    {'memory-highlight': index === highlightedParagraphIndex}
@@ -547,7 +582,7 @@
         </footer>
     </div>
 
-    <script src="./assets/js/app.js?v=20"></script>
+    <script src="./assets/js/app.js?v=23"></script>
 </body>
 
 </html>

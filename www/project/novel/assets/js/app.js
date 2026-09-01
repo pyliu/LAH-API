@@ -1,4 +1,4 @@
-const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
+const { createApp, ref, computed, watch, onMounted, onUnmounted, nextTick } = Vue;
 
 const app = createApp({
     setup() {
@@ -25,7 +25,14 @@ const app = createApp({
         const highlightedParagraphIndex = ref(-1);
         const activeParagraphIndex = ref(-1);
         const targetParagraphIndexToScroll = ref(-1);
+        const charBookmark = ref(null); // { chapter, pIndex, charOffset, textStyle } — 字元級書籤
         let uiHideTimer = null;
+        let prefetchTimer = null;  // 預載快取防抖計時器
+
+        // --- 預載快取狀態 ---
+        // 'idle' | 'prefetching' | 'done' | 'offline'
+        const cacheStatus = ref('idle');
+
 
         // --- 外觀設定 ---
         const themes = ['theme-dark', 'theme-light', 'theme-sepia'];
@@ -95,6 +102,7 @@ const app = createApp({
             window.removeEventListener('touchstart', handleTouchStart);
             window.removeEventListener('touchend', handleTouchEnd);
             if (uiHideTimer) clearTimeout(uiHideTimer);
+            if (prefetchTimer) clearTimeout(prefetchTimer);
         });
 
         function loadSettings() {
@@ -130,6 +138,16 @@ const app = createApp({
             } else {
                 textStyle.value = 'alt';
             }
+
+            // 讀取字元書籤
+            const savedBookmark = localStorage.getItem(`rm_bookmark_${category.value}`);
+            if (savedBookmark) {
+                try {
+                    charBookmark.value = JSON.parse(savedBookmark);
+                } catch (e) {
+                    charBookmark.value = null;
+                }
+            }
         }
 
         function saveSettings() {
@@ -141,6 +159,11 @@ const app = createApp({
             localStorage.setItem('rm_theme_idx', themeIndex.value);
             localStorage.setItem('rm_font_size', fontSize.value);
             localStorage.setItem('rm_text_style', textStyle.value);
+
+            // 寫入字元書籤
+            if (charBookmark.value) {
+                localStorage.setItem(`rm_bookmark_${category.value}`, JSON.stringify(charBookmark.value));
+            }
         }
 
         watch([category, chapter, themeIndex, fontSize, textStyle], () => {
@@ -160,6 +183,7 @@ const app = createApp({
         }
 
         function toggleTextStyle() {
+            var oldStyle = displayTextStyle.value;
             if (displayTextStyle.value === 'cn') {
                 textStyle.value = 'tw';
             } else if (displayTextStyle.value === 'tw') {
@@ -167,7 +191,8 @@ const app = createApp({
             } else {
                 textStyle.value = 'cn';
             }
-            // 切換風格後重新載入當前章節
+            // 切換風格後清除舊風格快取並重新載入當前章節
+            clearChapterCache(category.value, oldStyle);
             fetchChapter(false);
         }
 
@@ -252,6 +277,106 @@ const app = createApp({
             }
         }
 
+        // --- 預載快取工具 ---
+
+        /** 依 category、chapterId、style 回傳對應 URL */
+        function getChapterUrl(cat, chId, style) {
+            if (style === 'tw') {
+                return `./assets/txt_tw/${cat}/${chId}.txt`;
+            } else if (style === 'alt') {
+                return `./assets/txt_tw/${cat}/${chId}-alt.txt`;
+            }
+            return `./assets/txt/${cat}/${chId}.txt`;
+        }
+
+        /** 取得目前章節之後的最多 3 個有效章節 ID */
+        function getNextChapterIds(cat, currentId) {
+            var list = catalog.value[cat];
+            if (!list || list.length === 0) return [];
+            var ids = [];
+            var found = false;
+            for (var i = 0; i < list.length; i++) {
+                if (found) {
+                    ids.push(list[i].id);
+                    if (ids.length >= 3) break;
+                } else if (list[i].id === currentId) {
+                    found = true;
+                }
+            }
+            return ids;
+        }
+
+        /** 快取 key 規則：rm_cache_{category}_{chapterId}_{style} */
+        function cacheKey(cat, chId, style) {
+            return 'rm_cache_' + cat + '_' + chId + '_' + style;
+        }
+
+        /** 背景預載下三章，存入 localStorage；若 localStorage 已滿則靜默忽略 */
+        async function prefetchChapters() {
+            var style = displayTextStyle.value;
+            var cat = category.value;
+            var ids = getNextChapterIds(cat, chapter.value);
+            if (ids.length === 0) return;
+
+            cacheStatus.value = 'prefetching';
+            var successCount = 0;
+
+            for (var i = 0; i < ids.length; i++) {
+                var chId = ids[i];
+                var key = cacheKey(cat, chId, style);
+
+                // 如果 localStorage 已有且未過期（7 天），跳過
+                var existing = localStorage.getItem(key);
+                if (existing) {
+                    try {
+                        var cached = JSON.parse(existing);
+                        var age = Date.now() - (cached.ts || 0);
+                        if (age < 7 * 24 * 3600 * 1000) {
+                            successCount++;
+                            continue;
+                        }
+                    } catch(e) { /* 損壞的快取，繼續重新抓取 */ }
+                }
+
+                var url = getChapterUrl(cat, chId, style);
+                try {
+                    var resp = await fetch(url);
+                    if (resp.ok) {
+                        var text = await resp.text();
+                        var payload = JSON.stringify({ ts: Date.now(), text: text });
+                        try {
+                            localStorage.setItem(key, payload);
+                            successCount++;
+                        } catch(storageErr) {
+                            // localStorage 已滿，靜默放棄
+                            console.warn('[Cache] localStorage 空間不足，無法快取第', chId, '章');
+                        }
+                    }
+                } catch(fetchErr) {
+                    // 離線或網路錯誤，靜默放棄
+                    console.warn('[Cache] 無法預載第', chId, '章：', fetchErr.message);
+                }
+            }
+
+            cacheStatus.value = successCount > 0 ? 'done' : 'idle';
+            // 3 秒後圖示恢復 idle（避免長時間停留在 done 狀態）
+            setTimeout(function() {
+                if (cacheStatus.value === 'done') cacheStatus.value = 'idle';
+            }, 3000);
+        }
+
+        /** 清除指定 category + style 下的所有快取 key */
+        function clearChapterCache(cat, style) {
+            var keysToRemove = [];
+            for (var i = 0; i < localStorage.length; i++) {
+                var k = localStorage.key(i);
+                if (k && k.indexOf('rm_cache_' + cat + '_') === 0 && k.indexOf('_' + style) !== -1) {
+                    keysToRemove.push(k);
+                }
+            }
+            keysToRemove.forEach(function(k) { localStorage.removeItem(k); });
+        }
+
         // --- 閱讀邏輯 ---
         async function fetchCatalog() {
             try {
@@ -310,18 +435,44 @@ const app = createApp({
                 url = `./assets/txt_tw/${category.value}/${chapter.value}-alt.txt`;
             }
 
-            try {
-                // 強制加入些微延遲讓淡出動畫能順暢播放
-                const [response] = await Promise.all([
-                    fetch(url, { cache: 'no-store' }),
-                    new Promise(resolve => setTimeout(resolve, 300))
-                ]);
+            // 優先讀取 localStorage 快取（離線可用）
+            var cachedText = null;
+            var ckKey = cacheKey(category.value, chapter.value, displayTextStyle.value);
+            var ckRaw = localStorage.getItem(ckKey);
+            if (ckRaw) {
+                try {
+                    var ckData = JSON.parse(ckRaw);
+                    var ckAge = Date.now() - (ckData.ts || 0);
+                    if (ckAge < 7 * 24 * 3600 * 1000) {
+                        cachedText = ckData.text;
+                    }
+                } catch(e) { /* 快取損壞，繼續網路請求 */ }
+            }
 
-                if (!response.ok) {
-                    throw new Error(`找不到第 ${chapter.value} 章`);
+            try {
+                var text;
+                if (cachedText !== null) {
+                    // 命中快取：直接使用，並補一個短暫延遲讓淡出動畫能順暢播放
+                    await new Promise(function(resolve) { setTimeout(resolve, 300); });
+                    text = cachedText;
+                } else {
+                    // 未命中快取：從網路讀取
+                    const [response] = await Promise.all([
+                        fetch(url, { cache: 'no-store' }),
+                        new Promise(resolve => setTimeout(resolve, 300))
+                    ]);
+
+                    if (!response.ok) {
+                        throw new Error(`找不到第 ${chapter.value} 章`);
+                    }
+                    text = await response.text();
+
+                    // 同步寫入快取供下次離線使用
+                    try {
+                        localStorage.setItem(ckKey, JSON.stringify({ ts: Date.now(), text: text }));
+                    } catch(e) { /* localStorage 已滿，靜默忽略 */ }
                 }
 
-                const text = await response.text();
                 parseChapter(text);
 
                 // 因為有 <transition mode="out-in"> 的 0.3 秒淡出動畫
@@ -330,7 +481,22 @@ const app = createApp({
                     isRestoringScroll.value = true;
 
                     if (isRestore) {
-                        if (targetParagraphIndexToScroll.value !== -1) {
+                        // 優先：字元書籤精準還原
+                        const bm = charBookmark.value;
+                        if (bm && bm.chapter === chapter.value) {
+                            const pIdx = bm.pIndex;
+                            const charOff = bm.charOffset;
+                            const paragraphs = document.querySelectorAll('.chapter-content p');
+                            const target = paragraphs[pIdx];
+                            if (target) {
+                                const y = target.getBoundingClientRect().top + window.scrollY - 120;
+                                window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
+                                localStorage.setItem(`rm_scroll_${category.value}`, Math.round(window.scrollY));
+                                // 還原後以 highlight 提示使用者所在位置
+                                highlightCharBookmark(pIdx, charOff);
+                            }
+                        } else if (targetParagraphIndexToScroll.value !== -1) {
+                            // 次優先：段落書籤（編輯後還原用）
                             const paragraphs = document.querySelectorAll('.chapter-content p');
                             const target = paragraphs[targetParagraphIndexToScroll.value];
                             if (target) {
@@ -349,6 +515,7 @@ const app = createApp({
                             targetParagraphIndexToScroll.value = -1;
                             activeParagraphIndex.value = -1;
                         } else {
+                            // 最後：fallback 到 px 捲動位置
                             const savedScroll = localStorage.getItem(`rm_scroll_${category.value}`);
                             if (savedScroll) {
                                 window.scrollTo({ top: parseInt(savedScroll, 10), behavior: 'auto' });
@@ -373,6 +540,12 @@ const app = createApp({
                 showUI.value = true;
                 if (uiHideTimer) clearTimeout(uiHideTimer);
                 uiHideTimer = setTimeout(() => { showUI.value = false; }, 3000);
+
+                // 成功載入後，背景預載下三章（防抖 500ms，避免快速翻頁重複觸發）
+                if (prefetchTimer) clearTimeout(prefetchTimer);
+                prefetchTimer = setTimeout(function() {
+                    prefetchChapters();
+                }, 500);
 
             } catch (err) {
                 error.value = err.message;
@@ -428,15 +601,156 @@ const app = createApp({
             }, 100);
         }
 
-        function setMemoryPoint(index) {
+        // 從 click event 取得在 TextNode 中的字元 offset 與所在 <p> 段落 index
+        // 回傳 { pIndex, charOffset } 或 null
+        function getCharOffsetFromClick(e) {
+            let range;
+            if (document.caretRangeFromPoint) {
+                // Chrome / Safari / Edge
+                range = document.caretRangeFromPoint(e.clientX, e.clientY);
+            } else if (document.caretPositionFromPoint) {
+                // Firefox
+                var pos = document.caretPositionFromPoint(e.clientX, e.clientY);
+                if (!pos) return null;
+                range = document.createRange();
+                range.setStart(pos.offsetNode, pos.offset);
+            }
+            if (!range) return null;
+
+            var charOffset = range.startOffset;
+            var node = range.startContainer;
+
+            // 往上找到最近的 <p> 元素
+            var el = (node.nodeType === 3) ? node.parentElement : node;
+            while (el && el.tagName !== 'P') {
+                el = el.parentElement;
+            }
+            if (!el) return null;
+
+            // 確認 <p> 屬於 .chapter-content
+            var paragraphs = document.querySelectorAll('.chapter-content p');
+            var pIndex = -1;
+            for (var i = 0; i < paragraphs.length; i++) {
+                if (paragraphs[i] === el) { pIndex = i; break; }
+            }
+            if (pIndex === -1) return null;
+
+            return { pIndex: pIndex, charOffset: charOffset };
+        }
+
+        // 在目標段落的指定字元位置注入 <mark class="char-bookmark"> 並 scrollIntoView
+        // doScroll=true（預設）：還原書籤時捲動到 mark；doScroll=false：點擊當下已有平滑捲動，不重複捲動
+        // 3 秒後自動移除 <mark>，還原 TextNode
+        function highlightCharBookmark(pIndex, charOffset, doScroll) {
+            if (doScroll === undefined) doScroll = true;
+            setTimeout(function() {
+                var paragraphs = document.querySelectorAll('.chapter-content p');
+                var target = paragraphs[pIndex];
+                if (!target) return;
+
+                // 找到 TextNode（<p> 的第一個 text child）
+                var textNode = null;
+                for (var i = 0; i < target.childNodes.length; i++) {
+                    if (target.childNodes[i].nodeType === 3) {
+                        textNode = target.childNodes[i];
+                        break;
+                    }
+                }
+                if (!textNode) return;
+
+                var text = textNode.textContent;
+                var len = text.length;
+                if (charOffset >= len) charOffset = Math.max(0, len - 1);
+
+                // 書籤詞框：以 charOffset 為中心，前後各取 3 字（共約 7 字）
+                var start = Math.max(0, charOffset - 3);
+                var end   = Math.min(len, charOffset + 4);
+
+                // 用 Range API 框住目標文字範圍
+                var range = document.createRange();
+                range.setStart(textNode, start);
+                range.setEnd(textNode, end);
+
+                var mark = document.createElement('mark');
+                mark.className = 'char-bookmark';
+
+                try {
+                    range.surroundContents(mark);
+                } catch (err) {
+                    // surroundContents 若遇到跨 element 邊界會 throw，fallback 到整段高亮
+                    highlightedParagraphIndex.value = pIndex;
+                    setTimeout(function() {
+                        if (highlightedParagraphIndex.value === pIndex) {
+                            highlightedParagraphIndex.value = -1;
+                        }
+                    }, 3000);
+                    return;
+                }
+
+                // 捲動讓 mark 進入視野
+                if (doScroll) {
+                    mark.scrollIntoView({ behavior: 'auto', block: 'center' });
+                }
+
+                // 3 秒後移除 <mark>，還原文字節點
+                setTimeout(function() {
+                    if (mark.parentNode) {
+                        var parent = mark.parentNode;
+                        var frag = document.createDocumentFragment();
+                        while (mark.firstChild) frag.appendChild(mark.firstChild);
+                        parent.replaceChild(frag, mark);
+                        parent.normalize(); // 合併相鄰 TextNode
+                    }
+                }, 3100);
+            }, 100);
+        }
+
+        async function setMemoryPoint(index, e) {
             if (isEditing.value) return;
 
             if (activeParagraphIndex.value === index) {
                 // 再次點選同一段落時取消保留的高亮
                 activeParagraphIndex.value = -1;
             } else {
+                // 字元書籤：從 click event 取得精確字元位置
+                var loc = (e) ? getCharOffsetFromClick(e) : null;
+                var newBookmark = {
+                    chapter: chapter.value,
+                    pIndex: index,
+                    charOffset: (loc && loc.pIndex === index) ? loc.charOffset : 0,
+                    textStyle: displayTextStyle.value
+                };
+                charBookmark.value = newBookmark;
+                // 立即寫入 localStorage
+                localStorage.setItem('rm_bookmark_' + category.value, JSON.stringify(newBookmark));
+
                 // 點選段落時保留高亮
                 activeParagraphIndex.value = index;
+
+                // 等待 Vue 更新 DOM（套用 .active-paragraph 的邊框與內距樣式）
+                await nextTick();
+
+                // 確保瀏覽器完成 layout 繪製後動態實時測量該句子的精準位置並進行滾動
+                requestAnimationFrame(() => {
+                    const paragraphs = document.querySelectorAll('.chapter-content p');
+                    const target = paragraphs[index];
+                    if (target) {
+                        // 實時獲取句子相對於目前 viewport 頂部的距離
+                        const rect = target.getBoundingClientRect();
+                        const currentScrollY = window.scrollY || window.pageYOffset || 0;
+
+                        // 計算讓句子頂部恰好定位在 viewport 上方 74px 所需的 ScrollY 位置
+                        const targetScrollY = currentScrollY + rect.top - 74;
+
+                        window.scrollTo({
+                            top: Math.max(0, targetScrollY),
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+
+                // 點擊當下立即注入字元 highlight，doScroll=false 避免與上方平滑捲動衝突
+                highlightCharBookmark(index, newBookmark.charOffset, false);
             }
 
             // 點擊段落（無論高亮還是取消）強制顯示 UI 導航列，以便可以按編輯
@@ -625,6 +939,7 @@ const app = createApp({
             chapterWordCount,
             activeParagraphIndex,
             highlightedParagraphIndex,
+            charBookmark,
             isEditing,
             saveStatus,
             showPinModal,
@@ -640,6 +955,7 @@ const app = createApp({
             textStyle,
             displayTextStyle,
             hasAltVersion,
+            cacheStatus,
 
             cycleTheme,
             changeFontSize,
