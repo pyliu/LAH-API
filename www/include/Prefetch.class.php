@@ -918,86 +918,96 @@ class Prefetch {
             Logger::getInstance()->info('['.self::KEYS['FOREIGNER']."_${st}_${ed}".'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['FOREIGNER']."_${st}_${ed}")) {
                 $db = $this->getOraDB();
-                $db->parse("
-                    SELECT DISTINCT t.*,
-                        t.*,
-                        k.KCNT AS RM09_CHT,
-                        t.RM01   AS \"收件年\",
-                        t.RM02   AS \"收件字\",
-                        t.RM03   AS \"收件號\",
-                        t.RM01 || '-' || t.RM02 || '-' || t.RM03 AS \"收件字號\",
-                        t.RM09   AS \"登記原因代碼\",
-                        k.KCNT    AS \"登記原因\",
-                        t.RM07_1 AS \"收件日期\",
-                        t.RM58_1 AS \"結案日期\",
-                        t.RM18   AS \"權利人統一編號\",
-                        t.RM19   AS \"權利人姓名\",
-                        t.RM21   AS \"義務人統一編號\",
-                        t.RM22   AS \"義務人姓名\",
-                        (CASE
-                            WHEN p.LCDE = '1' THEN '".mb_convert_encoding('本國人', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN p.LCDE = '2' THEN '".mb_convert_encoding('外國人', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN p.LCDE = '3' THEN '".mb_convert_encoding('國有（中央機關）', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN p.LCDE = '4' THEN '".mb_convert_encoding('省市有（省市機關）', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN p.LCDE = '5' THEN '".mb_convert_encoding('縣市有（縣市機關）', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN p.LCDE = '6' THEN '".mb_convert_encoding('鄉鎮市有（鄉鎮市機關）', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN p.LCDE = '7' THEN '".mb_convert_encoding('本國私法人', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN p.LCDE = '8' THEN '".mb_convert_encoding('外國法人', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN p.LCDE = '9' THEN '".mb_convert_encoding('祭祀公業', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN p.LCDE = 'A' THEN '".mb_convert_encoding('其他', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN p.LCDE = 'B' THEN '".mb_convert_encoding('銀行法人', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN p.LCDE = 'C' THEN '".mb_convert_encoding('大陸地區自然人', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN p.LCDE = 'D' THEN '".mb_convert_encoding('大陸地區法人', ORACLE_ENCODING, 'UTF-8')."'
-                            ELSE p.LCDE
-                        END) AS \"外國人類別\",
-                        (CASE
-                            WHEN t.RM30 = 'A' THEN '".mb_convert_encoding('初審', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM30 = 'B' THEN '".mb_convert_encoding('複審', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM30 = 'H' THEN '".mb_convert_encoding('公告', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM30 = 'I' THEN '".mb_convert_encoding('補正', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM30 = 'R' THEN '".mb_convert_encoding('登錄', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM30 = 'C' THEN '".mb_convert_encoding('校對', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM30 = 'U' THEN '".mb_convert_encoding('異動完成', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM30 = 'F' THEN '".mb_convert_encoding('結案', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM30 = 'X' THEN '".mb_convert_encoding('補正初核', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM30 = 'Y' THEN '".mb_convert_encoding('駁回初核', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM30 = 'J' THEN '".mb_convert_encoding('撤回初核', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM30 = 'K' THEN '".mb_convert_encoding('撤回', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM30 = 'Z' THEN '".mb_convert_encoding('歸檔', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM30 = 'N' THEN '".mb_convert_encoding('駁回', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM30 = 'L' THEN '".mb_convert_encoding('公告初核', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM30 = 'E' THEN '".mb_convert_encoding('請示', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM30 = 'D' THEN '".mb_convert_encoding('展期', ORACLE_ENCODING, 'UTF-8')."'
-                            ELSE t.RM30
-                        END) AS \"辦理情形\",
-                        (CASE
-                            WHEN t.RM31 = 'A' THEN '".mb_convert_encoding('結案', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM31 = 'B' THEN '".mb_convert_encoding('撤回', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM31 = 'C' THEN '".mb_convert_encoding('併案', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM31 = 'D' THEN '".mb_convert_encoding('駁回', ORACLE_ENCODING, 'UTF-8')."'
-                            WHEN t.RM31 = 'E' THEN '".mb_convert_encoding('請示', ORACLE_ENCODING, 'UTF-8')."'
-                            ELSE t.RM31
-                        END) AS \"結案與否\",
-                        s.RECA AS \"土地筆數\",
-                        s.RF10 AS \"土地面積\",
-                        s.RECD AS \"建物筆數\",
-                        s.RF08 AS \"建物面積\"
-                    FROM (select *
-                            from MOICAS.CRSMS
-                            where (RM56_1 BETWEEN :bv_begin AND :bv_end) -- RM56_1 校對日期
-                          union
-                          select *
-                            from MOICAS.CRSMS
-                            where RM01 || RM02 || RM03 IN
-                            (select RF03 || RF04_1 || RF04_2 AS RM123
-                                from MOICAD.REGF
-                                where RF40 BETWEEN :bv_begin AND :bv_end)
-                         ) t
-                        LEFT JOIN MOICAD.REGF s ON t.RM01 = s.RF03 AND t.RM02 = s.RF04_1 AND t.RM03 = s.RF04_2
-                        LEFT JOIN MOICAD.RLNID p ON t.RM18 = p.LIDN OR t.RM21 = p.LIDN
-                        LEFT JOIN MOIADM.RKEYN k ON k.KCDE_1 = '06' AND k.KCDE_2 = t.RM09
-                    WHERE p.LCDE in ('2', '8', 'C', 'D')
-                ");
+                $sql = "
+                SELECT DISTINCT
+                    t.RM01 || '-' || t.RM02 || '-' || t.RM03 AS \"收件字號\",
+                    t.RM01   AS \"收件年\",
+                    t.RM02   AS \"收件字\",
+                    t.RM03   AS \"收件號\",
+                    t.RM09   AS \"登記原因代碼\",
+                    k.KCNT   AS \"登記原因\",
+                    t.RM07_1 AS \"收件日期\",
+                    t.RM58_1 AS \"結案日期\",
+
+                    -- 【關鍵新增】：輸出實際觸發外國人條件的明細人（繼承人）資訊，避免只呈現本國代表人造成的誤解
+                    d.RM_ID  AS \"實際外國人統一編號\",
+                    d.RM_NAME AS \"實際外國人姓名\",
+
+                    -- 保留代表權利人與義務人資訊供審查對照
+                    t.RM18   AS \"代表權利人統一編號\",
+                    t.RM19   AS \"代表權利人姓名\",
+                    t.RM21   AS \"代表義務人統一編號\",
+                    t.RM22   AS \"代表義務人姓名\",
+
+                    (CASE
+                        WHEN p.LCDE = '1' THEN '".mb_convert_encoding('本國人', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN p.LCDE = '2' THEN '".mb_convert_encoding('外國人', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN p.LCDE = '3' THEN '".mb_convert_encoding('國有（中央機關）', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN p.LCDE = '4' THEN '".mb_convert_encoding('省市有（省市機關）', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN p.LCDE = '5' THEN '".mb_convert_encoding('縣市有（縣市機關）', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN p.LCDE = '6' THEN '".mb_convert_encoding('鄉鎮市有（鄉鎮市機關）', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN p.LCDE = '7' THEN '".mb_convert_encoding('本國私法人', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN p.LCDE = '8' THEN '".mb_convert_encoding('外國法人', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN p.LCDE = '9' THEN '".mb_convert_encoding('祭祀公業', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN p.LCDE = 'A' THEN '".mb_convert_encoding('其他', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN p.LCDE = 'B' THEN '".mb_convert_encoding('銀行法人', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN p.LCDE = 'C' THEN '".mb_convert_encoding('大陸地區自然人', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN p.LCDE = 'D' THEN '".mb_convert_encoding('大陸地區法人', ORACLE_ENCODING, 'UTF-8')."'
+                        ELSE p.LCDE
+                    END) AS \"外國人類別\",
+                    (CASE
+                        WHEN t.RM30 = 'A' THEN '".mb_convert_encoding('初審', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM30 = 'B' THEN '".mb_convert_encoding('複審', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM30 = 'H' THEN '".mb_convert_encoding('公告', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM30 = 'I' THEN '".mb_convert_encoding('補正', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM30 = 'R' THEN '".mb_convert_encoding('登錄', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM30 = 'C' THEN '".mb_convert_encoding('校對', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM30 = 'U' THEN '".mb_convert_encoding('異動完成', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM30 = 'F' THEN '".mb_convert_encoding('結案', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM30 = 'X' THEN '".mb_convert_encoding('補正初核', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM30 = 'Y' THEN '".mb_convert_encoding('駁回初核', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM30 = 'J' THEN '".mb_convert_encoding('撤回初核', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM30 = 'K' THEN '".mb_convert_encoding('撤回', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM30 = 'Z' THEN '".mb_convert_encoding('歸檔', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM30 = 'N' THEN '".mb_convert_encoding('駁回', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM30 = 'L' THEN '".mb_convert_encoding('公告初核', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM30 = 'E' THEN '".mb_convert_encoding('請示', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM30 = 'D' THEN '".mb_convert_encoding('展期', ORACLE_ENCODING, 'UTF-8')."'
+                        ELSE t.RM30
+                    END) AS \"辦理情形\",
+                    (CASE
+                        WHEN t.RM31 = 'A' THEN '".mb_convert_encoding('結案', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM31 = 'B' THEN '".mb_convert_encoding('撤回', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM31 = 'C' THEN '".mb_convert_encoding('併案', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM31 = 'D' THEN '".mb_convert_encoding('駁回', ORACLE_ENCODING, 'UTF-8')."'
+                        WHEN t.RM31 = 'E' THEN '".mb_convert_encoding('請示', ORACLE_ENCODING, 'UTF-8')."'
+                        ELSE t.RM31
+                    END) AS \"結案與否\",
+                    s.RECA AS \"土地筆數\",
+                    s.RF10 AS \"土地面積\",
+                    s.RECD AS \"建物筆數\",
+                    s.RF08 AS \"建物面積\"
+                FROM (select *
+                        from MOICAS.CRSMS
+                        where (RM56_1 BETWEEN :bv_begin AND :bv_end) -- RM56_1 校對日期
+                        union
+                        select *
+                        from MOICAS.CRSMS
+                        where RM01 || RM02 || RM03 IN
+                        (select RF03 || RF04_1 || RF04_2 AS RM123
+                            from MOICAD.REGF
+                            where RF40 BETWEEN :bv_begin AND :bv_end)
+                        ) t
+                    -- 【優化修正 1】：改與明細表關聯，確保能抓出非代表人的共同繼承人 (同義字無須加 MOICAS 前綴)
+                    JOIN MOICAS.CRSMS_RM1821 d ON t.RM01 = d.RM01 AND t.RM02 = d.RM02 AND t.RM03 = d.RM03
+
+                    -- 【優化修正 2】：由明細表的「實際統編」去關聯 RLNID 主檔，並在此處直接限制外國人代碼
+                    JOIN MOICAD.RLNID p ON d.RM_ID = p.LIDN AND p.LCDE IN ('2', '8', 'C', 'D')
+
+                    -- 保持原有之統計檔與代碼檔之 LEFT JOIN 關係
+                    LEFT JOIN MOICAD.REGF s ON t.RM01 = s.RF03 AND t.RM02 = s.RF04_1 AND t.RM03 = s.RF04_2
+                    LEFT JOIN MOIADM.RKEYN k ON k.KCDE_1 = '06' AND k.KCDE_2 = t.RM09";
+                $db->parse($sql);
                 
                 $db->bind(":bv_begin", $st);
                 $db->bind(":bv_end", $ed);
