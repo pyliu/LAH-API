@@ -27,6 +27,8 @@ node_modules
 **/export/*
 **/bureau/*
 **/assets/*.txt
+**/assets/db.7z
+**/assets/wsdb.7z
 **/dist/*
 **/aerotropolis/assets/file/*
 **/include/*.txt
