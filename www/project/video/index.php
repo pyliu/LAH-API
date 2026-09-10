@@ -5544,7 +5544,7 @@ $badge_display = (count($video_dirs) > 1)
           <div class="guide-badge">
             <span class="badge-dot dot-cyan"></span>
             <span class="badge-label">系統環境:</span>
-            <span class="badge-value">ASUSTOR NAS (ADM 3.5)</span>
+            <span class="badge-value">Apache 2.4</span>
           </div>
           <div class="guide-badge">
             <span class="badge-dot dot-blue"></span>
