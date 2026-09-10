@@ -1,7 +1,7 @@
 <?php
 // ═══════════════════════════════════════════════════════════════════════════
-//  NAS 多媒體影音特區 (Multimedia Video Hub) - 前端入口與視圖渲染
-//  - 運行目標：ASUSTOR AS-202TE (ADM 3.5, 嚴格相容 PHP 5.6)
+//  NAS 影片播放   (Multimedia Video Player) - 前端入口與視圖渲染
+//  - 運行目標：APACHE 2.4 / PHP 7.3 (嚴格相容 PHP 5.6)
 //  - 100% 離線優先 (Offline-First) 單檔前端視圖架構
 //  - 後端專用邏輯已模組化解耦至：
 //      * video_core.php      (核心組態、路徑與編碼安全)
@@ -45,7 +45,7 @@ $current_auth_token = function_exists('auth_get_current_token') ? auth_get_curre
   <link rel="stylesheet" href="offline/bundle.css">
   <script src="offline/qrcode.min.js"></script>
   
-  <title>🎬 多媒體影音特區 — ASUSTOR NAS</title>
+  <title>🎬 NAS 影片播放 — 遠端串流播放軟體</title>
 
   <script>
     // 注入全域認證 Token
@@ -5526,8 +5526,8 @@ $badge_display = (count($video_dirs) > 1)
           <div class="guide-header-left">
             <div class="guide-header-icon">🎬</div>
             <div class="guide-header-text">
-              <h2 class="guide-title">多媒體影音特區 · 伺服器運作中心</h2>
-              <p class="guide-subtitle">Multimedia Video Hub — Server Configuration &amp; Pro Tips Guide</p>
+              <h2 class="guide-title">NAS 影片播放 · 伺服器運作中心</h2>
+              <p class="guide-subtitle">NAS Video Player — Server Configuration &amp; Pro Tips Guide</p>
             </div>
           </div>
           <div class="guide-header-right">
@@ -5639,7 +5639,7 @@ $badge_display = (count($video_dirs) > 1)
               <div class="guide-section-card">
                 <div class="guide-sec-header">
                   <span class="sec-icon">📂</span>
-                  <h3 class="sec-title">多媒體影音庫路徑配置 (.env)</h3>
+                  <h3 class="sec-title">影片庫路徑配置 (.env)</h3>
                 </div>
                 <div class="guide-sec-content">
                   <p>本系統支援單一或多個資料夾聯合索引。您可於專案根目錄之 <code>.env</code> 檔案中自訂 <code>VIDEO_DIRS</code> 參數：</p>
