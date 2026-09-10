@@ -6025,6 +6025,7 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
         }
         return res;
       }
+      window.authFetch = authFetch; // 供 PreviewManager 等外部獨立 <script> 區塊使用
 
       // ── 統一串流 URL 產生器（附加 Token 與轉換絕對網址，專供本機與 Google TV 投射）──
       window.buildStreamUrl = function (relPath, compat) {
