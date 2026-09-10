@@ -9375,6 +9375,90 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
         container.innerHTML = html;
       }
 
+      // ════════════════════════════════════════════════════════════════
+      // 伺服器端設定說明與常用技巧面板管理器 (Server Guide Manager)
+      // 改用具名函式宣告 (function declaration) 以取得 Hoisting 提升特性，
+      // 確保在 applyRecentData/applyFolderData 初始化階段呼叫時已完成定義。
+      // ════════════════════════════════════════════════════════════════
+      function showServerGuide(targetTab) {
+        var guide = document.getElementById('server-guide-card');
+        var viewport = document.getElementById('video-viewport-card');
+        var info = document.getElementById('video-info-card');
+        var returnBtn = document.getElementById('guide-back-to-player-btn');
+        var playingTitle = document.getElementById('guide-playing-title');
+
+        if (guide) guide.style.display = 'flex';
+        if (viewport) viewport.style.display = 'none';
+        if (info) info.style.display = 'none';
+
+        if (targetTab && typeof switchGuideTab === 'function') {
+          switchGuideTab(targetTab);
+        }
+
+        if (currentVideo && (currentVideo.title || currentVideo.filename)) {
+          var titleText = currentVideo.title || currentVideo.filename;
+          if (returnBtn) {
+            returnBtn.style.display = 'inline-flex';
+            returnBtn.title = '返回影片播放：' + titleText;
+          }
+          if (playingTitle) {
+            playingTitle.textContent = titleText;
+          }
+        } else {
+          if (returnBtn) returnBtn.style.display = 'none';
+        }
+
+        if (guide && typeof guide.scrollIntoView === 'function') {
+          guide.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+
+      function hideServerGuide() {
+        var guide = document.getElementById('server-guide-card');
+        var viewport = document.getElementById('video-viewport-card');
+        var info = document.getElementById('video-info-card');
+
+        if (guide) guide.style.display = 'none';
+        if (viewport) viewport.style.display = '';
+        if (info) info.style.display = '';
+      }
+
+      function toggleServerGuide(targetTab) {
+        var guide = document.getElementById('server-guide-card');
+        if (guide && guide.style.display !== 'none' && currentVideo) {
+          hideServerGuide();
+        } else {
+          showServerGuide(targetTab || 'config');
+        }
+      }
+
+      function switchGuideTab(tabId) {
+        var tabBtns = document.querySelectorAll('.guide-tab-btn');
+        var tabPanes = document.querySelectorAll('.guide-tab-pane');
+
+        for (var i = 0; i < tabBtns.length; i++) {
+          if (tabBtns[i].getAttribute('data-tab') === tabId) {
+            tabBtns[i].classList.add('active');
+          } else {
+            tabBtns[i].classList.remove('active');
+          }
+        }
+
+        for (var j = 0; j < tabPanes.length; j++) {
+          if (tabPanes[j].id === 'guide-tab-' + tabId) {
+            tabPanes[j].classList.add('active');
+          } else {
+            tabPanes[j].classList.remove('active');
+          }
+        }
+      }
+
+      // 維持全域掛載，確保 HTML 按鈕的 onclick 事件可正常觸發
+      window.showServerGuide = showServerGuide;
+      window.hideServerGuide = hideServerGuide;
+      window.toggleServerGuide = toggleServerGuide;
+      window.switchGuideTab = switchGuideTab;
+
       // 套用最新影音資料結構至介面
       function applyRecentData(data) {
         if (!data || !data.success) return;
@@ -10695,82 +10779,6 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
         } catch (e) {}
       }
       setTimeout(checkTopbarSpace, 50);
-
-      // ════════════════════════════════════════════════════════════════
-      // 伺服器端設定說明與常用技巧面板管理器 (Server Guide Manager)
-      // ════════════════════════════════════════════════════════════════
-      window.showServerGuide = function (targetTab) {
-        var guide = document.getElementById('server-guide-card');
-        var viewport = document.getElementById('video-viewport-card');
-        var info = document.getElementById('video-info-card');
-        var returnBtn = document.getElementById('guide-back-to-player-btn');
-        var playingTitle = document.getElementById('guide-playing-title');
-
-        if (guide) guide.style.display = 'flex';
-        if (viewport) viewport.style.display = 'none';
-        if (info) info.style.display = 'none';
-
-        if (targetTab && typeof window.switchGuideTab === 'function') {
-          window.switchGuideTab(targetTab);
-        }
-
-        if (currentVideo && (currentVideo.title || currentVideo.filename)) {
-          var titleText = currentVideo.title || currentVideo.filename;
-          if (returnBtn) {
-            returnBtn.style.display = 'inline-flex';
-            returnBtn.title = '返回影片播放：' + titleText;
-          }
-          if (playingTitle) {
-            playingTitle.textContent = titleText;
-          }
-        } else {
-          if (returnBtn) returnBtn.style.display = 'none';
-        }
-
-        if (guide && typeof guide.scrollIntoView === 'function') {
-          guide.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      };
-
-      window.hideServerGuide = function () {
-        var guide = document.getElementById('server-guide-card');
-        var viewport = document.getElementById('video-viewport-card');
-        var info = document.getElementById('video-info-card');
-
-        if (guide) guide.style.display = 'none';
-        if (viewport) viewport.style.display = '';
-        if (info) info.style.display = '';
-      };
-
-      window.toggleServerGuide = function (targetTab) {
-        var guide = document.getElementById('server-guide-card');
-        if (guide && guide.style.display !== 'none' && currentVideo) {
-          window.hideServerGuide();
-        } else {
-          window.showServerGuide(targetTab || 'config');
-        }
-      };
-
-      window.switchGuideTab = function (tabId) {
-        var tabBtns = document.querySelectorAll('.guide-tab-btn');
-        var tabPanes = document.querySelectorAll('.guide-tab-pane');
-
-        for (var i = 0; i < tabBtns.length; i++) {
-          if (tabBtns[i].getAttribute('data-tab') === tabId) {
-            tabBtns[i].classList.add('active');
-          } else {
-            tabBtns[i].classList.remove('active');
-          }
-        }
-
-        for (var j = 0; j < tabPanes.length; j++) {
-          if (tabPanes[j].id === 'guide-tab-' + tabId) {
-            tabPanes[j].classList.add('active');
-          } else {
-            tabPanes[j].classList.remove('active');
-          }
-        }
-      };
 
       // 監聽播放器錯誤事件，提示使用者查看排查技巧
       if (videoPlayer) {
