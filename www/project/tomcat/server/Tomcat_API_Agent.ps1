@@ -92,6 +92,7 @@ function Get-EnvBool($key, $default) { if ($envConfig.Contains($key) -and $envCo
 function Get-EnvArray($key, [string[]]$default) { if ($envConfig.Contains($key) -and $envConfig[$key] -ne '') { return @($envConfig[$key] -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }) } return $default }
 
 # 變數定義
+$svrName            = Get-EnvString "SERVER_NAME" "Tomcat"
 $port               = Get-EnvInt "PORT" 18888
 $apiKey             = Get-EnvString "API_KEY" "TomcatSecretKey123!"      
 $logPath            = Get-EnvString "LOG_PATH" "C:\Temp\TomcatApiLogs"
@@ -395,12 +396,12 @@ function Execute-ScheduledMaintenance {
         Write-ApiLog ">>> [排程任務] Tomcat 維護完成！" -Color Green
         
         if ($enableAdminNotifications) {
-            Send-SysAdminNotify -title "排程維護通知" -content "Tomcat 伺服器已完成每日定時重啟與快取清理作業。"
+            Send-SysAdminNotify -title "排程維護通知" -content "${svrName}伺服器已完成每日定時重啟與快取清理作業。"
         }
     } catch {
         Write-ApiLog "!!! [排程任務] 維護發生錯誤: $($_.Exception.Message)" -Color Red
         if ($enableAdminNotifications) {
-            Send-SysAdminNotify -title "排程維護異常" -content "Tomcat 定時維護發生錯誤: $($_.Exception.Message)"
+            Send-SysAdminNotify -title "排程維護異常" -content "${svrName} 定時維護發生錯誤: $($_.Exception.Message)"
         }
     }
 }
