@@ -5264,7 +5264,7 @@ $badge_display = (count($video_dirs) > 1)
       <!-- 明/暗主題切換按鈕 (同步儀表板 fin-lab-theme) -->
       <button type="button" class="btn topbar-icon-btn theme-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="切換明暗主題">🌙</button>
       <?php if (has_pin_protection()): ?>
-      <a href="auth.php?action=logout&redirect=video.php" class="btn topbar-icon-btn lock-btn" id="lock-btn" title="鎖定安全會話">🔒</a>
+      <a href="auth.php?action=logout&redirect=index.php" class="btn topbar-icon-btn lock-btn" id="lock-btn" title="鎖定安全會話">🔒</a>
       <?php endif; ?>
     </div>
   </header>
@@ -5995,7 +5995,7 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
 
       // ── 安全認證會話守衛：當 API 回傳 401 或 auth_required 時，轉址至 PIN 碼解鎖頁面 ──
       function handleAuthRequired() {
-        var path = window.location.pathname.split('/').pop() || 'video.php';
+        var path = window.location.pathname.split('/').pop() || 'index.php';
         var search = window.location.search || '';
         if (search) {
           search = search.replace(/([?&])auth_token=[^&]*(&|$)/, '$1').replace(/[?&]$/, '');
@@ -6028,7 +6028,7 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
 
       // ── 統一串流 URL 產生器（附加 Token 與轉換絕對網址，專供本機與 Google TV 投射）──
       window.buildStreamUrl = function (relPath, compat) {
-        var u = 'video.php?action=stream&file=' + encodeURIComponent(relPath);
+        var u = 'index.php?action=stream&file=' + encodeURIComponent(relPath);
         var curParams = new URLSearchParams(window.location.search);
         if (curParams.has('dir')) {
           u += '&dir=' + encodeURIComponent(curParams.get('dir'));
@@ -6044,7 +6044,7 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
 
       // ── 產生直接播放分享網址（完整絕對路徑，方便複製分享給家人）──
       window.buildShareUrl = function (relPath) {
-        var u = new URL('video.php', window.location.href);
+        var u = new URL('index.php', window.location.href);
         u.searchParams.set('play', relPath);
         var curParams = new URLSearchParams(window.location.search);
         if (curParams.has('dir')) {
@@ -6423,7 +6423,7 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
 
       // ── 產生資料夾目錄分享網址（完整絕對路徑，方便複製分享給家人）──
       window.buildFolderShareUrl = function (folderRelPath) {
-        var u = new URL('video.php', window.location.href);
+        var u = new URL('index.php', window.location.href);
         var cleanPath = (folderRelPath || '').replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+$/, '');
         if (cleanPath) {
           u.searchParams.set('folder', cleanPath);
@@ -8988,7 +8988,7 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
         clearVideoTracks();
 
         try {
-          var url = 'video.php?action=subtitles&file=' + encodeURIComponent(relPath);
+          var url = 'index.php?action=subtitles&file=' + encodeURIComponent(relPath);
           if (window.AUTH_TOKEN) {
             url += '&auth_token=' + encodeURIComponent(window.AUTH_TOKEN);
           }
@@ -9033,7 +9033,7 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
 
             var curParams = new URLSearchParams(window.location.search);
             if (isGraphicDvd) {
-              var graphicUrl = 'video.php?action=subtitles_graphic&file=' + encodeURIComponent(relPath) + '&sub_index=' + e.sub_index + '&track_num=' + (e.track_num || 0) + '&_t=' + Date.now();
+              var graphicUrl = 'index.php?action=subtitles_graphic&file=' + encodeURIComponent(relPath) + '&sub_index=' + e.sub_index + '&track_num=' + (e.track_num || 0) + '&_t=' + Date.now();
               if (curParams.has('dir')) {
                 graphicUrl += '&dir=' + encodeURIComponent(curParams.get('dir'));
               }
@@ -9054,7 +9054,7 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
                 trackNum: e.track_num || 0
               });
             } else if (!e.is_image) {
-              var vttUrl = 'video.php?action=subtitles_vtt&file=' + encodeURIComponent(relPath) + '&sub_index=' + e.sub_index + '&track_num=' + (e.track_num || 0) + '&_t=' + Date.now();
+              var vttUrl = 'index.php?action=subtitles_vtt&file=' + encodeURIComponent(relPath) + '&sub_index=' + e.sub_index + '&track_num=' + (e.track_num || 0) + '&_t=' + Date.now();
               if (curParams.has('dir')) {
                 vttUrl += '&dir=' + encodeURIComponent(curParams.get('dir'));
               }
@@ -9538,7 +9538,7 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
         ]);
 
         try {
-          const url = `video.php?action=recent&limit=40${force ? '&force=1' : ''}`;
+          const url = `index.php?action=recent&limit=40${force ? '&force=1' : ''}`;
           const res = await authFetch(url);
           const data = await res.json();
           if (data && data.success) {
@@ -9664,7 +9664,7 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
         }
 
         try {
-          var browseUrl = `video.php?action=browse&path=${encodeURIComponent(currentPath)}`;
+          var browseUrl = `index.php?action=browse&path=${encodeURIComponent(currentPath)}`;
           if (force) {
             browseUrl += '&force=1';
           }
@@ -11306,7 +11306,7 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
 
       var src = (typeof window.buildStreamUrl === 'function')
         ? window.buildStreamUrl(relPath)
-        : ('video.php?action=stream&file=' + encodeURIComponent(relPath));
+        : ('index.php?action=stream&file=' + encodeURIComponent(relPath));
 
       pvVideo.muted = true;
       pvVideo.volume = 0;
@@ -11411,7 +11411,7 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
       }
 
       // 2. 呼叫後端 API 隨機挑選該資料夾下一支影片
-      var apiUrl = 'video.php?action=random_video&folder=' + encodeURIComponent(folderRel);
+      var apiUrl = 'index.php?action=random_video&folder=' + encodeURIComponent(folderRel);
       if (window.AUTH_TOKEN) {
         apiUrl += '&token=' + encodeURIComponent(window.AUTH_TOKEN);
       }
@@ -11502,7 +11502,7 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
         return;
       }
       var folderName = item.dataset.folderName || folderPath;
-      var url = 'video.php?action=folder_sample&folder=' + encodeURIComponent(folderPath);
+      var url = 'index.php?action=folder_sample&folder=' + encodeURIComponent(folderPath);
       authFetch(url)
         .then(function(res) { return res.json(); })
         .then(function(data) {
