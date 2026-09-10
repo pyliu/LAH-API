@@ -10636,7 +10636,9 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
         try {
           var urlParams = new URLSearchParams(window.location.search);
           directPlay = urlParams.get('play') || urlParams.get('v') || '';
-          directFolder = urlParams.get('folder') || urlParams.get('dir') || urlParams.get('path') || '';
+          // 注意：'dir' 為「自訂路徑測試」專用的伺服器端 override 參數（見 video_core.php），
+          // 語意上與此處的資料夾深連結完全不同，不可混用，否則會被誤判為子路徑導致目錄讀取失敗。
+          directFolder = urlParams.get('folder') || urlParams.get('path') || '';
         } catch(e) {}
 
         if (directPlay) {

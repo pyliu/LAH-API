@@ -558,7 +558,7 @@ function browse_directory($base_dir, $rel_path = '', $force = false) {
 
     $result = array(
         'success'        => false,
-        'dir_exists'     => @is_dir($target_dir),
+        'dir_exists'     => ($real_target && @is_dir($real_target)),
         'base_dir'       => $target_dir,
         'current_path'   => $clean_rel,
         'parent_path'    => null,
