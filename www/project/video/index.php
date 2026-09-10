@@ -5230,7 +5230,7 @@ $current_auth_token = function_exists('auth_get_current_token') ? auth_get_curre
   <!-- ══ 頂部導航列 ══════════════════════════════════════════════════════════ -->
   <header class="topbar">
     <div class="topbar-left">
-      <a href="index.php" class="btn btn-icon" title="返回 NAS 監控儀表板">← 儀表板</a>
+      <a href="/project/bookmark/" class="btn btn-icon" title="返回書籤">← 回書籤</a>
       <div class="brand-badge">
         🎬 影音中心
         <button type="button" class="brand-guide-btn" id="btn-topbar-guide" onclick="toggleServerGuide('config')" title="點擊隨時查看伺服器端設定說明、全格式支援矩陣與操作技巧">
