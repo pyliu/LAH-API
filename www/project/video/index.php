@@ -223,6 +223,31 @@ $current_auth_token = function_exists('auth_get_current_token') ? auth_get_curre
       box-shadow: 0 0 10px rgba(0, 168, 130, 0.25);
     }
 
+    [data-theme="light"] .video-zoom-hud {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: var(--cyan);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 10px rgba(0, 168, 130, 0.15);
+      color: #0f172a;
+    }
+    [data-theme="light"] .zoom-hud-btn {
+      background: #f1f5f9;
+      border-color: var(--border2);
+      color: #0f172a;
+    }
+    [data-theme="light"] .zoom-hud-tip {
+      color: #64748b;
+      border-left-color: #cbd5e1;
+    }
+    [data-theme="light"] .zoom-segmented-group {
+      background: var(--bg3);
+      border-color: var(--border2);
+    }
+    [data-theme="light"] .zoom-segmented-group .zoom-btn {
+      color: var(--text2);
+      border-right-color: var(--border2);
+    }
+
+
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -781,6 +806,141 @@ $current_auth_token = function_exists('auth_get_current_token') ? auth_get_curre
       white-space: nowrap;
     }
 
+    /* 🔍 縮放中央淡入/淡出動態 HUD 提示卡片 */
+    .video-zoom-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.85);
+      background: rgba(11, 15, 23, 0.88);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(0, 212, 170, 0.6);
+      border-radius: 12px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #fff;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 26;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75), 0 0 20px rgba(0, 212, 170, 0.25);
+      transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      user-select: none;
+    }
+
+    .video-zoom-indicator.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .zoom-indicator-icon {
+      font-size: 1.8rem;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .zoom-indicator-content {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+    }
+
+    .zoom-indicator-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-family: var(--mono);
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+      color: var(--cyan);
+    }
+
+    .zoom-indicator-sub {
+      font-size: 0.75rem;
+      color: var(--text2);
+      font-family: var(--mono);
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    /* 🔍 畫面縮放懸浮狀態與微調控制膠囊 (Float Zoom HUD) */
+    .video-zoom-hud {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 50;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(0, 212, 170, 0.5);
+      border-radius: 20px;
+      padding: 4px 10px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: #fff;
+      font-size: 0.75rem;
+      font-family: var(--mono);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 212, 170, 0.2);
+      user-select: none;
+      -webkit-user-select: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .zoom-hud-ratio {
+      font-weight: 700;
+      color: var(--cyan);
+    }
+
+    .zoom-hud-tip {
+      font-size: 0.7rem;
+      color: var(--text2);
+      border-left: 1px solid rgba(255, 255, 255, 0.2);
+      padding-left: 6px;
+    }
+
+    .zoom-hud-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border-radius: 4px;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      font-size: 0.8rem;
+      font-family: var(--mono);
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      line-height: 1;
+    }
+
+    .zoom-hud-btn:hover {
+      background: rgba(0, 212, 170, 0.3);
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    .zoom-hud-btn.zoom-hud-reset {
+      width: auto;
+      padding: 0 8px;
+      font-size: 0.7rem;
+      color: var(--amber);
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+    .zoom-hud-btn.zoom-hud-reset:hover {
+      background: rgba(245, 158, 11, 0.25);
+      border-color: var(--amber);
+      color: #fff;
+    }
+
     .video-container:fullscreen .video-seek-indicator,
     .video-container:-webkit-full-screen .video-seek-indicator,
     .video-container:-moz-full-screen .video-seek-indicator,
@@ -788,9 +948,18 @@ $current_auth_token = function_exists('auth_get_current_token') ? auth_get_curre
     .video-container:fullscreen .video-play-indicator,
     .video-container:-webkit-full-screen .video-play-indicator,
     .video-container:-moz-full-screen .video-play-indicator,
-    .video-container.mobile-web-fullscreen .video-play-indicator {
+    .video-container.mobile-web-fullscreen .video-play-indicator,
+    .video-container:fullscreen .video-zoom-indicator,
+    .video-container:-webkit-full-screen .video-zoom-indicator,
+    .video-container:-moz-full-screen .video-zoom-indicator,
+    .video-container.mobile-web-fullscreen .video-zoom-indicator,
+    .video-container:fullscreen .video-zoom-hud,
+    .video-container:-webkit-full-screen .video-zoom-hud,
+    .video-container:-moz-full-screen .video-zoom-hud,
+    .video-container.mobile-web-fullscreen .video-zoom-hud {
       z-index: 2147483647 !important;
     }
+
 
     /* 🎨 原生 DVD 圖形字幕 (SPU Canvas) 懸浮渲染層 */
     .subtitle-overlay-canvas {
@@ -1122,6 +1291,72 @@ $current_auth_token = function_exists('auth_get_current_token') ? auth_get_curre
     .seek-segmented-group .seek-btn:active {
       transform: scale(0.94);
     }
+
+    /* 🔍 縮放連體微型控制項 (極致節省空間) */
+    .zoom-segmented-group {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      background: var(--bg3);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+
+    .zoom-segmented-group .zoom-btn {
+      padding: 3px 6px;
+      font-size: 0.72rem;
+      font-family: var(--mono);
+      font-weight: 600;
+      color: var(--text2);
+      background: transparent;
+      border: none;
+      border-right: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      line-height: 1.2;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .zoom-segmented-group .zoom-btn:last-child {
+      border-right: none;
+    }
+
+    .zoom-segmented-group .zoom-btn:hover {
+      background: rgba(0, 212, 170, 0.2);
+      color: var(--cyan);
+    }
+
+    .zoom-segmented-group .zoom-btn:active {
+      transform: scale(0.94);
+    }
+
+    .zoom-segmented-group .zoom-val-btn {
+      min-width: 44px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .zoom-segmented-group.is-zoomed {
+      border-color: rgba(0, 212, 170, 0.55);
+      box-shadow: 0 0 8px rgba(0, 212, 170, 0.25);
+    }
+
+    .zoom-segmented-group.is-zoomed .zoom-val-btn {
+      color: var(--cyan);
+    }
+
+    .zoom-segmented-group .zoom-reset-btn {
+      color: var(--amber);
+    }
+    .zoom-segmented-group .zoom-reset-btn:hover {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+    }
+
 
     /* 🔗 分享/複製直連按鈕專屬科技風格 */
     .pill-btn.share-btn {
@@ -5351,7 +5586,27 @@ $badge_display = (count($video_dirs) > 1)
               <div class="seek-indicator-time" id="seek-indicator-time">00:00 / 00:00</div>
             </div>
           </div>
+
+          <!-- 🔍 畫面縮放懸浮狀態與微調控制膠囊 (Float Zoom HUD) -->
+          <div class="video-zoom-hud" id="video-zoom-hud" style="display:none;">
+            <span class="zoom-hud-icon">🔍</span>
+            <span class="zoom-hud-ratio" id="zoom-hud-ratio">100%</span>
+            <span class="zoom-hud-tip">可拖曳平移</span>
+            <button type="button" class="zoom-hud-btn" onclick="adjustVideoZoom(-0.25)" title="縮小畫面 (快捷鍵 -)">−</button>
+            <button type="button" class="zoom-hud-btn" onclick="adjustVideoZoom(0.25)" title="放大畫面 (快捷鍵 +)">+</button>
+            <button type="button" class="zoom-hud-btn zoom-hud-reset" onclick="resetVideoZoom()" title="還原原比例 (快捷鍵 0)">⟲ 100%</button>
+          </div>
+
+          <!-- 🔍 縮放中央即時提示 HUD (淡入/淡出) -->
+          <div class="video-zoom-indicator" id="video-zoom-indicator">
+            <div class="zoom-indicator-icon">🔍</div>
+            <div class="zoom-indicator-content">
+              <div class="zoom-indicator-title" id="zoom-indicator-title">畫面縮放 150%</div>
+              <div class="zoom-indicator-sub" id="zoom-indicator-sub">按住滑鼠左鍵拖曳可平移畫面</div>
+            </div>
+          </div>
         </div>
+
 
         <!-- 字幕選擇列（有字幕時顯示） -->
         <div class="subtitle-bar" id="subtitle-bar" style="display:none;">
@@ -5438,6 +5693,14 @@ $badge_display = (count($video_dirs) > 1)
               <button class="seek-btn forward" onclick="seekRelative(300)" title="快進 5 分鐘">+5m</button>
               <button class="seek-btn forward" onclick="seekRelative(600)" title="快進 10 分鐘">+10m</button>
             </div>
+            <!-- 🔍 畫面縮放控制組 -->
+            <span class="toolbar-label zoom-label">縮放:</span>
+            <div class="zoom-segmented-group" id="toolbar-zoom-group" title="畫面縮放檢視局部細節 (可滾輪縮放、按住拖曳平移)">
+              <button type="button" class="zoom-btn" onclick="adjustVideoZoom(-0.25)" title="縮小畫面 (快捷鍵 -)">−</button>
+              <button type="button" class="zoom-btn zoom-val-btn" id="toolbar-zoom-val" onclick="cycleVideoZoom()" title="當前縮放比例 (點擊切換 100% → 125% → 150% → 200% → 300%)">100%</button>
+              <button type="button" class="zoom-btn" onclick="adjustVideoZoom(0.25)" title="放大畫面 (快捷鍵 +)">+</button>
+              <button type="button" class="zoom-btn zoom-reset-btn" id="toolbar-zoom-reset" onclick="resetVideoZoom()" title="重設回 100% 原比例 (快捷鍵 0)">⟲</button>
+            </div>
             <!-- 即時緩衝水位指示器 -->
             <div class="buffer-health-badge" id="buffer-health-badge" title="即時緩衝水位 (目前已超前預載秒數)">
               <span class="buffer-health-dot" id="buffer-health-dot"></span>
@@ -5515,6 +5778,7 @@ $badge_display = (count($video_dirs) > 1)
           <span><span class="kbd">M</span> 靜音</span>
           <span><span class="kbd">P</span> <span class="kbd">N</span> 上/下一集</span>
           <span><span class="kbd">L</span> 循環模式</span>
+          <span><span class="kbd">Z</span> 畫面縮放 (滾輪/拖曳平移/0重設)</span>
         </div>
       </div>
 
@@ -7533,8 +7797,14 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
           return;
         }
 
-        // 排除懸浮全螢幕按鈕或接續播放橫幅內部點擊
-        if (e.target && e.target.closest && e.target.closest('#video-overlay-fs-btn, #resume-banner, .resume-banner')) {
+        // 排除懸浮全螢幕按鈕、接續播放橫幅或畫面縮放控制膠囊內部點擊
+        if (e.target && e.target.closest && e.target.closest('#video-overlay-fs-btn, #resume-banner, .resume-banner, #video-zoom-hud, .video-zoom-hud')) {
+          return;
+        }
+
+        // 若剛進行過畫面拖曳平移，不觸發點擊播放/暫停
+        if (window.hasDraggedVideoZoom) {
+          window.hasDraggedVideoZoom = false;
           return;
         }
 
@@ -7736,6 +8006,11 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
 
         // 4. 刷新 cue 字幕自訂樣式（字級與陰影）
         updateSubtitleCueStyle();
+
+        // 5. 重新校正影片縮放平移邊界（適配全螢幕尺寸）
+        if (typeof window.recheckVideoZoomBounds === 'function') {
+          setTimeout(window.recheckVideoZoomBounds, 60);
+        }
       }
 
       document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -9853,6 +10128,9 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
 
         // ── 徹底重設並淨化播放器（清理舊媒體解碼管線、音訊狀態與殘留字幕）──
         clearVideoTracks();
+        if (typeof window.resetVideoZoom === 'function') {
+          window.resetVideoZoom(false);
+        }
 
         if (videoPlayer) {
           try {
@@ -10273,6 +10551,307 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
         showSeekIndicator(seconds, target, dur);
       };
 
+      // ══════════════════════════════════════════════════════════════════
+      //  🔍 影片畫面縮放與細節平移檢視核心模組 (Video Zoom & Pan Engine)
+      //  - 支援放大觀看畫面細節 (100% ~ 500%)
+      //  - 支援滾輪自由縮放 (以滑鼠游標為錨點縮放)
+      //  - 支援按住滑鼠左鍵自由平移拖曳 (Drag to Pan)，具備邊界限制防止全黑
+      //  - 支援雙指捏合縮放 (Pinch-to-zoom) 與單指平移
+      //  - 支援全螢幕、字幕層同步縮放、鍵盤快捷鍵 (Z, +, -, 0)
+      // ══════════════════════════════════════════════════════════════════
+      var videoZoomScale = 1.0;
+      var videoPanX = 0;
+      var videoPanY = 0;
+      var isDraggingVideoZoom = false;
+      window.hasDraggedVideoZoom = false;
+      var zoomDragStartX = 0;
+      var zoomDragStartY = 0;
+      var zoomPanStartX = 0;
+      var zoomPanStartY = 0;
+      var zoomIndicatorTimer = null;
+
+      // 畫面中央淡入淡出縮放提示 HUD
+      function showZoomIndicator(title, sub) {
+        var indicator = document.getElementById('video-zoom-indicator');
+        var titleEl = document.getElementById('zoom-indicator-title');
+        var subEl = document.getElementById('zoom-indicator-sub');
+        if (!indicator || !titleEl || !subEl) return;
+
+        titleEl.textContent = title;
+        subEl.textContent = sub || '按住滑鼠左鍵拖曳可平移畫面細節';
+
+        indicator.classList.remove('show');
+        void indicator.offsetWidth;
+        indicator.classList.add('show');
+
+        clearTimeout(zoomIndicatorTimer);
+        zoomIndicatorTimer = setTimeout(function () {
+          indicator.classList.remove('show');
+          zoomIndicatorTimer = null;
+        }, 900);
+      }
+
+      // 套用 Transform 並同步狀態至 UI
+      window.updateVideoTransform = function (showHud) {
+        var box = document.getElementById('video-box');
+        var gCanvas = document.getElementById('graphic-subtitle-canvas');
+        if (!box) return;
+
+        var w = box.clientWidth || 800;
+        var h = box.clientHeight || 450;
+
+        // 計算最大可平移邊界（避免邊緣出現黑色空隙）
+        var maxPanX = Math.max(0, (w * videoZoomScale - w) / 2);
+        var maxPanY = Math.max(0, (h * videoZoomScale - h) / 2);
+
+        if (videoZoomScale <= 1.0) {
+          videoZoomScale = 1.0;
+          videoPanX = 0;
+          videoPanY = 0;
+        } else {
+          videoPanX = Math.max(-maxPanX, Math.min(maxPanX, videoPanX));
+          videoPanY = Math.max(-maxPanY, Math.min(maxPanY, videoPanY));
+        }
+
+        var transformStr = (videoZoomScale === 1.0 && videoPanX === 0 && videoPanY === 0)
+          ? ''
+          : 'translate(' + videoPanX + 'px, ' + videoPanY + 'px) scale(' + videoZoomScale + ')';
+
+        if (videoPlayer) {
+          videoPlayer.style.transform = transformStr;
+          videoPlayer.style.transformOrigin = 'center center';
+          videoPlayer.style.cursor = videoZoomScale > 1.0 ? 'grab' : 'pointer';
+        }
+        if (gCanvas) {
+          gCanvas.style.transform = transformStr;
+          gCanvas.style.transformOrigin = 'center center';
+        }
+
+        // 更新工具列數值與高亮
+        var percentStr = Math.round(videoZoomScale * 100) + '%';
+        var valBtn = document.getElementById('toolbar-zoom-val');
+        if (valBtn) valBtn.textContent = percentStr;
+
+        var zoomGroup = document.getElementById('toolbar-zoom-group');
+        if (zoomGroup) {
+          if (videoZoomScale > 1.0) {
+            zoomGroup.classList.add('is-zoomed');
+          } else {
+            zoomGroup.classList.remove('is-zoomed');
+          }
+        }
+
+        // 更新或顯示懸浮控制膠囊 (Float Zoom HUD)
+        var hud = document.getElementById('video-zoom-hud');
+        var hudRatio = document.getElementById('zoom-hud-ratio');
+        if (hud) {
+          if (videoZoomScale > 1.0) {
+            hud.style.display = 'flex';
+            if (hudRatio) hudRatio.textContent = percentStr;
+          } else {
+            hud.style.display = 'none';
+          }
+        }
+
+        // 畫面中央浮動提示
+        if (showHud) {
+          var title = '畫面縮放 ' + percentStr;
+          var sub = videoZoomScale > 1.0 ? '按住滑鼠左鍵拖曳可平移畫面細節' : '已重設為 100% 原始比例';
+          showZoomIndicator(title, sub);
+        }
+      };
+
+      // 進入或退出全螢幕時重新校正邊界
+      window.recheckVideoZoomBounds = function () {
+        if (videoZoomScale > 1.0) {
+          window.updateVideoTransform(false);
+        }
+      };
+
+      // 數值增減縮放 (delta: +0.25 或 -0.25，可帶入滑鼠座標以進行定點錨定縮放)
+      window.adjustVideoZoom = function (delta, mouseX, mouseY) {
+        if (!videoPlayer || !videoPlayer.src || videoPlayer.src === window.location.href) {
+          showToast('⚠️ 目前尚未播放任何影片');
+          return;
+        }
+
+        var oldScale = videoZoomScale;
+        var newScale = Math.round((oldScale + delta) * 100) / 100;
+        newScale = Math.max(1.0, Math.min(5.0, newScale));
+
+        if (newScale === oldScale) return;
+
+        // 若提供滑鼠座標，以滑鼠游標所在處為錨點進行定點縮放
+        var box = document.getElementById('video-box');
+        if (box && typeof mouseX === 'number' && typeof mouseY === 'number') {
+          var w = box.clientWidth || 800;
+          var h = box.clientHeight || 450;
+          var offsetX = mouseX - (w / 2);
+          var offsetY = mouseY - (h / 2);
+          videoPanX = offsetX - (offsetX - videoPanX) * (newScale / oldScale);
+          videoPanY = offsetY - (offsetY - videoPanY) * (newScale / oldScale);
+        }
+
+        videoZoomScale = newScale;
+        window.updateVideoTransform(true);
+      };
+
+      // 循環切換縮放倍率 (100% → 125% → 150% → 200% → 300% → 100%)
+      window.cycleVideoZoom = function () {
+        if (!videoPlayer || !videoPlayer.src || videoPlayer.src === window.location.href) {
+          showToast('⚠️ 目前尚未播放任何影片');
+          return;
+        }
+        var current = Math.round(videoZoomScale * 100);
+        var next = 100;
+        if (current < 125) next = 125;
+        else if (current < 150) next = 150;
+        else if (current < 200) next = 200;
+        else if (current < 300) next = 300;
+        else next = 100;
+
+        videoZoomScale = next / 100;
+        if (videoZoomScale === 1.0) {
+          videoPanX = 0;
+          videoPanY = 0;
+        }
+        window.updateVideoTransform(true);
+      };
+
+      // 重設縮放回 100% 原比例
+      window.resetVideoZoom = function (showHud) {
+        if (videoZoomScale === 1.0 && videoPanX === 0 && videoPanY === 0) return;
+        videoZoomScale = 1.0;
+        videoPanX = 0;
+        videoPanY = 0;
+        window.updateVideoTransform(showHud !== false);
+      };
+
+      // ── 滑鼠拖曳平移 (Pan) 與滾輪縮放 (Wheel Zoom) 事件監聽 ──
+      (function initVideoZoomInteractions() {
+        var box = document.getElementById('video-box');
+        if (!box) return;
+
+        // 1. 滑鼠按下準備拖曳
+        box.addEventListener('mousedown', function (e) {
+          // 僅限左鍵，且縮放比例 > 1.0
+          if (e.button !== 0 || videoZoomScale <= 1.0) return;
+
+          // 排除點擊在全螢幕按鈕、縮放膠囊或橫幅
+          if (e.target && e.target.closest && e.target.closest('#video-overlay-fs-btn, #resume-banner, .resume-banner, #video-zoom-hud, .video-zoom-hud')) {
+            return;
+          }
+
+          // 排除點擊在底部原生控制列
+          if (videoPlayer && videoPlayer.controls) {
+            var rect = videoPlayer.getBoundingClientRect();
+            var fromBottom = rect.height - (e.clientY - rect.top);
+            if (fromBottom <= 52 && fromBottom >= 0) return;
+          }
+
+          isDraggingVideoZoom = true;
+          window.hasDraggedVideoZoom = false;
+          zoomDragStartX = e.clientX;
+          zoomDragStartY = e.clientY;
+          zoomPanStartX = videoPanX;
+          zoomPanStartY = videoPanY;
+
+          if (videoPlayer) {
+            videoPlayer.style.cursor = 'grabbing';
+          }
+        });
+
+        // 2. 滑鼠移動執行平移
+        window.addEventListener('mousemove', function (e) {
+          if (!isDraggingVideoZoom) return;
+
+          var dx = e.clientX - zoomDragStartX;
+          var dy = e.clientY - zoomDragStartY;
+
+          if (Math.hypot(dx, dy) > 4) {
+            window.hasDraggedVideoZoom = true;
+          }
+
+          videoPanX = zoomPanStartX + dx;
+          videoPanY = zoomPanStartY + dy;
+          window.updateVideoTransform(false);
+        });
+
+        // 3. 滑鼠放開結束拖曳
+        window.addEventListener('mouseup', function () {
+          if (isDraggingVideoZoom) {
+            isDraggingVideoZoom = false;
+            if (videoPlayer) {
+              videoPlayer.style.cursor = videoZoomScale > 1.0 ? 'grab' : 'pointer';
+            }
+          }
+        });
+
+        // 4. 滑鼠滾輪縮放 (支援按住 Alt / Ctrl 或在已放大狀態下直接滾輪縮放)
+        box.addEventListener('wheel', function (e) {
+          // 若按下 Alt 或 Ctrl，或者目前處於放大狀態
+          if (e.altKey || e.ctrlKey || videoZoomScale > 1.0) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            var delta = e.deltaY < 0 ? 0.25 : -0.25;
+            var rect = box.getBoundingClientRect();
+            var mouseX = e.clientX - rect.left;
+            var mouseY = e.clientY - rect.top;
+
+            window.adjustVideoZoom(delta, mouseX, mouseY);
+          }
+        }, { passive: false });
+
+        // 5. 行動裝置雙指捏合縮放 (Pinch-to-zoom) 與單指拖曳平移
+        var touchInitDist = 0;
+        var touchInitScale = 1.0;
+        var touchPanStartX = 0;
+        var touchPanStartY = 0;
+        var isTouchPanning = false;
+
+        box.addEventListener('touchstart', function (e) {
+          if (e.touches.length === 2) {
+            touchInitDist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+            touchInitScale = videoZoomScale;
+          } else if (e.touches.length === 1 && videoZoomScale > 1.0) {
+            isTouchPanning = true;
+            touchPanStartX = e.touches[0].clientX - videoPanX;
+            touchPanStartY = e.touches[0].clientY - videoPanY;
+          }
+        }, { passive: true });
+
+        box.addEventListener('touchmove', function (e) {
+          if (e.touches.length === 2 && touchInitDist > 0) {
+            var curDist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+            var ratio = curDist / touchInitDist;
+            var targetScale = Math.round(touchInitScale * ratio * 100) / 100;
+            videoZoomScale = Math.max(1.0, Math.min(5.0, targetScale));
+            window.updateVideoTransform(false);
+          } else if (e.touches.length === 1 && isTouchPanning && videoZoomScale > 1.0) {
+            videoPanX = e.touches[0].clientX - touchPanStartX;
+            videoPanY = e.touches[0].clientY - touchPanStartY;
+            window.updateVideoTransform(false);
+          }
+        }, { passive: true });
+
+        box.addEventListener('touchend', function (e) {
+          if (e.touches.length < 2) touchInitDist = 0;
+          if (e.touches.length === 0) isTouchPanning = false;
+        }, { passive: true });
+
+        // 6. 視窗尺寸改變時重新校準平移限制
+        window.addEventListener('resize', function () {
+          window.recheckVideoZoomBounds();
+        }, { passive: true });
+      })();
+
       // 11. 鍵盤快捷鍵（使用 capture 捕獲階段，防止 <video> 獲得焦點時瀏覽器原生預設行為與自訂快捷鍵衝突）
       window.addEventListener('keydown', (e) => {
         // 若使用者正在輸入框（搜尋、表單等）打字，不攔截任何快捷鍵
@@ -10350,8 +10929,32 @@ VIDEO_DIRS="/share/USB1/@影片,/share/USB1/@保存影片,/volume1/Media"</code>
             e.stopPropagation();
             cycleLoopMode();
             break;
+          case 'KeyZ':
+            e.preventDefault();
+            e.stopPropagation();
+            cycleVideoZoom();
+            break;
+          case 'Equal':
+          case 'NumpadAdd':
+            e.preventDefault();
+            e.stopPropagation();
+            adjustVideoZoom(0.25);
+            break;
+          case 'Minus':
+          case 'NumpadSubtract':
+            e.preventDefault();
+            e.stopPropagation();
+            adjustVideoZoom(-0.25);
+            break;
+          case 'Digit0':
+          case 'Numpad0':
+            e.preventDefault();
+            e.stopPropagation();
+            resetVideoZoom();
+            break;
         }
       }, true);
+
 
       // 12. 搜尋與工具
       window.handleSearch = function (val) {
