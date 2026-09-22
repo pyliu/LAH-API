@@ -5,9 +5,7 @@ if (Vue) {
             <div class="d-flex w-100 justify-content-between mb-0">
                 <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="road" size="lg"> 輸出地籍資料</lah-fa-icon></h6>
                 <b-button-group size="sm" class="align-middle" v-if="!working" variant="outline-primary">
-                    <lah-button icon="train" @click="tags = ['0200', '0202', '0205', '0210']" v-b-popover.top.hover.focus="'A21站'"></lah-button>
-                    <lah-button icon="warehouse" @click="tags = ['0213', '0222']" v-b-popover.top.hover.focus="'中原營區'"></lah-button>
-                    <lah-button icon="map-signs" @click="tags = ['0255', '0275', '0277', '0278', '0377']" v-b-popover.top.hover.focus="'草漯'"></lah-button>
+                    <lah-button icon="layer-group" @click="tags = ['0182', '0184', '0142']" v-b-popover.top.hover.focus="'中平市地重劃'" title="中平市地重劃"></lah-button>
                     <lah-button icon="undo" action="cycle-alt" variant="outline-secondary" @click="clean" title="重設" :disabled="tags.length == 0"></lah-button>
                     <lah-button icon="question" variant="outline-success" @click="popup" title="說明"></lah-button>
                 </b-button-group>
@@ -52,17 +50,18 @@ if (Vue) {
         },
         clean() { this.tags = [] ; this.links = []; },
         download(link) {
-            // second param usage => e.target.title to get the title
-            this.open(`${CONFIG.API.FILE.DATA}?code=${link.code}`, {
-                target: {
-                    title: '下載產製資料'
-                }
-            });
-            this.timeout(() => closeModal(() => this.notify({
+            const url = `${CONFIG.API.FILE.DATA}?code=${encodeURIComponent(link.code)}&filename=${encodeURIComponent(link.filename)}`;
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = link.filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            this.notify({
                 title: '下載產製資料',
-                message: `<i class="fas fa-check ld ld-pulse"></i> ${link.filename} 下載完成`,
+                message: `<i class="fas fa-check ld ld-pulse"></i> ${link.filename} 下載開始`,
                 type: "success"
-            })), 2000);
+            });
         },
         go() {
             if (this.working) {
