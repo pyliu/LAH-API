@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."init.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."Cache.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
