@@ -8,6 +8,7 @@ require_once("FileAPIExcelExportCommand.class.php");
 require_once("FileAPIDataExportCommand.class.php");
 require_once("FileAPIInheritanceRestrictionXlsxExportCommand.class.php");
 require_once("FileAPISurTrackingXlsxExportCommand.class.php");
+require_once("FileAPIDataCleanCommand.class.php");
 
 abstract class FileAPICommandFactory {
     public static function getCommand($type) {
@@ -24,6 +25,12 @@ abstract class FileAPICommandFactory {
             case "file_data_export":
                 Logger::getInstance()->info("輸出 ".$_POST["code"]." TXT 檔案");
                 return new FileAPIDataExportCommand($_POST["code"], $_POST['section']);
+            case "file_data_clean":
+                Logger::getInstance()->info("清理已匯出地籍資料檔案");
+                return new FileAPIDataCleanCommand();
+            case "file_data_list":
+                Logger::getInstance()->info("查詢已匯出地籍資料檔案清單");
+                return new FileAPIDataCleanCommand();
             case "file_log":
                 Logger::getInstance()->info("輸出LOG檔案");
                 Logger::getInstance()->info($_POST["date"]);
