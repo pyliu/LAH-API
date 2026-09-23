@@ -311,7 +311,7 @@ class Scheduler
             $report .= "\n***\n同步時間: " . date('Y-m-d H:i:s');
 
             // 清除舊報告並發送新報告
-            $concernedChannel = 'HA10013859';
+            $concernedChannel = 'inf';
             $this->removeNotificationByTitle($title, $concernedChannel);
             $this->addNotification($report, $concernedChannel, $title);
 
