@@ -66,8 +66,12 @@ class Notification {
             Logger::getInstance()->info('ws_db_path: '.$this->ws_db_path.", ws_share_db_file: ".$this->ws_share_db_file);
             Logger::getInstance()->warning(__CLASS__.': 即時通DB設定參數錯誤，改用預設值！');
             // use default lah-messenger-server path
-            $defaultNotificationDBPath = dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'lah-messenger-server'.DIRECTORY_SEPARATOR.'db';
+            $defaultNotificationDBPath = dirname(dirname(dirname(__DIR__))).DIRECTORY_SEPARATOR.'lah-messenger-server'.DIRECTORY_SEPARATOR.'db';
             $defaultNotificationMessageFile = dirname($defaultNotificationDBPath).DIRECTORY_SEPARATOR.'dimension'.DIRECTORY_SEPARATOR.'message.db';
+            if (!is_dir($defaultNotificationDBPath) || !is_file($defaultNotificationMessageFile)) {
+                $defaultNotificationDBPath = dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'lah-messenger-server'.DIRECTORY_SEPARATOR.'db';
+                $defaultNotificationMessageFile = dirname($defaultNotificationDBPath).DIRECTORY_SEPARATOR.'dimension'.DIRECTORY_SEPARATOR.'message.db';
+            }
             Logger::getInstance()->info('ws_db_path: '.$defaultNotificationDBPath.", ws_share_db_file: ".$defaultNotificationMessageFile);
             $this->ws_db_path = $defaultNotificationDBPath;
             $this->ws_share_db_file = $defaultNotificationMessageFile;
@@ -173,6 +177,7 @@ class Notification {
             }
             return false;
         }
+        return false;
     }
 
     public function removeMessage($channel, $payload) {

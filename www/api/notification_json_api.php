@@ -36,7 +36,7 @@ switch ($_POST["type"]) {
                 'from_ip' => $_POST['from_ip']
             ));
             Logger::getInstance()->info('新增訊息「'.$title.'」至 '.$channel.' 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
-            if ($lastId === false) {
+            if ($lastId === false || empty($lastId)) {
                 $fail++;
             } else {
                 $success++;
