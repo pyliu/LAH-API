@@ -998,7 +998,11 @@ if (Vue) {
                     this.$warn(`lah-chart: Not found "${label}" in dataset, the ${value} will not be updated.`, this.chartData);
                 }
             },
-            buildChart: function (opts = { plugins: {} }) {
+            buildChart: function (opts = {}) {
+                opts = Object.assign({ plugins: {} }, opts || {});
+                if (!opts.plugins) {
+                    opts.plugins = {};
+                }
                 if (this.inst) {
                     // reset the chart
                     this.inst.destroy();

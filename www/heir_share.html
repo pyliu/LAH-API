@@ -16,17 +16,134 @@
 <link rel="preload" href="assets/css/awesome-font.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <link rel="preload" href="assets/css/main.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<style>
+  /* 隱藏舊系統上方導覽標題列 (Vue 渲染後為 nav.navbar.fixed-top) */
+  nav.fixed-top,
+  #global-dynamic-components nav,
+  #global-dynamic-components .navbar {
+    display: none !important;
+  }
+  body {
+    padding-top: 15px !important;
+  }
+
+  /* 原持分與身分證號等輸入群組標籤與控制項高度嚴格對齊 (31px) */
+  .lah-heir-share-container .input-group-sm > .form-control,
+  .lah-heir-share-container .input-group-sm > .input-group-prepend > .input-group-text,
+  .lah-heir-share-container .input-group-sm > .input-group-append > .input-group-text,
+  .lah-heir-share-container .input-group-sm > .input-group-text {
+    height: 31px !important;
+    line-height: 1.5 !important;
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+    font-size: 0.875rem !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+  }
+
+  .cursor-pointer {
+    cursor: pointer;
+  }
+  .stepper-bar .stepper-step {
+    transition: all 0.2s ease-in-out;
+    border-radius: 4px;
+    padding: 6px 12px;
+    user-select: none;
+  }
+  .stepper-bar .stepper-step:hover {
+    background-color: #e9ecef;
+  }
+  .stepper-bar .stepper-step.active {
+    background-color: #e3f2fd;
+  }
+  .print-only {
+    display: none !important;
+  }
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 12mm 15mm;
+    }
+    html, body {
+      background: #fff !important;
+      color: #000 !important;
+      font-size: 11pt !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    .no-print,
+    header,
+    footer,
+    #global-dynamic-components lah-header,
+    #global-dynamic-components lah-footer,
+    .btn,
+    .b-button,
+    .stepper-bar,
+    .b-dropdown,
+    .custom-switch,
+    nav {
+      display: none !important;
+    }
+    .print-only {
+      display: block !important;
+    }
+    .container-fluid {
+      padding: 0 !important;
+      max-width: 100% !important;
+    }
+    .card {
+      border: 1px solid #ced4da !important;
+      box-shadow: none !important;
+      margin-bottom: 0 !important;
+    }
+    .card-header {
+      display: none !important;
+    }
+    .card-body {
+      padding: 0 !important;
+    }
+    .table-responsive {
+      overflow: visible !important;
+    }
+    table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+    }
+    th, td {
+      border: 1px solid #666 !important;
+      padding: 6px 8px !important;
+      color: #000 !important;
+    }
+    thead th {
+      background-color: #e9ecef !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    tfoot td {
+      background-color: #f8f9fa !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .badge {
+      border: 1px solid #999 !important;
+      color: #000 !important;
+      background: transparent !important;
+    }
+  }
+</style>
 </head>
 
 <body>
   <section class="hide">
     <div class="container-fluid" v-cloak>
-        <lah-heir-share-ratio pie-chart></lah-heir-share-ratio>
-        <lah-transition fade>
-          <h6 v-if="false" class="text-center text-danger">請使用 CHROME 瀏覽器開啟本頁面。</h6>
-        </lah-transition>
+      <lah-heir-share-ratio pie-chart></lah-heir-share-ratio>
+      <lah-transition fade>
+        <h6 v-if="false" class="text-center text-danger">請使用 CHROME 瀏覽器開啟本頁面。</h6>
+      </lah-transition>
     </div>
   </section><!-- /section -->
+
   <!-- Bootstrap core JavaScript -->
   <!-- Placed at the end of the document so the pages load faster -->
   <script src="assets/js/jquery.min.js"></script>
