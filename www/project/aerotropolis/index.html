@@ -4,149 +4,378 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="For Aviation City use only">
+    <meta name="description" content="桃園市地政局航空城開發科 地籍整理清冊搜尋系統">
     <meta name="author" content="LIU, PANG-YU">
     <meta http-equiv="pragma" content="no-cache">
     <meta http-equiv="expires" content="0">
     <meta http-equiv="cache-control" content="no-cache">
-    <title>桃園市地政局航空城開發科</title>
-    <!-- Bootstrap core CSS -->
-    <link rel="preload" href="assets/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/loading.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/loading-btn.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/animate.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/awesome-font.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/starter-template.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/transition.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/aerotropolis.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/VueBootstrapTypeahead.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <title>地籍整理清冊搜尋 — 桃園市地政局航空城開發科</title>
+
+    <!-- Bootstrap & Plugins CSS (本地資源) -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/bootstrap-vue.min.css">
+    <link rel="stylesheet" href="assets/css/bootstrap-vue-icons.min.css">
+    <link rel="stylesheet" href="assets/css/awesome-font.css">
+    <link rel="stylesheet" href="assets/css/animate.css">
+    <link rel="stylesheet" href="assets/css/loading.css">
+    <link rel="stylesheet" href="assets/css/loading-btn.css">
+    <link rel="stylesheet" href="assets/css/VueBootstrapTypeahead.css">
+    <!-- 現代化專案樣式 -->
+    <link rel="stylesheet" href="assets/css/aerotropolis.css">
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-        <a class="navbar-brand" href="index.html"><i class="fa fa-search fa-lg"></i> 地籍整理清冊搜尋</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
-            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+    <!-- 現代化頂部導覽列 -->
+    <nav class="navbar navbar-expand-md navbar-dark modern-navbar fixed-top">
+        <div class="container-fluid px-lg-4">
+            <a class="navbar-brand" href="index.html">
+                <span class="brand-icon-wrapper">
+                    <i class="fas fa-layer-group"></i>
+                </span>
+                <span>地籍整理清冊檢索</span>
+            </a>
 
-        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="admin.html""><i class=" fa fa-database fa-fw"></i> 更新資料庫</a>
-                </li>
-            </ul>
+            <button class="navbar-toggler border-0" type="button" data-toggle="collapse" data-target="#mainNav"
+                aria-controls="mainNav" aria-expanded="false" aria-label="切換選單">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav mr-auto ml-md-3">
+                    <li class="nav-item">
+                        <a class="nav-link modern-nav-link active" href="index.html">
+                            <i class="fas fa-search"></i> 地籍搜尋
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link modern-nav-link" href="admin.html">
+                            <i class="fas fa-database"></i> 資料庫更新
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="dept-badge my-2 my-md-0">
+                    <i class="fas fa-plane-departure"></i>
+                    <span>桃園市地政局・航空城開發科</span>
+                </div>
+            </div>
         </div>
-        <h5 class="text-light my-auto"><i class="fas fa-plane-departure"></i> 航空城開發科</h5>
     </nav>
 
-    <main role="main" class="container">
+    <!-- 主內容區 -->
+    <main role="main" class="container py-4 flex-grow-1">
         <div id="vueApp"></div>
-        <div id="footer"></div>
-    </main><!-- /.container -->
+    </main>
 
-    <!-- Place scripts at the end of the body to let DOM load first then scripts  -->
-    <!-- Bootstrap core JavaScript -->
+    <!-- 頁尾 -->
+    <footer class="modern-footer">
+        <div class="container-fluid px-lg-4 footer-content">
+            <div>
+                <strong>桃園市政府地政局 航空城開發科</strong>
+                <span class="text-muted ml-2">Taoyuan City Land Administration</span>
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/pyliu/LAH-API/" target="_blank" class="footer-link-item"
+                    title="檢視 GitHub 專案">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+                <span class="text-muted">|</span>
+                <span class="footer-link-item">
+                    <i class="far fa-copyright"></i> LIU, PANG-YU ALL RIGHTS RESERVED.
+                </span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 本地腳本庫 (依序載入) -->
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/js/popper.min.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
-    <!-- Vue -->
     <script src="assets/js/vue.js"></script>
     <script src="assets/js/vuex.js"></script>
     <script src="assets/js/bootstrap-vue.min.js"></script>
     <script src="assets/js/bootstrap-vue-icons.min.js"></script>
-    <!-- Add-On -->
     <script src="assets/js/axios.min.js"></script>
     <script src="assets/js/localforage.min.js"></script>
     <script src="assets/js/VueBootstrapTypeahead.umd.min.js"></script>
     <script src="assets/js/lodash.min.js"></script>
+
     <script>
         new Vue({
-            template: `<b-container fluid>
-                <vue-bootstrap-typeahead
-                    ref="typeahead"
-                    id="keyword-input"
-                    v-model="keyword"
-                    :data="preftech"
-                    placeholder="請輸入關鍵字查詢 ... "
-                    prepend="查詢條件"
-                    min-matching-chars="1"
-                    @hit="chooseTypeahead"
-                >
-                    <template #append>
-                        <b-button variant="primary" @click="search" @click="searchBy=undefined" :disabled="wip"><i class="fas fa-search"></i> 搜尋</b-button>
-                    </template>
-                </vue-bootstrap-typeahead>
-                <div class="text-muted small mb-3" style="padding-left: 90px">
-                    範例：
-                    <b-link @click="triggerInputEvent('機1-00063')">機1-00063</b-link> / 
-                    <b-link @click="triggerInputEvent('附11-010018')">附11-010018</b-link> / 
-                    <b-link @click="triggerInputEvent('A123456789')">A123456789</b-link> / 
-                    <b-link @click="triggerInputEvent('0000000158')">0000000158</b-link> / 
-                    <b-link @click="triggerInputEvent('*HE0173840')">*HE0173840</b-link> / 
-                    <b-link @click="triggerInputEvent('江川文篤')">江川文篤</b-link>
-                </div>
-                <transition name="slide-fade" mode="out-in">
-                    <div v-if="searchCount > 0">
-                        <div class="text-muted text-right">找到 {{searchCount}} 筆資料</div>
-                        <b-list-group flush compact>
-                            <b-list-group-item v-for="row in searchResults" class="d-flex justify-content-between">
-                                <b-link v-if="searchBy !== 'household'" @click.stop="quickSearch(row['household'], 'household')" title="根據歸戶號查詢">{{row['household']}}</b-link>
-                                <strong v-else class="bg-success text-light p-1 rounded">{{row['household']}}</strong>
-
-                                <b-link v-if="searchBy !== 'pid'" @click.stop="quickSearch(row['pid'], 'pid')" title="根據統編查詢">{{row['pid']}}</b-link>
-                                <strong v-else class="bg-success text-light p-1 rounded">{{row['pid']}}</strong>
-
-                                <b-link v-if="searchBy !== 'pname'" @click.stop="quickSearch(row['pname'], 'pname')" title="根據姓名查詢">{{row['pname']}}</b-link>
-                                <strong v-else class="bg-success text-light p-1 rounded">{{row['pname']}}</strong>
-
-                                <b-link v-if="searchBy !== 'owned_number'" @click.stop="quickSearch(row['owned_number'], 'owned_number')" title="根據段地號查詢">
-                                    {{row['owned_number'].slice(0, 4)}}-{{row['owned_number'].slice(4)}}
-                                    <i class="fas fa-external-link-alt text-success" @click.stop="query(row['owned_number'])" title="檢視地籍資料"></i>
-                                    <i class="fas fa-print text-primary" @click.stop="print(row['owned_number'])" title="開啟列印視窗"></i>
-                                </b-link>
-                                <strong v-else class="bg-success text-light p-1 rounded">
-                                    {{row['owned_number'].slice(0, 4)}}-{{row['owned_number'].slice(4)}}
-                                    <i class="fas fa-external-link-alt text-light" @click.stop="query(row['owned_number'])" title="檢視地籍資料" style="cursor: pointer;"></i>
-                                    <i class="fas fa-print text-light" @click.stop="print(row['owned_number'])" title="開啟列印視窗" style="cursor: pointer;"></i>
-                                </strong>
-                            </b-list-group-item>
-                        </b-list-group>
-                    </div>
-                    <h4 v-else-if="wip" class="text-center text-muted"><i class="fas fa-sync fa-spin"></i> 讀取中 ... </h4>
-                    <h4 v-else class="text-center text-muted"><i class="fas fa-exclamation-circle"></i> 查無資料。</h4>
-                </transition>
-                <b-modal
-                    ref="modal"
-                    size="lg"
-                    :title="landTitle"
-                    no-close-on-backdrop
-                    ok-title="關閉"
-                    ok-variant="secondary"
-                    ok-only
-                    scrollable
-                    hide-footer
-                    header-bg-variant="success"
-                    header-text-variant="light"
-                    body-bg-variant="light"
-                    body-text-variant="dark"
-                >
-                    <div v-html="landData"></div>
-                </b-modal>
-            </b-container>`,
+            el: '#vueApp',
             components: {
                 VueBootstrapTypeahead
             },
+            template: `
+            <div>
+                <!-- Hero 標頭 -->
+                <div class="hero-header">
+                    <span class="hero-subtitle">
+                        <i class="fas fa-satellite"></i> 航空城區段徵收專區
+                    </span>
+                    <h1 class="hero-title">
+                        桃園航空城 <span class="text-gradient">地籍整理清冊</span> 檢索
+                    </h1>
+                    <p class="hero-desc">
+                        支援所有權人姓名、身分證字號、法人統編、土地段地號或公文歸戶號全方位精準比對。
+                    </p>
+                </div>
+
+                <!-- 搜尋輸入卡片 -->
+                <div class="search-card-wrapper">
+                    <div class="vbt-wrapper">
+                        <vue-bootstrap-typeahead
+                            ref="typeahead"
+                            id="keyword-input"
+                            v-model="keyword"
+                            :data="preftech"
+                            placeholder="請輸入關鍵字（例如姓名、統編、歸戶號或段地號）..."
+                            prepend="查詢條件"
+                            min-matching-chars="1"
+                            @hit="chooseTypeahead"
+                        >
+                            <template #append>
+                                <b-button 
+                                    variant="primary" 
+                                    @click="triggerSearch" 
+                                    :disabled="wip || !keyword || keyword.trim() === ''"
+                                >
+                                    <i v-if="!wip" class="fas fa-search mr-1"></i>
+                                    <i v-else class="fas fa-spinner fa-spin mr-1"></i>
+                                    搜尋
+                                </b-button>
+                            </template>
+                        </vue-bootstrap-typeahead>
+                    </div>
+
+                    <!-- 快速範例 Smart Chips -->
+                    <div class="samples-container">
+                        <span class="samples-label">
+                            <i class="fas fa-bolt text-warning"></i> 快捷範例：
+                        </span>
+                        
+                        <span class="sample-chip" @click="triggerInputEvent('機1-00063')">
+                            <span class="chip-cat">歸戶號</span>
+                            機1-00063
+                        </span>
+                        <span class="sample-chip" @click="triggerInputEvent('附11-010018')">
+                            <span class="chip-cat">歸戶號</span>
+                            附11-010018
+                        </span>
+                        <span class="sample-chip" @click="triggerInputEvent('A123456789')">
+                            <span class="chip-cat">統編</span>
+                            A123456789
+                        </span>
+                        <span class="sample-chip" @click="triggerInputEvent('0000000158')">
+                            <span class="chip-cat">統編</span>
+                            0000000158
+                        </span>
+                        <span class="sample-chip" @click="triggerInputEvent('*HE0173840')">
+                            <span class="chip-cat">外國人/特定</span>
+                            *HE0173840
+                        </span>
+                        <span class="sample-chip" @click="triggerInputEvent('江川文篤')">
+                            <span class="chip-cat">姓名</span>
+                            江川文篤
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 搜尋結果區塊 -->
+                <transition name="fade" mode="out-in">
+                    <!-- 載入中狀態 -->
+                    <div v-if="wip" class="state-card">
+                        <div class="state-icon-wrapper state-icon-loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                        <h4 class="state-title">資料檢索中...</h4>
+                        <p class="state-desc">正在快速為您比對地籍清冊與所有權人歸戶資料，請稍候。</p>
+                    </div>
+
+                    <!-- 搜尋結果列表 -->
+                    <div v-else-if="searchCount > 0">
+                        <div class="results-header-bar">
+                            <div class="results-count-badge">
+                                <i class="fas fa-check-circle text-success"></i>
+                                查詢結果共計 <strong>{{ searchCount }}</strong> 筆資料
+                            </div>
+                            <b-button size="sm" variant="outline-secondary" @click="clearSearch" class="rounded-pill px-3">
+                                <i class="fas fa-times-circle mr-1"></i> 清除結果
+                            </b-button>
+                        </div>
+
+                        <div class="results-grid">
+                            <div v-for="(row, idx) in searchResults" :key="idx" class="result-card">
+                                <!-- 歸戶號 -->
+                                <div class="data-cell">
+                                    <span class="data-cell-label"><i class="fas fa-folder text-muted mr-1"></i> 歸戶號</span>
+                                    <span class="data-cell-value">
+                                        <span 
+                                            v-if="searchBy !== 'household'" 
+                                            class="data-clickable text-primary" 
+                                            @click.stop="quickSearch(row['household'], 'household')"
+                                            title="點擊依此歸戶號重新篩選"
+                                        >
+                                            {{ row['household'] }}
+                                        </span>
+                                        <span v-else class="data-highlight-active">
+                                            <i class="fas fa-filter mr-1 text-success"></i>{{ row['household'] }}
+                                        </span>
+                                    </span>
+                                </div>
+
+                                <!-- 統一編號 / 身分證字號 -->
+                                <div class="data-cell">
+                                    <span class="data-cell-label"><i class="fas fa-id-card text-muted mr-1"></i> 統一編號</span>
+                                    <span class="data-cell-value">
+                                        <span 
+                                            v-if="searchBy !== 'pid'" 
+                                            class="data-clickable text-primary" 
+                                            @click.stop="quickSearch(row['pid'], 'pid')"
+                                            title="點擊依此統編重新篩選"
+                                        >
+                                            {{ row['pid'] }}
+                                        </span>
+                                        <span v-else class="data-highlight-active">
+                                            <i class="fas fa-filter mr-1 text-success"></i>{{ row['pid'] }}
+                                        </span>
+                                    </span>
+                                </div>
+
+                                <!-- 姓名 -->
+                                <div class="data-cell">
+                                    <span class="data-cell-label"><i class="fas fa-user text-muted mr-1"></i> 所有權人</span>
+                                    <span class="data-cell-value font-weight-bold">
+                                        <span 
+                                            v-if="searchBy !== 'pname'" 
+                                            class="data-clickable text-dark" 
+                                            @click.stop="quickSearch(row['pname'], 'pname')"
+                                            title="點擊依此姓名重新篩選"
+                                        >
+                                            {{ row['pname'] }}
+                                        </span>
+                                        <span v-else class="data-highlight-active">
+                                            <i class="fas fa-filter mr-1 text-success"></i>{{ row['pname'] }}
+                                        </span>
+                                    </span>
+                                </div>
+
+                                <!-- 段地號 -->
+                                <div class="data-cell">
+                                    <span class="data-cell-label"><i class="fas fa-map-marked-alt text-muted mr-1"></i> 土地段地號</span>
+                                    <div>
+                                        <span 
+                                            class="land-badge" 
+                                            :class="{'active-highlight': searchBy === 'owned_number'}"
+                                            @click.stop="quickSearch(row['owned_number'], 'owned_number')"
+                                            style="cursor: pointer;"
+                                            title="點擊依此段地號篩選"
+                                        >
+                                            <i class="fas fa-map-pin mr-1"></i>
+                                            {{ formatLandNumber(row['owned_number']) }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- 操作按鈕群 -->
+                                <div class="card-actions">
+                                    <button 
+                                        type="button" 
+                                        class="action-btn action-btn-view" 
+                                        @click.stop="query(row['owned_number'])" 
+                                        title="檢視地籍整理詳細資料"
+                                    >
+                                        <i class="fas fa-file-alt"></i> 檢視詳情
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        class="action-btn action-btn-print" 
+                                        @click.stop="print(row['owned_number'])" 
+                                        title="開啟友善列印視窗"
+                                    >
+                                        <i class="fas fa-print"></i> 列印
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 查無資料狀態 -->
+                    <div v-else-if="hasSearched && searchCount === 0" class="state-card">
+                        <div class="state-icon-wrapper state-icon-empty">
+                            <i class="fas fa-search-minus"></i>
+                        </div>
+                        <h4 class="state-title">查無符合的資料</h4>
+                        <p class="state-desc">
+                            關鍵字「<strong>{{ keyword }}</strong>」未能在地籍整理清冊中找到相應紀錄。<br>
+                            請確認輸入格式無誤，或點擊上方快捷範例嘗試。
+                        </p>
+                    </div>
+
+                    <!-- 初始引導說明 -->
+                    <div v-else class="state-card">
+                        <div class="state-icon-wrapper state-icon-welcome">
+                            <i class="fas fa-compass"></i>
+                        </div>
+                        <h4 class="state-title">準備就緒，請輸入條件檢索</h4>
+                        <p class="state-desc">
+                            請在上方輸入關鍵字開始查詢，或點選上方範例標籤體驗快速檢索。
+                        </p>
+                    </div>
+                </transition>
+
+                <!-- 地籍詳細資料彈窗 (Modal) -->
+                <b-modal
+                    ref="modal"
+                    size="lg"
+                    no-close-on-backdrop
+                    scrollable
+                    centered
+                >
+                    <template #modal-header>
+                        <div class="modal-title w-100 d-flex justify-content-between align-items-center">
+                            <span>
+                                <i class="fas fa-file-invoice text-info mr-2"></i>
+                                {{ landTitle }}
+                            </span>
+                            <button type="button" class="close text-white" @click="$refs.modal.hide()" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    </template>
+
+                    <div class="land-content-box" v-html="landData"></div>
+
+                    <template #modal-footer>
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <div>
+                                <b-button variant="outline-primary" size="sm" @click="copyContent" class="mr-2">
+                                    <i class="fas" :class="copied ? 'fa-check text-success' : 'fa-copy'"></i>
+                                    {{ copied ? '已複製到剪貼簿' : '複製內容' }}
+                                </b-button>
+                                <b-button variant="outline-success" size="sm" @click="printCurrent">
+                                    <i class="fas fa-print mr-1"></i> 列印本筆資料
+                                </b-button>
+                            </div>
+                            <b-button variant="secondary" size="sm" @click="$refs.modal.hide()">
+                                關閉
+                            </b-button>
+                        </div>
+                    </template>
+                </b-modal>
+            </div>
+            `,
             data: () => ({
                 keyword: '',
                 wip: false,
+                hasSearched: false,
                 searchResults: [],
                 searchCount: 0,
                 searchBy: undefined,
-                landData: undefined,
-                landTitle: '地籍資料',
-                footer: true,
+                currentLandNumber: '',
+                landData: '',
+                landTitle: '地籍詳細資料',
+                copied: false,
                 preftech: [
                     '機1-00063',
                     '附11-010018',
@@ -157,45 +386,56 @@
                 ]
             }),
             computed: {
-                validate() {
-                    const chinese = /[\u4E00-\u9FA5]{2,}$/;
-                            // 附07-000771 機1-00001
-                    return (/^(附\d{2}\-\d{6})|(機\d{1}\-\d{5})$/.test(this.keyword) ||
-                            // 統編
-                            /^[A-Z]{1}[1-2]{1}[0-9]{8}$/.test(this.keyword) ||
-                            // 名稱
-                            chinese.test(this.keyword) ||
-                            // dead
-                            /^\*H[A-H]\d{7}$/.test(this.keyword) ||
-                            // 法人公司行號統編
-                            /^\d{8}|\d{10}$/.test(this.keyword) ||
-                            // 外國人
-                            /^\d{8}|[A-Z]{2}$/.test(this.keyword) ||
-                            // 段地號
-                            /^0\d{11}$/.test(this.keyword)) && this.keyword.length < 13 && this.keyword.length !== 9
-                },
-                input() { return this.$refs.typeahead.$el.childNodes[0].childNodes[1]; }
+                input() {
+                    if (this.$refs.typeahead && this.$refs.typeahead.$el) {
+                        return this.$refs.typeahead.$el.querySelector('input') || this.$refs.typeahead.$el.childNodes[0].childNodes[1];
+                    }
+                    return null;
+                }
             },
             watch: {
-                // debounce the query to API to reduce the http request
-                keyword: _.debounce(function(theVal) {
+                keyword: _.debounce(function (theVal) {
                     this.getPrefetch(theVal);
-                }, 500)
+                }, 400)
             },
             methods: {
+                formatLandNumber(val) {
+                    if (!val || val.length < 8) return val;
+                    return val.slice(0, 4) + '-' + val.slice(4);
+                },
+                triggerSearch() {
+                    this.searchBy = undefined;
+                    this.search();
+                },
                 triggerInputEvent(val) {
-                    // hack for the vue-bootstrap-typeahead component when v-model value update by others
-                    this.input.value = val;
-                    const event = new Event('input', { bubbles: true, cancelable: true });
-                    this.input.dispatchEvent(event);
+                    this.keyword = val;
+                    if (this.input) {
+                        this.input.value = val;
+                        const event = new Event('input', { bubbles: true, cancelable: true });
+                        this.input.dispatchEvent(event);
+                    }
+                    this.searchBy = undefined;
                     this.search();
                 },
                 chooseTypeahead() {
                     this.searchBy = undefined;
                     this.search();
                 },
+                clearSearch() {
+                    this.keyword = '';
+                    if (this.input) this.input.value = '';
+                    this.searchResults = [];
+                    this.searchCount = 0;
+                    this.hasSearched = false;
+                    this.searchBy = undefined;
+                },
                 print(number) {
-                    window.open(`print.html?number=${number}`, '_blank');
+                    window.open(`print.html?number=${encodeURIComponent(number)}`, '_blank');
+                },
+                printCurrent() {
+                    if (this.currentLandNumber) {
+                        this.print(this.currentLandNumber);
+                    }
                 },
                 quickSearch(data, by) {
                     this.keyword = data;
@@ -203,82 +443,101 @@
                     this.triggerInputEvent(data);
                 },
                 search() {
-                    if (!this.wip && this.keyword !== '' && this.keyword !== undefined) {
+                    if (!this.wip && this.keyword && this.keyword.trim() !== '') {
                         this.wip = true;
+                        this.hasSearched = true;
                         this.searchResults = [];
                         this.searchCount = 0;
                         let formData = new FormData();
                         formData.append("keyword", this.keyword.trim());
                         axios.post("api/search.php", formData).then((res) => {
-                            this.searchResults = res.data.results;
-                            this.searchCount = res.data.count;
-                        }).catch((err) => console.error(err)).finally(() => { this.wip = false; });
+                            this.searchResults = res.data.results || [];
+                            this.searchCount = res.data.count || 0;
+                        }).catch((err) => {
+                            console.error(err);
+                        }).finally(() => {
+                            this.wip = false;
+                        });
                     }
                 },
                 query(landNumber) {
                     this.wip = true;
+                    this.currentLandNumber = landNumber;
+                    this.copied = false;
                     let formData = new FormData();
                     formData.append("owned_number", landNumber);
                     axios.post("api/query_land_data.php", formData).then((res) => {
-                        this.landTitle = res.data.result[0].code + ' ' + res.data.result[0].name + ' ' + res.data.result[0].number.slice(0, 4) + '-' + res.data.result[0].number.slice(4);
-                        this.landData = res.data.result[0].content.trim().replace(/\n/g, '<br />');
+                        if (res.data.result && res.data.result[0]) {
+                            const item = res.data.result[0];
+                            const numStr = item.number ? (item.number.slice(0, 4) + '-' + item.number.slice(4)) : '';
+                            this.landTitle = `${item.code || ''} ${item.name || ''} 【地號：${numStr}】`;
+                            this.landData = (item.content || '').trim().replace(/\n/g, '<br />');
+                        } else {
+                            this.landTitle = '地籍詳細資料';
+                            this.landData = '<p class="text-muted text-center my-4">查無對應地籍資料內容</p>';
+                        }
                         this.$refs.modal.show();
-                    }).catch((err) => console.error(err)).finally(() => { this.wip = false; });
+                    }).catch((err) => {
+                        console.error(err);
+                    }).finally(() => {
+                        this.wip = false;
+                    });
+                },
+                copyContent() {
+                    const temp = document.createElement('div');
+                    temp.innerHTML = this.landData;
+                    const text = temp.innerText || temp.textContent || '';
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(text).then(() => {
+                            this.copied = true;
+                            setTimeout(() => { this.copied = false; }, 2500);
+                        });
+                    } else {
+                        const ta = document.createElement('textarea');
+                        ta.value = text;
+                        document.body.appendChild(ta);
+                        ta.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(ta);
+                        this.copied = true;
+                        setTimeout(() => { this.copied = false; }, 2500);
+                    }
                 },
                 getPrefetch(keyword) {
                     if (_.isEmpty(keyword)) {
                         return false;
                     }
-                    // detect chinese char
-                    const arr = keyword.match(/[^\x00-\xff]/ig);   
+                    const arr = keyword.match(/[^\x00-\xff]/ig);
                     const len = arr === null ? keyword.length : keyword.length + arr.length;
                     if (len > 1) {
                         let formData = new FormData();
                         formData.append("keyword", keyword);
-                        axios.post("api/prefetch.php", formData, { timeout: 1000 }).then((res) => {
-                            this.preftech = res.data.items;
-                        }).catch((err) => console.error(err)).finally(() => {});
+                        axios.post("api/prefetch.php", formData, { timeout: 1500 }).then((res) => {
+                            if (res.data && res.data.items) {
+                                this.preftech = res.data.items;
+                            }
+                        }).catch((err) => {
+                            console.error(err);
+                        });
                     }
                 }
             },
             mounted() {
-                setTimeout(() => {
-                    this.footer = false;
-                }, 10000);
-                // hack for listen keyup event at search input
                 const that = this;
-                $(this.input).keyup(function(e){ 
-                    var code = e.key; // recommended to use e.key, it's normalized across devices and languages
-                    if(code==="Enter") { e.preventDefault(); }
-                    if(code===" " || code==="Enter" || code===","|| code===";") {
-                        that.searchBy = undefined;
-                        that.search();
-                    } // missing closing if brace
+                this.$nextTick(() => {
+                    if (this.input) {
+                        $(this.input).keyup(function (e) {
+                            const code = e.key;
+                            if (code === "Enter") {
+                                e.preventDefault();
+                                that.searchBy = undefined;
+                                that.search();
+                            }
+                        });
+                    }
                 });
             }
-        }).$mount('#vueApp');
-
-        const vueFooter = new Vue({
-            template: `<transition>
-                <p v-if="show" class="text-muted fixed-bottom my-2 mx-3 bg-white border rounded text-center p-2 small shadow">
-                <span>
-                    <a href="https://github.com/pyliu/aerotropolis" target="_blank" title="View project on Github!">
-                        <i class="fab fa-github fa-lg text-dark"></i>
-                    </a>
-                    <strong><i class="far fa-copyright"></i> <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong>
-                    <a href="https://vuejs.org/" target="_blank" title="Learn Vue JS!">
-                        <i class="text-success fab fa-vuejs fa-lg"></i>
-                    </a>
-                </span>
-                </p>
-            </transition>`,
-            data: () => ({
-                show: true
-            }),
-            mounted() {
-                setTimeout(() => this.show = false, 10000);
-            }
-        }).$mount('#footer');
+        });
     </script>
 </body>
 

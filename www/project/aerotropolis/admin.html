@@ -4,280 +4,397 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <meta name="description" content="For Aviation City use only" />
+  <meta name="description" content="桃園市地政局航空城開發科 地籍清冊資料庫更新後台" />
   <meta name="author" content="LIU, PANG-YU" />
   <meta http-equiv="pragma" content="no-cache" />
   <meta http-equiv="expires" content="0" />
   <meta http-equiv="cache-control" content="no-cache" />
-  <title>桃園市地政局航空城開發科</title>
-  <!-- Bootstrap core CSS -->
-  <link rel="preload" href="assets/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-  <link rel="preload" href="assets/css/loading.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-  <link rel="preload" href="assets/css/loading-btn.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-  <link rel="preload" href="assets/css/animate.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-  <link rel="preload" href="assets/css/awesome-font.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-  <link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-  <link rel="preload" href="assets/css/starter-template.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <link rel="preload" href="assets/css/transition.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <link rel="preload" href="assets/css/aerotropolis.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <title>資料庫更新管理 — 桃園市地政局航空城開發科</title>
+
+  <!-- Bootstrap & Plugins CSS (本地資源) -->
+  <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="assets/css/bootstrap-vue.min.css" />
+  <link rel="stylesheet" href="assets/css/bootstrap-vue-icons.min.css" />
+  <link rel="stylesheet" href="assets/css/awesome-font.css" />
+  <link rel="stylesheet" href="assets/css/animate.css" />
+  <link rel="stylesheet" href="assets/css/loading.css" />
+  <link rel="stylesheet" href="assets/css/loading-btn.css" />
+  <!-- 現代化專案樣式 -->
+  <link rel="stylesheet" href="assets/css/aerotropolis.css" />
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <a class="navbar-brand" href="admin.html"><i class="fa fa-database fa-lg"></i> 更新地籍清冊資料庫</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
-      aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+  <!-- 現代化頂部導覽列 -->
+  <nav class="navbar navbar-expand-md navbar-dark modern-navbar fixed-top">
+    <div class="container-fluid px-lg-4">
+      <a class="navbar-brand" href="admin.html">
+        <span class="brand-icon-wrapper" style="background: linear-gradient(135deg, #0d9488, #0284c7);">
+          <i class="fas fa-database"></i>
+        </span>
+        <span>資料庫更新中樞</span>
+      </a>
 
-    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="index.html"><i class="fa fa-search fa-fw"> </i>地籍整理清冊搜尋</a>
-        </li>
-      </ul>
+      <button class="navbar-toggler border-0" type="button" data-toggle="collapse" data-target="#mainNav"
+        aria-controls="mainNav" aria-expanded="false" aria-label="切換選單">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav mr-auto ml-md-3">
+          <li class="nav-item">
+            <a class="nav-link modern-nav-link" href="index.html">
+              <i class="fas fa-search"></i> 地籍搜尋
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link modern-nav-link active" href="admin.html">
+              <i class="fas fa-database"></i> 資料庫更新
+            </a>
+          </li>
+        </ul>
+
+        <div class="dept-badge my-2 my-md-0">
+          <i class="fas fa-plane-departure"></i>
+          <span>桃園市地政局・航空城開發科</span>
+        </div>
+      </div>
     </div>
-    <h5 class="text-light my-auto"><i class="fas fa-plane-departure text-warning ld ld-wander-h"></i> 航空城開發科</h5>
   </nav>
 
-  <main role="main" class="container">
-    <h4 class="font-weight-bold text-right">
-      <i class="fa fa-exclamation-circle text-danger ld ld-breath"></i>
-      舊資料會被清除後更新。
-    </h4>
-    <hr class="my-5" />
-    <div id="land_data_upload"></div>
-    <hr class="my-5" />
-    <div id="id_data_upload"></div>
-    <hr class="my-5" />
-    <div id="footer"></div>
-  </main>
-  <!-- /.container -->
+  <!-- 主內容區 -->
+  <main role="main" class="container py-4 flex-grow-1">
+    <!-- 標題區 -->
+    <div class="admin-hero">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <div>
+          <span class="hero-subtitle mb-2">
+            <i class="fas fa-server"></i> 系統維護後台
+          </span>
+          <h2 class="font-weight-bold text-dark m-0">
+            地籍整理清冊資料庫更新
+          </h2>
+        </div>
+        <a href="index.html" class="btn btn-outline-primary rounded-pill px-3">
+          <i class="fas fa-arrow-left mr-1"></i> 返回檢索首頁
+        </a>
+      </div>
 
-  <!-- Place scripts at the end of the body to let DOM load first then scripts  -->
-  <!-- Bootstrap core JavaScript -->
+      <!-- 操作警示卡片 -->
+      <div class="admin-alert-banner">
+        <div class="admin-alert-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div>
+          <h6 class="font-weight-bold text-dark mb-1">
+            資料更新注意事項
+          </h6>
+          <p class="text-muted small mb-0">
+            匯入新資料時，系統將會清除舊有的對應段代碼或所有權人歸戶資料後進行覆蓋寫入。請確認上傳檔案格式正確，並於轉檔進行中保持視窗開啟。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 模組 1：地籍整理清冊檔案 (TXT) -->
+    <div id="land_data_upload" class="admin-card"></div>
+
+    <!-- 模組 2：所有權人歸戶清冊 (XLSX) -->
+    <div id="id_data_upload" class="admin-card"></div>
+  </main>
+
+  <!-- 頁尾 -->
+  <footer class="modern-footer">
+    <div class="container-fluid px-lg-4 footer-content">
+      <div>
+        <strong>桃園市政府地政局 航空城開發科</strong>
+        <span class="text-muted ml-2">Taoyuan City Land Administration</span>
+      </div>
+      <div class="footer-links">
+        <a href="index.html" class="footer-link-item">
+          <i class="fas fa-search"></i> 地籍檢索
+        </a>
+        <span class="text-muted">|</span>
+        <span class="footer-link-item">
+          <i class="far fa-copyright"></i> LIU, PANG-YU ALL RIGHTS RESERVED.
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 本地腳本庫 -->
   <script src="assets/js/jquery.min.js"></script>
   <script src="assets/js/popper.min.js"></script>
   <script src="assets/js/bootstrap.min.js"></script>
-  <!-- Vue -->
   <script src="assets/js/vue.js"></script>
   <script src="assets/js/vuex.js"></script>
   <script src="assets/js/bootstrap-vue.min.js"></script>
   <script src="assets/js/bootstrap-vue-icons.min.js"></script>
-  <!-- Add-On -->
   <script src="assets/js/axios.min.js"></script>
   <script src="assets/js/localforage.min.js"></script>
   <script src="assets/js/lodash.min.js"></script>
+
   <script>
-    $(document).ready((e) => {
-      const land = new Vue({
+    $(document).ready(() => {
+      // 模組 1：地籍整理清冊檔案 (TXT)
+      new Vue({
         el: "#land_data_upload",
-        template: `<div>
-              <b-form-group label="地籍整理清冊檔案" label-for="file-land_data_upload" label-cols-sm="2" label-size="lg">
-                  <b-progress v-if="uploadPercentage > 0 && uploadPercentage < 100" :value="uploadPercentage" :max="100" show-progress animated></b-progress>
-                  <b-form-file ref="file-land_data_upload" id="file-land_data_upload" size="lg" v-model="landData" :state="validate" placeholder="請選擇地籍整理清冊TXT檔案" drop-placeholder="放開以設定上傳檔案" accept=".txt, .TXT" :disabled="wip"></b-form-file>
-              </b-form-group>
-              <div class="text-right">
-                <transition name="slide-fade">
-                  <span v-if="!validate"><i class="fas fa-exclamation-triangle text-danger ld ld-breath"></i> 請指定段代碼為檔名(e.g. 0029.txt)</span>
-                </transition>
-                <transition name="bounce">
-                  <span v-if="!_.isEmpty(message) && validate" :class="messageVariant" v-html="message"></span>
-                </transition>
-                <b-button :disabled="!validate || wip" variant="primary" @click="upload">上傳</b-button>
-              </div>
-          </div>`,
+        template: `
+        <div>
+          <div class="admin-card-header">
+            <div class="admin-card-icon land">
+              <i class="fas fa-map"></i>
+            </div>
+            <div>
+              <h4 class="admin-card-title">1. 地籍整理清冊檔案 (TXT)</h4>
+              <p class="admin-card-subtitle">依段別匯入地籍文字清冊，請指定 4 碼段代碼為檔名 (例如：0029.txt)</p>
+            </div>
+          </div>
+
+          <b-form-group 
+            label="選擇清冊文字檔" 
+            label-for="file-land_data_upload" 
+            label-class="font-weight-bold text-secondary"
+          >
+            <b-form-file 
+              ref="file-land_data_upload" 
+              id="file-land_data_upload" 
+              size="lg" 
+              v-model="landData" 
+              :state="validateState" 
+              placeholder="點擊此處或將 0029.txt 等檔案拖曳至此..." 
+              drop-placeholder="放開滑鼠以設定檔案..." 
+              accept=".txt, .TXT" 
+              :disabled="wip"
+            ></b-form-file>
+          </b-form-group>
+
+          <!-- 上傳進度條 -->
+          <div v-if="uploadPercentage > 0" class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>檔案上傳進度</span>
+              <span><strong>{{ uploadPercentage }}%</strong></span>
+            </div>
+            <b-progress :value="uploadPercentage" :max="100" animated variant="primary" style="height: 10px; border-radius: 6px;"></b-progress>
+          </div>
+
+          <!-- 底部狀態與操作列 -->
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3 pt-3 border-top">
+            <div>
+              <span v-if="landData && !validate" class="badge badge-danger p-2">
+                <i class="fas fa-times-circle mr-1"></i> 檔名格式不符：檔名必須為 4 位數字代碼 (如 0029.txt)
+              </span>
+              <span v-else-if="landData && validate" class="badge badge-success p-2">
+                <i class="fas fa-check-circle mr-1"></i> 檔名合規：段代碼 {{ landData.name.replace('.txt', '') }}
+              </span>
+              <span v-if="message" :class="messageVariant" class="font-weight-bold ml-2" v-html="message"></span>
+            </div>
+
+            <b-button 
+              :disabled="!validate || wip" 
+              variant="primary" 
+              size="lg" 
+              @click="upload"
+              class="px-4 font-weight-bold shadow-sm"
+            >
+              <i v-if="!wip" class="fas fa-cloud-upload-alt mr-1"></i>
+              <i v-else class="fas fa-spinner fa-spin mr-1"></i>
+              {{ wip ? '資料處理中...' : '開始上傳轉檔' }}
+            </b-button>
+          </div>
+        </div>
+        `,
         data: () => ({
           landData: null,
           wip: false,
           responseData: undefined,
           message: "",
           messageVariant: "text-success",
-          uploadPercentage: 0,
-          progressHandler: null
+          uploadPercentage: 0
         }),
         computed: {
           validate() {
             if (!_.isEmpty(this.landData)) {
-              return /^\d{4}\.txt$/.test(this.landData.name);
+              return /^\d{4}\.txt$/i.test(this.landData.name);
             }
             return false;
           },
+          validateState() {
+            if (!this.landData) return null;
+            return this.validate;
+          }
         },
         watch: {
-          landData(val) {},
           wip(flag) {
             this.message = flag ?
-              `<i class="fas fa-spinner fa-spin"></i> 處理中 ... (處理1MB約1秒，請勿關閉本視窗)` :
+              `<i class="fas fa-spinner fa-spin"></i> 處理中 ... (處理 1MB 約需 1 秒，請勿關閉本視窗)` :
               "";
             this.messageVariant = flag ? "text-danger" : "text-success";
-            // if (flag) {
-            //   this.progressHandler = setInterval(() => this.progress(), 3000);
-            // } else {
-            //   clearInterval(this.progressHandler);
-            // }
-          },
+          }
         },
         methods: {
-          progress() {
-            let formData = new FormData();
-            formData.append("type", 'data');
-            axios
-              .post("api/get_progress.php", formData)
-              .then((res) => {
-                this.uploadPercentage = parseInt(Math.round((res.data.processed / res.data.total) * 100));
-              })
-              .catch((err) => console.error(err))
-              .finally(() => {});
-          },
           upload() {
+            if (!this.landData) {
+              alert("請先選擇一個地籍整理清冊文字檔 (.txt)");
+              return;
+            }
             this.wip = true;
             this.uploadPercentage = 0;
-            if (!_.isEmpty(this.landData)) {
-              let formData = new FormData();
-              formData.append("file", this.landData);
-              axios
-                .post("api/import_land_txt.php", formData, {
-                  headers: {
-                    'Content-Type': 'multipart/form-data'
-                  },
-                  onUploadProgress: function (progressEvent) {
-                    this.uploadPercentage = parseInt(Math.round((progressEvent.loaded / progressEvent
-                      .total) * 100));
-                  }.bind(this)
-                })
-                .then((res) => {
-                  this.responseData = res.data;
-                })
-                .catch((err) => console.error(err))
-                .finally(() => {
-                  this.wip = false;
-                  setTimeout(
-                    () =>
-                    (this.message = `${this.landData.name} 已完成轉檔。`),
-                    400
-                  );
-                  this.uploadPercentage = 0;
-                });
-            } else {
-              alert("請先選擇一個文字檔");
-            }
-          },
+            let formData = new FormData();
+            formData.append("file", this.landData);
+            axios
+              .post("api/import_land_txt.php", formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data'
+                },
+                onUploadProgress: function (progressEvent) {
+                  this.uploadPercentage = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100));
+                }.bind(this)
+              })
+              .then((res) => {
+                this.responseData = res.data;
+                this.message = `<i class="fas fa-check-circle text-success mr-1"></i> ${this.landData.name} 資料已順利完成轉檔與更新！`;
+              })
+              .catch((err) => {
+                console.error(err);
+                this.message = `<i class="fas fa-exclamation-triangle text-danger mr-1"></i> 上傳轉檔失敗，請確認檔案內容或系統記錄。`;
+                this.messageVariant = "text-danger";
+              })
+              .finally(() => {
+                this.wip = false;
+                this.uploadPercentage = 0;
+              });
+          }
         }
       });
 
-      const id = new Vue({
+      // 模組 2：所有權人歸戶清冊 (XLSX)
+      new Vue({
         el: "#id_data_upload",
-        template: `<div>
-              <b-form-group label="所有權人歸戶清冊" label-for="file-id_data_upload" label-cols-sm="2" label-size="lg">
-                  <b-progress v-if="uploadPercentage > 0 && uploadPercentage < 100" :value="uploadPercentage" :max="100" show-progress animated></b-progress>
-                  <b-form-file id="file-id_data_upload" size="lg" v-model="idData" :state="Boolean(idData)" placeholder="請選擇所有權人歸戶清冊資料檔" drop-placeholder="放開以設定上傳檔案" accept=".xlsx, .XLSX" :disabled="wip"></b-form-file>
-              </b-form-group>
-              <div class="text-right">
-                <transition name="bounce">
-                  <span v-if="!_.isEmpty(message) && validate" :class="messageVariant" v-html="message"></span>
-                </transition>
-                <b-button :disabled="!Boolean(idData) || wip" variant="secondary" @click="upload">上傳</b-button>
-              </div>
-          </div>`,
+        template: `
+        <div>
+          <div class="admin-card-header">
+            <div class="admin-card-icon id">
+              <i class="fas fa-file-excel"></i>
+            </div>
+            <div>
+              <h4 class="admin-card-title">2. 所有權人歸戶清冊檔案 (XLSX)</h4>
+              <p class="admin-card-subtitle">匯入所有權人姓名、統一編號與歸戶號對照資料，格式須為 Microsoft Excel (.xlsx)</p>
+            </div>
+          </div>
+
+          <b-form-group 
+            label="選擇歸戶清冊 Excel 檔" 
+            label-for="file-id_data_upload" 
+            label-class="font-weight-bold text-secondary"
+          >
+            <b-form-file 
+              id="file-id_data_upload" 
+              size="lg" 
+              v-model="idData" 
+              :state="validateState" 
+              placeholder="點擊此處或將 .xlsx 檔案拖曳至此..." 
+              drop-placeholder="放開滑鼠以設定檔案..." 
+              accept=".xlsx, .XLSX" 
+              :disabled="wip"
+            ></b-form-file>
+          </b-form-group>
+
+          <!-- 上傳進度條 -->
+          <div v-if="uploadPercentage > 0" class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>檔案上傳進度</span>
+              <span><strong>{{ uploadPercentage }}%</strong></span>
+            </div>
+            <b-progress :value="uploadPercentage" :max="100" animated variant="success" style="height: 10px; border-radius: 6px;"></b-progress>
+          </div>
+
+          <!-- 底部狀態與操作列 -->
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3 pt-3 border-top">
+            <div>
+              <span v-if="idData && !validate" class="badge badge-danger p-2">
+                <i class="fas fa-times-circle mr-1"></i> 副檔名不符：請選擇 Excel 工作表檔案 (.xlsx)
+              </span>
+              <span v-else-if="idData && validate" class="badge badge-success p-2">
+                <i class="fas fa-check-circle mr-1"></i> 已選取：{{ idData.name }}
+              </span>
+              <span v-if="message" :class="messageVariant" class="font-weight-bold ml-2" v-html="message"></span>
+            </div>
+
+            <b-button 
+              :disabled="!validate || wip" 
+              variant="success" 
+              size="lg" 
+              @click="upload"
+              class="px-4 font-weight-bold shadow-sm"
+            >
+              <i v-if="!wip" class="fas fa-cloud-upload-alt mr-1"></i>
+              <i v-else class="fas fa-spinner fa-spin mr-1"></i>
+              {{ wip ? '資料處理中...' : '開始上傳歸戶資料' }}
+            </b-button>
+          </div>
+        </div>
+        `,
         data: () => ({
           idData: null,
           wip: false,
           responseData: undefined,
           message: "",
           messageVariant: "text-success",
-          uploadPercentage: 0,
-          progressHandler: null
+          uploadPercentage: 0
         }),
         computed: {
           validate() {
             if (!_.isEmpty(this.idData)) {
-              return /\.xlsx$/.test(this.idData.name);
+              return /\.xlsx$/i.test(this.idData.name);
             }
             return false;
           },
+          validateState() {
+            if (!this.idData) return null;
+            return this.validate;
+          }
         },
         watch: {
           wip(flag) {
             this.message = flag ?
-              `<i class="fas fa-spinner fa-spin"></i> 處理中 ... (請勿關閉本視窗)` :
+              `<i class="fas fa-spinner fa-spin"></i> 處理中 ... (處理時間視筆數而定，請勿關閉本視窗)` :
               "";
             this.messageVariant = flag ? "text-danger" : "text-success";
-            // if (flag) {
-            //   this.progressHandler = setInterval(() => this.progress(), 3000);
-            // } else {
-            //   clearInterval(this.progressHandler);
-            // }
-          },
+          }
         },
         methods: {
-          progress() {
-            let formData = new FormData();
-            formData.append("type", 'people');
-            axios
-              .post("api/get_progress.php", formData)
-              .then((res) => {
-                this.uploadPercentage = parseInt(Math.round((res.data.processed / res.data.total) * 100));
-              })
-              .catch((err) => console.error(err))
-              .finally(() => {});
-          },
           upload() {
+            if (!this.idData) {
+              alert("請先選擇所有權人歸戶清冊 Excel 檔案 (.xlsx)");
+              return;
+            }
             this.wip = true;
             this.uploadPercentage = 0;
-            if (!_.isEmpty(this.idData)) {
-              let formData = new FormData();
-              formData.append("file", this.idData);
-              axios
-                .post("api/import_people_xlsx.php", formData, {
-                  headers: {
-                    'Content-Type': 'multipart/form-data'
-                  },
-                  onUploadProgress: function (progressEvent) {
-                    this.uploadPercentage = parseInt(Math.round((progressEvent.loaded / progressEvent
-                      .total) * 100));
-                  }.bind(this)
-                })
-                .then((res) => {
-                  this.responseData = res.data;
-                })
-                .catch((err) => console.error(err))
-                .finally(() => {
-                  this.wip = false;
-                  setTimeout(
-                    () =>
-                    (this.message = `${this.idData.name} 已完成轉檔。`),
-                    400
-                  );
-                  this.uploadPercentage = 0;
-                });
-            } else {
-              alert("請先選擇一個XLSX檔");
-            }
-          },
-        }
-      });
-
-      const vueFooter = new Vue({
-        el: '#footer',
-        template: `<transition>
-          <p v-if="show" class="text-muted fixed-bottom my-2 mx-3 bg-white border rounded text-center p-2 small shadow">
-            <span>
-                <a href="https://github.com/pyliu/aerotropolis" target="_blank" title="View project on Github!">
-                    <i class="fab fa-github fa-lg text-dark"></i>
-                </a>
-                <strong><i class="far fa-copyright"></i> <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong>
-                <a href="https://vuejs.org/" target="_blank" title="Learn Vue JS!">
-                    <i class="text-success fab fa-vuejs fa-lg"></i>
-                </a>
-            </span>
-          </p>
-        </transition>`,
-        data: () => ({
-          show: true
-        }),
-        mounted() {
-          setTimeout(() => this.show = false, 10000);
+            let formData = new FormData();
+            formData.append("file", this.idData);
+            axios
+              .post("api/import_people_xlsx.php", formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data'
+                },
+                onUploadProgress: function (progressEvent) {
+                  this.uploadPercentage = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100));
+                }.bind(this)
+              })
+              .then((res) => {
+                this.responseData = res.data;
+                this.message = `<i class="fas fa-check-circle text-success mr-1"></i> ${this.idData.name} 歸戶清冊已順利匯入完成！`;
+              })
+              .catch((err) => {
+                console.error(err);
+                this.message = `<i class="fas fa-exclamation-triangle text-danger mr-1"></i> 匯入失敗，請確認檔案格式是否合規。`;
+                this.messageVariant = "text-danger";
+              })
+              .finally(() => {
+                this.wip = false;
+                this.uploadPercentage = 0;
+              });
+          }
         }
       });
     });

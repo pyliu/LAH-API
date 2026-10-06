@@ -4,67 +4,180 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="For Aviation City use only">
+    <meta name="description" content="桃園市地政局航空城開發科 地籍整理清冊列印">
     <meta name="author" content="LIU, PANG-YU">
     <meta http-equiv="pragma" content="no-cache">
     <meta http-equiv="expires" content="0">
     <meta http-equiv="cache-control" content="no-cache">
-    <title>桃園市地政局航空城開發科</title>
-    <!-- Bootstrap core CSS -->
-    <link rel="preload" href="assets/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/loading.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/loading-btn.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/animate.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/awesome-font.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/aerotropolis.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <title>地籍整理清冊列印 — 桃園市地政局航空城開發科</title>
+
+    <!-- Bootstrap & Plugins CSS (本地資源) -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/bootstrap-vue.min.css">
+    <link rel="stylesheet" href="assets/css/awesome-font.css">
+    <link rel="stylesheet" href="assets/css/aerotropolis.css">
+
+    <style>
+        .print-toolbar {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gov-stamp-box {
+            display: flex;
+            justify-content: flex-end;
+            gap: 2rem;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px dashed #cbd5e1;
+        }
+
+        .stamp-column {
+            text-align: center;
+            width: 140px;
+        }
+
+        .stamp-placeholder {
+            height: 60px;
+            border-bottom: 1px solid #94a3b8;
+            margin-top: 0.5rem;
+        }
+    </style>
 </head>
 
-<body>
-    <main role="main" class="container">
+<body style="padding-top: 0; background-color: #f1f5f9;">
+    <!-- 列印操作工具列 (列印時隱藏) -->
+    <div class="print-toolbar no-print">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge badge-primary p-2 mr-2">
+                <i class="fas fa-print mr-1"></i> 列印預覽
+            </span>
+            <span class="font-weight-bold text-dark">地籍整理清冊明細表</span>
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary px-3 mr-2" onclick="window.print()">
+                <i class="fas fa-print mr-1"></i> 立即列印
+            </button>
+            <button type="button" class="btn btn-outline-secondary px-3" onclick="window.close()">
+                <i class="fas fa-times mr-1"></i> 關閉視窗
+            </button>
+        </div>
+    </div>
 
+    <!-- 主列印區 -->
+    <main role="main" class="print-container">
         <div id="print"></div>
+    </main>
 
-    </main><!-- /.container -->
-
-    <!-- Place scripts at the end of the body to let DOM load first then scripts  -->
-    <!-- Bootstrap core JavaScript -->
+    <!-- 本地腳本庫 -->
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/js/popper.min.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
-    <!-- Vue -->
     <script src="assets/js/vue.js"></script>
-    <script src="assets/js/vuex.js"></script>
     <script src="assets/js/bootstrap-vue.min.js"></script>
-    <script src="assets/js/bootstrap-vue-icons.min.js"></script>
-    <!-- Add-On -->
     <script src="assets/js/axios.min.js"></script>
-    <script src="assets/js/localforage.min.js"></script>
+
     <script>
-        const printVue = new Vue({
+        new Vue({
             el: '#print',
-            template:`<b-card :title="code + ' ' + name" :sub-title="number">
-                <hr />
-                <b-card-text v-html="content"></b-card-text>
-            </b-card>`,
+            template: `
+            <div v-if="landData" class="print-sheet">
+                <!-- 正式公務表頭 -->
+                <div class="print-header-official">
+                    <div class="print-gov-title">桃園市政府地政局 航空城開發科</div>
+                    <div class="print-doc-title">桃園航空城區段徵收 — 地籍整理清冊報告表</div>
+                    <div class="text-muted small">列印日期：{{ printTime }}</div>
+                </div>
+
+                <!-- 土地地籍摘要區塊 -->
+                <div class="print-meta-grid">
+                    <div>
+                        <strong class="text-secondary">段代碼：</strong>
+                        <span>{{ code }}</span>
+                    </div>
+                    <div>
+                        <strong class="text-secondary">段名：</strong>
+                        <span>{{ name }}</span>
+                    </div>
+                    <div>
+                        <strong class="text-secondary">土地地號：</strong>
+                        <span class="font-weight-bold text-primary">{{ number }}</span>
+                    </div>
+                </div>
+
+                <!-- 清冊本文 -->
+                <div class="mb-4">
+                    <h6 class="font-weight-bold text-dark mb-2">
+                        <i class="fas fa-list-alt mr-1 text-primary no-print"></i> 地籍整理詳細紀錄：
+                    </h6>
+                    <div class="print-content-pre p-3 border rounded bg-light" v-html="content"></div>
+                </div>
+
+                <!-- 公務簽核註記欄 -->
+                <div class="gov-stamp-box">
+                    <div class="stamp-column">
+                        <span class="small font-weight-bold text-secondary">承辦人</span>
+                        <div class="stamp-placeholder"></div>
+                    </div>
+                    <div class="stamp-column">
+                        <span class="small font-weight-bold text-secondary">科長 / 核章</span>
+                        <div class="stamp-placeholder"></div>
+                    </div>
+                </div>
+            </div>
+            <div v-else class="text-center p-5">
+                <i class="fas fa-spinner fa-spin fa-2x text-primary mb-3"></i>
+                <p class="text-muted">正在產生地籍列印清冊，請稍候...</p>
+            </div>
+            `,
             data: () => ({
-                landData: undefined
+                landData: null,
+                printTime: ''
             }),
             computed: {
-                code() { return this.landData ? this.landData.code : '' },
-                name() { return this.landData ? this.landData.name : '' },
-                number() { return this.landData ? this.landData.number.slice(0, 4) + '-' + this.landData.number.slice(4) : '' },
-                content() { return this.landData ? this.landData.content.trim().replace(/\n/g, '<br />') : '' }
+                code() { return this.landData ? (this.landData.code || '') : ''; },
+                name() { return this.landData ? (this.landData.name || '') : ''; },
+                number() { 
+                    if (!this.landData || !this.landData.number) return '';
+                    return this.landData.number.slice(0, 4) + '-' + this.landData.number.slice(4);
+                },
+                content() { 
+                    if (!this.landData || !this.landData.content) return '';
+                    return this.landData.content.trim().replace(/\n/g, '<br />');
+                }
             },
             mounted() {
-                const urlParams = new URLSearchParams(window.location.search);
+                const now = new Date();
+                const rocYear = now.getFullYear() - 1911;
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const date = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                this.printTime = `民國 ${rocYear} 年 ${month} 月 ${date} 日 ${hours}:${minutes}`;
 
-                let formData = new FormData();
-                formData.append("owned_number", urlParams.get('number'));
-                axios.post("api/query_land_data.php", formData).then((res) => {
-                    this.landData = res.data.result[0];
-                    setTimeout(() => window.print(), 500);
-                }).catch((err) => console.error(err)).finally(() => { });
+                const urlParams = new URLSearchParams(window.location.search);
+                const landNum = urlParams.get('number');
+                if (landNum) {
+                    let formData = new FormData();
+                    formData.append("owned_number", landNum);
+                    axios.post("api/query_land_data.php", formData).then((res) => {
+                        if (res.data.result && res.data.result[0]) {
+                            this.landData = res.data.result[0];
+                            setTimeout(() => {
+                                window.print();
+                            }, 600);
+                        } else {
+                            alert('查無此地號的地籍整理清冊資料');
+                        }
+                    }).catch((err) => {
+                        console.error(err);
+                    });
+                }
             }
         });
     </script>
