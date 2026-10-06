@@ -12,121 +12,286 @@
     <meta http-equiv="Expires" content="0">
 
     <!-- 外部函式庫 -->
-    <!-- 確保 lodash.min.js 和 marked.min.js 檔案與 index.html 在同一個目錄 -->
     <script src="lodash.min.js"></script>
     <script src="marked.min.js"></script>
     <script src="vue.global.prod.js"></script>
     <script src="lucide.min.js"></script>
     <link href="tailwind.min.css" rel="stylesheet">
 
-    <!-- 自訂樣式 (已修正主題切換) -->
+    <!-- 現代親民風格自訂樣式 (支援完整深色高對比主題) -->
     <style>
         :root {
-            --bootstrap-primary: #0d6efd;
-            --bootstrap-primary-hover: #0b5ed7;
-            --bootstrap-primary-active: #0a58ca;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --primary-accent: #2563eb;
 
-            /* 預設為淺色主題 */
-            --highlight-bg: #fffbe0;
-            --highlight-border: #fcd34d;
-            --watermark-bg: rgba(252, 211, 77, 0.1);
-            --watermark-text: rgba(180, 83, 9, 0.2);
-            --body-bg: #f8f9fa;
-            --body-color: #212529;
+            --body-bg: #f8fafc;
+            --body-color: #1e293b;
+            --heading-color: #0f172a;
+            --text-muted: #64748b;
+            --text-subtle: #94a3b8;
+
+            --header-bg: rgba(255, 255, 255, 0.9);
+
             --sidebar-bg: #ffffff;
-            --sidebar-border: #dee2e6;
-            --sidebar-link-color: #495057;
-            --sidebar-link-hover-bg: #e9ecef;
-            --sidebar-link-active-bg: var(--bootstrap-primary);
+            --sidebar-border: #e2e8f0;
+            --sidebar-link-color: #475569;
+            --sidebar-link-hover-bg: #f1f5f9;
+            --sidebar-link-hover-color: #0f172a;
+            --sidebar-link-active-bg: #2563eb;
             --sidebar-link-active-color: #ffffff;
-            --bookmark-card-bg: #ffffff;
-            --bookmark-card-border: #dee2e6;
-            --bookmark-card-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
-            --modal-bg: rgba(0, 0, 0, 0.5);
+
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --card-hover-border: #93c5fd;
+            --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+            --card-hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+            --card-icon-bg: #eff6ff;
+            --card-icon-color: #2563eb;
+
+            --modal-bg: rgba(15, 23, 42, 0.6);
             --modal-content-bg: #ffffff;
+            --modal-border: #e2e8f0;
+            --drawer-bg: #ffffff;
+
+            --input-bg: #ffffff;
+            --input-border: #cbd5e1;
+            --input-text: #0f172a;
+
+            --badge-dept-bg: #f1f5f9;
+            --badge-dept-text: #475569;
         }
 
         [data-theme="dark"] {
-            /* 深色主題變數覆寫 */
-            --highlight-bg: #3a372c;
-            --highlight-border: #a16207;
-            --watermark-bg: rgba(252, 211, 77, 0.05);
-            --watermark-text: rgba(252, 211, 77, 0.1);
-            --body-bg: #121212;
-            --body-color: #e0e0e0;
-            --sidebar-bg: #1e1e1e;
-            --sidebar-border: #333;
-            --sidebar-link-color: #adb5bd;
-            --sidebar-link-hover-bg: #343a40;
-            --bookmark-card-bg: #1e1e1e;
-            --bookmark-card-border: #333;
-            --bookmark-card-shadow: 0 .125rem .25rem rgba(0, 0, 0, .15);
-            --modal-bg: rgba(0, 0, 0, 0.7);
-            --modal-content-bg: #2d2d2d;
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            --primary-light: rgba(59, 130, 246, 0.15);
+            --primary-accent: #60a5fa;
+
+            --body-bg: #0b1120;
+            --body-color: #e2e8f0;
+            --heading-color: #ffffff;
+            --text-muted: #94a3b8;
+            --text-subtle: #64748b;
+
+            --header-bg: rgba(15, 23, 42, 0.95);
+
+            --sidebar-bg: #111827;
+            --sidebar-border: #1f2937;
+            --sidebar-link-color: #cbd5e1;
+            --sidebar-link-hover-bg: #1f2937;
+            --sidebar-link-hover-color: #ffffff;
+            --sidebar-link-active-bg: #2563eb;
+            --sidebar-link-active-color: #ffffff;
+
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --card-hover-border: #60a5fa;
+            --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+            --card-hover-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.6);
+            --card-icon-bg: rgba(37, 99, 235, 0.2);
+            --card-icon-color: #60a5fa;
+
+            --modal-bg: rgba(0, 0, 0, 0.8);
+            --modal-content-bg: #1e293b;
+            --modal-border: #334155;
+            --drawer-bg: #1e293b;
+
+            --input-bg: #0f172a;
+            --input-border: #334155;
+            --input-text: #f8fafc;
+
+            --badge-dept-bg: #334155;
+            --badge-dept-text: #cbd5e1;
         }
 
         body {
             background-color: var(--body-bg);
             color: var(--body-color);
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-color 0.25s ease, color 0.25s ease;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
         }
 
         body.modal-open {
             overflow: hidden;
         }
 
+        /* 側邊欄樣式 */
         #sidebar {
             background-color: var(--sidebar-bg);
             border-right: 1px solid var(--sidebar-border);
         }
 
-        #sidebar a {
+        .sidebar-header a,
+        .sidebar-header a:focus,
+        .sidebar-header a:active {
+            outline: none !important;
+            box-shadow: none !important;
+            border: none !important;
+            text-decoration: none !important;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .sidebar-title {
+            color: var(--heading-color) !important;
+        }
+
+        .sidebar-subtitle {
+            color: var(--primary-accent) !important;
+        }
+
+        #sidebar nav a {
             color: var(--sidebar-link-color);
         }
 
-        #sidebar a:hover {
-            background-color: var(--sidebar-link-hover-bg);
+        #sidebar nav a:hover {
+            background-color: var(--sidebar-link-hover-bg) !important;
+            color: var(--sidebar-link-hover-color) !important;
         }
 
-        #sidebar a.active {
-            background-color: var(--sidebar-link-active-bg);
-            color: var(--sidebar-link-active-color);
+        #sidebar nav a.active {
+            background-color: var(--sidebar-link-active-bg) !important;
+            color: var(--sidebar-link-active-color) !important;
         }
 
-        #bookmarks-content .bookmark-card-styled {
-            background-color: var(--bookmark-card-bg);
-            border: 1px solid var(--bookmark-card-border);
-            box-shadow: var(--bookmark-card-shadow);
+        .sidebar-footer-btn {
+            color: var(--sidebar-link-color);
+            background-color: transparent;
         }
 
-        #bookmarks-content .bookmark-card-styled.recent::before {
-            content: 'RECENT';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--watermark-text);
-            background-color: var(--watermark-bg);
-            padding: 1rem 2rem;
-            border-radius: 0.5rem;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.5;
+        .sidebar-footer-btn:hover {
+            background-color: var(--sidebar-link-hover-bg) !important;
+            color: var(--sidebar-link-hover-color) !important;
         }
 
+        /* 頂部導覽列 */
+        header.app-header {
+            background-color: var(--header-bg);
+            border-color: var(--sidebar-border);
+        }
+
+        header.app-header h2 {
+            color: var(--heading-color);
+        }
+
+        .search-input {
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--input-text);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* 卡片設計 */
+        .bookmark-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
+            color: var(--body-color);
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .bookmark-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--card-hover-border);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .bookmark-card .card-title {
+            color: var(--heading-color);
+        }
+
+        .bookmark-card .card-desc {
+            color: var(--text-muted);
+        }
+
+        .bookmark-card .card-domain {
+            color: var(--text-subtle);
+        }
+
+        .badge-dept {
+            background-color: var(--badge-dept-bg);
+            color: var(--badge-dept-text);
+        }
+
+        /* 彈窗與抽屜 */
         .modal-backdrop {
             background-color: var(--modal-bg);
+            backdrop-filter: blur(4px);
         }
 
         .modal-content {
             background-color: var(--modal-content-bg);
+            border-color: var(--modal-border);
+            color: var(--body-color);
         }
 
+        .modal-content h3 {
+            color: var(--heading-color);
+        }
+
+        .drawer-content {
+            background-color: var(--drawer-bg);
+            border-color: var(--modal-border);
+            color: var(--body-color);
+        }
+
+        .drawer-content h3 {
+            color: var(--heading-color);
+        }
+
+        /* 表單元素高對比控制 */
+        .app-form-input {
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--input-text);
+        }
+
+        .app-form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        /* 標籤高亮 */
+        mark.search-highlight {
+            background-color: #fef08a;
+            color: #854d0e;
+            padding: 0 2px;
+            border-radius: 2px;
+            font-weight: 600;
+        }
+
+        [data-theme="dark"] mark.search-highlight {
+            background-color: #854d0e;
+            color: #fef08a;
+        }
+
+        /* 自訂滾動條 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.4);
+            border-radius: 9999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 116, 139, 0.7);
+        }
+
+        /* Vue 動畫過渡 */
         .fade-enter-active,
         .fade-leave-active {
-            transition: opacity 0.3s ease;
+            transition: opacity 0.25s ease;
         }
 
         .fade-enter-from,
@@ -134,179 +299,652 @@
             opacity: 0;
         }
 
-        .list-enter-active,
-        .list-leave-active,
-        .list-move {
-            transition: all 0.5s ease;
+        .slide-right-enter-active,
+        .slide-right-leave-active {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
         }
 
-        .list-enter-from,
-        .list-leave-to {
+        .slide-right-enter-from,
+        .slide-right-leave-to {
+            transform: translateX(100%);
             opacity: 0;
-            transform: translateY(30px);
         }
 
-        .list-leave-active {
-            position: absolute;
+        .toast-enter-active,
+        .toast-leave-active {
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .toast-enter-from,
+        .toast-leave-to {
+            opacity: 0;
+            transform: translateY(16px);
         }
     </style>
 </head>
 
-<body class="font-sans antialiased">
+<body class="font-sans antialiased text-sm">
     <div id="app" class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
+        <!-- 側邊欄 Sidebar -->
         <aside id="sidebar"
-            :class="['flex-shrink-0 transition-all duration-300', isSidebarCollapsed ? 'w-16' : 'w-48']">
-            <div class="flex flex-col h-full">
-                <!-- Logo -->
-                <div class="p-4 border-b" :style="{ borderColor: 'var(--sidebar-border)' }">
-                    <div class="flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="text-blue-500">
-                            <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path>
-                        </svg>
-                        <h1 v-show="!isSidebarCollapsed" class="ml-2 text-xl font-semibold whitespace-nowrap">書籤索引</h1>
+            :class="['flex-shrink-0 transition-all duration-300 z-20 flex flex-col', isSidebarCollapsed ? 'w-16' : 'w-52']">
+            
+            <!-- Logo 與標題 (高對比修正) -->
+            <div class="sidebar-header p-3 border-b flex items-center justify-between" :style="{ borderColor: 'var(--sidebar-border)' }">
+                <a href="#" @click.prevent="selectCategory('dashboard')" class="flex items-center space-x-2.5 overflow-hidden focus:outline-none focus:ring-0">
+                    <div class="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <i data-lucide="bookmark-check" class="w-5 h-5"></i>
                     </div>
+                    <div v-show="!isSidebarCollapsed" class="leading-tight truncate">
+                        <h1 class="sidebar-title font-bold text-base tracking-wide">書籤索引</h1>
+                        <p class="sidebar-subtitle text-xs font-semibold">桃園地政事務所</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 分類導航清單 Navigation Links -->
+            <nav class="flex-1 p-2 space-y-1 overflow-y-auto">
+                <!-- 儀表板首頁 -->
+                <a href="#" @click.prevent="selectCategory('dashboard')"
+                    :class="['flex items-center px-3 py-2 rounded-lg transition-colors group', { 'active': currentCategoryId === 'dashboard' && !searchQuery.trim(), 'justify-center': isSidebarCollapsed }]"
+                    title="儀表板首頁">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 flex-shrink-0"></i>
+                    <span v-show="!isSidebarCollapsed" class="ml-2.5 flex-1 font-medium truncate">儀表板首頁</span>
+                    <span v-show="!isSidebarCollapsed && pinnedCount > 0"
+                        class="text-xs px-1.5 py-0.2 rounded-full font-bold"
+                        :style="{ backgroundColor: 'var(--primary-light)', color: 'var(--primary)' }">
+                        {{ pinnedCount }}
+                    </span>
+                </a>
+
+                <!-- 我的最愛 -->
+                <a href="#" @click.prevent="selectCategory('favorites')"
+                    :class="['flex items-center px-3 py-2 rounded-lg transition-colors group', { 'active': currentCategoryId === 'favorites' && !searchQuery.trim(), 'justify-center': isSidebarCollapsed }]"
+                    title="我的最愛與常用">
+                    <i data-lucide="star" class="w-4 h-4 flex-shrink-0 text-amber-500 fill-amber-500"></i>
+                    <span v-show="!isSidebarCollapsed" class="ml-2.5 flex-1 font-medium truncate">我的最愛</span>
+                    <span v-show="!isSidebarCollapsed"
+                        class="text-xs px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 font-bold">
+                        {{ favoriteLinks.length }}
+                    </span>
+                </a>
+
+                <!-- 業務課室分區 -->
+                <div class="py-1 px-3" v-show="!isSidebarCollapsed">
+                    <div class="text-[11px] font-semibold uppercase tracking-wider" :style="{ color: 'var(--text-subtle)' }">課室業務分區</div>
                 </div>
+                <div class="border-t my-1 mx-2" v-show="isSidebarCollapsed" :style="{ borderColor: 'var(--sidebar-border)' }"></div>
 
-                <!-- Navigation Links -->
-                <nav class="flex-1 p-2 space-y-1 overflow-y-auto">
-                    <a v-for="category in bookmarks" :key="category.id" href="#"
-                        @click.prevent="selectCategory(category.id)"
-                        :class="['flex items-center p-2 rounded-md transition-colors', { 'active': currentCategoryId === category.id, 'justify-center': isSidebarCollapsed }]">
-                        <i :data-lucide="category.icon" class="w-5 h-5"></i>
-                        <span v-show="!isSidebarCollapsed" class="ml-3">{{ category.category }}</span>
-                    </a>
-                </nav>
+                <!-- 各課室項目 -->
+                <a v-for="category in categories" :key="category.id" href="#"
+                    @click.prevent="selectCategory(category.id)"
+                    :class="['flex items-center px-3 py-2 rounded-lg transition-colors group', { 'active': currentCategoryId === category.id && !searchQuery.trim(), 'justify-center': isSidebarCollapsed }]"
+                    :title="category.category">
+                    <i :data-lucide="category.icon" class="w-4 h-4 flex-shrink-0"></i>
+                    <span v-show="!isSidebarCollapsed" class="ml-2.5 flex-1 truncate">{{ category.category }}</span>
+                    <span v-show="!isSidebarCollapsed" class="text-xs font-mono" :style="{ color: 'var(--text-subtle)' }">
+                        {{ category.links.length }}
+                    </span>
+                </a>
+            </nav>
 
-                <!-- Footer Controls and Time -->
-                <div class="p-2 border-t" :style="{ borderColor: 'var(--sidebar-border)' }">
-                    <!-- Control Buttons -->
-                    <button @click="toggleTheme" class="w-full flex items-center p-2 rounded-md"
-                        :class="{'justify-center': isSidebarCollapsed}"
-                        :aria-label="theme === 'dark' ? '切換為淺色模式' : '切換為深色模式'">
-                        <!-- 修正: 加入 span wrapper 隔離 Vue 與 Lucide 的 DOM 操作 -->
-                        <span :key="'theme-icon-' + theme" class="inline-flex flex-shrink-0">
-                            <i :data-lucide="theme === 'dark' ? 'sun' : 'moon'" class="w-5 h-5"></i>
-                        </span>
-                        <span v-show="!isSidebarCollapsed" class="ml-3">切換主題</span>
-                    </button>
-                    <button @click="toggleFontSize" class="w-full flex items-center p-2 rounded-md"
-                        :class="{'justify-center': isSidebarCollapsed}" aria-label="調整字體大小">
-                        <span class="inline-flex flex-shrink-0">
-                            <i data-lucide="text" class="w-5 h-5"></i>
-                        </span>
-                        <span v-show="!isSidebarCollapsed" class="ml-3">調整字體 ({{ fontSizeLabel }})</span>
-                    </button>
-                    <button @click="toggleSidebar" class="w-full flex items-center p-2 rounded-md"
-                        :class="{'justify-center': isSidebarCollapsed}"
-                        :aria-label="isSidebarCollapsed ? '展開側邊欄' : '收合側邊欄'">
-                        <!-- 修正: 加入 span wrapper 隔離 Vue 與 Lucide 的 DOM 操作 -->
-                        <span :key="'sidebar-icon-' + isSidebarCollapsed" class="inline-flex flex-shrink-0">
-                            <i :data-lucide="isSidebarCollapsed ? 'panel-right-open' : 'panel-left-close'"
-                                class="w-5 h-5"></i>
-                        </span>
-                        <span v-show="!isSidebarCollapsed" class="ml-3">收合側邊欄</span>
-                    </button>
-                    <!-- Time Display -->
-                    <div v-show="!isSidebarCollapsed" class="my-2 text-center">
-                        <p class="text-lg font-medium">{{ currentTime }}</p>
-                        <p class="text-xs text-gray-500">{{ currentDate }}</p>
-                    </div>
+            <!-- 側邊欄底部工具與時間 (高對比修正，解決滑鼠反白看不清) -->
+            <div class="p-2 border-t space-y-1" :style="{ borderColor: 'var(--sidebar-border)' }">
+                <!-- 深淺色主題切換 -->
+                <button @click="toggleTheme" class="sidebar-footer-btn w-full flex items-center px-2.5 py-1.5 rounded-lg transition-colors"
+                    :class="{'justify-center': isSidebarCollapsed}"
+                    :title="theme === 'dark' ? '切換為淺色模式' : '切換為深色模式'">
+                    <span :key="'theme-icon-' + theme" class="inline-flex flex-shrink-0">
+                        <i :data-lucide="theme === 'dark' ? 'sun' : 'moon'" class="w-4 h-4 text-amber-500"></i>
+                    </span>
+                    <span v-show="!isSidebarCollapsed" class="ml-2.5 text-xs font-medium">{{ theme === 'dark' ? '淺色模式' : '深色模式' }}</span>
+                </button>
+
+                <!-- 字體縮放按鈕 -->
+                <button @click="toggleFontSize" class="sidebar-footer-btn w-full flex items-center px-2.5 py-1.5 rounded-lg transition-colors"
+                    :class="{'justify-center': isSidebarCollapsed}" title="調整字體大小">
+                    <span class="inline-flex flex-shrink-0">
+                        <i data-lucide="type" class="w-4 h-4 text-blue-500"></i>
+                    </span>
+                    <span v-show="!isSidebarCollapsed" class="ml-2.5 text-xs font-medium">字體大小 ({{ fontSizeLabel }})</span>
+                </button>
+
+                <!-- 側邊欄展開/收合 -->
+                <button @click="toggleSidebar" class="sidebar-footer-btn w-full flex items-center px-2.5 py-1.5 rounded-lg transition-colors"
+                    :class="{'justify-center': isSidebarCollapsed}"
+                    :title="isSidebarCollapsed ? '展開側邊欄' : '收合側邊欄'">
+                    <span :key="'sidebar-icon-' + isSidebarCollapsed" class="inline-flex flex-shrink-0">
+                        <i :data-lucide="isSidebarCollapsed ? 'panel-left-open' : 'panel-left-close'" class="w-4 h-4"></i>
+                    </span>
+                    <span v-show="!isSidebarCollapsed" class="ml-2.5 text-xs font-medium">收合導航</span>
+                </button>
+
+                <!-- 即時時鐘 -->
+                <div v-show="!isSidebarCollapsed" class="pt-1.5 text-center border-t border-dashed" :style="{ borderColor: 'var(--sidebar-border)' }">
+                    <p class="text-sm font-semibold tracking-wider font-mono text-blue-600 dark:text-blue-400">{{ currentTime }}</p>
+                    <p class="text-[11px] truncate" :style="{ color: 'var(--text-subtle)' }">{{ currentDate }}</p>
                 </div>
             </div>
         </aside>
 
-        <!-- Main Content -->
-        <main class="flex-1 flex flex-col overflow-hidden">
-            <header class="flex items-center justify-between p-4 border-b"
+        <!-- 主內容區域 Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden relative">
+            
+            <!-- 頂部功能導覽列 Top Header -->
+            <header class="app-header p-3 border-b flex items-center justify-between gap-3 backdrop-blur-md z-10"
                 :style="{ borderColor: 'var(--sidebar-border)' }">
-                <h2 class="text-2xl font-bold">{{ currentCategory.category }}</h2>
-            </header>
-            <div id="bookmarks-content" class="flex-1 p-4 overflow-y-auto">
-                <transition-group name="list" tag="div"
-                    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
-                    <div v-for="link in currentCategoryLinks" :key="link.id"
-                        class="bookmark-card-styled relative rounded-lg p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1 overflow-hidden"
-                        :class="{ 'recent': recentLinks.includes(link.id) }" :style="getRecentHighlightStyle(link)">
+                
+                <!-- 標題與路徑提示 -->
+                <div class="flex items-center space-x-2 min-w-0 flex-shrink-0">
+                    <h2 class="text-lg font-bold truncate flex items-center gap-2">
+                        <i v-if="currentViewIcon" :data-lucide="currentViewIcon" class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0"></i>
+                        <span>{{ currentViewTitle }}</span>
+                    </h2>
+                    <span v-if="!searchQuery.trim()" class="text-xs px-2 py-0.5 rounded-full font-medium badge-dept">
+                        {{ currentDisplayLinks.length }} 個項目
+                    </span>
+                </div>
 
-                        <!-- *** FIX: 移除 .prevent 修飾符 *** -->
-                        <a :href="link.href" :target="getLinkTarget(link.href)" @click="handleLinkClick(link, $event)"
-                            @mouseover="handlePdfHover($event, link.href)" @mouseleave="hidePdfPopover"
-                            class="flex flex-col items-center justify-center w-full h-full z-10">
-                            <i :data-lucide="link.icon || 'globe'" class="w-10 h-10 mb-2 text-blue-500"></i>
-                            <h3 class="font-semibold">{{ link.title }}</h3>
-                            <p v-if="link.description || link.nextMonthHtml" class="text-xs text-gray-500 mt-1">
-                                <span v-html="markdownToHtml(link.description)"></span>
-                                <span v-if="link.nextMonthHtml" v-html="link.nextMonthHtml"></span>
-                            </p>
-                        </a>
-
-                        <div v-if="isDownloadable(link.href) || link.href.toLowerCase().endsWith('.pdf')"
-                            class="absolute bottom-2 right-2 z-20">
-                            <button @click.stop="openPdfModal(link.href)"
-                                v-if="link.href.toLowerCase().endsWith('.pdf')"
-                                class="p-1.5 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-gray-700 dark:text-gray-200"
-                                aria-label="預覽PDF">
-                                <i data-lucide="eye" class="w-4 h-4"></i>
+                <!-- 全域即時搜尋列 Global Search -->
+                <div class="flex-1 max-w-xl mx-2 relative">
+                    <div class="relative flex items-center">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none" :style="{ color: 'var(--text-muted)' }">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                        </div>
+                        <input ref="searchInputRef" type="text" v-model="searchQuery"
+                            placeholder="全域搜尋系統名稱、功能關鍵字或網址... (快捷鍵: /)"
+                            class="search-input w-full pl-9 pr-14 py-1.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                            @keydown.esc="clearSearch">
+                        <div class="absolute inset-y-0 right-0 pr-2 flex items-center space-x-1">
+                            <button v-if="searchQuery.trim()" @click="clearSearch"
+                                class="p-1 rounded hover:opacity-75" :style="{ color: 'var(--text-muted)' }" title="清除搜尋 (Esc)">
+                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
                             </button>
+                            <span v-else class="text-[10px] px-1.5 py-0.5 rounded border text-gray-400 font-mono" :style="{ borderColor: 'var(--input-border)' }">/</span>
                         </div>
                     </div>
-                </transition-group>
+                </div>
+
+                <!-- 頂部快捷按鈕群 Action Buttons -->
+                <div class="flex items-center space-x-2 flex-shrink-0">
+                    <!-- 熱門排行抽屜開關 -->
+                    <button @click="toggleTopVisitedDrawer"
+                        class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors"
+                        :style="{
+                            backgroundColor: theme === 'dark' ? 'rgba(217, 119, 6, 0.15)' : '#fffbeb',
+                            borderColor: theme === 'dark' ? '#b45309' : '#fde68a',
+                            color: theme === 'dark' ? '#fcd34d' : '#92400e'
+                        }"
+                        title="查看這台電腦最常造訪的系統">
+                        <i data-lucide="flame" class="w-4 h-4 text-amber-500"></i>
+                        <span class="hidden sm:inline">熱門排行</span>
+                    </button>
+
+                    <!-- 新增個人書籤按鈕 -->
+                    <button @click="openAddBookmarkModal"
+                        class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors text-xs font-medium shadow-sm"
+                        title="新增自訂常用網址">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">新增書籤</span>
+                    </button>
+
+                    <!-- 備份與還原按鈕 -->
+                    <button @click="openBackupModal"
+                        class="p-1.5 rounded-lg border hover:opacity-80 transition-colors"
+                        :style="{ borderColor: 'var(--sidebar-border)', color: 'var(--body-color)' }"
+                        title="個人書籤備份與還原">
+                        <i data-lucide="settings-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- 書籤主列表展示區 Bookmark Grid Container -->
+            <div id="bookmarks-content" class="flex-1 p-4 overflow-y-auto space-y-6">
+
+                <!-- 狀態一：搜尋中顯示結果 Search Results View -->
+                <div v-if="searchQuery.trim()">
+                    <div class="mb-3 flex items-center justify-between">
+                        <p class="text-sm font-semibold flex items-center gap-1.5" :style="{ color: 'var(--heading-color)' }">
+                            <i data-lucide="filter" class="w-4 h-4 text-blue-500"></i>
+                            <span>搜尋「<span class="text-blue-500 font-bold">{{ searchQuery }}</span>」的結果：共 {{ filteredSearchResults.length }} 筆</span>
+                        </p>
+                        <button @click="clearSearch" class="text-xs text-blue-500 hover:underline">返回原本檢視</button>
+                    </div>
+
+                    <!-- 查無結果 Empty Search Result -->
+                    <div v-if="filteredSearchResults.length === 0" class="py-16 text-center space-y-3">
+                        <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto" :style="{ backgroundColor: 'var(--badge-dept-bg)', color: 'var(--text-muted)' }">
+                            <i data-lucide="search-x" class="w-6 h-6"></i>
+                        </div>
+                        <p class="text-base font-medium" :style="{ color: 'var(--heading-color)' }">查無符合的書籤系統</p>
+                        <p class="text-xs" :style="{ color: 'var(--text-muted)' }">請嘗試簡化關鍵字，或點擊右上角「新增書籤」手動建立專屬連結</p>
+                        <button @click="openAddBookmarkModal" class="inline-flex items-center px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            <i data-lucide="plus" class="w-3.5 h-3.5 mr-1"></i> 新增此網址至個人書籤
+                        </button>
+                    </div>
+
+                    <!-- 搜尋結果卡片網格 -->
+                    <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5">
+                        <div v-for="link in filteredSearchResults" :key="link.id" class="bookmark-card rounded-xl p-3.5 flex flex-col justify-between relative group">
+                            <card-body :link="link" :is-pinned="isPinned(link.id)" :search-query="searchQuery"
+                                @toggle-pin="togglePin(link)" @copy="handleCopy(link.href)"
+                                @open-iframe="openIframeModal(link.href, link.title)" @open-pdf="openPdfModal(link.href)"
+                                @pdf-hover="handlePdfHover($event, link.href)" @pdf-leave="hidePdfPopover"
+                                @edit="openEditBookmarkModal(link)"
+                                @delete="deleteCustomBookmark(link.id)"
+                                @visit="recordVisit(link)" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 狀態二：儀表板首頁檢視 Dashboard View -->
+                <div v-else-if="currentCategoryId === 'dashboard'" class="space-y-6">
+                    
+                    <!-- 專區一：我的最愛與常用捷徑 Pinned & Custom Section -->
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="p-1.5 rounded-lg bg-amber-100 text-amber-600">
+                                    <i data-lucide="star" class="w-4 h-4 fill-amber-500 text-amber-500"></i>
+                                </span>
+                                <h3 class="text-base font-bold" :style="{ color: 'var(--heading-color)' }">我的最愛 ＆ 常用捷徑</h3>
+                                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                                    {{ favoriteLinks.length }}
+                                </span>
+                            </div>
+                            <button @click="openAddBookmarkModal" class="text-xs text-blue-500 hover:underline flex items-center gap-1 font-medium">
+                                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> 新增自訂書籤
+                            </button>
+                        </div>
+
+                        <!-- 尚未加入最愛時的親切引導空狀態 -->
+                        <div v-if="favoriteLinks.length === 0"
+                            class="p-6 rounded-xl border border-dashed text-center space-y-2"
+                            :style="{ borderColor: 'var(--card-border)', backgroundColor: 'var(--sidebar-bg)' }">
+                            <div class="w-10 h-10 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mx-auto">
+                                <i data-lucide="star" class="w-5 h-5"></i>
+                            </div>
+                            <h4 class="font-medium" :style="{ color: 'var(--heading-color)' }">您尚未收藏任何常用書籤</h4>
+                            <p class="text-xs max-w-sm mx-auto" :style="{ color: 'var(--text-muted)' }">
+                                點擊下方各課室卡片右上角的「<span class="text-amber-500 font-bold">⭐</span>」星號，即可釘選到最愛專區；或點擊「新增書籤」加入您個人的常去網址。
+                            </p>
+                        </div>
+
+                        <!-- 我的最愛卡片網格 -->
+                        <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5">
+                            <div v-for="link in favoriteLinks" :key="link.id" class="bookmark-card rounded-xl p-3.5 flex flex-col justify-between relative group">
+                                <card-body :link="link" :is-pinned="isPinned(link.id)"
+                                    @toggle-pin="togglePin(link)" @copy="handleCopy(link.href)"
+                                    @open-iframe="openIframeModal(link.href, link.title)" @open-pdf="openPdfModal(link.href)"
+                                    @pdf-hover="handlePdfHover($event, link.href)" @pdf-leave="hidePdfPopover"
+                                    @edit="openEditBookmarkModal(link)"
+                                    @delete="deleteCustomBookmark(link.id)"
+                                    @visit="recordVisit(link)" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 專區二：課室全覽卡片組 (依課室展開) -->
+                    <div v-for="cat in categories" :key="cat.id" class="space-y-3">
+                        <div class="flex items-center justify-between border-b pb-2" :style="{ borderColor: 'var(--sidebar-border)' }">
+                            <div class="flex items-center space-x-2">
+                                <i :data-lucide="cat.icon" class="w-4 h-4 text-blue-500"></i>
+                                <h3 class="font-bold text-sm" :style="{ color: 'var(--heading-color)' }">{{ cat.category }}</h3>
+                                <span class="text-xs" :style="{ color: 'var(--text-subtle)' }">({{ cat.links.length }})</span>
+                            </div>
+                            <button @click="selectCategory(cat.id)" class="text-xs text-blue-500 hover:underline flex items-center gap-0.5">
+                                <span>進入該課室</span>
+                                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5">
+                            <div v-for="link in getVisibleLinks(cat.links)" :key="link.id"
+                                class="bookmark-card rounded-xl p-3.5 flex flex-col justify-between relative group">
+                                <card-body :link="link" :is-pinned="isPinned(link.id)"
+                                    @toggle-pin="togglePin(link)" @copy="handleCopy(link.href)"
+                                    @open-iframe="openIframeModal(link.href, link.title)" @open-pdf="openPdfModal(link.href)"
+                                    @pdf-hover="handlePdfHover($event, link.href)" @pdf-leave="hidePdfPopover"
+                                    @edit="openEditBookmarkModal(link)"
+                                    @delete="deleteCustomBookmark(link.id)"
+                                    @visit="recordVisit(link)" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 狀態三：特定課室或我的最愛單一分頁檢視 Single Category View -->
+                <div v-else>
+                    <div v-if="currentDisplayLinks.length === 0" class="py-16 text-center space-y-3">
+                        <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto" :style="{ backgroundColor: 'var(--badge-dept-bg)', color: 'var(--text-muted)' }">
+                            <i data-lucide="inbox" class="w-6 h-6"></i>
+                        </div>
+                        <p class="text-base font-medium" :style="{ color: 'var(--heading-color)' }">此分區目前沒有書籤</p>
+                    </div>
+
+                    <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5">
+                        <div v-for="link in currentDisplayLinks" :key="link.id"
+                            class="bookmark-card rounded-xl p-3.5 flex flex-col justify-between relative group">
+                            <card-body :link="link" :is-pinned="isPinned(link.id)"
+                                @toggle-pin="togglePin(link)" @copy="handleCopy(link.href)"
+                                @open-iframe="openIframeModal(link.href, link.title)" @open-pdf="openPdfModal(link.href)"
+                                @pdf-hover="handlePdfHover($event, link.href)" @pdf-leave="hidePdfPopover"
+                                @edit="openEditBookmarkModal(link)"
+                                @delete="deleteCustomBookmark(link.id)"
+                                @visit="recordVisit(link)" />
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </main>
 
-        <!-- PDF Modal -->
+        <!-- 管理權限 PIN 碼驗證彈窗 PIN Modal -->
         <transition name="fade">
-            <div v-if="pdfModal.visible" class="fixed inset-0 z-50 flex items-center justify-center">
+            <div v-if="pinModal.visible" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div class="modal-backdrop absolute inset-0" @click="closePinModal"></div>
+                <div class="modal-content relative w-full max-w-sm rounded-2xl shadow-2xl p-6 z-10 border space-y-4">
+                    <div class="flex items-center justify-between border-b pb-3" :style="{ borderColor: 'var(--sidebar-border)' }">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                                <i data-lucide="lock" class="w-4 h-4"></i>
+                            </div>
+                            <h3 class="font-bold text-base">管理權限驗證</h3>
+                        </div>
+                        <button @click="closePinModal" class="p-1 rounded-lg hover:opacity-75" :style="{ color: 'var(--text-muted)' }">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <p class="text-xs" :style="{ color: 'var(--text-muted)' }">
+                        為維護書籤系統正確性，新增、編輯或刪除自訂書籤需要輸入管理 PIN 碼。
+                    </p>
+
+                    <form @submit.prevent="verifyPin" class="space-y-3">
+                        <div>
+                            <input ref="pinInputRef" type="password" v-model="pinModal.input" required
+                                placeholder="請輸入 PIN 碼 (預設: a.123456)"
+                                class="app-form-input w-full px-3 py-2 rounded-lg border text-sm font-mono focus:outline-none">
+                            <p v-if="pinModal.error" class="text-xs text-red-500 font-semibold mt-1 flex items-center gap-1">
+                                <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+                                <span>{{ pinModal.error }}</span>
+                            </p>
+                        </div>
+
+                        <div class="pt-2 flex justify-end space-x-2">
+                            <button type="button" @click="closePinModal"
+                                class="px-3.5 py-1.5 text-xs font-medium rounded-lg border"
+                                :style="{ borderColor: 'var(--sidebar-border)', color: 'var(--body-color)' }">
+                                取消
+                            </button>
+                            <button type="submit"
+                                class="px-4 py-1.5 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-1">
+                                <i data-lucide="key" class="w-3.5 h-3.5"></i>
+                                <span>驗證進入</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </transition>
+
+        <!-- 熱門造訪排行抽屜 Top Visited Drawer -->
+        <transition name="slide-right">
+            <div v-if="drawerVisible" class="fixed inset-y-0 right-0 z-40 w-80 sm:w-96 shadow-2xl flex flex-col drawer-content border-l">
+                <div class="p-4 border-b flex items-center justify-between" :style="{ borderColor: 'var(--sidebar-border)' }">
+                    <div class="flex items-center space-x-2">
+                        <span class="p-1.5 rounded-lg bg-amber-100 text-amber-600">
+                            <i data-lucide="flame" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <h3 class="font-bold text-base">熱門造訪排行</h3>
+                            <p class="text-[11px]" :style="{ color: 'var(--text-muted)' }">這台電腦點擊次數最多的 Top 10 系統</p>
+                        </div>
+                    </div>
+                    <button @click="drawerVisible = false" class="p-1 rounded-lg hover:opacity-75" :style="{ color: 'var(--text-muted)' }" title="關閉">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <div class="flex-1 p-3 overflow-y-auto space-y-2">
+                    <div v-if="topVisitedLinks.length === 0" class="py-12 text-center space-y-2" :style="{ color: 'var(--text-muted)' }">
+                        <i data-lucide="bar-chart-2" class="w-8 h-8 mx-auto opacity-50"></i>
+                        <p class="text-xs">目前尚無點擊紀錄，開始使用系統後將自動累計排行！</p>
+                    </div>
+
+                    <a v-for="(item, index) in topVisitedLinks" :key="item.id"
+                        :href="item.href" target="_blank" @click="recordVisit(item)"
+                        class="p-2.5 rounded-xl border hover:border-blue-400 transition-all flex items-center justify-between group"
+                        :style="{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'var(--sidebar-border)' }">
+                        <div class="flex items-center space-x-3 min-w-0">
+                            <span :class="[
+                                'w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0',
+                                index === 0 ? 'bg-amber-500 text-white shadow-sm' :
+                                index === 1 ? 'bg-slate-300 text-slate-800' :
+                                index === 2 ? 'bg-amber-700 text-amber-100' :
+                                'bg-gray-100 text-gray-600'
+                            ]">
+                                {{ index + 1 }}
+                            </span>
+                            <div class="min-w-0">
+                                <h4 class="font-medium text-xs group-hover:text-blue-500 truncate" :style="{ color: 'var(--heading-color)' }">
+                                    {{ item.title }}
+                                </h4>
+                                <p class="text-[11px] truncate" :style="{ color: 'var(--text-muted)' }">{{ item.categoryName || '個人自訂' }}</p>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0 ml-2 text-right">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700">
+                                {{ item.visits }} 次
+                            </span>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="p-3 border-t text-center" :style="{ borderColor: 'var(--sidebar-border)', color: 'var(--text-muted)' }">
+                    <p class="text-[11px]">數據僅儲存於此瀏覽器，保護同仁操作隱私</p>
+                </div>
+            </div>
+        </transition>
+
+        <!-- 新增 / 編輯 個人書籤 Modal -->
+        <transition name="fade">
+            <div v-if="bookmarkModal.visible" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div class="modal-backdrop absolute inset-0" @click="closeBookmarkModal"></div>
+                <div class="modal-content relative w-full max-w-md rounded-2xl shadow-2xl p-6 z-10 border space-y-4">
+                    <div class="flex items-center justify-between border-b pb-3" :style="{ borderColor: 'var(--sidebar-border)' }">
+                        <h3 class="font-bold text-base flex items-center gap-2">
+                            <i data-lucide="bookmark-plus" class="w-5 h-5 text-blue-600"></i>
+                            <span>{{ bookmarkModal.isEdit ? '編輯自訂書籤' : '新增自訂書籤' }}</span>
+                        </h3>
+                        <button @click="closeBookmarkModal" class="p-1 rounded-lg hover:opacity-75" :style="{ color: 'var(--text-muted)' }">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <form @submit.prevent="saveCustomBookmark" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold mb-1" :style="{ color: 'var(--body-color)' }">
+                                網站名稱 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" v-model="bookmarkModal.form.title" required placeholder="例如：地所差勤代簽登記、地政法規新訊..."
+                                class="app-form-input w-full px-3 py-2 rounded-lg border text-sm focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold mb-1" :style="{ color: 'var(--body-color)' }">
+                                網站網址 (URL) <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" v-model="bookmarkModal.form.href" required placeholder="例如：http://220.1.34.18/... 或 https://..."
+                                class="app-form-input w-full px-3 py-2 rounded-lg border text-sm font-mono focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold mb-1" :style="{ color: 'var(--body-color)' }">備註說明 (選填)</label>
+                            <textarea v-model="bookmarkModal.form.description" rows="2" placeholder="簡述網站用途或備忘註記..."
+                                class="app-form-input w-full px-3 py-2 rounded-lg border text-sm focus:outline-none"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold mb-1.5" :style="{ color: 'var(--body-color)' }">代表圖示</label>
+                            <div class="grid grid-cols-6 gap-2">
+                                <button type="button" v-for="iconName in presetIcons" :key="iconName"
+                                    @click="bookmarkModal.form.icon = iconName"
+                                    :class="[
+                                        'p-2 rounded-lg border flex items-center justify-center transition-all',
+                                        bookmarkModal.form.icon === iconName ? 'border-blue-500 bg-blue-50 text-blue-600 ring-2 ring-blue-500' : 'text-gray-400 hover:text-blue-500'
+                                    ]" :style="{ borderColor: 'var(--input-border)' }">
+                                    <i :data-lucide="iconName" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 flex justify-end space-x-2 border-t" :style="{ borderColor: 'var(--sidebar-border)' }">
+                            <button type="button" @click="closeBookmarkModal"
+                                class="px-4 py-2 text-xs font-medium rounded-lg border"
+                                :style="{ borderColor: 'var(--sidebar-border)', color: 'var(--body-color)' }">
+                                取消
+                            </button>
+                            <button type="submit"
+                                class="px-4 py-2 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+                                {{ bookmarkModal.isEdit ? '儲存修改' : '建立書籤' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </transition>
+
+        <!-- 個人書籤備份與還原 Modal Backup & Restore -->
+        <transition name="fade">
+            <div v-if="backupModalVisible" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div class="modal-backdrop absolute inset-0" @click="backupModalVisible = false"></div>
+                <div class="modal-content relative w-full max-w-lg rounded-2xl shadow-2xl p-6 z-10 border space-y-5">
+                    <div class="flex items-center justify-between border-b pb-3" :style="{ borderColor: 'var(--sidebar-border)' }">
+                        <div class="flex items-center space-x-2">
+                            <span class="p-1.5 rounded-lg bg-blue-100 text-blue-600">
+                                <i data-lucide="settings-2" class="w-5 h-5"></i>
+                            </span>
+                            <div>
+                                <h3 class="font-bold text-base">個人書籤備份與還原</h3>
+                                <p class="text-xs" :style="{ color: 'var(--text-muted)' }">當您更換電腦或瀏覽器時，可匯出/匯入常用書籤紀錄</p>
+                            </div>
+                        </div>
+                        <button @click="backupModalVisible = false" class="p-1 rounded-lg hover:opacity-75" :style="{ color: 'var(--text-muted)' }">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <!-- 匯出備份區 -->
+                    <div class="p-4 rounded-xl border space-y-2" :style="{ borderColor: 'var(--card-border)', backgroundColor: 'var(--sidebar-bg)' }">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="download" class="w-4 h-4 text-blue-600"></i>
+                                <span class="font-semibold text-xs" :style="{ color: 'var(--heading-color)' }">匯出本機備份檔 (JSON)</span>
+                            </div>
+                            <button @click="exportBackupData"
+                                class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium shadow-sm flex items-center gap-1.5">
+                                <i data-lucide="file-down" class="w-3.5 h-3.5"></i>
+                                <span>下載備份檔</span>
+                            </button>
+                        </div>
+                        <p class="text-[11px]" :style="{ color: 'var(--text-muted)' }">包含已釘選的 {{ pinnedCount }} 筆最愛、{{ (userBookmarks || []).length }} 筆自訂網站與點擊排行記錄。</p>
+                    </div>
+
+                    <!-- 匯入還原區 -->
+                    <div class="p-4 rounded-xl border space-y-3" :style="{ borderColor: 'var(--card-border)', backgroundColor: 'var(--sidebar-bg)' }">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="upload" class="w-4 h-4 text-emerald-600"></i>
+                            <span class="font-semibold text-xs" :style="{ color: 'var(--heading-color)' }">匯入還原備份檔</span>
+                        </div>
+                        <p class="text-[11px]" :style="{ color: 'var(--text-muted)' }">選擇先前下載的 .json 備份檔，將常用網站與釘選資料還原至此電腦。</p>
+                        
+                        <div class="flex items-center space-x-2">
+                            <input ref="importFileInput" type="file" accept=".json" class="text-xs file:mr-2 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <button @click="importBackupData"
+                                class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium shadow-sm flex items-center gap-1">
+                                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                <span>確認還原</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 重設清理區 -->
+                    <div class="pt-2 flex items-center justify-between border-t" :style="{ borderColor: 'var(--sidebar-border)' }">
+                        <span class="text-xs" :style="{ color: 'var(--text-muted)' }">若需恢復出廠預設狀態：</span>
+                        <button @click="resetAllPersonalData"
+                            class="text-xs text-red-500 hover:text-red-700 flex items-center gap-1">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            <span>清除所有本機個人紀錄</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- PDF 預覽彈窗 Modal -->
+        <transition name="fade">
+            <div v-if="pdfModal.visible" class="fixed inset-0 z-50 flex items-center justify-center p-4">
                 <div class="modal-backdrop absolute inset-0" @click="closePdfModal"></div>
-                <div class="modal-content relative w-11/12 h-5/6 max-w-4xl rounded-lg shadow-xl flex flex-col">
-                    <header class="flex items-center justify-between p-4 border-b">
-                        <h3 class="font-semibold text-lg">PDF 預覽</h3>
-                        <button @click="closePdfModal" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
-                            aria-label="關閉">
-                            <i data-lucide="x" class="w-6 h-6"></i>
+                <div class="modal-content relative w-11/12 h-5/6 max-w-5xl rounded-2xl shadow-2xl flex flex-col z-10 border overflow-hidden">
+                    <header class="flex items-center justify-between p-3.5 border-b" :style="{ borderColor: 'var(--sidebar-border)' }">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="file-text" class="w-5 h-5 text-red-500"></i>
+                            <h3 class="font-bold text-sm">公務文件預覽 (PDF)</h3>
+                        </div>
+                        <button @click="closePdfModal" class="p-1 rounded-lg hover:opacity-75" :style="{ color: 'var(--text-muted)' }" aria-label="關閉">
+                            <i data-lucide="x" class="w-5 h-5"></i>
                         </button>
                     </header>
-                    <div class="flex-1 p-2">
-                        <iframe :src="pdfModal.url" class="w-full h-full border-0" title="PDF Viewer"></iframe>
+                    <div class="flex-1 p-2 bg-gray-100 dark:bg-slate-900">
+                        <iframe :src="pdfModal.url" class="w-full h-full rounded-lg border-0 bg-white" title="PDF Viewer"></iframe>
                     </div>
                 </div>
             </div>
         </transition>
 
-        <!-- IFrame Modal -->
+        <!-- IFrame 內嵌視窗 (Ctrl + 點擊) -->
         <transition name="fade">
-            <div v-if="iframeModal.visible"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-8">
+            <div v-if="iframeModal.visible" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
                 <div class="modal-backdrop absolute inset-0" @click="closeIframeModal"></div>
-                <div class="modal-content relative w-full h-full rounded-lg shadow-xl flex flex-col">
-                    <header class="flex items-center justify-between p-4 border-b">
-                        <h3 class="font-semibold text-lg truncate pr-4">{{ iframeModal.title }}</h3>
-                        <button @click="closeIframeModal"
-                            class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 flex-shrink-0"
-                            aria-label="關閉">
-                            <i data-lucide="x" class="w-6 h-6"></i>
+                <div class="modal-content relative w-full h-full max-w-6xl rounded-2xl shadow-2xl flex flex-col z-10 border overflow-hidden">
+                    <header class="flex items-center justify-between p-3.5 border-b" :style="{ borderColor: 'var(--sidebar-border)' }">
+                        <h3 class="font-bold text-sm truncate pr-4">{{ iframeModal.title }}</h3>
+                        <button @click="closeIframeModal" class="p-1 rounded-lg hover:opacity-75" :style="{ color: 'var(--text-muted)' }" aria-label="關閉">
+                            <i data-lucide="x" class="w-5 h-5"></i>
                         </button>
                     </header>
-                    <div class="flex-1 p-2">
-                        <iframe :src="iframeModal.url" class="w-full h-full border-0"
-                            :title="iframeModal.title"></iframe>
+                    <div class="flex-1 p-2 bg-gray-100 dark:bg-slate-900">
+                        <iframe :src="iframeModal.url" class="w-full h-full rounded-lg border-0 bg-white" :title="iframeModal.title"></iframe>
                     </div>
                 </div>
             </div>
         </transition>
 
-        <!-- PDF Popover -->
-        <div ref="pdfPopover" v-show="pdfPopoverState.visible"
+        <!-- PDF 懸浮預覽浮動小視窗 PDF Hover Popover -->
+        <div ref="pdfPopover" v-if="pdfPopoverState.visible && pdfPopoverState.url"
             :style="{ top: pdfPopoverState.y + 'px', left: pdfPopoverState.x + 'px' }"
-            class="fixed z-50 w-80 h-96 bg-white border border-gray-300 rounded-lg shadow-lg pointer-events-none">
+            class="fixed z-50 w-80 h-96 bg-white border rounded-xl shadow-2xl pointer-events-none overflow-hidden"
+            :style="{ borderColor: 'var(--modal-border)' }">
             <iframe :src="pdfPopoverState.url" class="w-full h-full border-0" title="PDF Popover"></iframe>
         </div>
+
+        <!-- 浮動 Toast 提示訊息 Floating Toast Notification -->
+        <transition name="toast">
+            <div v-if="toast.visible"
+                class="fixed bottom-6 right-6 z-50 flex items-center space-x-2 px-4 py-2.5 rounded-xl shadow-xl border text-xs font-medium"
+                :class="[
+                    toast.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' :
+                    toast.type === 'error' ? 'bg-rose-50 border-rose-200 text-rose-800' :
+                    'bg-slate-900 text-white border-slate-700'
+                ]">
+                <i :data-lucide="toast.type === 'success' ? 'check-circle' : toast.type === 'error' ? 'alert-circle' : 'info'" class="w-4 h-4 flex-shrink-0"></i>
+                <span>{{ toast.message }}</span>
+            </div>
+        </transition>
     </div>
 
-    <!-- 將書籤資料從 JS 邏輯中分離出來 -->
+    <!-- 內嵌預設備援書籤資料 (確保無外部連線或 file:// 模式皆可直接載入) -->
     <script id="bookmark-data" type="application/json">
     [
         {
@@ -436,7 +1074,7 @@
             { "title": "VM備份紀錄監控", "href": "http://220.1.34.220:8082/", "description": "VM備份紀錄監控 http://220.1.34.220:8082/", "icon": "cloud" },
             { "title": "信貸投資 4-4-2 儀表板", "href": "/project/investment/", "description": "隱藏的投資儀表板工具", "icon": "bar-chart-2", "isHidden": true },
             { "title": "凡人修仙傳", "href": "/project/novel/", "description": "隱藏的凡人修仙傳小說閱讀器", "icon": "book-open", "isHidden": true },
-            { "title": "英文謄本住址翻譯", "href": "http://220.1.34.18/eng.html",   "description": "內政部 / 中華郵政「中文地址英譯」對照檔", "icon": "globe" },
+            { "title": "英文謄本住址翻譯", "href": "http://220.1.34.18/eng.html", "description": "內政部 / 中華郵政「中文地址英譯」對照檔", "icon": "globe" },
             { "title": "DGX Spark vLLM 部署指南", "href": "http://220.1.34.75/project/dgx/", "description": "介紹 vLLM (gemma4-26B-A4B) 的安裝、部署、模型管理與 API 設定流程。", "icon": "microchip" },
             { "title": "廠商操作錄影播放", "href": "http://220.1.34.75/project/video/", "description": "線上播放廠商操作錄影 http://220.1.34.75/project/video/", "icon": "video" }
             ]
@@ -489,511 +1127,874 @@
     ]
     </script>
 
+    <!-- Vue 3 核心程式碼 -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const { createApp, ref, reactive, computed, watch, onMounted, nextTick } = Vue;
 
             // =================================================================
-            // Composable 函式：將相關邏輯封裝在一起，提高可讀性與複用性
+            // 工具函式 Helpers
             // =================================================================
 
-            /**
-             * @description 管理主題（淺色/深色模式）的 Composable
-             */
-            function useTheme() {
-                const getInitialTheme = () => {
-                    const storedTheme = localStorage.getItem('theme');
-                    if (storedTheme === 'light' || storedTheme === 'dark') {
-                        return storedTheme;
+            // 網路類型判斷 (局所內網 / 外部服務)
+            function getNetworkType(url) {
+                if (!url) return { isInternal: false, label: '外部網路', icon: 'globe' };
+                try {
+                    const u = new URL(url, window.location.origin);
+                    const host = u.hostname;
+                    if (
+                        host === 'localhost' ||
+                        host === '127.0.0.1' ||
+                        host.startsWith('192.168.') ||
+                        host.startsWith('10.') ||
+                        host.startsWith('220.1.') ||
+                        host.startsWith('220.5.') ||
+                        host.startsWith('210.241.') ||
+                        url.startsWith('/')
+                    ) {
+                        return { isInternal: true, label: '局所內網', icon: 'lock' };
                     }
-                    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                        return 'dark';
+                } catch (e) {
+                    if (url.startsWith('/')) {
+                        return { isInternal: true, label: '局所內網', icon: 'lock' };
                     }
-                    return 'light';
-                };
-
-                const theme = ref(getInitialTheme());
-
-                const applyTheme = (themeValue) => {
-                    document.documentElement.dataset.theme = themeValue;
-                };
-
-                const toggleTheme = () => {
-                    theme.value = theme.value === 'light' ? 'dark' : 'light';
-                };
-
-                watch(theme, (newTheme) => {
-                    localStorage.setItem('theme', newTheme);
-                    applyTheme(newTheme);
-                }, { immediate: true });
-
-                return { theme, toggleTheme };
+                }
+                return { isInternal: false, label: '外部網路', icon: 'globe' };
             }
 
-            /**
-             * @description 管理側邊欄狀態的 Composable
-             */
-            function useSidebar() {
-                const isSidebarCollapsed = ref(localStorage.getItem('sidebarCollapsed') === 'true');
-
-                const toggleSidebar = () => {
-                    isSidebarCollapsed.value = !isSidebarCollapsed.value;
-                };
-
-                watch(isSidebarCollapsed, (isCollapsed) => {
-                    localStorage.setItem('sidebarCollapsed', isCollapsed);
-                });
-
-                return { isSidebarCollapsed, toggleSidebar };
+            // 安全剪貼簿複製 (含非 HTTPS 回退)
+            async function copyToClipboard(text) {
+                try {
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(text);
+                        return true;
+                    }
+                } catch (e) {}
+                try {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = text;
+                    textArea.style.position = "fixed";
+                    textArea.style.left = "-999999px";
+                    textArea.style.top = "-999999px";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    return successful;
+                } catch (err) {
+                    return false;
+                }
             }
 
-            /**
-             * @description 管理即時時鐘的 Composable
-             */
-            function useClock() {
-                const currentTime = ref('');
-                const currentDate = ref('');
-
-                const updateTime = () => {
-                    const now = new Date();
-                    currentTime.value = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-                    currentDate.value = now.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
-                };
-
-                onMounted(() => {
-                    updateTime();
-                    setInterval(updateTime, 1000);
-                });
-
-                return { currentTime, currentDate };
+            // Markdown 解析器
+            const renderer = new marked.Renderer();
+            renderer.link = (href, title, text) => {
+                if (typeof href !== 'string' || !href) return text;
+                const isExternal = href.startsWith('http');
+                const target = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
+                return `<a href="${href}" title="${title || ''}" class="text-blue-500 hover:underline"${target}>${text}</a>`;
+            };
+            marked.use({ renderer });
+            function markdownToHtml(markdownText) {
+                if (!markdownText) return '';
+                const textWithLinkedUrls = markdownText.replace(
+                    /(?<!\S)(https?:\/\/[^\s<>"']+)/g,
+                    (url) => `[${url}](${url})`
+                );
+                return marked.parse(textWithLinkedUrls, { breaks: true, gfm: true });
             }
 
-            /**
-             * @description 管理字體大小的 Composable
-             */
-            function useFontSize() {
-                const fontSizes = { small: '110%', medium: '120%', large: '130%' };
-                const fontSizeKeys = ['small', 'medium', 'large'];
-                const fontSizeLabels = { small: '小', medium: '中', large: '大' };
-
-                const fontSize = ref(localStorage.getItem('fontSize') || 'small');
-
-                const fontSizeLabel = computed(() => fontSizeLabels[fontSize.value]);
-
-                const applyFontSize = () => {
-                    document.documentElement.style.fontSize = fontSizes[fontSize.value];
-                };
-
-                const toggleFontSize = () => {
-                    const currentIndex = fontSizeKeys.indexOf(fontSize.value);
-                    const nextIndex = (currentIndex + 1) % fontSizeKeys.length;
-                    fontSize.value = fontSizeKeys[nextIndex];
-                };
-
-                watch(fontSize, (newSize) => {
-                    localStorage.setItem('fontSize', newSize);
-                    applyFontSize();
-                });
-
-                onMounted(applyFontSize);
-
-                return { fontSize, fontSizeLabel, toggleFontSize };
+            // 關鍵字高亮過濾器
+            function highlightMatch(text, query) {
+                if (!text || !query || !query.trim()) return text || '';
+                const safeQuery = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(`(${safeQuery})`, 'gi');
+                return text.replace(regex, '<mark class="search-highlight">$1</mark>');
             }
 
-            /**
-             * @description 管理書籤資料與互動的 Composable
-             */
-            function useBookmarks(theme, openIframeModal) {
-                // *** 彩蛋功能：監聽 Konami 密碼解鎖隱藏內容 ***
-                const isKonamiUnlocked = ref(false);
-                const secretCode = 'uuddlrlrba'; // 經典的 上上下下左右左右BA
-                let inputBuffer = '';
+            // =================================================================
+            // 書籤卡片組件 Card Component
+            // =================================================================
+            const CardBody = {
+                props: ['link', 'isPinned', 'searchQuery'],
+                emits: ['toggle-pin', 'copy', 'open-iframe', 'open-pdf', 'pdf-hover', 'pdf-leave', 'edit', 'delete', 'visit'],
+                setup(props, { emit }) {
+                    const netType = computed(() => getNetworkType(props.link.href));
+                    const isPdf = computed(() => (props.link.href || '').toLowerCase().endsWith('.pdf'));
 
-                const handleKeyDown = (e) => {
-                    // 避免在輸入框內打字時觸發
-                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                    const displayTitleHtml = computed(() => {
+                        return highlightMatch(props.link.title, props.searchQuery);
+                    });
 
-                    // 將方向鍵對應到單一字母，其餘按鍵轉小寫
-                    const keyMap = {
-                        'arrowup': 'u',
-                        'arrowdown': 'd',
-                        'arrowleft': 'l',
-                        'arrowright': 'r'
+                    const displayDescHtml = computed(() => {
+                        let html = markdownToHtml(props.link.description || '');
+                        if (props.searchQuery) {
+                            html = highlightMatch(html, props.searchQuery);
+                        }
+                        return html;
+                    });
+
+                    const displayDomain = computed(() => {
+                        try {
+                            const u = new URL(props.link.href, window.location.origin);
+                            return u.hostname + (u.port ? ':' + u.port : '');
+                        } catch (e) {
+                            return props.link.href || '';
+                        }
+                    });
+
+                    const handleCardClick = (e) => {
+                        if (e.target.closest('button') || e.target.closest('a[target="_blank"]')) {
+                            return;
+                        }
+                        if (e.ctrlKey) {
+                            e.preventDefault();
+                            emit('open-iframe');
+                        } else {
+                            emit('visit');
+                        }
                     };
-                    const key = e.key.toLowerCase();
-                    const mappedKey = keyMap[key] || key;
 
-                    inputBuffer += mappedKey;
-                    // 保持 buffer 長度
-                    if (inputBuffer.length > secretCode.length) {
-                        inputBuffer = inputBuffer.slice(-secretCode.length);
-                    }
-                    // 觸發解鎖
-                    if (inputBuffer === secretCode) {
-                        isKonamiUnlocked.value = true;
-                        inputBuffer = '';
-                    }
-                };
-
-                onMounted(() => {
-                    window.addEventListener('keydown', handleKeyDown);
-                });
-
-                // 從 HTML 中讀取原始資料
-                const bookmarksDataEl = document.getElementById('bookmark-data');
-                const rawBookmarksData = JSON.parse(bookmarksDataEl.textContent || '[]');
-
-                /**
-                 * @description 同步處理書籤資料：更新當月輪值表、加上唯一 ID
-                 * @returns {Array} - 初步處理後的書籤資料
-                 */
-                const getInitialBookmarks = () => {
-                    const now = new Date();
-                    const rocYear = now.getFullYear() - 1911;
-                    const currentMonth = now.getMonth() + 1;
-
-                    const bookmarksCopy = JSON.parse(JSON.stringify(rawBookmarksData));
-
-                    // 更新 "常用表單下載" 的大門輪值表
-                    const filesCategory = bookmarksCopy.find(c => c.id === 'files');
-                    if (filesCategory) {
-                        const dutyRosterLink = filesCategory.links.find(l => l.linkId === 'main-gate-roster');
-                        if (dutyRosterLink) {
-                            dutyRosterLink.title = `${rocYear}年${currentMonth}月大門輪值表`;
-                            dutyRosterLink.href = `http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/photogallery/%E8%BC%AA%E5%80%BC%E8%A1%A8/${rocYear}/${currentMonth}%E6%9C%88%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf`;
-                            dutyRosterLink.description = `本月份全所關大門輪值班表PDF檢視`;
-                        }
-                    }
-
-                    // 更新 "資訊課" 的輪值表
-                    const infCategory = bookmarksCopy.find(c => c.id === 'inf');
-                    if (infCategory) {
-                        const infoDutyRosterLink = infCategory.links.find(l => l.linkId === 'inf-roster');
-                        if (infoDutyRosterLink) {
-                            infoDutyRosterLink.title = `資訊課${rocYear}年${currentMonth}月輪值表`;
-                            // 注意：這裡的連結結構與大門輪值表不同，保持原樣
-                            infoDutyRosterLink.href = `http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E8%B3%87%E8%A8%8A%E8%AA%B2%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf`;
-                            infoDutyRosterLink.description = `資訊課本月份每日工作輪值表`;
-                        }
-                    }
-
-                    // 為每個 link 加上唯一的 ID 和新的 nextMonthHtml 屬性
-                    return bookmarksCopy.map(category => ({
-                        ...category,
-                        links: category.links.map((link, index) => ({
-                            ...link,
-                            id: `${category.id}-${index}`,
-                            nextMonthHtml: '' // *** NEW: 初始化 nextMonthHtml 屬性 ***
-                        }))
-                    }));
-                };
-
-                const bookmarks = reactive(getInitialBookmarks());
-
-                /**
-                 * @description 異步檢查下個月的輪值表是否存在，並更新描述
-                 */
-                const checkNextMonthRosters = async () => {
-                    const now = new Date();
-                    const rocYear = now.getFullYear() - 1911;
-
-                    let nextMonth = now.getMonth() + 2; // getMonth() 是 0-11，所以 +2
-                    let nextMonthRocYear = rocYear;
-                    if (nextMonth > 12) {
-                        nextMonth = 1;
-                        nextMonthRocYear += 1;
-                    }
-
-                    // 檢查大門輪值表
-                    const mainGateRoster = bookmarks
-                        .find(c => c.id === 'files')?.links
-                        .find(l => l.linkId === 'main-gate-roster');
-
-                    if (mainGateRoster) {
-                        const nextMonthUrl = `http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/photogallery/%E8%BC%AA%E5%80%BC%E8%A1%A8/${nextMonthRocYear}/${nextMonth}%E6%9C%88%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf`;
-                        try {
-                            const response = await fetch(nextMonthUrl, { method: 'HEAD' });
-                            if (response.ok) {
-                                // *** FIX: 更新 nextMonthHtml 而不是 description ***
-                                mainGateRoster.nextMonthHtml = ` | <a href="${nextMonthUrl}" target="_blank" class="text-blue-500 hover:underline">預覽${nextMonth}月</a>`;
-                            }
-                        } catch (error) {
-                            console.warn(`無法檢查下個月的大門輪值表: ${nextMonthUrl}`, error);
-                        }
-                    }
-
-                    // 檢查資訊課輪值表
-                    const infRoster = bookmarks
-                        .find(c => c.id === 'inf')?.links
-                        .find(l => l.linkId === 'inf-roster');
-
-                    if (infRoster) {
-                        const nextMonthUrl = `http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E8%B3%87%E8%A8%8A%E8%AA%B2%E8%BC%AA%E5%80%BC%E8%A1%A8NEXT.pdf`;
-                        try {
-                            const response = await fetch(nextMonthUrl, { method: 'HEAD' });
-                            if (response.ok) {
-                                // *** FIX: 更新 nextMonthHtml 而不是 description ***
-                                infRoster.nextMonthHtml = ` | <a href="${nextMonthUrl}" target="_blank" class="text-blue-500 hover:underline">預覽下月</a>`;
-                            }
-                        } catch (error) {
-                            console.warn(`無法檢查下個月的資訊課輪值表: ${nextMonthUrl}`, error);
-                        }
-                    }
-                };
-
-                const currentCategoryId = ref(localStorage.getItem('lastSelectedCategory') || (bookmarks.length > 0 ? bookmarks[0].id : null));
-                const clickCounts = ref(JSON.parse(localStorage.getItem('clickCounts') || '{}'));
-                const recentLinks = ref(JSON.parse(localStorage.getItem('recentLinks') || '[]'));
-
-                const selectCategory = (id) => {
-                    currentCategoryId.value = id;
-                };
-
-                const currentCategory = computed(() => {
-                    return bookmarks.find(c => c.id === currentCategoryId.value) || { category: '未分類', links: [] };
-                });
-
-                const currentCategoryLinks = computed(() => {
-                    // *** 隱藏內容過濾處理 ***
-                    let links = [...(currentCategory.value.links || [])].filter(link => {
-                        return !(link.isHidden && !isKonamiUnlocked.value);
-                    });
-
-                    links.sort((a, b) => {
-                        const indexA = recentLinks.value.indexOf(a.id);
-                        const indexB = recentLinks.value.indexOf(b.id);
-                        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-                        if (indexA !== -1) return -1;
-                        if (indexB !== -1) return 1;
-                        return a.title.localeCompare(b.title, 'zh-Hant');
-                    });
-
-                    return links;
-                });
-
-                // *** FIX: 修改點擊事件處理邏輯以解決巢狀連結問題 ***
-                const handleLinkClick = (link, event) => {
-                    const clickedAnchor = event.target.closest('a');
-
-                    // 如果點擊的是巢狀的 <a> 標籤，且它不是卡片本身，就讓瀏覽器正常處理
-                    if (clickedAnchor && clickedAnchor !== event.currentTarget) {
-                        return;
-                    }
-
-                    // 阻止卡片本身的預設導航行為
-                    event.preventDefault();
-
-                    // --- 以下為原有的邏輯 ---
-                    // 更新點擊次數與最近點擊清單
-                    clickCounts.value[link.id] = (clickCounts.value[link.id] || 0) + 1;
-                    const index = recentLinks.value.indexOf(link.id);
-                    if (index > -1) {
-                        recentLinks.value.splice(index, 1);
-                    }
-                    recentLinks.value.unshift(link.id);
-                    if (recentLinks.value.length > 10) {
-                        recentLinks.value.pop();
-                    }
-
-                    // 判斷 Ctrl 鍵
-                    if (event.ctrlKey) {
-                        // 如果按下了 Ctrl，則在 Modal 中開啟
-                        openIframeModal(link.href, link.title);
-                    } else {
-                        // 否則，執行預設行為 (在新分頁或當前頁面開啟)
-                        window.open(link.href, getLinkTarget(link.href));
-                    }
-                };
-
-                const getRecentHighlightStyle = (link) => {
-                    const index = recentLinks.value.indexOf(link.id);
-                    if (index === -1) return {};
-                    const opacity = Math.max(0.1, 1 - (index * 0.1));
-                    const isDark = theme.value === 'dark';
-                    const bgRgb = isDark ? '58, 55, 44' : '255, 251, 224';
-                    const borderRgb = isDark ? '161, 98, 7' : '252, 211, 77';
                     return {
-                        backgroundColor: `rgba(${bgRgb}, ${opacity})`,
-                        borderColor: `rgba(${borderRgb}, ${opacity})`,
-                        transition: 'background-color 0.3s, border-color 0.3s'
+                        netType,
+                        isPdf,
+                        displayTitleHtml,
+                        displayDescHtml,
+                        displayDomain,
+                        handleCardClick
                     };
-                };
+                },
+                template: `
+                    <div class="flex flex-col h-full justify-between select-none">
+                        <!-- 卡片頂部徽章與快捷操作列 -->
+                        <div class="flex items-center justify-between gap-1 mb-2">
+                            <!-- 標籤標記 -->
+                            <div class="flex items-center space-x-1 min-w-0 flex-wrap">
+                                <!-- 課室標籤或個人自訂標記 -->
+                                <span v-if="link.isCustom" class="text-[10px] px-1.5 py-0.5 rounded font-bold bg-purple-100 text-purple-700">
+                                    個人自訂
+                                </span>
+                                <span v-else-if="link.categoryName" class="badge-dept text-[10px] px-1.5 py-0.5 rounded font-medium truncate max-w-[80px]">
+                                    {{ link.categoryName }}
+                                </span>
 
-                watch(clickCounts, (newCounts) => {
-                    localStorage.setItem('clickCounts', JSON.stringify(newCounts));
-                }, { deep: true });
+                                <!-- 外部網路徽章 (僅外部網站顯示，內網不顯示) -->
+                                <span v-if="!netType.isInternal"
+                                    class="text-[10px] px-1.5 py-0.5 rounded font-semibold flex items-center gap-0.5 bg-sky-100 text-sky-800"
+                                    title="可從外部網際網路直接瀏覽">
+                                    <i data-lucide="globe" class="w-2.5 h-2.5"></i>
+                                    <span>外部網路</span>
+                                </span>
+                            </div>
 
-                watch(recentLinks, (newLinks) => {
-                    localStorage.setItem('recentLinks', JSON.stringify(newLinks));
-                }, { deep: true });
+                            <!-- 右上角快捷操作按鈕 -->
+                            <div class="flex items-center space-x-0.5 flex-shrink-0">
+                                <!-- 複製網址按鈕 -->
+                                <button @click.stop="$emit('copy')" class="p-1 rounded text-gray-400 hover:text-blue-500 transition-colors" title="複製網址">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                </button>
 
-                watch(currentCategoryId, (newId) => {
-                    if (newId) {
-                        localStorage.setItem('lastSelectedCategory', newId);
-                    }
-                });
+                                <!-- PDF 預覽按鈕 -->
+                                <button v-if="isPdf" @click.stop="$emit('open-pdf')" class="p-1 rounded text-red-500 hover:text-red-600 transition-colors" title="開啟 PDF 預覽視窗">
+                                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                </button>
 
-                const getLinkTarget = (url) => {
-                    try {
-                        const urlObj = new URL(url, window.location.origin);
-                        return urlObj.protocol.startsWith('http') ? '_blank' : '_self';
-                    } catch (e) {
-                        return '_blank';
-                    }
-                };
+                                <!-- 自訂書籤專屬：編輯與刪除 -->
+                                <template v-if="link.isCustom">
+                                    <button @click.stop="$emit('edit')" class="p-1 rounded text-blue-500 hover:text-blue-700" title="編輯此自訂書籤 (需要 PIN 碼)">
+                                        <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                    <button @click.stop="$emit('delete')" class="p-1 rounded text-red-500 hover:text-red-700" title="刪除此書籤 (需要 PIN 碼)">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </template>
 
-                const isDownloadable = (url) => {
-                    return /\.(zip|rar|7z|exe|dmg|doc|docx|xls|xlsx|ppt|pptx)$/i.test(url);
-                };
+                                <!-- ⭐ 我的最愛釘選開關 -->
+                                <button @click.stop="$emit('toggle-pin')"
+                                    :class="['p-1 rounded transition-colors', isPinned ? 'text-amber-500 hover:text-amber-600' : 'text-gray-400 hover:text-amber-500']"
+                                    :title="isPinned ? '已加入我的最愛 (點擊取消)' : '釘選至我的最愛'">
+                                    <i data-lucide="star" :class="['w-4 h-4', isPinned ? 'fill-amber-400' : '']"></i>
+                                </button>
+                            </div>
+                        </div>
 
-                return {
-                    bookmarks,
-                    currentCategoryId,
-                    selectCategory,
-                    currentCategory,
-                    currentCategoryLinks,
-                    clickCounts,
-                    recentLinks,
-                    handleLinkClick,
-                    getLinkTarget,
-                    isDownloadable,
-                    checkNextMonthRosters,
-                    getRecentHighlightStyle
-                };
-            }
+                        <!-- 卡片本體連結 Clickable Link Area -->
+                        <a :href="link.href" target="_blank" @click="handleCardClick"
+                            @mouseover="$emit('pdf-hover', $event)" @mouseleave="$emit('pdf-leave')"
+                            class="flex-1 flex flex-col items-center text-center py-2 px-1 rounded-lg group-hover:opacity-95 transition-opacity">
+                            
+                            <!-- 圖示容器 (主題適配色彩) -->
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-2.5 transition-transform group-hover:scale-105"
+                                :style="{
+                                    backgroundColor: link.isCustom ? 'rgba(168, 85, 247, 0.15)' : 'var(--card-icon-bg)',
+                                    color: link.isCustom ? '#a855f7' : 'var(--card-icon-color)'
+                                }">
+                                <i :data-lucide="link.icon || 'globe'" class="w-6 h-6"></i>
+                            </div>
 
-            /**
-             * @description 管理 PDF 預覽器（彈出視窗與懸浮預覽）的 Composable
-             */
-            function usePdfViewer() {
-                const pdfModal = reactive({ visible: false, url: '' });
-                const pdfPopover = ref(null);
-                const pdfPopoverState = reactive({ visible: false, url: '', x: 0, y: 0 });
-                let popoverTimeout = null;
+                            <!-- 網站標題 -->
+                            <h4 class="card-title font-bold text-sm group-hover:text-blue-500 transition-colors line-clamp-1 w-full"
+                                v-html="displayTitleHtml"></h4>
 
-                const openPdfModal = (url) => {
-                    pdfModal.url = `${url}#view=FitH&toolbar=1&navpanes=1`;
-                    pdfModal.visible = true;
-                };
+                            <!-- 備註說明或輪值表次月預覽 -->
+                            <div class="card-desc text-[11px] mt-1 line-clamp-2 w-full text-center leading-relaxed">
+                                <span v-html="displayDescHtml"></span>
+                                <span v-if="link.nextMonthHtml" v-html="link.nextMonthHtml"></span>
+                            </div>
+                        </a>
 
-                const closePdfModal = () => {
-                    pdfModal.visible = false;
-                    pdfModal.url = '';
-                };
-
-                const handlePdfHover = (event, url) => {
-                    if (!url.toLowerCase().endsWith('.pdf')) return;
-
-                    clearTimeout(popoverTimeout);
-                    popoverTimeout = setTimeout(() => {
-                        pdfPopoverState.url = `${url}#view=FitH&toolbar=0&navpanes=0`;
-                        const popoverWidth = 480;
-                        const popoverHeight = 576;
-                        const viewportWidth = window.innerWidth;
-                        const viewportHeight = window.innerHeight;
-                        const offset = 15;
-                        let finalX = event.clientX + offset;
-                        let finalY = event.clientY + offset;
-                        if (finalX + popoverWidth > viewportWidth) finalX = event.clientX - popoverWidth - offset;
-                        if (finalY + popoverHeight > viewportHeight) finalY = event.clientY - popoverHeight - offset;
-                        if (finalX < 0) finalX = 0;
-                        if (finalY < 0) finalY = 0;
-                        pdfPopoverState.x = finalX;
-                        pdfPopoverState.y = finalY;
-                        pdfPopoverState.visible = true;
-                    }, 500);
-                };
-
-                const hidePdfPopover = () => {
-                    clearTimeout(popoverTimeout);
-                    pdfPopoverState.visible = false;
-                };
-
-                watch(() => pdfModal.visible, (isVisible) => {
-                    document.body.classList.toggle('modal-open', isVisible);
-                });
-
-                return { pdfModal, pdfPopover, pdfPopoverState, openPdfModal, closePdfModal, handlePdfHover, hidePdfPopover };
-            }
-
-            /**
-             * @description [新增] 管理 IFrame Modal 的 Composable
-             */
-            function useIframeModal() {
-                const iframeModal = reactive({ visible: false, url: '', title: '' });
-
-                const openIframeModal = (url, title) => {
-                    iframeModal.url = url;
-                    iframeModal.title = title || '網頁內容';
-                    iframeModal.visible = true;
-                };
-
-                const closeIframeModal = () => {
-                    iframeModal.visible = false;
-                    iframeModal.url = '';
-                    iframeModal.title = '';
-                };
-
-                // 監聽 Modal 可見性，以防止背景滾動
-                watch(() => iframeModal.visible, (isVisible) => {
-                    // 只有在沒有其他 modal 打開時才切換 class
-                    if (!document.querySelector('.modal-content')) {
-                        document.body.classList.toggle('modal-open', isVisible);
-                    }
-                });
-
-                return { iframeModal, openIframeModal, closeIframeModal };
-            }
-
-            /**
-             * @description 其他工具函式
-             */
-            function useUtils() {
-                const renderer = new marked.Renderer();
-                renderer.link = (href, title, text) => {
-                    if (typeof href !== 'string' || !href) return text;
-                    const isExternal = href.startsWith('http');
-                    const target = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
-                    return `<a href="${href}" title="${title || ''}"${target}>${text}</a>`;
-                };
-                marked.use({ renderer });
-
-                const markdownToHtml = (markdownText) => {
-                    if (!markdownText || typeof marked === 'undefined') return markdownText || '';
-                    const textWithLinkedUrls = markdownText.replace(
-                        /(?<!\S)(https?:\/\/[^\s<>"']+)/g,
-                        (url) => `[${url}](${url})`
-                    );
-                    return marked.parse(textWithLinkedUrls, { breaks: true, gfm: true });
-                };
-
-                return { markdownToHtml };
-            }
-
+                        <!-- 卡片底部網址或網域資訊 -->
+                        <div class="mt-2 pt-2 border-t flex items-center justify-between text-[10px]" :style="{ borderColor: 'var(--sidebar-border)' }">
+                            <span class="card-domain truncate max-w-[160px] font-mono" :title="link.href">{{ displayDomain }}</span>
+                            <i data-lucide="external-link" class="w-3 h-3 text-gray-400 group-hover:text-blue-500 flex-shrink-0"></i>
+                        </div>
+                    </div>
+                `
+            };
 
             // =================================================================
-            // Vue 應用程式實例
+            // 主應用程式 Vue App
             // =================================================================
-
             const app = createApp({
+                components: {
+                    CardBody
+                },
                 setup() {
-                    // 組合所有 Composable 函式
-                    const themeManager = useTheme();
-                    const sidebarManager = useSidebar();
-                    const clockManager = useClock();
-                    const fontSizeManager = useFontSize();
-                    const pdfViewerManager = usePdfViewer();
-                    const iframeModalManager = useIframeModal(); // << 新增
-                    const bookmarkManager = useBookmarks(themeManager.theme, iframeModalManager.openIframeModal); // << 修改：傳入 openIframeModal
-                    const utils = useUtils();
+                    // 管理 PIN 碼預設值與驗證狀態
+                    const DEFAULT_PIN = 'a.123456';
+                    const isPinAuthenticated = ref(sessionStorage.getItem('lah_pin_auth') === 'true');
+                    const pinModal = reactive({
+                        visible: false,
+                        input: '',
+                        error: '',
+                        onSuccess: null
+                    });
+                    const pinInputRef = ref(null);
 
+                    // 1. 主題管理
+                    const theme = ref(localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+                    const applyTheme = (val) => {
+                        document.documentElement.dataset.theme = val;
+                        localStorage.setItem('theme', val);
+                    };
+                    const toggleTheme = () => {
+                        theme.value = theme.value === 'light' ? 'dark' : 'light';
+                    };
+                    watch(theme, applyTheme, { immediate: true });
+
+                    // 2. 側邊欄狀態
+                    const isSidebarCollapsed = ref(localStorage.getItem('sidebarCollapsed') === 'true');
+                    const toggleSidebar = () => {
+                        isSidebarCollapsed.value = !isSidebarCollapsed.value;
+                        localStorage.setItem('sidebarCollapsed', isSidebarCollapsed.value);
+                    };
+
+                    // 3. 字體大小管理 (Base 基準調升 25%)
+                    const fontSizes = { small: '120%', medium: '130%', large: '145%' };
+                    const fontSizeLabels = { small: '小', medium: '中', large: '大' };
+                    const fontSizeKeys = ['small', 'medium', 'large'];
+                    const fontSize = ref(localStorage.getItem('fontSize') || 'medium');
+                    const fontSizeLabel = computed(() => fontSizeLabels[fontSize.value]);
+                    const applyFontSize = () => {
+                        document.documentElement.style.fontSize = fontSizes[fontSize.value];
+                    };
+                    const toggleFontSize = () => {
+                        const idx = fontSizeKeys.indexOf(fontSize.value);
+                        fontSize.value = fontSizeKeys[(idx + 1) % fontSizeKeys.length];
+                        localStorage.setItem('fontSize', fontSize.value);
+                        applyFontSize();
+                    };
+                    onMounted(applyFontSize);
+
+                    // 4. 即時時間
+                    const currentTime = ref('');
+                    const currentDate = ref('');
+                    const updateTime = () => {
+                        const now = new Date();
+                        currentTime.value = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                        currentDate.value = now.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
+                    };
                     onMounted(() => {
-                        bookmarkManager.checkNextMonthRosters();
+                        updateTime();
+                        setInterval(updateTime, 1000);
+                    });
+
+                    // 5. Toast 提示機制
+                    const toast = reactive({ visible: false, message: '', type: 'info' });
+                    let toastTimer = null;
+                    const showToast = (message, type = 'info') => {
+                        clearTimeout(toastTimer);
+                        toast.message = message;
+                        toast.type = type;
+                        toast.visible = true;
+                        toastTimer = setTimeout(() => {
+                            toast.visible = false;
+                        }, 2500);
+                    };
+
+                    // 6. 書籤資料核心
+                    const categories = ref([]);
+                    const currentCategoryId = ref(localStorage.getItem('lastSelectedCategory') || 'dashboard');
+                    const searchQuery = ref('');
+                    const searchInputRef = ref(null);
+
+                    // 釘選狀態與個人自訂書籤 (LocalStorage)
+                    const pinnedIds = ref(JSON.parse(localStorage.getItem('lah_pinned_ids') || '[]'));
+                    const userBookmarks = ref(JSON.parse(localStorage.getItem('lah_user_bookmarks') || '[]'));
+                    const clickCounts = ref(JSON.parse(localStorage.getItem('clickCounts') || '{}'));
+                    const recentLinks = ref(JSON.parse(localStorage.getItem('recentLinks') || '[]'));
+
+                    // 彩蛋解鎖狀態
+                    const isKonamiUnlocked = ref(false);
+
+                    // 載入書籤資料 (徹底解決 file:// 協定下的 CORS 問題)
+                    const loadBookmarksData = async () => {
+                        let raw = null;
+                        const isLocalFile = window.location.protocol === 'file:';
+
+                        if (isLocalFile) {
+                            // 本機 file:// 模式：避免瀏覽器安全性阻擋 fetch 噴出 CORS 錯誤，直接讀取 HTML 內嵌資料
+                            const embeddedEl = document.getElementById('bookmark-data');
+                            if (embeddedEl) {
+                                try {
+                                    raw = JSON.parse(embeddedEl.textContent || '[]');
+                                } catch (err) {
+                                    console.error('解析內嵌資料失敗:', err);
+                                    raw = [];
+                                }
+                            }
+                        } else {
+                            // HTTP / HTTPS 模式：動態 fetch 最新 bookmarks.json
+                            try {
+                                const res = await fetch('bookmarks.json', { cache: 'no-cache' });
+                                if (res.ok) {
+                                    raw = await res.json();
+                                }
+                            } catch (e) {
+                                console.warn('載入外部 bookmarks.json 失敗，改用 HTML 內嵌備援資料:', e);
+                            }
+                            if (!raw || !Array.isArray(raw) || raw.length === 0) {
+                                const embeddedEl = document.getElementById('bookmark-data');
+                                if (embeddedEl) {
+                                    try {
+                                        raw = JSON.parse(embeddedEl.textContent || '[]');
+                                    } catch (err) {
+                                        raw = [];
+                                    }
+                                }
+                            }
+                        }
+
+                        // 初始化處理：輪值表計算與唯一 ID
+                        const now = new Date();
+                        const rocYear = now.getFullYear() - 1911;
+                        const currentMonth = now.getMonth() + 1;
+
+                        const processed = (raw || []).map(cat => {
+                            return {
+                                ...cat,
+                                links: (cat.links || []).map((link, idx) => {
+                                    const item = { ...link, id: `${cat.id}-${idx}`, categoryName: cat.category, nextMonthHtml: '' };
+                                    if (item.linkId === 'main-gate-roster') {
+                                        item.title = `${rocYear}年${currentMonth}月大門輪值表`;
+                                        item.href = `http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/photogallery/%E8%BC%AA%E5%80%BC%E8%A1%A8/${rocYear}/${currentMonth}%E6%9C%88%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf`;
+                                    } else if (item.linkId === 'inf-roster') {
+                                        item.title = `資訊課${rocYear}年${currentMonth}月輪值表`;
+                                        item.href = `http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E8%B3%87%E8%A8%8A%E8%AA%B2%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf`;
+                                    }
+                                    return item;
+                                })
+                            };
+                        });
+
+                        categories.value = processed;
+                    };
+
+                    // 次月輪值表自動檢查探測
+                    const checkNextMonthRosters = async () => {
+                        if (window.location.protocol === 'file:') return;
+                        const now = new Date();
+                        const rocYear = now.getFullYear() - 1911;
+                        let nextMonth = now.getMonth() + 2;
+                        let nextMonthRocYear = rocYear;
+                        if (nextMonth > 12) {
+                            nextMonth = 1;
+                            nextMonthRocYear += 1;
+                        }
+
+                        const filesCat = categories.value.find(c => c.id === 'files');
+                        const mainGate = filesCat?.links.find(l => l.linkId === 'main-gate-roster');
+                        if (mainGate) {
+                            const nextUrl = `http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/photogallery/%E8%BC%AA%E5%80%BC%E8%A1%A8/${nextMonthRocYear}/${nextMonth}%E6%9C%88%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf`;
+                            try {
+                                const resp = await fetch(nextUrl, { method: 'HEAD' });
+                                if (resp.ok) {
+                                    mainGate.nextMonthHtml = ` | <a href="${nextUrl}" target="_blank" class="text-blue-500 hover:underline">預覽${nextMonth}月</a>`;
+                                }
+                            } catch (e) {}
+                        }
+
+                        const infCat = categories.value.find(c => c.id === 'inf');
+                        const infRoster = infCat?.links.find(l => l.linkId === 'inf-roster');
+                        if (infRoster) {
+                            const nextUrl = `http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E8%B3%87%E8%A8%8A%E8%AA%B2%E8%BC%AA%E5%80%BC%E8%A1%A8NEXT.pdf`;
+                            try {
+                                const resp = await fetch(nextUrl, { method: 'HEAD' });
+                                if (resp.ok) {
+                                    infRoster.nextMonthHtml = ` | <a href="${nextUrl}" target="_blank" class="text-blue-500 hover:underline">預覽下月</a>`;
+                                }
+                            } catch (e) {}
+                        }
+                    };
+
+                    // 所有系統連結扁平清單 (含個人自訂書籤)
+                    const allLinks = computed(() => {
+                        const list = [];
+                        categories.value.forEach(cat => {
+                            (cat.links || []).forEach(l => {
+                                if (!l.isHidden || isKonamiUnlocked.value) {
+                                    list.push(l);
+                                }
+                            });
+                        });
+                        userBookmarks.value.forEach(ub => {
+                            list.push(ub);
+                        });
+                        return list;
+                    });
+
+                    // 釘選判斷與釘選數量
+                    const isPinned = (id) => pinnedIds.value.includes(id);
+                    const pinnedCount = computed(() => pinnedIds.value.length);
+
+                    // 切換釘選 (⭐)
+                    const togglePin = (link) => {
+                        const idx = pinnedIds.value.indexOf(link.id);
+                        if (idx > -1) {
+                            pinnedIds.value.splice(idx, 1);
+                            showToast(`已取消釘選「${link.title}」`);
+                        } else {
+                            pinnedIds.value.push(link.id);
+                            showToast(`已將「${link.title}」加入我的最愛！`, 'success');
+                        }
+                        localStorage.setItem('lah_pinned_ids', JSON.stringify(pinnedIds.value));
+                    };
+
+                    // 我的最愛連結 (釘選公務系統 + 個人自訂書籤)
+                    const favoriteLinks = computed(() => {
+                        const favs = [];
+                        allLinks.value.forEach(link => {
+                            if (isPinned(link.id) || link.isCustom) {
+                                favs.push(link);
+                            }
+                        });
+                        return favs;
+                    });
+
+                    // 記錄點擊與最近造訪
+                    const recordVisit = (link) => {
+                        clickCounts.value[link.id] = (clickCounts.value[link.id] || 0) + 1;
+                        localStorage.setItem('clickCounts', JSON.stringify(clickCounts.value));
+
+                        const rIdx = recentLinks.value.indexOf(link.id);
+                        if (rIdx > -1) recentLinks.value.splice(rIdx, 1);
+                        recentLinks.value.unshift(link.id);
+                        if (recentLinks.value.length > 20) recentLinks.value.pop();
+                        localStorage.setItem('recentLinks', JSON.stringify(recentLinks.value));
+                    };
+
+                    // 熱門造訪 Top 10
+                    const topVisitedLinks = computed(() => {
+                        const map = new Map();
+                        allLinks.value.forEach(link => {
+                            const visits = clickCounts.value[link.id] || 0;
+                            if (visits > 0) {
+                                map.set(link.id, { ...link, visits });
+                            }
+                        });
+                        return Array.from(map.values())
+                            .sort((a, b) => b.visits - a.visits)
+                            .slice(0, 10);
+                    });
+
+                    // 全域搜尋過濾
+                    const filteredSearchResults = computed(() => {
+                        const q = searchQuery.value.trim().toLowerCase();
+                        if (!q) return [];
+                        return allLinks.value.filter(link => {
+                            const title = (link.title || '').toLowerCase();
+                            const desc = (link.description || '').toLowerCase();
+                            const href = (link.href || '').toLowerCase();
+                            const cat = (link.categoryName || '').toLowerCase();
+                            return title.includes(q) || desc.includes(q) || href.includes(q) || cat.includes(q);
+                        });
+                    });
+
+                    // 當前視圖標題與圖示
+                    const currentViewTitle = computed(() => {
+                        if (searchQuery.value.trim()) return '全域搜尋結果';
+                        if (currentCategoryId.value === 'dashboard') return '儀表板首頁';
+                        if (currentCategoryId.value === 'favorites') return '⭐ 我的最愛';
+                        const found = categories.value.find(c => c.id === currentCategoryId.value);
+                        return found ? found.category : '書籤總覽';
+                    });
+
+                    const currentViewIcon = computed(() => {
+                        if (searchQuery.value.trim()) return 'search';
+                        if (currentCategoryId.value === 'dashboard') return 'layout-dashboard';
+                        if (currentCategoryId.value === 'favorites') return 'star';
+                        const found = categories.value.find(c => c.id === currentCategoryId.value);
+                        return found ? found.icon : 'folder';
+                    });
+
+                    // 當前視圖展示的連結
+                    const currentDisplayLinks = computed(() => {
+                        if (currentCategoryId.value === 'favorites') {
+                            return favoriteLinks.value;
+                        }
+                        const found = categories.value.find(c => c.id === currentCategoryId.value);
+                        if (found) {
+                            return getVisibleLinks(found.links);
+                        }
+                        return [];
+                    });
+
+                    const getVisibleLinks = (links) => {
+                        return (links || []).filter(l => !l.isHidden || isKonamiUnlocked.value);
+                    };
+
+                    const selectCategory = (id) => {
+                        currentCategoryId.value = id;
+                        searchQuery.value = '';
+                        localStorage.setItem('lastSelectedCategory', id);
+                    };
+
+                    const clearSearch = () => {
+                        searchQuery.value = '';
+                    };
+
+                    // 一鍵複製網址
+                    const handleCopy = async (href) => {
+                        const ok = await copyToClipboard(href);
+                        if (ok) {
+                            showToast('已成功複製網址至剪貼簿！', 'success');
+                        } else {
+                            showToast('複製失敗，請手動選取網址', 'error');
+                        }
+                    };
+
+                    // =========================================================
+                    // PIN 碼驗證機制 (因自訂書籤純屬各同仁本機 LocalStorage，免去 PIN 碼阻礙)
+                    // =========================================================
+                    const handleProtectedAction = (actionCallback) => {
+                        if (typeof actionCallback === 'function') actionCallback();
+                    };
+
+                    const closePinModal = () => {
+                        pinModal.visible = false;
+                        pinModal.input = '';
+                        pinModal.error = '';
+                        pinModal.onSuccess = null;
+                    };
+
+                    const verifyPin = () => {
+                        if (pinModal.input.trim() === DEFAULT_PIN) {
+                            isPinAuthenticated.value = true;
+                            sessionStorage.setItem('lah_pin_auth', 'true');
+                            showToast('🔓 PIN 碼驗證成功，已取得管理權限！', 'success');
+                            const callback = pinModal.onSuccess;
+                            closePinModal();
+                            if (callback) callback();
+                        } else {
+                            pinModal.error = 'PIN 碼錯誤，無法進行修改！';
+                        }
+                    };
+
+                    // =========================================================
+                    // 新增/編輯 自訂書籤 Modal
+                    // =========================================================
+                    const bookmarkModal = reactive({
+                        visible: false,
+                        isEdit: false,
+                        editId: null,
+                        form: {
+                            title: '',
+                            href: '',
+                            description: '',
+                            icon: 'bookmark'
+                        }
+                    });
+
+                    const presetIcons = ['bookmark', 'globe', 'star', 'server', 'monitor', 'file-text', 'link', 'database', 'shield', 'folder', 'send', 'heart'];
+
+                    const openAddBookmarkModal = () => {
+                        bookmarkModal.isEdit = false;
+                        bookmarkModal.editId = null;
+                        bookmarkModal.form = {
+                            title: '',
+                            href: '',
+                            description: '',
+                            icon: 'bookmark'
+                        };
+                        bookmarkModal.visible = true;
+                    };
+
+                    const openEditBookmarkModal = (link) => {
+                        bookmarkModal.isEdit = true;
+                        bookmarkModal.editId = link.id;
+                        bookmarkModal.form = {
+                            title: link.title,
+                            href: link.href,
+                            description: link.description,
+                            icon: link.icon || 'bookmark'
+                        };
+                        bookmarkModal.visible = true;
+                    };
+
+                    const closeBookmarkModal = () => {
+                        bookmarkModal.visible = false;
+                    };
+
+                    const saveCustomBookmark = () => {
+                        let url = bookmarkModal.form.href.trim();
+                        if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('/')) {
+                            url = 'http://' + url;
+                        }
+
+                        if (bookmarkModal.isEdit) {
+                            const item = userBookmarks.value.find(b => b.id === bookmarkModal.editId);
+                            if (item) {
+                                item.title = bookmarkModal.form.title.trim();
+                                item.href = url;
+                                item.description = bookmarkModal.form.description.trim();
+                                item.icon = bookmarkModal.form.icon;
+                                showToast('已成功更新個人自訂書籤！', 'success');
+                            }
+                        } else {
+                            const newId = 'custom-' + Date.now();
+                            userBookmarks.value.unshift({
+                                id: newId,
+                                title: bookmarkModal.form.title.trim(),
+                                href: url,
+                                description: bookmarkModal.form.description.trim(),
+                                icon: bookmarkModal.form.icon,
+                                isCustom: true,
+                                createdAt: Date.now()
+                            });
+                            // 自動釘選至最愛
+                            if (!pinnedIds.value.includes(newId)) {
+                                pinnedIds.value.push(newId);
+                                localStorage.setItem('lah_pinned_ids', JSON.stringify(pinnedIds.value));
+                            }
+                            showToast('已新增個人書籤並加入我的最愛！', 'success');
+                        }
+
+                        localStorage.setItem('lah_user_bookmarks', JSON.stringify(userBookmarks.value));
+                        closeBookmarkModal();
+                    };
+
+                    const deleteCustomBookmark = (id) => {
+                        if (confirm('確定要刪除這筆個人書籤嗎？')) {
+                            userBookmarks.value = userBookmarks.value.filter(b => b.id !== id);
+                            pinnedIds.value = pinnedIds.value.filter(pid => pid !== id);
+                            localStorage.setItem('lah_user_bookmarks', JSON.stringify(userBookmarks.value));
+                            localStorage.setItem('lah_pinned_ids', JSON.stringify(pinnedIds.value));
+                            showToast('已刪除該自訂書籤');
+                        }
+                    };
+
+                    // =========================================================
+                    // 備份與還原 Modal
+                    // =========================================================
+                    const backupModalVisible = ref(false);
+                    const importFileInput = ref(null);
+                    const openBackupModal = () => {
+                        backupModalVisible.value = true;
+                    };
+
+                    const exportBackupData = () => {
+                        const payload = {
+                            version: '1.0',
+                            exportedAt: new Date().toISOString(),
+                            pinnedIds: pinnedIds.value,
+                            userBookmarks: userBookmarks.value,
+                            clickCounts: clickCounts.value,
+                            recentLinks: recentLinks.value
+                        };
+                        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                        const a = document.createElement('a');
+                        const now = new Date();
+                        const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+                        a.href = URL.createObjectURL(blob);
+                        a.download = `lah_bookmarks_backup_${dateStr}.json`;
+                        a.click();
+                        URL.revokeObjectURL(a.href);
+                        showToast('已成功匯出個人備份檔案！', 'success');
+                    };
+
+                    const importBackupData = () => {
+                        const file = importFileInput.value?.files?.[0];
+                        if (!file) {
+                            showToast('請先選擇要匯入的備份檔案 (.json)', 'error');
+                            return;
+                        }
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            try {
+                                const data = JSON.parse(e.target.result);
+                                if (data && typeof data === 'object') {
+                                    if (Array.isArray(data.pinnedIds)) pinnedIds.value = data.pinnedIds;
+                                    if (Array.isArray(data.userBookmarks)) userBookmarks.value = data.userBookmarks;
+                                    if (data.clickCounts) clickCounts.value = data.clickCounts;
+                                    if (Array.isArray(data.recentLinks)) recentLinks.value = data.recentLinks;
+
+                                    localStorage.setItem('lah_pinned_ids', JSON.stringify(pinnedIds.value));
+                                    localStorage.setItem('lah_user_bookmarks', JSON.stringify(userBookmarks.value));
+                                    localStorage.setItem('clickCounts', JSON.stringify(clickCounts.value));
+                                    localStorage.setItem('recentLinks', JSON.stringify(recentLinks.value));
+
+                                    showToast('備份資料還原成功！', 'success');
+                                    backupModalVisible.value = false;
+                                }
+                            } catch (err) {
+                                showToast('備份檔格式不正確，無法解析', 'error');
+                            }
+                        };
+                        reader.readAsText(file);
+                    };
+
+                    const resetAllPersonalData = () => {
+                        if (confirm('警告：這將會清除您所有的個人書籤、釘選與造訪次數，確定要重置嗎？')) {
+                            pinnedIds.value = [];
+                            userBookmarks.value = [];
+                            clickCounts.value = {};
+                            recentLinks.value = [];
+                            localStorage.removeItem('lah_pinned_ids');
+                            localStorage.removeItem('lah_user_bookmarks');
+                            localStorage.removeItem('clickCounts');
+                            localStorage.removeItem('recentLinks');
+                            showToast('已清除本機所有個人設定');
+                            backupModalVisible.value = false;
+                        }
+                    };
+
+                    // 熱門造訪抽屜
+                    const drawerVisible = ref(false);
+                    const toggleTopVisitedDrawer = () => {
+                        drawerVisible.value = !drawerVisible.value;
+                    };
+
+                    // PDF 預覽與彈窗
+                    const pdfModal = reactive({ visible: false, url: '' });
+                    const pdfPopover = ref(null);
+                    const pdfPopoverState = reactive({ visible: false, url: '', x: 0, y: 0 });
+                    let popoverTimeout = null;
+
+                    const openPdfModal = (url) => {
+                        pdfModal.url = `${url}#view=FitH&toolbar=1&navpanes=1`;
+                        pdfModal.visible = true;
+                    };
+                    const closePdfModal = () => {
+                        pdfModal.visible = false;
+                        pdfModal.url = '';
+                    };
+
+                    const handlePdfHover = (event, url) => {
+                        if (!url.toLowerCase().endsWith('.pdf')) return;
+                        clearTimeout(popoverTimeout);
+                        popoverTimeout = setTimeout(() => {
+                            pdfPopoverState.url = `${url}#view=FitH&toolbar=0&navpanes=0`;
+                            const popoverWidth = 400;
+                            const popoverHeight = 500;
+                            const offset = 15;
+                            let finalX = event.clientX + offset;
+                            let finalY = event.clientY + offset;
+                            if (finalX + popoverWidth > window.innerWidth) finalX = event.clientX - popoverWidth - offset;
+                            if (finalY + popoverHeight > window.innerHeight) finalY = event.clientY - popoverHeight - offset;
+                            if (finalX < 0) finalX = 0;
+                            if (finalY < 0) finalY = 0;
+                            pdfPopoverState.x = finalX;
+                            pdfPopoverState.y = finalY;
+                            pdfPopoverState.visible = true;
+                        }, 500);
+                    };
+                    const hidePdfPopover = () => {
+                        clearTimeout(popoverTimeout);
+                        pdfPopoverState.visible = false;
+                    };
+
+                    // IFrame 內嵌視窗 (Ctrl + 點擊)
+                    const iframeModal = reactive({ visible: false, url: '', title: '' });
+                    const openIframeModal = (url, title) => {
+                        iframeModal.url = url;
+                        iframeModal.title = title || '網頁預覽';
+                        iframeModal.visible = true;
+                    };
+                    const closeIframeModal = () => {
+                        iframeModal.visible = false;
+                        iframeModal.url = '';
+                    };
+
+                    // 鍵盤快速鍵與彩蛋 Konami Code
+                    const secretCode = 'uuddlrlrba';
+                    let inputBuffer = '';
+                    const handleKeyDown = (e) => {
+                        // 快捷鍵: 按 / 聚焦搜尋框
+                        if (e.key === '/' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                            e.preventDefault();
+                            if (searchInputRef.value) searchInputRef.value.focus();
+                            return;
+                        }
+
+                        // 按 Esc 清除搜尋或關閉浮動視窗
+                        if (e.key === 'Escape') {
+                            if (pinModal.visible) closePinModal();
+                            if (bookmarkModal.visible) bookmarkModal.visible = false;
+                            if (backupModalVisible.value) backupModalVisible.value = false;
+                            if (drawerVisible.value) drawerVisible.value = false;
+                            if (pdfModal.visible) pdfModal.visible = false;
+                            if (iframeModal.visible) iframeModal.visible = false;
+                            if (searchQuery.value) searchQuery.value = '';
+                            return;
+                        }
+
+                        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+                        const keyMap = { 'arrowup': 'u', 'arrowdown': 'd', 'arrowleft': 'l', 'arrowright': 'r' };
+                        const key = e.key.toLowerCase();
+                        const mappedKey = keyMap[key] || key;
+                        inputBuffer += mappedKey;
+                        if (inputBuffer.length > secretCode.length) {
+                            inputBuffer = inputBuffer.slice(-secretCode.length);
+                        }
+                        if (inputBuffer === secretCode) {
+                            isKonamiUnlocked.value = true;
+                            inputBuffer = '';
+                            showToast('🎉 已解鎖資訊課隱藏工具專區！', 'success');
+                        }
+                    };
+
+                    // 生命週期與圖示渲染監聽
+                    onMounted(async () => {
+                        window.addEventListener('keydown', handleKeyDown);
+                        await loadBookmarksData();
+                        checkNextMonthRosters();
                         lucide.createIcons();
+
+                        // 監聽狀態改變後即時更新 Lucide 圖示
                         watch([
-                            themeManager.theme,
-                            sidebarManager.isSidebarCollapsed,
-                            bookmarkManager.currentCategoryLinks
+                            theme,
+                            isSidebarCollapsed,
+                            currentCategoryId,
+                            searchQuery,
+                            favoriteLinks,
+                            categories,
+                            drawerVisible,
+                            bookmarkModal,
+                            backupModalVisible,
+                            pinModal,
+                            toast
                         ], () => {
                             nextTick(() => {
                                 lucide.createIcons();
@@ -1001,16 +2002,26 @@
                         }, { deep: true, immediate: true });
                     });
 
-                    // 將所有需要暴露給模板的狀態和方法集中返回
                     return {
-                        ...themeManager,
-                        ...sidebarManager,
-                        ...clockManager,
-                        ...fontSizeManager,
-                        ...bookmarkManager,
-                        ...pdfViewerManager,
-                        ...iframeModalManager, // << 新增
-                        ...utils
+                        theme, toggleTheme,
+                        isSidebarCollapsed, toggleSidebar,
+                        fontSize, fontSizeLabel, toggleFontSize,
+                        currentTime, currentDate,
+                        toast, showToast,
+                        categories, currentCategoryId, selectCategory,
+                        searchQuery, searchInputRef, clearSearch,
+                        allLinks, currentDisplayLinks, currentViewTitle, currentViewIcon,
+                        filteredSearchResults, getVisibleLinks,
+                        pinnedIds, isPinned, togglePin, pinnedCount, favoriteLinks,
+                        userBookmarks,
+                        recordVisit, topVisitedLinks, handleCopy,
+                        isPinAuthenticated, pinModal, pinInputRef, handleProtectedAction, closePinModal, verifyPin,
+                        bookmarkModal, presetIcons, openAddBookmarkModal, openEditBookmarkModal, closeBookmarkModal, saveCustomBookmark, deleteCustomBookmark,
+                        backupModalVisible, importFileInput, openBackupModal, exportBackupData, importBackupData, resetAllPersonalData,
+                        drawerVisible, toggleTopVisitedDrawer,
+                        pdfModal, openPdfModal, closePdfModal,
+                        pdfPopover, pdfPopoverState, handlePdfHover, hidePdfPopover,
+                        iframeModal, openIframeModal, closeIframeModal
                     };
                 }
             });
