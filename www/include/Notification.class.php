@@ -3,6 +3,7 @@ require_once("Logger.class.php");
 require_once("System.class.php");
 require_once("SQLiteDBFactory.class.php");
 require_once("StatsSQLite.class.php");
+require_once("SQLiteUser.class.php");
 
 class Notification {
     
@@ -314,5 +315,200 @@ class Notification {
             }
         }
         return false;
+    }
+
+    public function getUserInfo($name_or_id_or_ip) {
+        $sqlite_user = new SQLiteUser();
+        $name_or_id_or_ip = trim($name_or_id_or_ip);
+        if (empty($name_or_id_or_ip)) {
+            return false;
+        }
+        $res = $sqlite_user->getUser($name_or_id_or_ip);
+        if (empty($res)) {
+            $res = $sqlite_user->getUserByName($name_or_id_or_ip);
+        }
+        if (empty($res)) {
+            $res = $sqlite_user->getUserByIP($name_or_id_or_ip);
+        }
+        if (empty($res) || count($res) < 1) {
+            return false;
+        }
+        return $res[0];
+    }
+
+    public function getUserChannel($param) {
+        if (empty($param)) {
+            global $client_ip;
+            $param = $client_ip;
+        }
+        $userInfo = $this->getUserInfo($param);
+        if ($userInfo && !empty($userInfo['id'])) {
+            return $userInfo['id'];
+        }
+        if (!empty($param) && is_string($param)) {
+            return trim($param);
+        }
+        return false;
+    }
+
+    public function getUserMessages($param, $top = 10) {
+        $channel = $this->getUserChannel($param);
+        if (empty($channel)) {
+            Logger::getInstance()->warning(__METHOD__.": 無法解析使用者或頻道資訊【${param}】");
+            return false;
+        }
+        $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
+        if (!file_exists($channelDBPath)) {
+            return [];
+        }
+        if (!is_numeric($top) || intval($top) < 1) {
+            $top = 10;
+        }
+        $db = new SQLite3(SQLiteDBFactory::getMessageDB($channelDBPath));
+        $stm = $db->prepare("SELECT * FROM message ORDER BY id DESC LIMIT :bv_top");
+        $stm->bindValue(':bv_top', intval($top), SQLITE3_INTEGER);
+        $rows = $this->prepareArray($stm);
+        $db->close();
+
+        $sqlite_user = new SQLiteUser();
+        $results = [];
+        foreach ($rows as $row) {
+            $sender = $row['sender'] ?? '';
+            $sendCname = $sender;
+            if (!empty($sender)) {
+                $senderUser = $sqlite_user->getUser($sender);
+                if (!empty($senderUser) && isset($senderUser[0]['name'])) {
+                    $sendCname = $senderUser[0]['name'];
+                }
+            }
+
+            $createDt = $row['create_datetime'] ?? '';
+            $expireDt = $row['expire_datetime'] ?? '';
+            $flag = intval($row['flag'] ?? 0);
+            $done = ($flag & 2) === 2 ? 1 : 0;
+            $title = $row['title'] ?? '';
+            if (empty($title) || $title === 'dontcare' || strpos($title, '{"to"') === 0 || strpos($title, '{"id"') === 0) {
+                $title = '即時通私訊';
+            }
+
+            $results[] = array(
+                'id' => $row['id'],
+                'sn' => $row['id'],
+                'title' => $title,
+                'xname' => $title,
+                'content' => $row['content'] ?? '',
+                'xcontent' => $row['content'] ?? '',
+                'priority' => $row['priority'] ?? 3,
+                'create_datetime' => $createDt,
+                'sendtime' => array('date' => $createDt),
+                'expire_datetime' => $expireDt,
+                'enddate' => array('date' => $expireDt),
+                'sender' => $sender,
+                'sendCname' => $sendCname,
+                'from_ip' => $row['from_ip'] ?? '',
+                'sendIP' => $row['from_ip'] ?? '',
+                'flag' => $flag,
+                'done' => $done
+            );
+        }
+        return $results;
+    }
+
+    public function getUserUnreadMessages($param) {
+        $channel = $this->getUserChannel($param);
+        if (empty($channel)) {
+            Logger::getInstance()->warning(__METHOD__.": 無法解析使用者或頻道資訊【${param}】");
+            return false;
+        }
+        $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
+        if (!file_exists($channelDBPath)) {
+            return [];
+        }
+        $db = new SQLite3(SQLiteDBFactory::getMessageDB($channelDBPath));
+        $stm = $db->prepare("SELECT * FROM message WHERE (flag & 2) <> 2 ORDER BY id DESC");
+        $rows = $this->prepareArray($stm);
+        $db->close();
+
+        $sqlite_user = new SQLiteUser();
+        $results = [];
+        foreach ($rows as $row) {
+            $sender = $row['sender'] ?? '';
+            $sendCname = $sender;
+            if (!empty($sender)) {
+                $senderUser = $sqlite_user->getUser($sender);
+                if (!empty($senderUser) && isset($senderUser[0]['name'])) {
+                    $sendCname = $senderUser[0]['name'];
+                }
+            }
+
+            $createDt = $row['create_datetime'] ?? '';
+            $expireDt = $row['expire_datetime'] ?? '';
+            $flag = intval($row['flag'] ?? 0);
+            $done = 0;
+            $title = $row['title'] ?? '';
+            if (empty($title) || $title === 'dontcare' || strpos($title, '{"to"') === 0 || strpos($title, '{"id"') === 0) {
+                $title = '即時通私訊';
+            }
+
+            $results[] = array(
+                'id' => $row['id'],
+                'sn' => $row['id'],
+                'title' => $title,
+                'xname' => $title,
+                'content' => $row['content'] ?? '',
+                'xcontent' => $row['content'] ?? '',
+                'priority' => $row['priority'] ?? 3,
+                'create_datetime' => $createDt,
+                'sendtime' => array('date' => $createDt),
+                'expire_datetime' => $expireDt,
+                'enddate' => array('date' => $expireDt),
+                'sender' => $sender,
+                'sendCname' => $sendCname,
+                'from_ip' => $row['from_ip'] ?? '',
+                'sendIP' => $row['from_ip'] ?? '',
+                'flag' => $flag,
+                'done' => $done
+            );
+        }
+        return $results;
+    }
+
+    public function setUserMessageRead($param, $sn) {
+        $channel = $this->getUserChannel($param);
+        if (empty($channel)) return false;
+        $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
+        if (!file_exists($channelDBPath)) return false;
+        $db = new SQLite3(SQLiteDBFactory::getMessageDB($channelDBPath));
+        $stm = $db->prepare("UPDATE message SET flag = (flag | 2) WHERE id = :bv_id");
+        $stm->bindValue(':bv_id', intval($sn), SQLITE3_INTEGER);
+        $res = $stm->execute() !== FALSE;
+        $db->close();
+        return $res;
+    }
+
+    public function setUserMessageUnread($param, $sn) {
+        $channel = $this->getUserChannel($param);
+        if (empty($channel)) return false;
+        $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
+        if (!file_exists($channelDBPath)) return false;
+        $db = new SQLite3(SQLiteDBFactory::getMessageDB($channelDBPath));
+        $stm = $db->prepare("UPDATE message SET flag = (CASE WHEN (flag & 2) = 2 THEN flag - 2 ELSE flag END) WHERE id = :bv_id");
+        $stm->bindValue(':bv_id', intval($sn), SQLITE3_INTEGER);
+        $res = $stm->execute() !== FALSE;
+        $db->close();
+        return $res;
+    }
+
+    public function deleteUserMessage($param, $sn) {
+        $channel = $this->getUserChannel($param);
+        if (empty($channel)) return false;
+        $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
+        if (!file_exists($channelDBPath)) return false;
+        $db = new SQLite3(SQLiteDBFactory::getMessageDB($channelDBPath));
+        $stm = $db->prepare("DELETE FROM message WHERE id = :bv_id");
+        $stm->bindValue(':bv_id', intval($sn), SQLITE3_INTEGER);
+        $res = $stm->execute() !== FALSE;
+        $db->close();
+        return $res;
     }
 }

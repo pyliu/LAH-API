@@ -12,6 +12,93 @@ $system = System::getInstance();
 $mock = $system->isMockMode();
 $mssql_on = $system->isMSSQLEnable();
 if (!$mssql_on) {
+	if (in_array($_POST["type"] ?? '', array("user_message", "user_unread_message", "set_read_user_message", "set_unread_user_message", "del_user_message"))) {
+		require_once(INC_DIR."/Notification.class.php");
+		$notify = new Notification();
+		switch ($_POST["type"]) {
+			case "user_message":
+				$param = $_POST["id"] ?? $_POST["name"] ?? $_POST["ip"] ?? '';
+				$param = empty($param) ? $client_ip : $param;
+				$count = $_POST["count"] ?? 5;
+				$results = $notify->getUserMessages($param, $count);
+				if (empty($results)) {
+					Logger::getInstance()->info("XHR [user_message] (即時通) 查無 ${param} 訊息。");
+					echoJSONResponse("查無 ${param} 訊息。");
+				} else {
+					$msg = "XHR [user_message] (即時通) 查詢 ${param} 訊息成功。(".count($results).")";
+					Logger::getInstance()->info($msg);
+					echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
+						"data_count" => count($results),
+						"raw" => $results,
+						"query_string" => "id=".($_POST["id"] ?? '')."&name=".($_POST["name"] ?? '')."&ip=".($_POST["ip"] ?? '')."&count=".$count
+					));
+				}
+				exit;
+			case "user_unread_message":
+				$param = $_POST["id"] ?? $_POST["name"] ?? $_POST["ip"] ?? '';
+				$param = empty($param) ? $client_ip : $param;
+				$results = $notify->getUserUnreadMessages($param);
+				if (empty($results)) {
+					Logger::getInstance()->info("XHR [user_unread_message] (即時通) 查無 ${param} 未讀訊息。");
+					echoJSONResponse("查無 ${param} 未讀訊息。");
+				} else {
+					$msg = "XHR [user_unread_message] (即時通) 查詢 ${param} 未讀訊息成功。(".count($results).")";
+					Logger::getInstance()->info($msg);
+					echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
+						"data_count" => count($results),
+						"raw" => $results
+					));
+				}
+				exit;
+			case "set_read_user_message":
+				$param = $_POST["id"] ?? $_POST["name"] ?? $_POST["ip"] ?? '';
+				$param = empty($param) ? $client_ip : $param;
+				$sn = $_POST["sn"] ?? 0;
+				$result = $notify->setUserMessageRead($param, $sn);
+				if ($result) {
+					$msg = "設定 ".$sn." 已讀成功。";
+					echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
+						"data_count" => 1,
+						"raw" => $result,
+						"query_string" => "sn=".$sn
+					));
+				} else {
+					echoJSONResponse("設定已讀即時通私訊失敗。");
+				}
+				exit;
+			case "set_unread_user_message":
+				$param = $_POST["id"] ?? $_POST["name"] ?? $_POST["ip"] ?? '';
+				$param = empty($param) ? $client_ip : $param;
+				$sn = $_POST["sn"] ?? 0;
+				$result = $notify->setUserMessageUnread($param, $sn);
+				if ($result) {
+					$msg = "設定 ".$sn." 未讀成功。";
+					echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
+						"data_count" => 1,
+						"raw" => $result,
+						"query_string" => "sn=".$sn
+					));
+				} else {
+					echoJSONResponse("設定未讀即時通私訊失敗。");
+				}
+				exit;
+			case "del_user_message":
+				$param = $_POST["id"] ?? $_POST["name"] ?? $_POST["ip"] ?? '';
+				$param = empty($param) ? $client_ip : $param;
+				$sn = $_POST["sn"] ?? 0;
+				$result = $notify->deleteUserMessage($param, $sn);
+				if ($result) {
+					$msg = "刪除「".$sn."」訊息成功";
+					echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
+						"data_count" => 1,
+						"sn" => $sn
+					));
+				} else {
+					echoJSONResponse("刪除「".$sn."」訊息失敗");
+				}
+				exit;
+		}
+	}
 	Logger::getInstance()->warning("XHR [".$_POST["type"]."] MSSQL查詢模式已停用。");
 	echoJSONResponse("MSSQL查詢模式已停用");
 }

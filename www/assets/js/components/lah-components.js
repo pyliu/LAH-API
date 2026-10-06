@@ -319,7 +319,7 @@ if (Vue) {
                             <i class="far fa-laugh-wink fa-lg ld ld-swing"></i> 快放假了~離下班只剩 {{left_hours}} 小時
                         </b-popover>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottom" delay="350">
-                            <lah-user-message-history ref="message" :ip="myip" count=5 title="最新訊息" class="mb-2" :tabs="true" :tabs-end="true"></lah-user-message-history>
+                            <lah-user-message-history ref="message" :ip="myip" count=5 title="最新即時通私訊" class="mb-2" :tabs="true" :tabs-end="true"></lah-user-message-history>
                             <lah-user-ext class="mb-2"></lah-user-ext>
                             <lah-user-message-reservation class="mb-2"></lah-user-message-reservation>
                             <b-button block @click.stop="clearCache" variant="outline-secondary" size="sm"><lah-fa-icon icon="broom"> 清除快取資料</lah-fa-icon></b-button>
@@ -440,7 +440,7 @@ if (Vue) {
                     need_admin: false,
                     children: []
                 }, {
-                    text: "信差歷史訊息",
+                    text: "即時通私訊",
                     url: "message.html",
                     icon: "comments",
                     need_admin: false
@@ -572,23 +572,22 @@ if (Vue) {
                 });
             },
             setUnreadMessageCount: function () {
-                if (!this.disableMSDBQuery) {
-                    this.$http.post(CONFIG.API.JSON.MSSQL, {
-                        type: 'user_unread_message',
-                        ip: this.myip,
-                        timeout: 5000
-                    }).then(res => {
-                        this.avatar_badge = res.data.data_count || false;
-                        this.$root.$emit(CONFIG.LAH_ROOT_EVENT ? CONFIG.LAH_ROOT_EVENT.MESSAGE_UNREAD : 'lah::message::unread', {
-                            count: res.data.data_count,
-                            ip: this.myip
-                        });
-                    }).catch(err => {
-                        this.error = err;
-                    }).finally(() => {
-
+                this.$http.post(CONFIG.API.JSON.NOTIFICATION, {
+                    type: 'user_unread_message',
+                    id: this.myid,
+                    ip: this.myip,
+                    timeout: 5000
+                }).then(res => {
+                    this.avatar_badge = (res.data.data_count > 0 ? res.data.data_count : false);
+                    this.$root.$emit(CONFIG.LAH_ROOT_EVENT ? CONFIG.LAH_ROOT_EVENT.MESSAGE_UNREAD : 'lah::message::unread', {
+                        count: res.data.data_count || 0,
+                        ip: this.myip
                     });
-                }
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+
+                });
             },
             clearCache: function () {
                 this.$lf.clear().then(() => {
@@ -1664,10 +1663,10 @@ if (Vue) {
                             <b-card-title title-tag="h6">
                                 <lah-fa-icon v-if="message['done'] == 1" icon="eye" variant="muted" title="已看過"></lah-fa-icon>
                                 <lah-fa-icon v-else icon="eye-slash" title="還沒看過！"></lah-fa-icon>
-                                <strong class="align-middle">{{message['xname']}}</strong>
+                                <strong class="align-middle">{{displayTitle(message)}}</strong>
                             </b-card-title>
-                            <b-card-sub-title sub-title-tag="small"><div class="text-right">{{message['sendtime']['date'].substring(0, 19)}}</div></b-card-sub-title>
-                            <b-card-text v-html="format(message['xcontent'])" class="small"></b-card-text>
+                            <b-card-sub-title sub-title-tag="small"><div class="text-right">{{formatTime(message)}}</div></b-card-sub-title>
+                            <b-card-text @click="handleTextClick($event)" v-html="format(message['content'] || message['xcontent'])" class="small"></b-card-text>
                         </b-tab>
                     </b-tabs>
                 </b-card>
@@ -1682,24 +1681,24 @@ if (Vue) {
                             <strong class="align-middle">
                                 <lah-fa-icon v-if="raws[index]['done'] != 1" icon="angle-double-right" variant="danger" action="wander"></lah-fa-icon>
                                 <span :class="index < 3 ? 'text-danger h4 font-weight-bold' : ''">{{index+1}}</span>. 
-                                {{message['xname']}}
+                                {{displayTitle(message)}}
                             </strong>
-                            <span v-if="showCtlBtn(message['sendtime']['date'].substring(0, 19))">
-                                <b-btn v-if="raws[index]['done'] != 1" size="sm" variant="outline-primary" @click.stop="read(message['sn'], index)" title="設為已讀" class="border-0"> <lah-fa-icon icon="eye-slash"></lah-fa-icon> </b-btn>
-                                <b-btn v-else size="sm" variant="outline-secondary" @click.stop="unread(message['sn'], index)" title="設為未讀" class="border-0"> <lah-fa-icon :id="message['sn']" icon="eye"></lah-fa-icon> </b-btn>
+                            <span>
+                                <b-btn v-if="raws[index]['done'] != 1" size="sm" variant="outline-primary" @click.stop="read(message['sn'] || message['id'], index)" title="設為已讀" class="border-0"> <lah-fa-icon icon="eye-slash"></lah-fa-icon> </b-btn>
+                                <b-btn v-else size="sm" variant="outline-secondary" @click.stop="unread(message['sn'] || message['id'], index)" title="設為未讀" class="border-0"> <lah-fa-icon :id="message['sn'] || message['id']" icon="eye"></lah-fa-icon> </b-btn>
                             </span>
-                            <b-button-close v-if="showDeleteBtn(message)" @click="del(message['sn'])" title="刪除這個訊息"></b-button-close>
+                            <b-button-close v-if="showDeleteBtn(message)" @click="del(message['sn'] || message['id'])" title="刪除這個訊息"></b-button-close>
                         </b-card-title>
                         <b-card-sub-title sub-title-tag="small">
                             <div class="float-right">
                                 <ul>
-                                    <li>通知時間：{{message['sendtime']['date'].substring(0, 19)}}</li>
-                                    <li>停止通知：{{message['enddate']['date'].substring(0, 19)}}</li>
-                                    <li>傳送人員：{{message['sender']}}:{{message['sendCname']}}</li>
+                                    <li>通知時間：{{formatTime(message)}}</li>
+                                    <li v-if="hasEndTime(message)">停止通知：{{formatEndTime(message)}}</li>
+                                    <li>傳送人員：{{formatSender(message)}}</li>
                                 </ul>
                             </div>
                         </b-card-sub-title>
-                        <b-card-text v-html="format(message['xcontent'])" class="small mt-2 clearfix"></b-card-text>
+                        <b-card-text @click="handleTextClick($event)" v-html="format(message['content'] || message['xcontent'])" class="small mt-2 clearfix"></b-card-text>
                     </b-card>
                 </transition-group>
             </b-card-group>
@@ -1712,7 +1711,12 @@ if (Vue) {
         }),
         watch: {
             count: function (nVal, oVal) {
-                this.load()
+                this.load();
+            },
+            myid: function (nVal) {
+                if (nVal && (!this.raws || this.raws.length === 0)) {
+                    this.load();
+                }
             }
         },
         computed: {
@@ -1720,7 +1724,7 @@ if (Vue) {
                 return !this.empty(this.raws)
             },
             notFound: function () {
-                return `「${this.name || this.id || this.ip || this.myip}」找不到信差訊息！`
+                return `「${this.name || this.id || this.ip || this.myip}」找不到即時通私訊！`
             },
             columns: function () {
                 return !this.useTabs && this.enable_spinbutton
@@ -1738,126 +1742,219 @@ if (Vue) {
                 return this.id || this.name || this.ip || this.myip
             },
             cache_key: function () {
-                return `${this.cache_prefix}-messeages`
+                return `${this.cache_prefix}-messages`
             }
         },
         methods: {
+            displayTitle: function (message) {
+                let t = message['title'] || message['xname'];
+                if (!t || t === 'dontcare') {
+                    return '即時通私訊';
+                }
+                if (typeof t === 'string' && (t.startsWith('{"to"') || t.startsWith('{"id"') || (t.startsWith('{') && t.endsWith('}')))) {
+                    return '即時通私訊';
+                }
+                return t;
+            },
+            formatTime: function (message) {
+                if (message['sendtime'] && message['sendtime']['date']) {
+                    return message['sendtime']['date'].substring(0, 19);
+                }
+                if (message['create_datetime']) {
+                    return message['create_datetime'].substring(0, 19);
+                }
+                return '';
+            },
+            hasEndTime: function (message) {
+                let et = (message['enddate'] && message['enddate']['date']) || message['expire_datetime'];
+                return !this.empty(et);
+            },
+            formatEndTime: function (message) {
+                let et = (message['enddate'] && message['enddate']['date']) || message['expire_datetime'] || '';
+                return et.substring(0, 19);
+            },
+            formatSender: function (message) {
+                let s = message['sender'] || '';
+                let c = message['sendCname'] || (this.userNames && this.userNames[s]) || '';
+                if (c && c !== s) {
+                    return `${s}:${c}`;
+                }
+                return s || '系統排程';
+            },
             format: function (content) {
-                return content
-                    .replace(this.urlPattern, "<a href='$1' target='_blank' title='點擊前往'>$1</a>")
-                    .replace(/\r\n/g, "<br />");
+                if (!content) return '';
+
+                // 1. 抽取 Markdown 圖片語法 ![alt](src) 與原生 <img>，利用佔位符保護避免 URL 被後續 regex 影響
+                const images = [];
+                // 1-1. 原生 <img> 標籤
+                content = content.replace(/<img\b[^>]*>/gi, (match) => {
+                    let enriched = match;
+                    if (!enriched.includes('lah-embedded-img')) {
+                        enriched = enriched.replace('<img', '<img class="img-fluid img-thumbnail rounded lah-embedded-img shadow-sm" style="max-height: 320px; object-fit: contain; cursor: zoom-in;"');
+                    }
+                    images.push(`<div class="lah-img-container my-2 text-center">${enriched}</div>`);
+                    return `%%%LAH_IMG_PH_${images.length - 1}%%%`;
+                });
+                // 1-2. Markdown 圖片 ![alt](src)
+                content = content.replace(/!\[([^\]]*)\]\(([\s\S]*?)\)/g, (match, alt, src) => {
+                    let cleanSrc = (src || '').trim();
+                    let title = '';
+                    const titleMatch = cleanSrc.match(/^(\S+)\s+["'](.*)["']$/);
+                    if (titleMatch) {
+                        cleanSrc = titleMatch[1];
+                        title = titleMatch[2];
+                    }
+                    const altText = alt || title || '圖片';
+                    const imgHtml = `<div class="lah-img-container my-2 text-center"><img src="${cleanSrc}" alt="${altText}" title="${altText}（點擊放大）" class="img-fluid img-thumbnail rounded lah-embedded-img shadow-sm" style="max-height: 320px; object-fit: contain; cursor: zoom-in;" /></div>`;
+                    images.push(imgHtml);
+                    return `%%%LAH_IMG_PH_${images.length - 1}%%%`;
+                });
+
+                // 2. 處理超連結
+                content = content.replace(this.urlPattern, "<a href='$1' target='_blank' title='點擊前往'>$1</a>");
+
+                // 3. 處理常用 Markdown 語法（粗體、標題、分隔線、換行）
+                content = content
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/^##### (.*$)/gim, '<h6 class="font-weight-bold my-1">$1</h6>')
+                    .replace(/^#### (.*$)/gim, '<h6 class="font-weight-bold my-1">$1</h6>')
+                    .replace(/^### (.*$)/gim, '<h5 class="font-weight-bold my-1">$1</h5>')
+                    .replace(/(?:\r\n|\r|\n)/g, '<br />');
+
+                // 4. 還原圖片佔位符
+                content = content.replace(/%%%LAH_IMG_PH_(\d+)%%%/g, (match, idx) => {
+                    return images[parseInt(idx)] || '';
+                });
+
+                return content;
+            },
+            handleTextClick: function (e) {
+                const target = e.target;
+                if (target && target.tagName === 'IMG' && target.classList.contains('lah-embedded-img')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const src = target.getAttribute('src');
+                    const alt = target.getAttribute('alt') || '圖片預覽';
+                    this.previewImage(src, alt);
+                }
+            },
+            previewImage: function (src, alt) {
+                if (!src) return;
+                this.msgbox({
+                    title: `${alt || '圖片預覽'}`,
+                    message: `<div class="text-center p-2"><img src="${src}" alt="${alt || '圖片預覽'}" class="img-fluid rounded shadow" style="max-height: 80vh; max-width: 100%; object-fit: contain;" /></div>`,
+                    size: 'xl',
+                    backdrop_close: true
+                });
             },
             border: function (index) {
                 return this.raws[index]['done'] == 0 ? 'danger' : 'secondary'
             },
             load: async function (force = false) {
-                if (!this.disableMSDBQuery) {
-                    if (this.isBusy) return;
-                    try {
-                        if (!this.empty(this.noCache) || force) await this.removeLocalCache(this.cache_key);
-                        this.getLocalCache(this.cache_key).then(raws => {
-                            if (raws !== false && raws.length == this.count) {
-                                this.raws = raws;
-                            } else if (raws !== false && raws.length >= this.count) {
-                                this.raws = raws.slice(0, this.count);
-                            } else {
-                                this.isBusy = true;
-                                this.$http.post(CONFIG.API.JSON.MSSQL, {
-                                    type: "user_message",
-                                    id: this.id,
-                                    name: this.name,
-                                    ip: this.ip || this.myip,
-                                    count: this.count,
-                                    timeout: 3000
-                                }).then(res => {
-                                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                                        this.raws = res.data.raw
-                                        this.setLocalCache(this.cache_key, this.raws, 60000); // 1 min
-                                    } else {
-                                        this.notify({
-                                            title: "查詢信差訊息",
-                                            message: res.data.message,
-                                            type: "warning"
-                                        });
-                                    }
-                                }).catch(err => {
-                                    this.error = err;
-                                }).finally(() => this.isBusy = false);
-                            }
-                        });
-                    } catch (err) {
-                        this.error = err;
-                    }
+                if (this.isBusy) return;
+                try {
+                    if (!this.empty(this.noCache) || force) await this.removeLocalCache(this.cache_key);
+                    this.getLocalCache(this.cache_key).then(raws => {
+                        if (raws !== false && raws.length == this.count) {
+                            this.raws = raws;
+                        } else if (raws !== false && raws.length >= this.count) {
+                            this.raws = raws.slice(0, this.count);
+                        } else {
+                            this.isBusy = true;
+                            this.$http.post(CONFIG.API.JSON.NOTIFICATION, {
+                                type: "user_message",
+                                id: this.id || this.myid,
+                                name: this.name,
+                                ip: this.ip || this.myip,
+                                count: this.count,
+                                timeout: 3000
+                            }).then(res => {
+                                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL || res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_MULTIPLE_RECORDS) {
+                                    this.raws = res.data.raw || [];
+                                    this.setLocalCache(this.cache_key, this.raws, 60000); // 1 min
+                                } else {
+                                    this.raws = [];
+                                    this.notify({
+                                        title: "查詢即時通私訊",
+                                        message: res.data.message,
+                                        type: "warning"
+                                    });
+                                }
+                            }).catch(err => {
+                                this.error = err;
+                            }).finally(() => this.isBusy = false);
+                        }
+                    });
+                } catch (err) {
+                    this.error = err;
                 }
             },
             read(sn, idx) {
-                if (!this.disableMSDBQuery) {
-                    this.$http.post(CONFIG.API.JSON.MSSQL, {
-                        type: "set_read_user_message",
-                        sn: sn
-                    }).then(res => {
-                        this.notify({
-                            title: "設定已讀取",
-                            message: res.data.message,
-                            type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? 'success' : 'warning'
-                        });
-                        this.raws[idx]['done'] = XHR_STATUS_CODE.SUCCESS_NORMAL ? 1 : 0;
-                    }).catch(err => {
-                        this.error = err;
-                    }).finally(() => {
-
+                this.$http.post(CONFIG.API.JSON.NOTIFICATION, {
+                    type: "set_read_user_message",
+                    id: this.id || this.myid,
+                    sn: sn
+                }).then(res => {
+                    this.notify({
+                        title: "設定已讀取",
+                        message: res.data.message,
+                        type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? 'success' : 'warning'
                     });
-                }
+                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        this.raws[idx]['done'] = 1;
+                        this.setLocalCache(this.cache_key, this.raws, 60000);
+                    }
+                }).catch(err => {
+                    this.error = err;
+                });
             },
             unread(sn, idx) {
-                if (!this.disableMSDBQuery) {
-                    this.$http.post(CONFIG.API.JSON.MSSQL, {
-                        type: "set_unread_user_message",
+                this.$http.post(CONFIG.API.JSON.NOTIFICATION, {
+                    type: "set_unread_user_message",
+                    id: this.id || this.myid,
+                    sn: sn
+                }).then(res => {
+                    this.notify({
+                        title: "設定未讀取",
+                        message: res.data.message,
+                        type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? 'success' : 'warning'
+                    });
+                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        this.raws[idx]['done'] = 0;
+                        this.setLocalCache(this.cache_key, this.raws, 60000);
+                    }
+                }).catch(err => {
+                    this.error = err;
+                });
+            },
+            del(sn) {
+                this.$confirm('此動作無法復原，確定刪除本則訊息？', () => {
+                    this.$http.post(CONFIG.API.JSON.NOTIFICATION, {
+                        type: "del_user_message",
+                        id: this.id || this.myid,
                         sn: sn
                     }).then(res => {
                         this.notify({
-                            title: "設定未讀取",
+                            title: "刪除訊息",
                             message: res.data.message,
                             type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? 'success' : 'warning'
                         });
-                        this.raws[idx]['done'] = XHR_STATUS_CODE.SUCCESS_NORMAL ? 0 : 1;
+                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            this.load(true);
+                        }
                     }).catch(err => {
                         this.error = err;
-                    }).finally(() => {
-
                     });
-                }
-            },
-            del(sn) {
-                if (!this.disableMSDBQuery) {
-                    this.$confirm('此動作無法復原，確定刪除本則訊息？', () => {
-                        this.$http.post(CONFIG.API.JSON.MSSQL, {
-                            type: "del_user_message",
-                            sn: sn
-                        }).then(res => {
-                            this.notify({
-                                title: "刪除訊息",
-                                message: res.data.message,
-                                type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? 'success' : 'warning'
-                            });
-                            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                                this.load(true);
-                            }
-                        }).catch(err => {
-                            this.error = err;
-                        }).finally(() => {
-
-                        });
-                    });
-                }
+                });
             },
             showCtlBtn(snd_time) {
+                if (!snd_time) return true;
                 const date1 = +new Date();
                 const date2 = +new Date(snd_time.replace(' ', 'T'));
-                return date1 - date2 > 0;
+                return isNaN(date2) ? true : date1 - date2 >= 0;
             },
             showDeleteBtn(message) {
-                return $.trim(message['sender']) == $.trim(this.myid) && message['done'] == 0
+                return true;
             }
         },
         created() {
@@ -1868,7 +1965,7 @@ if (Vue) {
                     this.notify({
                         message: `您有 ${payload.count} 則未讀訊息。`,
                         type: "warning"
-                    })
+                    });
                 }
             });
             this.load();

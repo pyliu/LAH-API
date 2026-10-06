@@ -169,6 +169,113 @@ switch ($_POST["type"]) {
             echoJSONResponse('讀取 notification_log 失敗', STATUS_CODE::DEFAULT_FAIL);
         }
         break;
+    case "user_message":
+        $param = $_POST["id"] ?? $_POST["channel"] ?? $_POST["name"] ?? $_POST["ip"] ?? '';
+        $param = empty($param) ? $client_ip : $param;
+        $count = $_POST["count"] ?? 10;
+        Logger::getInstance()->info("XHR [user_message] 查詢使用者即時通私訊【".$param.", count: ".$count."】請求");
+        $notify = new Notification();
+        $results = $notify->getUserMessages($param, $count);
+        if ($results === false || empty($results)) {
+            Logger::getInstance()->info("XHR [user_message] 查無 ${param} 即時通私訊。");
+            echoJSONResponse("查無 ${param} 即時通私訊。", STATUS_CODE::SUCCESS_WITH_NO_RECORD, array(
+                "data_count" => 0,
+                "raw" => array(),
+                "query_string" => "id=".($_POST["id"] ?? '')."&name=".($_POST["name"] ?? '')."&ip=".($_POST["ip"] ?? '')."&count=".$count
+            ));
+        } else {
+            $msg = "XHR [user_message] 查詢 ${param} 即時通私訊成功。(".count($results).")";
+            Logger::getInstance()->info($msg);
+            $status = count($results) > 1 ? STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS : STATUS_CODE::SUCCESS_NORMAL;
+            echoJSONResponse($msg, $status, array(
+                "data_count" => count($results),
+                "raw" => $results,
+                "query_string" => "id=".($_POST["id"] ?? '')."&name=".($_POST["name"] ?? '')."&ip=".($_POST["ip"] ?? '')."&count=".$count
+            ));
+        }
+        break;
+    case "user_unread_message":
+        $param = $_POST["id"] ?? $_POST["channel"] ?? $_POST["name"] ?? $_POST["ip"] ?? '';
+        $param = empty($param) ? $client_ip : $param;
+        Logger::getInstance()->info("XHR [user_unread_message] 查詢使用者未讀即時通私訊【".$param."】請求");
+        $notify = new Notification();
+        $results = $notify->getUserUnreadMessages($param);
+        if (empty($results)) {
+            Logger::getInstance()->info("XHR [user_unread_message] 查無 ${param} 未讀即時通私訊。");
+            echoJSONResponse("查無 ${param} 未讀即時通私訊。", STATUS_CODE::SUCCESS_WITH_NO_RECORD, array(
+                "data_count" => 0,
+                "raw" => array()
+            ));
+        } else {
+            $msg = "XHR [user_unread_message] 查詢 ${param} 未讀即時通私訊成功。(".count($results).")";
+            Logger::getInstance()->info($msg);
+            $status = count($results) > 1 ? STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS : STATUS_CODE::SUCCESS_NORMAL;
+            echoJSONResponse($msg, $status, array(
+                "data_count" => count($results),
+                "raw" => $results
+            ));
+        }
+        break;
+    case "set_read_user_message":
+        $param = $_POST["id"] ?? $_POST["channel"] ?? $_POST["name"] ?? $_POST["ip"] ?? '';
+        $param = empty($param) ? $client_ip : $param;
+        $sn = $_POST["sn"] ?? $_POST["id"] ?? 0;
+        Logger::getInstance()->info("XHR [set_read_user_message] 設定已讀使用者即時通私訊【".$param.", sn: ".$sn."】請求");
+        $notify = new Notification();
+        $result = $notify->setUserMessageRead($param, $sn);
+        if ($result) {
+            $msg = "設定 ".$sn." 已讀成功。";
+            Logger::getInstance()->info("XHR [set_read_user_message] ".$msg);
+            echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => 1,
+                "raw" => $result,
+                "query_string" => "sn=".$sn
+            ));
+        } else {
+            Logger::getInstance()->error("XHR [set_read_user_message] 設定 ".$sn." 已讀即時通私訊失敗。");
+            echoJSONResponse("設定已讀失敗", STATUS_CODE::DEFAULT_FAIL);
+        }
+        break;
+    case "set_unread_user_message":
+        $param = $_POST["id"] ?? $_POST["channel"] ?? $_POST["name"] ?? $_POST["ip"] ?? '';
+        $param = empty($param) ? $client_ip : $param;
+        $sn = $_POST["sn"] ?? $_POST["id"] ?? 0;
+        Logger::getInstance()->info("XHR [set_unread_user_message] 設定未讀使用者即時通私訊【".$param.", sn: ".$sn."】請求");
+        $notify = new Notification();
+        $result = $notify->setUserMessageUnread($param, $sn);
+        if ($result) {
+            $msg = "設定 ".$sn." 未讀成功。";
+            Logger::getInstance()->info("XHR [set_unread_user_message] ".$msg);
+            echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => 1,
+                "raw" => $result,
+                "query_string" => "sn=".$sn
+            ));
+        } else {
+            Logger::getInstance()->error("XHR [set_unread_user_message] 設定 ".$sn." 未讀即時通私訊失敗。");
+            echoJSONResponse("設定未讀失敗", STATUS_CODE::DEFAULT_FAIL);
+        }
+        break;
+    case "del_user_message":
+        $param = $_POST["id"] ?? $_POST["channel"] ?? $_POST["name"] ?? $_POST["ip"] ?? '';
+        $param = empty($param) ? $client_ip : $param;
+        $sn = $_POST["sn"] ?? $_POST["id"] ?? 0;
+        Logger::getInstance()->info("XHR [del_user_message] 刪除即時通私訊【".$param.", sn: ".$sn."】請求");
+        $notify = new Notification();
+        $result = $notify->deleteUserMessage($param, $sn);
+        if ($result) {
+            $msg = "刪除「".$sn."」訊息成功";
+            Logger::getInstance()->info("XHR [del_user_message] ".$msg);
+            echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => 1,
+                "sn" => $sn,
+                "query_string" => "sn=".$sn
+            ));
+        } else {
+            Logger::getInstance()->error("XHR [del_user_message] 刪除「".$sn."」訊息失敗。");
+            echoJSONResponse("刪除「".$sn."」訊息失敗", STATUS_CODE::DEFAULT_FAIL);
+        }
+        break;
     default:
         Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
         echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

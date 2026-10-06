@@ -341,7 +341,7 @@ if (Vue) {
             },
             message: function() {
                 this.msgbox({
-                    title: '我的信差訊息',
+                    title: '我的即時通私訊',
                     message: this.$createElement(
                         'lah-user-message-history',
                         { props: { count: 9, tabs: true }}
