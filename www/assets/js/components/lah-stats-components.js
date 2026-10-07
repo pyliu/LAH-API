@@ -9,7 +9,7 @@ if (Vue) {
                 <span class="st-date-pill"><i class="far fa-calendar-alt mr-1"></i> 統計月份：{{ date.substr(0, 3) }} 年 {{ date.substr(3, 2) }} 月 ({{ date }})</span>
             </div>
             <b-form-row class="align-items-center">
-                <div class="col-lg-4 col-md-12 mb-2 mb-lg-0">
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-2 mb-xl-0">
                     <b-input-group size="sm" prepend="統計年月">
                         <b-input-group-prepend>
                             <b-button variant="outline-secondary" @click="stepMonth(-1)" title="上個月">
@@ -35,7 +35,7 @@ if (Vue) {
                         </b-input-group-append>
                     </b-input-group>
                 </div>
-                <div class="col-lg-2 col-md-4 mb-2 mb-md-0">
+                <div class="col-xl-2 col-lg-2 col-md-6 mb-2 mb-xl-0">
                     <b-input-group size="sm" prepend="筆數 ≥">
                         <b-form-input
                             type="number"
@@ -47,7 +47,17 @@ if (Vue) {
                         ></b-form-input>
                     </b-input-group>
                 </div>
-                <div class="col-lg-4 col-md-5 mb-2 mb-md-0">
+                <div class="col-xl-2 col-lg-3 col-md-4 mb-2 mb-md-0">
+                    <b-input-group size="sm" prepend="排序">
+                        <b-form-select
+                            v-model="sort_by"
+                            :options="sort_options"
+                            size="sm"
+                            class="no-cache h-100"
+                        ></b-form-select>
+                    </b-input-group>
+                </div>
+                <div class="col-xl-3 col-lg-3 col-md-5 mb-2 mb-md-0">
                     <b-input-group size="sm" prepend="關鍵字">
                         <b-form-input
                             type="text"
@@ -59,7 +69,7 @@ if (Vue) {
                         <lah-button v-if="button" icon="edit" size="sm" variant="outline-primary" class="ml-2" @click="update">更新</lah-button>
                     </b-input-group>
                 </div>
-                <div class="col-lg-2 col-md-3 text-md-right">
+                <div class="col-xl-2 col-lg-12 col-md-3 text-md-right">
                     <b-form-checkbox inline v-model="reg_reason" switch class="my-auto small font-weight-bold">顯示所有原因</b-form-checkbox>
                 </div>
             </b-form-row>
@@ -79,6 +89,13 @@ if (Vue) {
             max: 36,
             value: 35,
             filter: 0,
+            sort_by: 'default',
+            sort_options: [
+                { value: 'default', text: '預設分類' },
+                { value: 'count_desc', text: '數量：多 → 少' },
+                { value: 'count_asc', text: '數量：少 → 多' },
+                { value: 'code_asc', text: '代碼 / 名稱' }
+            ],
             keyword: '',
             reg_reason: false,
             value_timer: null,
@@ -105,6 +122,9 @@ if (Vue) {
             }
         },
         watch: {
+            sort_by(nVal) {
+                this.storeParams['stats_sort'] = nVal;
+            },
             filter(nVal, oVal) {
                 if (nVal < 0 || nVal > 1000 || isNaN(nVal)) {
                     this.filter = 0;
@@ -202,6 +222,7 @@ if (Vue) {
             this.ym_input = this.date;
             this.addToStoreParams('stats_date', this.date);
             this.addToStoreParams('stats_filter', this.filter);
+            this.addToStoreParams('stats_sort', this.sort_by);
             this.addToStoreParams('stats_keyword', this.keyword);
             this.addToStoreParams('stats_reg_reason', this.reg_reason);
         }
@@ -249,7 +270,7 @@ if (Vue) {
             </div>
             <div v-if="all">
                 <transition-group name="list" tag="div" class="st-grid">
-                    <div v-for="(item, idx) in items" :key="'stats_'+idx" class="st-item" :class="'cat-' + border_var(item)" @click.stop="query(item)" title="按我取得詳細資料">
+                    <div v-for="(item, idx) in sortedItems" :key="'stats_' + item.category + '_' + (item.id || idx)" class="st-item" :class="'cat-' + border_var(item)" @click.stop="query(item)" title="按我取得詳細資料">
                         <div class="st-item-main">
                             <lah-button pill icon="file-excel" size="sm" variant="outline-success" action="move-fade-ltr" title="匯出EXCEL" @click="xlsx(item)" class="st-xlsx-btn"></lah-button>
                             <div class="st-item-text">
@@ -267,7 +288,7 @@ if (Vue) {
             </div>
             <b-list-group v-else :title="header" class="st-list">
                 <transition-group name="list">
-                    <b-list-group-item flush button v-if="ok" v-for="(item, idx) in items" :key="'stats_'+idx" class="d-flex justify-content-between align-items-center" @click.stop="query(item)">
+                    <b-list-group-item flush button v-if="ok" v-for="(item, idx) in sortedItems" :key="'stats_'+idx" class="d-flex justify-content-between align-items-center" @click.stop="query(item)">
                         <div>
                             <lah-button pill icon="file-excel" variant="outline-success" action="move-fade-ltr" @click="xlsx(item)"></lah-button>
                             {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
@@ -301,6 +322,29 @@ if (Vue) {
             },
             filter() {
                 return parseInt(this.storeParams['stats_filter'] || 0)
+            },
+            sort_by() {
+                return this.storeParams['stats_sort'] || 'default'
+            },
+            sortedItems() {
+                const list = this.items.slice();
+                if (this.sort_by === 'count_desc') {
+                    return list.sort((a, b) => (parseInt(b.count, 10) || 0) - (parseInt(a.count, 10) || 0));
+                }
+                if (this.sort_by === 'count_asc') {
+                    return list.sort((a, b) => (parseInt(a.count, 10) || 0) - (parseInt(b.count, 10) || 0));
+                }
+                if (this.sort_by === 'code_asc') {
+                    return list.sort((a, b) => {
+                        const codeA = a.id || '';
+                        const codeB = b.id || '';
+                        if (codeA !== codeB) {
+                            return codeA.localeCompare(codeB, 'zh-Hant');
+                        }
+                        return (a.text || '').localeCompare(b.text || '', 'zh-Hant');
+                    });
+                }
+                return list;
             },
             all_reg_reason() {
                 return this.storeParams['stats_reg_reason'] || false
