@@ -3,40 +3,14 @@ if (Vue) {
      * Stats Relative Components
      */
     Vue.component("lah-stats-range", {
-        template: `<div class="st-filter-card">
-            <div class="st-filter-header">
-                <span><i class="fas fa-sliders-h mr-1"></i> 篩選與月份設定</span>
-                <span class="st-date-pill"><i class="far fa-calendar-alt mr-1"></i> 統計月份：{{ date.substr(0, 3) }} 年 {{ date.substr(3, 2) }} 月 ({{ date }})</span>
-            </div>
-            <b-form-row class="align-items-center">
-                <div class="col-lg-4 col-md-12 mb-2 mb-lg-0">
-                    <b-input-group size="sm" prepend="統計年月">
-                        <b-input-group-prepend>
-                            <b-button variant="outline-secondary" @click="stepMonth(-1)" title="上個月">
-                                <i class="fas fa-chevron-left"></i> 上月
-                            </b-button>
-                        </b-input-group-prepend>
-                        <b-form-input
-                            id="stat_range"
-                            v-model="ym_input"
-                            type="text"
-                            maxlength="5"
-                            placeholder="例: 11509"
-                            :state="ym_valid"
-                            @input="onYmInput"
-                            @blur="normalizeYm"
-                            @keyup.enter="applyYmNow"
-                            class="text-center font-weight-bold no-cache h-100"
-                        ></b-form-input>
-                        <b-input-group-append>
-                            <b-button variant="outline-secondary" @click="stepMonth(1)" :disabled="!canNextMonth" title="下個月">
-                                下月 <i class="fas fa-chevron-right"></i>
-                            </b-button>
-                        </b-input-group-append>
+        template: `<div>
+            <h6><lah-fa-icon icon="angle-double-right" variant="primary">篩選條件</lah-fa-icon></h6>
+            <b-card class="shadow">
+                <b-form-row class="mt-2">
+                    <b-input-group size="sm" :prepend="date" class="col">
+                        <b-form-input id="stat_range" v-model="value" type="range" :min="1" :max="max" class="h-100"></b-form-input>
                     </b-input-group>
-                </div>
-                <div class="col-lg-2 col-md-4 mb-2 mb-md-0">
-                    <b-input-group size="sm" prepend="筆數 ≥">
+                    <b-input-group size="sm" prepend="筆數大於" class="col-2">
                         <b-form-input
                             type="number"
                             v-model="filter"
@@ -46,23 +20,18 @@ if (Vue) {
                             class="no-cache h-100"
                         ></b-form-input>
                     </b-input-group>
-                </div>
-                <div class="col-lg-4 col-md-5 mb-2 mb-md-0">
-                    <b-input-group size="sm" prepend="關鍵字">
+                    <b-input-group size="sm" prepend="關鍵字" class="col-2">
                         <b-form-input
                             type="text"
                             v-model="keyword"
                             size="sm"
-                            placeholder="代碼或原因名稱…"
                             class="no-cache h-100"
                         ></b-form-input>
-                        <lah-button v-if="button" icon="edit" size="sm" variant="outline-primary" class="ml-2" @click="update">更新</lah-button>
+                        <lah-button v-if="button" icon="edit" size="sm" variant="outline-primary" class="ml-2" @click.stop="update">更新</lah-button>
                     </b-input-group>
-                </div>
-                <div class="col-lg-2 col-md-3 text-md-right">
-                    <b-form-checkbox inline v-model="reg_reason" switch class="my-auto small font-weight-bold">顯示所有原因</b-form-checkbox>
-                </div>
-            </b-form-row>
+                    <b-form-checkbox inline v-model="reg_reason" switch class="h-100 my-auto small">顯示所有</b-form-checkbox>
+                </b-form-row>
+            </b-card>
         </div>`,
         props: {
             button: {
@@ -72,9 +41,7 @@ if (Vue) {
         },
         data: () => ({
             year: 110,
-            month: 3,
-            ym_input: '',
-            max_ym: '',
+            month: 03,
             base: 0,
             max: 36,
             value: 35,
@@ -85,26 +52,26 @@ if (Vue) {
             filter_timer: null,
             keyword_timer: null,
             reg_reason_timer: null,
-            delay_ms: 600
+            delay_ms: 1000
         }),
         computed: {
             date() {
-                return `${("00" + this.year).slice(-3)}${("0" + this.month).slice(-2)}`
-            },
-            ym_valid() {
-                if (!/^\d{5}$/.test(this.ym_input)) return false;
-                const y = parseInt(this.ym_input.substr(0, 3), 10);
-                const m = parseInt(this.ym_input.substr(3, 2), 10);
-                if (y < 100 || m < 1 || m > 12) return false;
-                if (this.max_ym && this.ym_input > this.max_ym) return false;
-                return null;
-            },
-            canNextMonth() {
-                if (!this.max_ym) return true;
-                return this.date < this.max_ym;
+                return `${this.year}${("0" + this.month).slice(-2)}`
             }
         },
         watch: {
+            value(nVal, oVal) {
+                let after = this.base - this.max + parseInt(nVal) - 1;
+                this.year = parseInt(after / 12);
+                this.month = after % 12 + 1;
+                if (!this.button) {
+                    // delay the reload action 
+                    clearTimeout(this.value_timer);
+                    this.value_timer = this.timeout(() => {
+                        this.storeParams['stats_date'] = this.date;
+                    }, this.delay_ms);
+                }
+            },
             filter(nVal, oVal) {
                 if (nVal < 0 || nVal > 1000 || isNaN(nVal)) {
                     this.filter = 0;
@@ -135,55 +102,7 @@ if (Vue) {
             }
         },
         methods: {
-            onYmInput(val) {
-                const digits = String(val || '').replace(/\D/g, '').slice(0, 5);
-                if (digits !== this.ym_input) {
-                    this.ym_input = digits;
-                }
-                if (digits.length === 5) {
-                    const y = parseInt(digits.substr(0, 3), 10);
-                    const m = parseInt(digits.substr(3, 2), 10);
-                    if (y >= 100 && m >= 1 && m <= 12 && (!this.max_ym || digits <= this.max_ym)) {
-                        this.year = y;
-                        this.month = m;
-                        if (!this.button) {
-                            clearTimeout(this.value_timer);
-                            this.value_timer = this.timeout(() => {
-                                this.storeParams['stats_date'] = this.date;
-                            }, this.delay_ms);
-                        }
-                    }
-                }
-            },
-            applyYmNow() {
-                this.normalizeYm();
-                clearTimeout(this.value_timer);
-                this.storeParams['stats_date'] = this.date;
-            },
-            normalizeYm() {
-                if (this.ym_valid === false) {
-                    this.ym_input = this.date;
-                }
-            },
-            stepMonth(delta) {
-                let totalMonths = this.year * 12 + (this.month - 1) + delta;
-                let nYear = Math.floor(totalMonths / 12);
-                let nMonth = (totalMonths % 12) + 1;
-                const nextYm = `${("00" + nYear).slice(-3)}${("0" + nMonth).slice(-2)}`;
-                if (nYear < 100) return;
-                if (this.max_ym && nextYm > this.max_ym) return;
-                this.year = nYear;
-                this.month = nMonth;
-                this.ym_input = nextYm;
-                if (!this.button) {
-                    clearTimeout(this.value_timer);
-                    this.value_timer = this.timeout(() => {
-                        this.storeParams['stats_date'] = this.date;
-                    }, 300);
-                }
-            },
             update() {
-                this.normalizeYm();
                 this.storeParams['stats_date'] = this.date;
                 this.storeParams['stats_filter'] = this.filter;
                 this.storeParams['stats_keyword'] = this.keyword;
@@ -191,15 +110,12 @@ if (Vue) {
         },
         mounted() {
             let now = new Date();
-            let curY = now.getFullYear() - 1911;
-            let curM = now.getMonth() + 1;
-            this.max_ym = `${("00" + curY).slice(-3)}${("0" + curM).slice(-2)}`;
-            this.year = curY;
+            this.year = now.getFullYear() - 1911;
             this.month = now.getMonth(); // set last month as default
+            this.value = this.max - 1;
             this.base = this.year * 12 + now.getMonth() + 1;
             // to fix cross year issue
             this.month === 0 && (this.month = 12, this.year--);
-            this.ym_input = this.date;
             this.addToStoreParams('stats_date', this.date);
             this.addToStoreParams('stats_filter', this.filter);
             this.addToStoreParams('stats_keyword', this.keyword);
@@ -209,63 +125,25 @@ if (Vue) {
 
     Vue.component("lah-stats-dashboard", {
         template: `<div>
-            <div class="st-kpi-grid" v-if="all">
-                <div class="st-kpi">
-                    <div>
-                        <div class="st-kpi-label">統計項目數</div>
-                        <div class="st-kpi-num">{{ items.length }}</div>
-                    </div>
-                    <div class="st-kpi-ico brand"><i class="fas fa-th-large"></i></div>
-                </div>
-                <div class="st-kpi">
-                    <div>
-                        <div class="st-kpi-label">案件總計筆數</div>
-                        <div class="st-kpi-num">{{ items.reduce((s, it) => s + (parseInt(it.count) || 0), 0) }}</div>
-                    </div>
-                    <div class="st-kpi-ico ok"><i class="fas fa-calculator"></i></div>
-                </div>
-                <div class="st-kpi">
-                    <div>
-                        <div class="st-kpi-label">專項業務指標</div>
-                        <div class="st-kpi-num">{{ items.filter(it => it.category !== 'stats_reg_reason' && it.category !== 'stats_reg_all').length }}</div>
-                    </div>
-                    <div class="st-kpi-ico info"><i class="fas fa-briefcase"></i></div>
-                </div>
-                <div class="st-kpi">
-                    <div>
-                        <div class="st-kpi-label">登記原因指標</div>
-                        <div class="st-kpi-num">{{ items.filter(it => it.category === 'stats_reg_reason' || it.category === 'stats_reg_all').length }}</div>
-                    </div>
-                    <div class="st-kpi-ico warn"><i class="fas fa-tags"></i></div>
-                </div>
-            </div>
-            <div class="st-sec-bar">
-                <div class="st-sec-title">
-                    <i class="fas fa-chart-pie text-primary mr-1"></i>
-                    <span>查詢結果</span>
-                    <small class="st-sec-sub" v-if="date">（{{ date.substr(0, 3) }} 年 {{ date.substr(3, 2) }} 月，點擊卡片檢視明細，點擊左測圖示匯出 EXCEL）</small>
-                </div>
-                <lah-button icon="sync" action="cycle" size="sm" @click="refresh" variant="outline-primary" class="st-refresh-btn" title="清除快取並重新整理">重新整理快取</lah-button>
-            </div>
-            <div v-if="all">
-                <transition-group name="list" tag="div" class="st-grid">
-                    <div v-for="(item, idx) in items" :key="'stats_'+idx" class="st-item" :class="'cat-' + border_var(item)" @click.stop="query(item)" title="按我取得詳細資料">
-                        <div class="st-item-main">
-                            <lah-button pill icon="file-excel" size="sm" variant="outline-success" action="move-fade-ltr" title="匯出EXCEL" @click="xlsx(item)" class="st-xlsx-btn"></lah-button>
-                            <div class="st-item-text">
-                                <span v-if="!empty(item.id)" class="st-code">{{ item.id }}</span>
-                                <span class="st-name">{{ item.text }}</span>
+            <h6 class="d-flex w-100 justify-content-between mb-0">
+                <lah-fa-icon icon="angle-double-right" variant="success">查詢結果</lah-fa-icon>
+                <lah-button icon="sync" action="cycle" no-border @click="refresh" variant="outline-secondary" title="重新整理"></lah-button>
+            </h6>
+            <b-card-group v-if="all" columns>
+                <transition-group name="list">
+                    <b-card no-body v-for="(item, idx) in items" :key="'stats_'+idx" :border-variant="border_var(item)" class="shadow my-2">
+                        <b-list-group-item button class="d-flex justify-content-between align-items-center" @click.stop="query(item)" title="按我取得詳細資料">
+                            <div>
+                                <lah-button pill icon="file-excel" variant="outline-success" action="move-fade-ltr" title="匯出EXCEL" @click="xlsx(item)"></lah-button>
+                                {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
                             </div>
-                        </div>
-                        <b-badge :variant="badge_var(item.count)" pill class="st-count">{{ item.count }}</b-badge>
-                    </div>
+                            <b-badge :variant="badge_var(item.count)" pill>{{item.count}}</b-badge>
+                        </b-list-group-item>
+                    </b-card>
                 </transition-group>
-                <div v-if="!isBusy && items.length === 0" class="st-empty">
-                    <i class="far fa-folder-open"></i>
-                    <div>{{ ok ? '沒有符合篩選條件的統計項目' : '查詢後端資料失敗或尚無統計資料' }}</div>
-                </div>
-            </div>
-            <b-list-group v-else :title="header" class="st-list">
+                <lah-fa-icon v-if="!ok" icon="exclamation-triangle" variant="danger"> 查詢後端資料失敗</lah-fa-icon>
+            </b-card-group>
+            <b-list-group v-else :title="header">
                 <transition-group name="list">
                     <b-list-group-item flush button v-if="ok" v-for="(item, idx) in items" :key="'stats_'+idx" class="d-flex justify-content-between align-items-center" @click.stop="query(item)">
                         <div>
@@ -625,139 +503,45 @@ if (Vue) {
                     }
                 } else {
                     this.$log(item.category);
-                    const label = this.empty(item.text) ? `登記原因 ${item.id}` : `${item.id}：${item.text}`;
-                    this.xhr('reg_reason_cases_by_month', label, item.id);
+                    this.xhr('reg_reason_cases_by_month', item.text, item.id);
                 }
             },
             xlsx_export(item) {
-                if (typeof XLSX === 'undefined') {
-                    this.alert({
-                        title: '匯出 EXCEL 檔案',
-                        message: '前端 XLSX 套件尚未載入，請重新整理頁面再試。',
-                        type: 'danger'
-                    });
-                    return;
-                }
-                let qType = '';
-                let isRegCase = false;
-                if (this.empty(item.id)) {
-                    switch (item.category) {
-                        case "stats_court":
-                            qType = 'reg_court_cases_by_month';
-                            isRegCase = true;
-                            break;
-                        case "stats_reg_fix":
-                            qType = 'reg_fix_cases_by_month';
-                            isRegCase = true;
-                            break;
-                        case "stats_reg_reject":
-                            qType = 'reg_reject_cases_by_month';
-                            isRegCase = true;
-                            break;
-                        case "stats_refund":
-                            qType = 'expba_refund_cases_by_month';
-                            break;
-                        case "stats_sur_rain":
-                            qType = 'sur_rain_cases_by_month';
-                            break;
-                        case "stats_reg_remote":
-                            qType = 'reg_remote_cases_by_month';
-                            break;
-                        case "stats_reg_subcase":
-                            qType = 'reg_subcases_by_month';
-                            break;
-                        case "stats_regf":
-                            qType = 'regf_by_month';
-                            break;
-                        default:
-                            this.notify({ message: '本項目未支援匯出XLSX功能', type: 'warning' });
-                            return;
-                    }
-                } else {
-                    qType = 'reg_reason_cases_by_month';
-                    isRegCase = true;
-                }
-
                 this.isBusy = true;
-                this.notify({
-                    title: '匯出 EXCEL 檔案',
-                    message: `<i class="fas fa-cog ld ld-spin"></i> 正在擷取「${item.text}」資料並產生 XLSX ...`,
-                    type: 'info',
-                    duration: 2000
-                });
-
                 this.$http.post(CONFIG.API.JSON.QUERY, {
-                    type: qType,
-                    query_month: this.date,
-                    reason_code: item.id || undefined
+                    type: 'xlsx_params',
+                    xlsx_type: 'stats_export',
+                    xlsx_item: Object.assign({
+                        query_month: this.date
+                    }, item)
                 }).then(res => {
-                    if (
-                        res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_MULTIPLE_RECORDS ||
-                        res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL
-                    ) {
-                        let rows = isRegCase ? (res.data.baked || []) : (res.data.raw || []);
-                        if (!rows || rows.length === 0) {
-                            this.notify({ title: '匯出 EXCEL 檔案', message: '查無明細資料可匯出', type: 'warning' });
-                            return;
-                        }
-                        let exportRows = [];
-                        if (isRegCase) {
-                            const regCols = [
-                                '收件字號', '收件時間', '登記原因', '辦理情形',
-                                '收件人員', '作業人員', '初審人員', '複審人員',
-                                '准登人員', '登錄人員', '校對人員', '結案人員', '結案狀態'
-                            ];
-                            exportRows = rows.map(r => {
-                                let o = {};
-                                regCols.forEach(k => { o[k] = r[k] !== undefined && r[k] !== null ? String(r[k]) : ''; });
-                                return o;
-                            });
-                        } else {
-                            exportRows = rows.map(r => {
-                                let o = {};
-                                Object.keys(r).forEach(k => { o[k] = r[k] !== undefined && r[k] !== null ? String(r[k]) : ''; });
-                                return o;
-                            });
-                        }
-
-                        const ws = XLSX.utils.json_to_sheet(exportRows);
-                        // Force all data cells as string type so leading zeros are preserved
-                        const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
-                        const colWidths = [];
-                        for (let C = range.s.c; C <= range.e.c; ++C) {
-                            let maxLen = 10;
-                            for (let R = range.s.r; R <= range.e.r; ++R) {
-                                const addr = XLSX.utils.encode_cell({ r: R, c: C });
-                                const cell = ws[addr];
-                                if (cell && cell.v !== undefined) {
-                                    cell.t = 's';
-                                    cell.v = String(cell.v);
-                                    const len = cell.v.replace(/[^\x00-\xff]/g, 'xx').length;
-                                    if (len > maxLen) maxLen = len;
-                                }
-                            }
-                            colWidths.push({ wch: Math.min(maxLen + 3, 42) });
-                        }
-                        ws['!cols'] = colWidths;
-
-                        const wb = XLSX.utils.book_new();
-                        const sheetName = (item.text || '統計明細').replace(/[\\/?*[\]:]/g, '').slice(0, 31) || 'Sheet1';
-                        XLSX.utils.book_append_sheet(wb, ws, sheetName);
-
-                        const d = new Date();
-                        const today = `${d.getFullYear() - 1911}${('0' + (d.getMonth() + 1)).slice(-2)}${('0' + d.getDate()).slice(-2)}`;
-                        const codePrefix = this.empty(item.id) ? '' : `${item.id}_`;
-                        const filename = `${today}_${this.date}_${codePrefix}${item.text}.xlsx`;
-                        XLSX.writeFile(wb, filename);
-
+                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         this.notify({
-                            title: '匯出 EXCEL 檔案',
-                            message: `<i class="fas fa-check"></i> 已下載 <b>${filename}</b>（共 ${exportRows.length} 筆）`,
-                            type: 'success'
+                            title: '匯出EXCEL檔案',
+                            message: '<i class="fas fa-cog ld ld-spin"></i> 後端處理中 ... ',
+                            type: "warning",
+                            duration: 2000
                         });
+                        // second param usage => e.target.title to get the title
+                        this.open(CONFIG.API.FILE.XLSX, {
+                            target: {
+                                title: '下載XLSX'
+                            }
+                        });
+                        this.timeout(() => closeModal(() => this.notify({
+                            title: '匯出EXCEL檔案',
+                            message: '<i class="fas fa-check ld ld-pulse"></i> 後端作業完成',
+                            type: "success"
+                        })), 2000);
                     } else {
                         let err = this.responseMessage(res.data.status);
-                        this.notify({ title: '匯出 EXCEL 檔案', message: err, type: 'warning' });
+                        let message = `${err} - ${res.data.status}`;
+                        this.$warn(`紀錄 XLSX 參數失敗: ${message}`);
+                        this.alert({
+                            title: '紀錄 XLSX 參數',
+                            message: message,
+                            type: "danger"
+                        });
                     }
                 }).catch(err => {
                     this.error = err;
@@ -777,7 +561,6 @@ if (Vue) {
                     case "stats_reg_subcase":
                     case "stats_regf":
                     case "stats_reg_reason":
-                    case "stats_reg_all":
                         this.xlsx_export(item);
                         break;
                     default:

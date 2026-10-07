@@ -2,7 +2,11 @@ if (Vue) {
     Vue.component("lah-case-reg-overdue", {
         components: { "countdown": VueCountdown },
         template: `<div>
-            <div style="right: 1rem; position:absolute; top: 0.5rem;" v-if="!is_in_modal_mode">
+            <div class="ov-summary" v-if="!is_in_modal_mode">
+                <div class="ov-card" :class="is_overdue_mode ? 'danger' : 'warning'"><div class="ov-label">{{ is_overdue_mode ? '逾期案件' : '即將逾期案件' }}</div><div class="ov-num">{{ total_case }}<small> 件</small></div></div>
+                <div class="ov-card"><div class="ov-label">涉及初審人員</div><div class="ov-num">{{ total_people }}<small> 人</small></div></div>
+            </div>
+            <div class="ov-toolbar" v-if="!is_in_modal_mode">
                 <b-form-checkbox v-b-tooltip.hover.top="modeTooltip" inline v-model="overdueMode" switch style="margin-right: 0rem; margin-top: .15rem;" :class="['align-baseline', 'btn', 'btn-sm', is_overdue_mode ? '' : 'border-warning', 'p-1']">
                     <span>{{modeText}}</span>
                 </b-form-checkbox>

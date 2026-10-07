@@ -68,6 +68,14 @@ function queryStats($type, $date, $error_msg) {
             }
         }
     }
+    if (is_array($result) && defined('REG_REASON')) {
+        foreach ($result as &$r) {
+            if (empty($r['text']) && !empty($r['id']) && isset(REG_REASON[$r['id']])) {
+                $r['text'] = REG_REASON[$r['id']];
+            }
+        }
+        unset($r);
+    }
     Logger::getInstance()->info(__METHOD__.": ($type, $date) 取得 ".count($result)." 筆資料。");
     echoJSONResponse("取得 ".count($result)." 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
         "data_count" => count($result),

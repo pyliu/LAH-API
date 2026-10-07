@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="For zhongli land office use only">
+<meta name="author" content="LIU, PANG-YU">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta http-equiv="cache-control" content="no-cache">
+<title>今日案件-桃園市桃園地政事務所</title>
+<link rel="preload" href="assets/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="assets/css/loading.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="assets/css/loading-btn.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="assets/css/animate.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="assets/css/awesome-font.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="assets/css/main.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+</head>
+
+<body class="overflow-hidden">
+  <section>
+    <div class="container-fluid" v-cloak>
+        <div id="tracking"></div>
+        <h1 v-if="false" style="text-align: center; color: red; font-weight: bold;">請使用非 IE 瀏覽器開啟本頁面</h1>
+    </div>
+  </section><!-- /section -->
+  <!-- Bootstrap core JavaScript -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="assets/js/jquery.min.js"></script>
+  <script src="assets/js/popper.min.js"></script>
+  <script src="assets/js/bootstrap.min.js"></script>
+  <!-- Vue -->
+  <script src="assets/js/vue.js"></script>
+  <script src="assets/js/vuex.js"></script>
+  <script src="assets/js/bootstrap-vue.min.js"></script>
+  <script src="assets/js/bootstrap-vue-icons.min.js"></script>
+  <!-- Add-On -->
+  <script src="assets/js/axios.min.js"></script>
+  <script src="assets/js/localforage.min.js"></script>
+  <script src="assets/js/global.js"></script>
+  <script src="assets/js/chart.min.js"></script>
+  <script src="assets/js/mark.jquery.min.js"></script>
+  <script src="assets/js/vue-countdown.min.js"></script>
+  <script src="assets/js/components/lah-global.js"></script>
+  <script src="assets/js/components/lah-components.js"></script>
+
+
+  <script type="text/javascript">
+    $(document).ready(e => {
+        window.trackingApp = new Vue({
+            components: { "countdown": VueCountdown },
+            el: "#tracking",
+            template: `<div>
+                <div class="d-flex justify-content-between mb-2">
+                    <b-input-group size="sm" class="text-nowrap mr-1" style="max-width: 350px">
+                        <b-input-group-prepend is-text>日期</b-input-group-prepend>
+                        <b-form-datepicker
+                            value-as-date
+                            v-model="date_obj"
+                            placeholder="🔍 請選擇日期"
+                            size="sm"
+                            :date-disabled-fn="dateDisabled"
+                            :max="new Date()"
+                        ></b-form-datepicker>
+                        <b-button class="ml-1" @click.stop="reload()" variant="outline-primary" size="sm" title="依據日期"><i class="fas fa-search"></i> 查詢</b-button>
+                    </b-input-group>
+                    <div class="text-nowrap my-auto">
+                        <b-button size="sm" variant="light" @click="$('.b-table tbody tr').removeClass('hide')" class="border px-3"><lah-fa-icon icon="list"></lah-fa-icon> 全部</b-button>
+                        <b-button size="sm" variant="success" @click="$('.b-table tbody tr').addClass('hide'); $('.b-table tbody tr.filter-success').removeClass('hide');"><lah-fa-icon icon="suitcase"></lah-fa-icon> 已結案</b-button>
+                        <b-button size="sm" variant="warning" @click="$('.b-table tbody tr').addClass('hide'); $('.b-table tbody tr.filter-warning').removeClass('hide');"><lah-fa-icon prefix="far" icon="clock"></lah-fa-icon> 快逾期</b-button>
+                        <b-button size="sm" variant="danger" @click="$('.b-table tbody tr').addClass('hide'); $('.b-table tbody tr.filter-danger').removeClass('hide');"><lah-fa-icon icon="stopwatch"></lah-fa-icon> 已逾期</b-button>
+                        <b-button id="reload" variant="primary" size="sm" @click="reload">
+                            <lah-fa-icon icon="sync-alt"> 刷新</lah-fa-icon>
+                            <b-badge variant="light">
+                                <countdown ref="countdown" :time="milliseconds" @end="handleCountdownEnd" @start="handleCountdownStart" :auto-start="false">
+                                    <template slot-scope="props">{{ props.minutes.toString().padStart(2, '0') }}:{{ props.seconds.toString().padStart(2, '0') }}</template>
+                                </countdown>
+                                <span class="sr-only">倒數</span>
+                            </b-badge>
+                        </b-button>
+                    </div>
+                </div>
+                <b-skeleton-table
+                    :rows="8"
+                    :columns="14"
+                    :table-props="{ bordered: true, striped: true }"
+                    v-if="isBusy"
+                ></b-skeleton-table>
+                <lah-reg-table
+                    v-else
+                    :baked-data="reg_cases_by_day"
+                    :max-height="reg_cases_by_day_max_height"
+                    :color="false"
+                    :busy="isBusy"
+                    icon="chevron-circle-right"
+                    iconVariant="primary"
+                    class="s-90"
+                    type="xl"
+                ></lah-reg-table>
+            </div>`,
+            data: {
+                reg_cases_by_day: undefined,
+                reg_cases_by_day_max_height: window.innerHeight - 150,
+                milliseconds: 60 * 5 * 1000, // cached for 5 mins
+                date_obj: null,
+                date_str: undefined,
+                today_str: undefined
+            },
+            watch: {
+                date_obj(nVal) { this.date_str = `${nVal.getFullYear() - 1911}${("0" + (nVal.getMonth()+1)).slice(-2)}${("0" + nVal.getDate()).slice(-2)}` }
+            },
+            computed: {
+                qday() { return this.date_str || this.today_str },
+                is_today() { return this.qday == this.today_str },
+                cache_key() { return `reg_cases_by_day_${this.qday}` }
+            },
+            methods: {
+                dateDisabled(ymd, date) {
+                    const weekday = date.getDay();
+                    // Disable weekends (Sunday = `0`, Saturday = `6`)
+                    // Return `true` if the date should be disabled
+                    return weekday === 0// || weekday === 6;
+                },
+                resetTimer(remaining) {
+                    this.isBusy = false; 
+                    let now = new Date();
+                    if (this.is_today && now.getHours() >= 7 && now.getHours() < 17) {
+                        // auto start countdown to prepare next reload
+                        this.setCountdown(remaining);
+                        this.startCountdown();
+                        // add effect to catch attention
+                        this.animated("#reload, caption", {name: "flash"});
+                    } else {
+                        this.$warn("非今日上班時間，停止自動更新。");
+                        this.notify({
+                            title: "自動更新停止通知",
+                            message: "非今日上班時間，停止自動更新。",
+                            type: "warning"
+                        });
+                    }
+                },
+                reload(force = false) {
+                    if (this.isBusy) return;
+                    Vue.nextTick(async () => {
+                        this.isBusy = true;
+                        if (force) await this.removeLocalCache(this.cache_key);
+                        this.getLocalCache(this.cache_key).then(cached => {
+                            if (cached !== false) {
+                                this.reg_cases_by_day = cached;
+                                this.getLocalCacheExpireRemainingTime(this.cache_key).then(remaining_ms => this.resetTimer(remaining_ms));
+                            } else {
+                                this.endCountdown();
+                                this.$http.post(CONFIG.API.JSON.QUERY, {
+                                    type: "reg_cases_by_day",
+                                    qday: this.qday
+                                }).then(res => {
+                                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                        this.reg_cases_by_day = res.data.baked;
+                                        this.setLocalCache(this.cache_key, res.data.baked, this.milliseconds);  
+                                    } else {
+                                        this.notify({
+                                            title: `查詢 ${this.qday} 案件`,
+                                            message: res.data.message,
+                                            type: "warning"
+                                        });
+                                    }
+                                }).catch(err => {
+                                    this.error = err;
+                                }).finally(() => {
+                                    this.resetTimer(this.milliseconds);
+                                });
+                            }
+                        });
+                    });
+                },
+                handleCountdownEnd() { this.reload(true) },
+                handleCountdownStart() {},    
+                resetCountdown: function () {
+                    this.$refs.countdown.totalMilliseconds = this.milliseconds;
+                },
+                setCountdown: function (milliseconds) {
+                    this.$refs.countdown.totalMilliseconds = milliseconds || this.milliseconds;
+                },
+                startCountdown: function () {
+                    this.$refs.countdown.start();
+                },
+                endCountdown: function () {
+                    this.$refs.countdown.end();
+                },
+            },
+            created() {
+                let d = new Date();
+                this.today_str = `${d.getFullYear() - 1911}${("0" + (d.getMonth()+1)).slice(-2)}${("0" + d.getDate()).slice(-2)}`
+                //this.busyIconSize="lg";
+                this.reload();
+            }
+        });
+    });
+  </script>
+</body>
+</html>

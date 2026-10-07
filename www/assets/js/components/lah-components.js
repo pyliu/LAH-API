@@ -188,7 +188,7 @@ if (Vue) {
                     this.remaining_delay -= 200;
                     let now_percent = ++this.progress_counter / (this.delay_ms / 200.0);
                     this.remaining_percent = (100 - Math.round(now_percent * 100));
-                    if (this.remaining_percent > 50) {} else if (this.remaining_percent > 25) {
+                    if (this.remaining_percent > 50) { } else if (this.remaining_percent > 25) {
                         this.bar_variant = "warning";
                     } else {
                         this.bar_variant = "danger";
@@ -263,9 +263,10 @@ if (Vue) {
                     this.animated_out = `${this_time.out} once-anim-cfg`;
                 }
             },
-            enter: function () {},
+            enter: function () { },
             leave: function () {
-                /*this.randAnimation();*/ },
+                /*this.randAnimation();*/
+            },
             afterEnter: function () {
                 // close alert after 15 secs (default)
                 if (this.autohide) {
@@ -378,7 +379,7 @@ if (Vue) {
             links() {
                 return [{
                     text: `系管看板`,
-                    url: "dashboard.html",
+                    url: `http://${location.host}:8080/inf/mgt`,
                     icon: "cubes",
                     need_admin: true,
                     children: [{
@@ -465,26 +466,26 @@ if (Vue) {
                         icon: "sitemap",
                         need_admin: false
                     }, */{
-                        text: `海報輪播`,
-                        url: "carousel.html",
-                        icon: "scroll",
-                        need_admin: false
-                    }, {
-                        text: `航空城`,
-                        url: "project/aerotropolis/index.html",
-                        icon: "plane-departure",
-                        need_admin: true
-                    }, {
-                        text: "繼承應繼分",
-                        url: "heir_share.html",
-                        icon: "chart-pie",
-                        need_admin: false
-                    }, {
-                        text: "使用者查詢",
-                        url: "user.html",
-                        icon: "users",
-                        need_admin: false
-                    }]
+                            text: `海報輪播`,
+                            url: "carousel.html",
+                            icon: "scroll",
+                            need_admin: false
+                        }, {
+                            text: `航空城`,
+                            url: "project/aerotropolis/index.html",
+                            icon: "plane-departure",
+                            need_admin: true
+                        }, {
+                            text: "繼承應繼分",
+                            url: "heir_share.html",
+                            icon: "chart-pie",
+                            need_admin: false
+                        }, {
+                            text: "使用者查詢",
+                            url: "user.html",
+                            icon: "users",
+                            need_admin: false
+                        }]
                 }];
             }
         },
@@ -754,7 +755,7 @@ if (Vue) {
             </lah-fa-icon>
       </b-button>`,
         props: {
-            href: { type: String, default: ''},
+            href: { type: String, default: '' },
             noBorder: { type: Boolean, default: false },
             variant: {
                 type: String,
@@ -916,7 +917,7 @@ if (Vue) {
                 type: Number,
                 default: 14
             },
-            aspectRatio: { type: Number, default: 2}
+            aspectRatio: { type: Number, default: 2 }
         },
         data: () => ({
             id: null,
@@ -2037,7 +2038,7 @@ if (Vue) {
                             ("0" + dropdate.getMinutes()).slice(-2) + ":" +
                             ("0" + dropdate.getSeconds()).slice(-2);
                     },
-                    valid_sendtime() { return  this.sendtime_ms > this.nowDate.getTime() },
+                    valid_sendtime() { return this.sendtime_ms > this.nowDate.getTime() },
                     disabled_send() { return !this.valid_sendtime || this.empty(this.message) }
                 },
                 methods: {
@@ -2289,7 +2290,7 @@ if (Vue) {
             }
         },
         methods: {
-            update: function(e) {
+            update: function (e) {
                 /**
                  * add various data attrs in the button tag
                  */
@@ -2330,7 +2331,7 @@ if (Vue) {
                     this.notify("連件數未變更，不需更新。");
                 }
             },
-            fix: function(e) {
+            fix: function (e) {
                 if (!this.setD && !this.clearDatetime && !this.fixCount) {
                     this.disabled_popover = false;
                     return;
@@ -2376,7 +2377,7 @@ if (Vue) {
                 });
             }
         },
-        created: function() {
+        created: function () {
             this.orig_count = this.count = this.json.raw["MM24"];
             this.id = `${this.json.raw['MM01']}${this.json.raw['MM02']}${this.json.raw['MM03']}`;
         }
@@ -2510,196 +2511,196 @@ if (Vue) {
             rm42_orig: "",
             sync_rm30_1: true,
             rm30_map: [{
-                    value: 'A',
-                    text: 'A: 初審'
-                },
-                {
-                    value: 'B',
-                    text: 'B: 複審'
-                },
-                {
-                    value: 'H',
-                    text: 'H: 公告'
-                },
-                {
-                    value: 'I',
-                    text: 'I: 補正'
-                },
-                {
-                    value: 'R',
-                    text: 'R: 登錄'
-                },
-                {
-                    value: 'C',
-                    text: 'C: 校對'
-                },
-                {
-                    value: 'U',
-                    text: 'U: 異動完成'
-                },
-                {
-                    value: 'F',
-                    text: 'F: 結案'
-                },
-                {
-                    value: 'X',
-                    text: 'X: 補正初核'
-                },
-                {
-                    value: 'Y',
-                    text: 'Y: 駁回初核'
-                },
-                {
-                    value: 'J',
-                    text: 'J: 撤回初核'
-                },
-                {
-                    value: 'K',
-                    text: 'K: 撤回'
-                },
-                {
-                    value: 'Z',
-                    text: 'Z: 歸檔'
-                },
-                {
-                    value: 'N',
-                    text: 'N: 駁回'
-                },
-                {
-                    value: 'L',
-                    text: 'L: 公告初核'
-                },
-                {
-                    value: 'E',
-                    text: 'E: 請示'
-                },
-                {
-                    value: 'D',
-                    text: 'D: 展期'
-                },
+                value: 'A',
+                text: 'A: 初審'
+            },
+            {
+                value: 'B',
+                text: 'B: 複審'
+            },
+            {
+                value: 'H',
+                text: 'H: 公告'
+            },
+            {
+                value: 'I',
+                text: 'I: 補正'
+            },
+            {
+                value: 'R',
+                text: 'R: 登錄'
+            },
+            {
+                value: 'C',
+                text: 'C: 校對'
+            },
+            {
+                value: 'U',
+                text: 'U: 異動完成'
+            },
+            {
+                value: 'F',
+                text: 'F: 結案'
+            },
+            {
+                value: 'X',
+                text: 'X: 補正初核'
+            },
+            {
+                value: 'Y',
+                text: 'Y: 駁回初核'
+            },
+            {
+                value: 'J',
+                text: 'J: 撤回初核'
+            },
+            {
+                value: 'K',
+                text: 'K: 撤回'
+            },
+            {
+                value: 'Z',
+                text: 'Z: 歸檔'
+            },
+            {
+                value: 'N',
+                text: 'N: 駁回'
+            },
+            {
+                value: 'L',
+                text: 'L: 公告初核'
+            },
+            {
+                value: 'E',
+                text: 'E: 請示'
+            },
+            {
+                value: 'D',
+                text: 'D: 展期'
+            },
             ],
             rm31_map: [{
-                    value: 'A',
-                    text: 'A: 結案'
-                },
-                {
-                    value: 'B',
-                    text: 'B: 撤回'
-                },
-                {
-                    value: 'C',
-                    text: 'C: 併案'
-                },
-                {
-                    value: 'D',
-                    text: 'D: 駁回'
-                },
-                {
-                    value: 'E',
-                    text: 'E: 請示'
-                },
+                value: 'A',
+                text: 'A: 結案'
+            },
+            {
+                value: 'B',
+                text: 'B: 撤回'
+            },
+            {
+                value: 'C',
+                text: 'C: 併案'
+            },
+            {
+                value: 'D',
+                text: 'D: 駁回'
+            },
+            {
+                value: 'E',
+                text: 'E: 請示'
+            },
             ],
             rm39_map: [{
-                    value: 'B',
-                    text: 'B: 登錄開始'
-                },
-                {
-                    value: 'R',
-                    text: 'R: 登錄完成'
-                },
-                {
-                    value: 'C',
-                    text: 'C: 校對結束'
-                },
-                {
-                    value: 'E',
-                    text: 'D: 校對有誤'
-                },
-                {
-                    value: 'S',
-                    text: 'S: 異動開始'
-                },
-                {
-                    value: 'F',
-                    text: 'F: 異動完成'
-                },
-                {
-                    value: 'G',
-                    text: 'G: 異動有誤'
-                },
-                {
-                    value: 'P',
-                    text: 'P: 競合暫停'
-                },
+                value: 'B',
+                text: 'B: 登錄開始'
+            },
+            {
+                value: 'R',
+                text: 'R: 登錄完成'
+            },
+            {
+                value: 'C',
+                text: 'C: 校對結束'
+            },
+            {
+                value: 'E',
+                text: 'D: 校對有誤'
+            },
+            {
+                value: 'S',
+                text: 'S: 異動開始'
+            },
+            {
+                value: 'F',
+                text: 'F: 異動完成'
+            },
+            {
+                value: 'G',
+                text: 'G: 異動有誤'
+            },
+            {
+                value: 'P',
+                text: 'P: 競合暫停'
+            },
             ],
             rm42_map: [{
-                    value: '0',
-                    text: '0: 登記移案'
-                },
-                {
-                    value: 'B',
-                    text: 'B: 登錄中'
-                },
-                {
-                    value: 'R',
-                    text: 'R: 登錄完成'
-                },
-                {
-                    value: 'C',
-                    text: 'C: 校對中'
-                },
-                {
-                    value: 'D',
-                    text: 'D: 校對完成'
-                },
-                {
-                    value: 'E',
-                    text: 'E: 登錄有誤'
-                },
-                {
-                    value: 'S',
-                    text: 'S: 異動開始'
-                },
-                {
-                    value: 'F',
-                    text: 'F: 異動完成'
-                },
-                {
-                    value: 'G',
-                    text: 'G: 異動有誤'
-                }
+                value: '0',
+                text: '0: 登記移案'
+            },
+            {
+                value: 'B',
+                text: 'B: 登錄中'
+            },
+            {
+                value: 'R',
+                text: 'R: 登錄完成'
+            },
+            {
+                value: 'C',
+                text: 'C: 校對中'
+            },
+            {
+                value: 'D',
+                text: 'D: 校對完成'
+            },
+            {
+                value: 'E',
+                text: 'E: 登錄有誤'
+            },
+            {
+                value: 'S',
+                text: 'S: 異動開始'
+            },
+            {
+                value: 'F',
+                text: 'F: 異動完成'
+            },
+            {
+                value: 'G',
+                text: 'G: 異動有誤'
+            }
             ],
             fields: [{
-                    key: "收件字號",
-                    sortable: true
-                },
-                {
-                    key: "登記原因",
-                    sortable: true
-                },
-                {
-                    key: "辦理情形",
-                    sortable: true
-                },
-                {
-                    key: "作業人員",
-                    sortable: true
-                },
-                {
-                    key: "登記處理註記",
-                    label: "登記註記",
-                    sortable: true
-                },
-                {
-                    key: "地價處理註記",
-                    label: "地價註記",
-                    sortable: true
-                },
-                {
-                    key: "預定結案日期",
-                    label: "期限",
-                    sortable: true
-                }
+                key: "收件字號",
+                sortable: true
+            },
+            {
+                key: "登記原因",
+                sortable: true
+            },
+            {
+                key: "辦理情形",
+                sortable: true
+            },
+            {
+                key: "作業人員",
+                sortable: true
+            },
+            {
+                key: "登記處理註記",
+                label: "登記註記",
+                sortable: true
+            },
+            {
+                key: "地價處理註記",
+                label: "地價註記",
+                sortable: true
+            },
+            {
+                key: "預定結案日期",
+                label: "期限",
+                sortable: true
+            }
             ]
         }),
         computed: {
@@ -3626,92 +3627,92 @@ if (Vue) {
                 switch (this.type) {
                     case "md":
                         return [{
-                                key: "收件字號",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "登記原因",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "辦理情形",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "初審人員",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "作業人員",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "收件時間",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "限辦時間",
-                                sortable: this.sort
-                            }
+                            key: "收件字號",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "登記原因",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "辦理情形",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "初審人員",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "作業人員",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "收件時間",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "限辦時間",
+                            sortable: this.sort
+                        }
                             //{key: "預定結案日期", label:"限辦期限", sortable: this.sort}
                         ];
                     case "lg":
                         return [{
-                                key: "收件字號",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "收件日期",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "登記原因",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "辦理情形",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "收件人員",
-                                label: "收件",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "作業人員",
-                                label: "作業",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "初審人員",
-                                label: "初審",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "複審人員",
-                                label: "複審",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "准登人員",
-                                label: "准登",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "登錄人員",
-                                label: "登簿",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "校對人員",
-                                label: "校對",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "結案人員",
-                                label: "結案",
-                                sortable: this.sort
-                            }
+                            key: "收件字號",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "收件日期",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "登記原因",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "辦理情形",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "收件人員",
+                            label: "收件",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "作業人員",
+                            label: "作業",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "初審人員",
+                            label: "初審",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "複審人員",
+                            label: "複審",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "准登人員",
+                            label: "准登",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "登錄人員",
+                            label: "登簿",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "校對人員",
+                            label: "校對",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "結案人員",
+                            label: "結案",
+                            sortable: this.sort
+                        }
                         ];
                     case "xl":
                         return [
@@ -3785,70 +3786,70 @@ if (Vue) {
                         ];
                     case "flow":
                         return [{
-                                key: "辦理情形",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "收件人員",
-                                label: "收件",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "作業人員",
-                                label: "作業",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "初審人員",
-                                label: "初審",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "複審人員",
-                                label: "複審",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "准登人員",
-                                label: "准登",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "登錄人員",
-                                label: "登簿",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "校對人員",
-                                label: "校對",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "結案人員",
-                                label: "結案",
-                                sortable: this.sort
-                            }
+                            key: "辦理情形",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "收件人員",
+                            label: "收件",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "作業人員",
+                            label: "作業",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "初審人員",
+                            label: "初審",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "複審人員",
+                            label: "複審",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "准登人員",
+                            label: "准登",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "登錄人員",
+                            label: "登簿",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "校對人員",
+                            label: "校對",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "結案人員",
+                            label: "結案",
+                            sortable: this.sort
+                        }
                         ];
                     default:
                         return [{
-                                key: "RM01",
-                                label: "收件字號",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "RM07_1",
-                                label: "收件日期",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "RM09",
-                                label: "登記原因",
-                                sortable: this.sort
-                            },
-                            {
-                                key: "辦理情形",
-                                sortable: this.sort
-                            },
+                            key: "RM01",
+                            label: "收件字號",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "RM07_1",
+                            label: "收件日期",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "RM09",
+                            label: "登記原因",
+                            sortable: this.sort
+                        },
+                        {
+                            key: "辦理情形",
+                            sortable: this.sort
+                        },
                         ];
                 }
             },

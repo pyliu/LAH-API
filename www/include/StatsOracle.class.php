@@ -122,7 +122,7 @@ class StatsOracle {
             -- 住址變更 48、拍賣 67、清償 AF、徵收  70、管理機關變更  46
             SELECT t.RM09 AS \"id\", q.kcnt AS \"text\", COUNT(*) AS \"count\"
             FROM MOICAS.CRSMS t
-            LEFT JOIN MOICAD.RKEYN q ON q.kcde_1 = '06' AND t.rm09 = q.kcde_2
+            LEFT JOIN MOIADM.RKEYN q ON q.kcde_1 = '06' AND t.rm09 = q.kcde_2
             WHERE
               t.RM09 in ('11', '06', '02', '21', '07', 'CN', '35', '36', '37', '48', '67', 'AF', '70', '46')
               AND t.RM07_1 LIKE :bv_cond || '%'
@@ -140,7 +140,7 @@ class StatsOracle {
         $this->db_wrapper->getDB()->parse("
             SELECT t.RM09 AS \"id\", q.kcnt AS \"text\", COUNT(*) AS \"count\"
             FROM MOICAS.CRSMS t
-            LEFT JOIN MOICAD.RKEYN q
+            LEFT JOIN MOIADM.RKEYN q
             ON q.kcde_1 = '06'
             AND t.rm09 = q.kcde_2
             WHERE t.RM07_1 LIKE :bv_cond || '%'

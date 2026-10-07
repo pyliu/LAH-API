@@ -16,11 +16,119 @@
 <link rel="preload" href="assets/css/awesome-font.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <link rel="preload" href="assets/css/main.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<style>
+  :root {
+    --bg: #f3f5f9; --surface: #fff; --text: #1f2937; --muted: #6b7280; --line: #e5e7eb;
+    --brand: #2563eb; --brand-2: #4f46e5;
+    --ok: #16a34a; --ok-bg: #dcfce7; --warn: #d97706; --warn-bg: #fef3c7;
+    --danger: #dc2626; --danger-bg: #fee2e2; --other: #64748b; --other-bg: #e2e8f0;
+  }
+  html[data-theme="dark"] {
+    --bg: #0f172a; --surface: #1e293b; --text: #e2e8f0; --muted: #94a3b8; --line: #334155;
+    --ok-bg: #14532d; --warn-bg: #78350f; --danger-bg: #7f1d1d; --other-bg: #334155;
+  }
+  html[data-theme="dark"] .stat.all .ico { background:#1e3a8a; color:#93c5fd; }
+  .theme-btn { border-radius:999px; border:1px solid rgba(255,255,255,.5); background:rgba(255,255,255,.15); color:#fff; padding:2px 12px; font-size:.85rem; margin-left:12px; cursor:pointer; }
+  .theme-btn:hover { background:rgba(255,255,255,.3); }
+  html, body { background: var(--bg) !important; min-height: 100%; }
+  body { font-family: "Segoe UI", "Microsoft JhengHei", system-ui, sans-serif; }
+  [v-cloak] { display: none; }
+  .app { max-width: 1680px; margin: 0 auto; padding: 0 16px 32px; color: var(--text); }
+  .modal-content { color: #212529; }
+
+  /* header */
+  .hero {
+    background: linear-gradient(120deg, var(--brand), var(--brand-2));
+    color: #fff; border-radius: 0 0 20px 20px; padding: 20px 24px 64px; margin: 0 -16px;
+  }
+  .hero h1 { font-size: 1.4rem; font-weight: 700; margin: 0; }
+  .hero .sub { opacity: .85; font-size: .9rem; }
+  .live-dot { display:inline-block; width:9px; height:9px; border-radius:50%; background:#4ade80; margin-right:6px; animation: pulse 1.6s infinite; }
+  .live-dot.off { background:#fbbf24; animation:none; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(74,222,128,.7)} 100%{box-shadow:0 0 0 10px rgba(74,222,128,0)} }
+
+  /* stat cards */
+  .stats { display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; margin-top:-46px; }
+  .stat {
+    background: var(--surface); border-radius: 14px; padding: 14px 18px; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,.08); border: 2px solid transparent; transition: transform .15s, border-color .15s;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .stat:hover { transform: translateY(-2px); }
+  .stat.active { border-color: var(--brand); }
+  .stat .label { color: var(--muted); font-size: .85rem; }
+  .stat .num { font-size: 2rem; font-weight: 700; line-height: 1.1; }
+  .stat .ico { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+  .stat.all .ico { background:#dbeafe; color:var(--brand); }
+  .stat.success .ico { background:var(--ok-bg); color:var(--ok); } .stat.success .num { color:var(--ok); }
+  .stat.warning .ico { background:var(--warn-bg); color:var(--warn); } .stat.warning .num { color:var(--warn); }
+  .stat.danger .ico { background:var(--danger-bg); color:var(--danger); } .stat.danger .num { color:var(--danger); }
+
+  /* toolbar */
+  .toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:18px 0 12px; }
+  .toolbar .grow { flex:1 1 220px; min-width:200px; }
+  .search { border-radius: 999px !important; padding-left: 38px; }
+  .search-wrap { position:relative; }
+  .search-wrap i { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--muted); }
+  .refresh-btn { border-radius:999px; }
+  .refresh-btn .cd { font-variant-numeric: tabular-nums; background:rgba(255,255,255,.25); border-radius:999px; padding:0 8px; margin-left:6px; }
+
+  /* table panel */
+  .panel { background: var(--surface); border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.06); overflow:hidden; }
+  .scroller { overflow:auto; }
+  table.cases { width:100%; border-collapse: separate; border-spacing:0; font-size:.88rem; }
+  table.cases th {
+    position: sticky; top:0; z-index:2; background: var(--surface); color: var(--muted); font-weight:600;
+    padding: 10px 12px; border-bottom: 2px solid var(--line); white-space:nowrap; text-align:left; cursor:pointer; user-select:none;
+  }
+  table.cases th.nosort { cursor: default; }
+  table.cases td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  table.cases tbody tr { transition: background .12s; }
+  table.cases tbody tr:hover { background: rgba(37,99,235,.06); }
+  table.cases tbody tr td:first-child { border-left: 4px solid var(--other); }
+  table.cases tbody tr.row-success td:first-child { border-left-color: var(--ok); }
+  table.cases tbody tr.row-warning td:first-child { border-left-color: var(--warn); }
+  table.cases tbody tr.row-danger td:first-child { border-left-color: var(--danger); }
+  .idx { color: var(--muted); }
+  .case-id { font-weight:600; color: var(--brand); text-decoration:none; white-space:nowrap; }
+  .case-id:hover { text-decoration: underline; }
+  .reason { max-width: 220px; }
+  .muted { color: var(--muted); font-size:.8rem; }
+  .pill { display:inline-block; border-radius:999px; padding:2px 10px; font-size:.78rem; font-weight:600; white-space:nowrap; }
+  .pill.success { background:var(--ok-bg); color:var(--ok); }
+  .pill.warning { background:var(--warn-bg); color:var(--warn); }
+  .pill.danger { background:var(--danger-bg); color:var(--danger); }
+  .pill.other { background:var(--other-bg); color:var(--other); }
+
+  /* workflow dots */
+  .flow { display:flex; align-items:center; gap:3px; }
+  .step { display:flex; flex-direction:column; align-items:center; min-width:46px; cursor:pointer; }
+  .step .dot { width:10px; height:10px; border-radius:50%; background: var(--line); }
+  .step.done .dot { background: var(--ok); }
+  .step.cur .dot { background: var(--brand); box-shadow:0 0 0 4px rgba(37,99,235,.2); }
+  .step .st { font-size:.68rem; color: var(--muted); margin-top:2px; line-height:1; }
+  .step .who { font-size:.78rem; white-space:nowrap; line-height:1.2; }
+  .step.todo .who { color: var(--muted); opacity:.5; }
+  .step:hover .who { color: var(--brand); text-decoration: underline; }
+  .bar { flex:0 0 8px; height:2px; background: var(--line); margin-top:-18px; }
+  .bar.done { background: var(--ok); }
+
+  .empty { padding: 60px 0; text-align:center; color: var(--muted); }
+  .empty i { font-size: 2.4rem; opacity:.4; display:block; margin-bottom:8px; }
+  .skel { height: 44px; margin: 10px 14px; border-radius: 8px; background: linear-gradient(90deg, var(--line) 25%, transparent 50%, var(--line) 75%); background-size: 200% 100%; animation: sk 1.2s infinite; }
+  @keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  @media (max-width: 900px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .hero { padding: 16px 16px 58px; }
+    .stat .num { font-size:1.6rem; }
+  }
+</style>
 </head>
 
-<body class="overflow-hidden">
+<body>
   <section>
-    <div class="container-fluid" v-cloak>
+    <div class="app" v-cloak>
         <div id="tracking"></div>
         <h1 v-if="false" style="text-align: center; color: red; font-weight: bold;">請使用非 IE 瀏覽器開啟本頁面</h1>
     </div>
@@ -52,8 +160,37 @@
             components: { "countdown": VueCountdown },
             el: "#tracking",
             template: `<div>
-                <div class="d-flex justify-content-between mb-2">
-                    <b-input-group size="sm" class="text-nowrap mr-1" style="max-width: 350px">
+                <header class="hero">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center">
+                        <div>
+                            <h1><i class="fas fa-route"></i> 今日案件追蹤</h1>
+                            <div class="sub">桃園市桃園地政事務所 ・ 登記案件 {{ displayDate }}</div>
+                        </div>
+                        <div class="sub mt-2 mt-md-0"><span class="live-dot" :class="{off: !is_live}"></span>{{ is_live ? '自動更新中' : '已停止自動更新' }}<button type="button" class="theme-btn" @click="toggleTheme"><i :class="theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'"></i> {{ theme === 'dark' ? '淺色' : '深色' }}</button></div>
+                    </div>
+                </header>
+
+                <div class="stats">
+                    <div class="stat all" :class="{active: filter === 'all'}" @click="filter = 'all'">
+                        <div><div class="label">全部案件</div><div class="num">{{ counts.all }}</div></div>
+                        <div class="ico"><i class="fas fa-layer-group"></i></div>
+                    </div>
+                    <div class="stat success" :class="{active: filter === 'success'}" @click="filter = 'success'">
+                        <div><div class="label">已結案</div><div class="num">{{ counts.success }}</div></div>
+                        <div class="ico"><i class="fas fa-check-circle"></i></div>
+                    </div>
+                    <div class="stat warning" :class="{active: filter === 'warning'}" @click="filter = 'warning'">
+                        <div><div class="label">快逾期</div><div class="num">{{ counts.warning }}</div></div>
+                        <div class="ico"><i class="far fa-clock"></i></div>
+                    </div>
+                    <div class="stat danger" :class="{active: filter === 'danger'}" @click="filter = 'danger'">
+                        <div><div class="label">已逾期</div><div class="num">{{ counts.danger }}</div></div>
+                        <div class="ico"><i class="fas fa-stopwatch"></i></div>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <b-input-group size="sm" class="text-nowrap" style="max-width: 300px">
                         <b-input-group-prepend is-text>日期</b-input-group-prepend>
                         <b-form-datepicker
                             value-as-date
@@ -63,41 +200,68 @@
                             :date-disabled-fn="dateDisabled"
                             :max="new Date()"
                         ></b-form-datepicker>
-                        <b-button class="ml-1" @click.stop="reload()" variant="outline-primary" size="sm" title="依據日期"><i class="fas fa-search"></i> 查詢</b-button>
                     </b-input-group>
-                    <div class="text-nowrap my-auto">
-                        <b-button size="sm" variant="light" @click="$('.b-table tbody tr').removeClass('hide')" class="border px-3"><lah-fa-icon icon="list"></lah-fa-icon> 全部</b-button>
-                        <b-button size="sm" variant="success" @click="$('.b-table tbody tr').addClass('hide'); $('.b-table tbody tr.filter-success').removeClass('hide');"><lah-fa-icon icon="suitcase"></lah-fa-icon> 已結案</b-button>
-                        <b-button size="sm" variant="warning" @click="$('.b-table tbody tr').addClass('hide'); $('.b-table tbody tr.filter-warning').removeClass('hide');"><lah-fa-icon prefix="far" icon="clock"></lah-fa-icon> 快逾期</b-button>
-                        <b-button size="sm" variant="danger" @click="$('.b-table tbody tr').addClass('hide'); $('.b-table tbody tr.filter-danger').removeClass('hide');"><lah-fa-icon icon="stopwatch"></lah-fa-icon> 已逾期</b-button>
-                        <b-button id="reload" variant="primary" size="sm" @click="reload">
-                            <lah-fa-icon icon="sync-alt"> 刷新</lah-fa-icon>
-                            <b-badge variant="light">
-                                <countdown ref="countdown" :time="milliseconds" @end="handleCountdownEnd" @start="handleCountdownStart" :auto-start="false">
-                                    <template slot-scope="props">{{ props.minutes.toString().padStart(2, '0') }}:{{ props.seconds.toString().padStart(2, '0') }}</template>
-                                </countdown>
-                                <span class="sr-only">倒數</span>
-                            </b-badge>
-                        </b-button>
+                    <div class="grow search-wrap">
+                        <i class="fas fa-search"></i>
+                        <input type="search" v-model.trim="keyword" class="form-control form-control-sm search" placeholder="搜尋收件字號、登記原因、人員…">
+                    </div>
+                    <b-button id="reload" class="refresh-btn" variant="primary" size="sm" @click="reload(true)" title="重新查詢">
+                        <i class="fas fa-sync-alt" :class="{'fa-spin': isBusy}"></i> 刷新
+                        <span class="cd">
+                            <countdown ref="countdown" :time="milliseconds" @end="handleCountdownEnd" @start="handleCountdownStart" :auto-start="false">
+                                <template slot-scope="props">{{ props.minutes.toString().padStart(2, '0') }}:{{ props.seconds.toString().padStart(2, '0') }}</template>
+                            </countdown>
+                        </span>
+                    </b-button>
+                </div>
+
+                <div class="panel">
+                    <div v-if="isBusy" class="py-2"><div class="skel" v-for="n in 8" :key="n"></div></div>
+                    <div v-else-if="rows.length === 0" class="empty">
+                        <i class="far fa-folder-open"></i>
+                        {{ (reg_cases_by_day || []).length === 0 ? '本日查無登記案件' : '沒有符合條件的案件' }}
+                    </div>
+                    <div v-else class="scroller" :style="{maxHeight: tableHeight + 'px'}">
+                        <table class="cases">
+                            <thead>
+                                <tr>
+                                    <th class="nosort">#</th>
+                                    <th @click="sortBy('收件字號')">收件字號 <small>{{ sortIcon('收件字號') }}</small></th>
+                                    <th @click="sortBy('收件時間')">收件時間 <small>{{ sortIcon('收件時間') }}</small></th>
+                                    <th @click="sortBy('限辦時間')">限辦 <small>{{ sortIcon('限辦時間') }}</small></th>
+                                    <th @click="sortBy('登記原因')">登記原因 <small>{{ sortIcon('登記原因') }}</small></th>
+                                    <th @click="sortBy('辦理情形')">辦理情形 <small>{{ sortIcon('辦理情形') }}</small></th>
+                                    <th class="nosort">作業流程</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(item, i) in rows" :key="item['收件字號'] + i" :class="'row-' + lamp(item)">
+                                    <td class="idx">{{ i + 1 }}</td>
+                                    <td><a href="javascript:void(0)" class="case-id" @click="fetch(item)">{{ item['收件字號'] }}</a></td>
+                                    <td>{{ item['收件時間'] }}</td>
+                                    <td>
+                                        <span class="pill" :class="lamp(item)" :title="item['預定結案日期']">{{ item['限辦時間'] || '-' }}</span>
+                                        <div class="muted" v-if="item['結案狀態']">{{ item['結案狀態'] }}</div>
+                                    </td>
+                                    <td class="reason">{{ reason(item) }}</td>
+                                    <td>{{ item['辦理情形'] }}</td>
+                                    <td>
+                                        <div class="flow">
+                                            <template v-for="(s, si) in steps(item)">
+                                                <div class="bar" :class="{done: s.done}" v-if="si > 0" :key="'b' + si"></div>
+                                                <div class="step" :class="s.cls" :key="'s' + si" :title="s.tip" @click="userinfo(s.name, s.id)">
+                                                    <span class="dot"></span>
+                                                    <span class="who">{{ s.name || '—' }}</span>
+                                                    <span class="st">{{ s.label }}</span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <b-skeleton-table
-                    :rows="8"
-                    :columns="14"
-                    :table-props="{ bordered: true, striped: true }"
-                    v-if="isBusy"
-                ></b-skeleton-table>
-                <lah-reg-table
-                    v-else
-                    :baked-data="reg_cases_by_day"
-                    :max-height="reg_cases_by_day_max_height"
-                    :color="false"
-                    :busy="isBusy"
-                    icon="chevron-circle-right"
-                    iconVariant="primary"
-                    class="s-90"
-                    type="xl"
-                ></lah-reg-table>
             </div>`,
             data: {
                 reg_cases_by_day: undefined,
@@ -105,17 +269,139 @@
                 milliseconds: 60 * 5 * 1000, // cached for 5 mins
                 date_obj: null,
                 date_str: undefined,
-                today_str: undefined
+                today_str: undefined,
+                isBusy: true,
+                theme: "light",
+                is_live: true,
+                filter: "all",
+                keyword: "",
+                sortKey: "",
+                sortDesc: false,
+                stageDefs: [
+                    { label: "收件", key: "收件人員", id: "RM96", dur: null },
+                    { label: "作業", key: "作業人員", id: "RM30_1", dur: null },
+                    { label: "初審", key: "初審人員", id: "RM45", dur: "初審" },
+                    { label: "複審", key: "複審人員", id: "RM47", dur: "複審" },
+                    { label: "准登", key: "准登人員", id: "RM63", dur: "准登" },
+                    { label: "登簿", key: "登錄人員", id: "RM55", dur: "登簿" },
+                    { label: "校對", key: "校對人員", id: "RM57", dur: "校對" },
+                    { label: "結案", key: "結案人員", id: "RM59", dur: "結案" }
+                ]
             },
             watch: {
-                date_obj(nVal) { this.date_str = `${nVal.getFullYear() - 1911}${("0" + (nVal.getMonth()+1)).slice(-2)}${("0" + nVal.getDate()).slice(-2)}` }
+                date_obj(nVal) {
+                    if (!nVal) return;
+                    this.date_str = `${nVal.getFullYear() - 1911}${("0" + (nVal.getMonth()+1)).slice(-2)}${("0" + nVal.getDate()).slice(-2)}`;
+                    this.reload();
+                }
             },
             computed: {
                 qday() { return this.date_str || this.today_str },
                 is_today() { return this.qday == this.today_str },
-                cache_key() { return `reg_cases_by_day_${this.qday}` }
+                cache_key() { return `reg_cases_by_day_${this.qday}` },
+                displayDate() {
+                    const q = this.qday || "";
+                    return q.length === 7 ? `${q.substr(0, 3)} 年 ${q.substr(3, 2)} 月 ${q.substr(5, 2)} 日` : "";
+                },
+                tableHeight() { return Math.max(320, window.innerHeight - 330) },
+                all_rows() { return Array.isArray(this.reg_cases_by_day) ? this.reg_cases_by_day : [] },
+                counts() {
+                    const c = { all: this.all_rows.length, success: 0, warning: 0, danger: 0 };
+                    this.all_rows.forEach(r => { const l = r["燈號"]; if (c[l] !== undefined) c[l]++; });
+                    return c;
+                },
+                rows() {
+                    let list = this.all_rows;
+                    if (this.filter !== "all") list = list.filter(r => r["燈號"] === this.filter);
+                    const kw = (this.keyword || "").toLowerCase();
+                    if (kw) {
+                        list = list.filter(r => [r["收件字號"], r["RM09"], r["登記原因"], r["RM09_CHT"], r["辦理情形"]]
+                            .concat(this.stageDefs.map(s => r[s.key]))
+                            .some(v => v && String(v).toLowerCase().indexOf(kw) > -1));
+                    }
+                    if (this.sortKey) {
+                        const k = this.sortKey, d = this.sortDesc ? -1 : 1;
+                        list = list.slice().sort((a, b) => String(a[k] || "").localeCompare(String(b[k] || ""), "zh-TW", { numeric: true }) * d);
+                    }
+                    return list;
+                }
             },
             methods: {
+                lamp(item) { return ["success", "warning", "danger"].indexOf(item["燈號"]) > -1 ? item["燈號"] : "other" },
+                applyTheme(t) {
+                    this.theme = t === "dark" ? "dark" : "light";
+                    document.documentElement.setAttribute("data-theme", this.theme);
+                    try { localStorage.setItem("lah_tracking_theme", this.theme); } catch (e) {}
+                },
+                toggleTheme() { this.applyTheme(this.theme === "dark" ? "light" : "dark") },
+                reason(item) {
+                    const cht = item["登記原因"] || item["RM09_CHT"];
+                    return item["RM09"] ? `${item["RM09"]} : ${cht || ""}` : (cht || "");
+                },
+                valid(name) { return !!name && name !== "XXXXXXXX" },
+                steps(item) {
+                    let last = -1;
+                    this.stageDefs.forEach((s, i) => { if (this.valid(item[s.key])) last = i; });
+                    const closed = !this.empty(item["結案代碼"]) || item["燈號"] === "success";
+                    return this.stageDefs.map((s, i) => {
+                        const name = this.valid(item[s.key]) ? item[s.key] : "";
+                        const done = i <= last && (name !== "" || i < last);
+                        const cur = !closed && i === last;
+                        const secs = s.dur && item.ELAPSED_TIME ? item.ELAPSED_TIME[s.dur] : undefined;
+                        return {
+                            label: s.label, name, id: item[s.id] || "", done,
+                            cls: cur ? "cur" : (done ? "done" : "todo"),
+                            tip: name ? `${s.label}：${name}${this.duration(secs, item) ? "（" + this.duration(secs, item) + "）" : ""}` : `${s.label}：尚未處理`
+                        };
+                    });
+                },
+                duration(secs, item) {
+                    if (secs === undefined || secs === null || secs === "" || isNaN(secs)) return "";
+                    if (secs == 0 && this.empty(item["結案代碼"])) return "作業中";
+                    if (secs < 60) return `耗時 ${secs} 秒`;
+                    if (secs < 3600) return `耗時 ${(secs / 60).toFixed(2)} 分鐘`;
+                    return `耗時 ${(secs / 3600).toFixed(2)} 小時`;
+                },
+                sortBy(k) {
+                    if (this.sortKey === k) {
+                        if (this.sortDesc) { this.sortKey = ""; this.sortDesc = false; } else this.sortDesc = true;
+                    } else { this.sortKey = k; this.sortDesc = false; }
+                },
+                sortIcon(k) { return this.sortKey === k ? (this.sortDesc ? "▼" : "▲") : "" },
+                fetch(data) {
+                    let id = `${data["RM01"]}${data["RM02"]}${data["RM03"]}`;
+                    this.$http.post(CONFIG.API.JSON.QUERY, {
+                        type: "reg_case",
+                        id: id
+                    }).then(res => {
+                        if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
+                            this.alert({
+                                title: "顯示登記案件詳情",
+                                message: res.data.message,
+                                type: "warning"
+                            });
+                        } else {
+                            this.msgbox({
+                                message: this.$createElement("lah-reg-case-detail", {
+                                    props: { bakedData: res.data.baked }
+                                }),
+                                title: `登記案件詳情 ${data["RM01"]}-${data["RM02"]}-${data["RM03"]}`,
+                                size: "lg"
+                            });
+                        }
+                    }).catch(err => {
+                        this.error = err;
+                    });
+                },
+                userinfo(name, id = "") {
+                    if (!this.valid(name)) return;
+                    this.msgbox({
+                        title: `${name} 使用者資訊${this.empty(id) ? "" : ` (${id})`}`,
+                        message: this.$createElement("lah-user-card", {
+                            props: { id: id, name: name }
+                        })
+                    });
+                },
                 dateDisabled(ymd, date) {
                     const weekday = date.getDay();
                     // Disable weekends (Sunday = `0`, Saturday = `6`)
@@ -123,15 +409,19 @@
                     return weekday === 0// || weekday === 6;
                 },
                 resetTimer(remaining) {
-                    this.isBusy = false; 
+                    this.isBusy = false;
                     let now = new Date();
                     if (this.is_today && now.getHours() >= 7 && now.getHours() < 17) {
+                        this.is_live = true;
                         // auto start countdown to prepare next reload
-                        this.setCountdown(remaining);
-                        this.startCountdown();
-                        // add effect to catch attention
-                        this.animated("#reload, caption", {name: "flash"});
+                        this.$nextTick(() => {
+                            this.setCountdown(remaining);
+                            this.startCountdown();
+                            // add effect to catch attention
+                            this.animated("#reload", {name: "flash"});
+                        });
                     } else {
+                        this.is_live = false;
                         this.$warn("非今日上班時間，停止自動更新。");
                         this.notify({
                             title: "自動更新停止通知",
@@ -141,10 +431,10 @@
                     }
                 },
                 reload(force = false) {
-                    if (this.isBusy) return;
+                    if (this.isBusy && this.reg_cases_by_day !== undefined) return;
                     Vue.nextTick(async () => {
                         this.isBusy = true;
-                        if (force) await this.removeLocalCache(this.cache_key);
+                        if (force === true) await this.removeLocalCache(this.cache_key);
                         this.getLocalCache(this.cache_key).then(cached => {
                             if (cached !== false) {
                                 this.reg_cases_by_day = cached;
@@ -157,8 +447,9 @@
                                 }).then(res => {
                                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                         this.reg_cases_by_day = res.data.baked;
-                                        this.setLocalCache(this.cache_key, res.data.baked, this.milliseconds);  
+                                        this.setLocalCache(this.cache_key, res.data.baked, this.milliseconds);
                                     } else {
+                                        this.reg_cases_by_day = [];
                                         this.notify({
                                             title: `查詢 ${this.qday} 案件`,
                                             message: res.data.message,
@@ -175,24 +466,26 @@
                     });
                 },
                 handleCountdownEnd() { this.reload(true) },
-                handleCountdownStart() {},    
+                handleCountdownStart() {},
                 resetCountdown: function () {
-                    this.$refs.countdown.totalMilliseconds = this.milliseconds;
+                    if (this.$refs.countdown) this.$refs.countdown.totalMilliseconds = this.milliseconds;
                 },
                 setCountdown: function (milliseconds) {
-                    this.$refs.countdown.totalMilliseconds = milliseconds || this.milliseconds;
+                    if (this.$refs.countdown) this.$refs.countdown.totalMilliseconds = milliseconds || this.milliseconds;
                 },
                 startCountdown: function () {
-                    this.$refs.countdown.start();
+                    if (this.$refs.countdown) this.$refs.countdown.start();
                 },
                 endCountdown: function () {
-                    this.$refs.countdown.end();
+                    if (this.$refs.countdown) this.$refs.countdown.end();
                 },
             },
             created() {
+                let saved = "light";
+                try { saved = localStorage.getItem("lah_tracking_theme") || "light"; } catch (e) {}
+                this.applyTheme(saved);
                 let d = new Date();
                 this.today_str = `${d.getFullYear() - 1911}${("0" + (d.getMonth()+1)).slice(-2)}${("0" + d.getDate()).slice(-2)}`
-                //this.busyIconSize="lg";
                 this.reload();
             }
         });

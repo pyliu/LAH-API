@@ -17,11 +17,158 @@
 <link rel="preload" href="assets/css/awesome-font.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <link rel="preload" href="assets/css/main.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<script>
+  // apply saved theme early (shared with index.html & overdue_reg_cases.html) to avoid flash
+  try { document.documentElement.setAttribute("data-theme", localStorage.getItem("lah_tracking_theme") === "dark" ? "dark" : "light"); } catch (e) {}
+</script>
+<style>
+  :root {
+    --bg: #f3f5f9; --surface: #fff; --text: #1f2937; --muted: #6b7280; --line: #e5e7eb;
+    --brand: #2563eb; --brand-bg: #dbeafe;
+    --ok: #16a34a; --ok-bg: #dcfce7;
+    --info: #0891b2; --info-bg: #cffafe;
+    --warn: #d97706; --warn-bg: #fef3c7;
+    --danger: #dc2626; --danger-bg: #fee2e2;
+    --input-bg: #fff;
+  }
+  html[data-theme="dark"] {
+    --bg: #0f172a; --surface: #1e293b; --text: #e2e8f0; --muted: #94a3b8; --line: #334155;
+    --brand-bg: #1e3a8a; --ok-bg: #14532d; --info-bg: #164e63; --warn-bg: #78350f; --danger-bg: #7f1d1d;
+    --input-bg: #0f172a;
+  }
+  html, body { background: var(--bg) !important; min-height: 100%; }
+  body { font-family: "Segoe UI", "Microsoft JhengHei", system-ui, sans-serif; }
+  [v-cloak] { display: none; }
+  .modal-content { color: #212529; }
+
+  .st-page { color: var(--text); max-width: 1680px; margin: 0 auto; padding: 0 16px 36px; }
+  .st-hero {
+    background: linear-gradient(120deg, #0d9488, #2563eb); color: #fff;
+    border-radius: 0 0 20px 20px; padding: 20px 24px 62px; margin: 0 -16px;
+  }
+  .st-hero h1 { font-size: 1.4rem; font-weight: 700; margin: 0; }
+  .st-hero .sub { opacity: .88; font-size: .9rem; }
+  .theme-btn {
+    border-radius: 999px; border: 1px solid rgba(255,255,255,.5);
+    background: rgba(255,255,255,.15); color: #fff; padding: 2px 12px; font-size: .85rem; cursor: pointer;
+  }
+  .theme-btn:hover { background: rgba(255,255,255,.3); }
+
+  /* Filter Card (overlaps hero) */
+  .st-filter-card {
+    background: var(--surface); border-radius: 14px; padding: 14px 18px;
+    margin-top: -44px; box-shadow: 0 4px 14px rgba(0,0,0,.08); border: 1px solid var(--line);
+  }
+  .st-filter-header {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+    font-size: .88rem; font-weight: 600; color: var(--muted); margin-bottom: 10px;
+  }
+  .st-date-pill {
+    background: var(--brand-bg); color: var(--brand); border-radius: 999px;
+    padding: 2px 12px; font-size: .82rem; font-weight: 700;
+  }
+  html[data-theme="dark"] .st-date-pill { color: #93c5fd; }
+  .st-filter-card .input-group-text {
+    background: var(--bg); color: var(--text); border-color: var(--line); font-weight: 600;
+  }
+  .st-filter-card .form-control {
+    background: var(--input-bg); color: var(--text); border-color: var(--line);
+  }
+  .st-filter-card .custom-control-label { color: var(--text); cursor: pointer; }
+
+  /* KPI Grid */
+  .st-kpi-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 16px 0;
+  }
+  .st-kpi {
+    background: var(--surface); border-radius: 14px; padding: 14px 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.05); border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .st-kpi-label { color: var(--muted); font-size: .85rem; }
+  .st-kpi-num { font-size: 1.85rem; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+  .st-kpi-ico {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+  }
+  .st-kpi-ico.brand { background: var(--brand-bg); color: var(--brand); }
+  .st-kpi-ico.ok { background: var(--ok-bg); color: var(--ok); }
+  .st-kpi-ico.info { background: var(--info-bg); color: var(--info); }
+  .st-kpi-ico.warn { background: var(--warn-bg); color: var(--warn); }
+  html[data-theme="dark"] .st-kpi-ico.brand { color: #93c5fd; }
+  html[data-theme="dark"] .st-kpi-ico.ok { color: #86efac; }
+  html[data-theme="dark"] .st-kpi-ico.info { color: #67e8f9; }
+  html[data-theme="dark"] .st-kpi-ico.warn { color: #fcd34d; }
+
+  /* Section Bar */
+  .st-sec-bar {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+    margin: 14px 0 10px; gap: 8px;
+  }
+  .st-sec-title { font-weight: 700; font-size: 1rem; color: var(--text); }
+  .st-sec-sub { color: var(--muted); font-weight: 400; font-size: .82rem; }
+  .st-refresh-btn { border-radius: 999px !important; }
+
+  /* Stats Card Grid */
+  .st-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px;
+  }
+  .st-item {
+    background: var(--surface); border-radius: 12px; padding: 12px 14px;
+    border: 1px solid var(--line); border-left: 4px solid var(--brand);
+    box-shadow: 0 2px 6px rgba(0,0,0,.04); cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    transition: transform .15s, box-shadow .15s, border-color .15s;
+  }
+  .st-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,.1);
+  }
+  .st-item.cat-info { border-left-color: var(--info); }
+  .st-item.cat-primary { border-left-color: var(--brand); }
+  .st-item.cat-warning { border-left-color: var(--warn); }
+  .st-item.cat-secondary { border-left-color: var(--muted); }
+
+  .st-item-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .st-xlsx-btn { flex-shrink: 0; }
+  .st-item-text { display: flex; align-items: center; gap: 6px; min-width: 0; flex-wrap: wrap; }
+  .st-code {
+    background: var(--bg); color: var(--muted); border: 1px solid var(--line);
+    border-radius: 6px; padding: 1px 6px; font-size: .76rem; font-weight: 700; font-family: monospace;
+  }
+  .st-name { font-weight: 600; font-size: .92rem; color: var(--text); word-break: break-word; }
+  .st-count { font-size: .88rem; padding: 5px 10px; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+
+  .st-empty {
+    background: var(--surface); border-radius: 14px; border: 1px dashed var(--line);
+    padding: 48px 16px; text-align: center; color: var(--muted);
+  }
+  .st-empty i { font-size: 2.2rem; opacity: .45; margin-bottom: 8px; display: block; }
+
+  /* Single category list fallback */
+  .st-list .list-group-item {
+    background: var(--surface); color: var(--text); border-color: var(--line);
+  }
+
+  @media (max-width: 900px) {
+    .st-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .st-hero { padding: 16px 16px 56px; }
+  }
+</style>
 </head>
 
 <body>
   <section class="hide">
-    <div class="container-fluid" v-cloak>
+    <div class="st-page" v-cloak>
+        <div class="st-hero">
+          <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+              <h1><i class="fas fa-chart-line"></i> 月份統計報表看板</h1>
+              <div class="sub">桃園市桃園地政事務所 ・ 各項登記與測量業務月統計指標及 EXCEL 匯出</div>
+            </div>
+            <button type="button" class="theme-btn mt-2 mt-md-0" id="theme-toggle" onclick="window.toggleLahTheme()">🌙 深色</button>
+          </div>
+        </div>
         <lah-stats-range class="mb-3"></lah-stats-range>
         <lah-stats-dashboard></lah-stats-dashboard>
     </div>
@@ -42,9 +189,27 @@
   <script src="assets/js/localforage.min.js"></script>
   <script src="assets/js/global.js"></script>
   <script src="assets/js/chart.min.js"></script>
+  <script src="assets/js/xlsx.full.min.js"></script>
   <script src="assets/js/mark.jquery.min.js"></script>
   <script src="assets/js/components/lah-global.js"></script>
   <script src="assets/js/components/lah-components.js"></script>
   <script src="assets/js/components/lah-stats-components.js"></script>
+  <script>
+    (function () {
+      function sync() {
+        var dark = document.documentElement.getAttribute("data-theme") === "dark";
+        var b = document.getElementById("theme-toggle");
+        if (b) b.textContent = dark ? "☀ 淺色" : "🌙 深色";
+      }
+      window.toggleLahTheme = function () {
+        var t = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", t);
+        try { localStorage.setItem("lah_tracking_theme", t); } catch (e) {}
+        sync();
+      };
+      document.addEventListener("DOMContentLoaded", sync);
+      setTimeout(sync, 500);
+    })();
+  </script>
 </body>
 </html>

@@ -16,12 +16,80 @@
 <link rel="preload" href="assets/css/awesome-font.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <link rel="preload" href="assets/css/main.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<script>
+  // apply saved theme early (shared with index.html) to avoid flash
+  try { document.documentElement.setAttribute("data-theme", localStorage.getItem("lah_tracking_theme") === "dark" ? "dark" : "light"); } catch (e) {}
+</script>
+<style>
+  :root {
+    --bg: #f3f5f9; --surface: #fff; --text: #1f2937; --muted: #6b7280; --line: #e5e7eb;
+    --brand: #2563eb; --brand-2: #4f46e5; --row-hover: rgba(37,99,235,.06);
+    --danger: #dc2626; --danger-bg: #fee2e2; --warn: #d97706; --warn-bg: #fef3c7;
+  }
+  html[data-theme="dark"] {
+    --bg: #0f172a; --surface: #1e293b; --text: #e2e8f0; --muted: #94a3b8; --line: #334155;
+    --danger-bg: #7f1d1d; --warn-bg: #78350f; --row-hover: rgba(148,163,184,.12);
+  }
+  html, body { background: var(--bg) !important; min-height: 100%; }
+  body { font-family: "Segoe UI", "Microsoft JhengHei", system-ui, sans-serif; }
+  .modal-content { color: #212529; }
+
+  .ov-page { color: var(--text); max-width: 1680px; margin: 0 auto; padding-bottom: 32px; }
+  .ov-hero {
+    background: linear-gradient(120deg, #dc2626, #9333ea); color:#fff;
+    border-radius: 0 0 20px 20px; padding: 20px 24px 60px; margin: 0 -15px;
+  }
+  .ov-hero h1 { font-size:1.4rem; font-weight:700; margin:0; }
+  .ov-hero .sub { opacity:.88; font-size:.9rem; }
+  .theme-btn { border-radius:999px; border:1px solid rgba(255,255,255,.5); background:rgba(255,255,255,.15); color:#fff; padding:2px 12px; font-size:.85rem; cursor:pointer; }
+  .theme-btn:hover { background:rgba(255,255,255,.3); }
+
+  /* summary cards (rendered by the component) */
+  .ov-summary { display:grid; grid-template-columns: repeat(2, minmax(0, 260px)); gap:14px; margin-top:-44px; }
+  .ov-card { background:var(--surface); border-radius:14px; padding:14px 18px; box-shadow:0 4px 14px rgba(0,0,0,.08); border-left:5px solid var(--brand); }
+  .ov-card.danger { border-left-color: var(--danger); } .ov-card.danger .ov-num { color: var(--danger); }
+  .ov-card.warning { border-left-color: var(--warn); } .ov-card.warning .ov-num { color: var(--warn); }
+  .ov-label { color:var(--muted); font-size:.85rem; }
+  .ov-num { font-size:2rem; font-weight:700; line-height:1.15; }
+  .ov-num small { font-size:.9rem; font-weight:400; color:var(--muted); }
+
+  .ov-toolbar { display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; align-items:center; margin:16px 0 10px; }
+  .ov-toolbar .btn { border-radius:999px; }
+
+  /* table */
+  .ov-page .table-responsive { background:var(--surface); border-radius:14px; box-shadow:0 2px 10px rgba(0,0,0,.06); }
+  .ov-page table.b-table { color: var(--text); margin-bottom:0; border:0; }
+  .ov-page table.b-table > caption { color: var(--muted); padding:12px 16px; font-size:.85rem; text-align:left; caption-side: top; }
+  .ov-page table.b-table > thead > tr > th {
+    background: var(--surface) !important; color: var(--muted) !important; border:0 !important;
+    border-bottom: 2px solid var(--line) !important; font-weight:600; white-space:nowrap; padding:10px 12px; text-align:left;
+  }
+  .ov-page table.b-table > tbody > tr > td { border:0; border-bottom:1px solid var(--line); padding:10px 12px; vertical-align:middle; text-align:left; background: transparent; color: var(--text); }
+  .ov-page table.b-table.table-striped > tbody > tr:nth-of-type(odd) { background: transparent; }
+  .ov-page table.b-table.table-hover > tbody > tr:hover { background: var(--row-hover); color: var(--text); }
+  .ov-page table.b-table > tbody > tr > td:first-child { border-left: 4px solid var(--danger); color: var(--muted); }
+  .ov-page .reg_case_id { color: var(--brand); font-weight:600; cursor:pointer; white-space:nowrap; }
+  .ov-page .reg_case_id:hover { text-decoration: underline; }
+  .ov-page .btn-sm { border-radius:999px; }
+  html[data-theme="dark"] .ov-page .btn-outline-secondary { color: var(--text); border-color: var(--muted); }
+  html[data-theme="dark"] .ov-page .btn-outline-danger { color:#fca5a5; border-color:#fca5a5; }
+  .ov-page .text-center { text-align: left !important; }
+</style>
 </head>
 
 <body>
 
   <section>
-    <div class="container-fluid">
+    <div class="container-fluid ov-page">
+      <div class="ov-hero">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+          <div>
+            <h1><i class="fas fa-exclamation-triangle"></i> 逾期案件追蹤</h1>
+            <div class="sub">桃園市桃園地政事務所 ・ 登記案件逾期／即將逾期清單</div>
+          </div>
+          <button type="button" class="theme-btn mt-2 mt-md-0" id="theme-toggle" onclick="window.toggleLahTheme()">🌙 深色</button>
+        </div>
+      </div>
       <div class="row">
         <div class="col">
           <lah-case-reg-overdue ref="overdue"></lah-case-reg-overdue>
@@ -53,5 +121,22 @@
   <!-- Vue components -->
   <script src="assets/js/vue-countdown.min.js"></script>
   <script src="assets/js/components/lah-case-reg-overdue.js"></script>
+  <script>
+    (function () {
+      function sync() {
+        var dark = document.documentElement.getAttribute("data-theme") === "dark";
+        var b = document.getElementById("theme-toggle");
+        if (b) b.textContent = dark ? "☀ 淺色" : "🌙 深色";
+      }
+      window.toggleLahTheme = function () {
+        var t = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", t);
+        try { localStorage.setItem("lah_tracking_theme", t); } catch (e) {}
+        sync();
+      };
+      document.addEventListener("DOMContentLoaded", sync);
+      setTimeout(sync, 500);
+    })();
+  </script>
 </body>
 </html>
