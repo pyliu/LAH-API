@@ -166,6 +166,8 @@ class MOISMS {
 				 (CASE
 				   WHEN t.MS_TYPE = 'M' THEN '".mb_convert_encoding('地籍異動即時通', ORACLE_ENCODING, 'UTF-8')."'
 					 WHEN t.MS_TYPE = 'W' THEN '".mb_convert_encoding('指定送達處所', ORACLE_ENCODING, 'UTF-8')."'
+					 WHEN t.MS_TYPE = 'Z' THEN '".mb_convert_encoding('智慧控管系統', ORACLE_ENCODING, 'UTF-8')."'
+					 WHEN t.MS_TYPE = 'O' THEN '".mb_convert_encoding('跨域代收代寄', ORACLE_ENCODING, 'UTF-8')."'
 					 ELSE t.MS_TYPE
 				 END) AS SMS_TYPE,
 				 MS07_1 AS SMS_DATE,
