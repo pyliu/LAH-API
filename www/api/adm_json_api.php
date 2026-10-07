@@ -135,7 +135,7 @@ switch ($_POST["type"]) {
         $id = $_POST['id'];
         $result = $reservePDF->removeReservePDF($id);
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
-        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已刪除檔案預約PDF資料 ($id)" : "無法刪除外國人PDF資料 ($id)";
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已刪除檔案預約PDF資料 ($id)" : "無法刪除檔案預約PDF資料 ($id)";
         Logger::getInstance()->info("XHR [remove_reserve_pdf] $message");
         echoJSONResponse($message, $response_code);
         break;
