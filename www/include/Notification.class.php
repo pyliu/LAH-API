@@ -207,6 +207,31 @@ class Notification {
         return false;
     }
 
+    public function getAttachments($channel, $messageId) {
+        $uploadsDir = dirname($this->ws_db_path).DIRECTORY_SEPARATOR.'uploads'.DIRECTORY_SEPARATOR.$channel.DIRECTORY_SEPARATOR.$messageId;
+        if (!is_dir($uploadsDir)) {
+            return array();
+        }
+        $files = scandir($uploadsDir);
+        if ($files === false) {
+            return array();
+        }
+        $attachments = array();
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..' || strpos($file, '.') === 0) {
+                continue;
+            }
+            $filePath = $uploadsDir.DIRECTORY_SEPARATOR.$file;
+            if (is_file($filePath)) {
+                $attachments[] = array(
+                    'name' => $file,
+                    'size' => filesize($filePath)
+                );
+            }
+        }
+        return $attachments;
+    }
+
     public function getMessages($channel, $top = 10) {
         $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
         if (!file_exists($channelDBPath)) {
@@ -222,7 +247,14 @@ class Notification {
             $db = new SQLite3(SQLiteDBFactory::getMessageDB($channelDBPath));
             $stm = $db->prepare("SELECT * FROM message ORDER BY id DESC LIMIT :bv_top");
             $stm->bindParam(':bv_top', $top);
-            return $this->prepareArray($stm);
+            $rows = $this->prepareArray($stm);
+            if (is_array($rows)) {
+                foreach ($rows as &$row) {
+                    $row['attachments'] = $this->getAttachments($channel, $row['id']);
+                }
+                unset($row);
+            }
+            return $rows;
         }
         return false;
     }
@@ -243,7 +275,14 @@ class Notification {
             $stm = $db->prepare("SELECT * FROM message WHERE id < :bv_before ORDER BY id DESC LIMIT :bv_limit");
             $stm->bindParam(':bv_before', $before);
             $stm->bindParam(':bv_limit', $limit);
-            return $this->prepareArray($stm);
+            $rows = $this->prepareArray($stm);
+            if (is_array($rows)) {
+                foreach ($rows as &$row) {
+                    $row['attachments'] = $this->getAttachments($channel, $row['id']);
+                }
+                unset($row);
+            }
+            return $rows;
         }
         return false;
     }
