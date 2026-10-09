@@ -263,17 +263,19 @@ switch ($_POST["type"]) {
         // 代理人
         if (!empty($baked['代理人姓名'])) {
             $applicants[] = array(
-                'role'   => '代理人',
-                'name'   => $baked['代理人姓名'],
-                'id_no'  => $baked['代理人統編'] ?? ''
+                'role'      => '代理人',
+                'name'      => $baked['代理人姓名'],
+                'id_no'     => $baked['代理人統編'] ?? '',
+                'cellphone' => !empty($baked['非專代電話']) ? $baked['非專代電話'] : (!empty($baked['代理人電話']) ? $baked['代理人電話'] : '')
             );
         }
         // 權利人
         if (!empty($baked['權利人姓名'])) {
             $applicants[] = array(
-                'role'   => '權利人',
-                'name'   => $baked['權利人姓名'],
-                'id_no'  => $baked['權利人統編'] ?? ''
+                'role'      => '權利人',
+                'name'      => $baked['權利人姓名'],
+                'id_no'     => $baked['權利人統編'] ?? '',
+                'cellphone' => $baked['手機號碼'] ?? ''
             );
         }
         $response_code = empty($baked) ? STATUS_CODE::FAIL_NOT_FOUND : STATUS_CODE::SUCCESS_NORMAL;

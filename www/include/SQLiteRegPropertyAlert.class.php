@@ -24,6 +24,23 @@ class SQLiteRegPropertyAlert {
         $this->db->exec("PRAGMA journal_mode = WAL");
         $this->db->exec("PRAGMA cache_size = 100000");
         $this->db->exec("PRAGMA temp_store = MEMORY");
+        // 若 serial_no, cellphone, sms_status 欄位不存在則新增（向下相容既有資料）
+        $col_result = $this->db->query("PRAGMA table_info(reg_property_alert)");
+        $columns = [];
+        if ($col_result) {
+            while ($col_row = $col_result->fetchArray(SQLITE3_ASSOC)) {
+                $columns[] = $col_row['name'];
+            }
+        }
+        if (!in_array('serial_no', $columns)) {
+            $this->db->exec("ALTER TABLE reg_property_alert ADD COLUMN serial_no TEXT DEFAULT ''");
+        }
+        if (!in_array('cellphone', $columns)) {
+            $this->db->exec("ALTER TABLE reg_property_alert ADD COLUMN cellphone TEXT DEFAULT ''");
+        }
+        if (!in_array('sms_status', $columns)) {
+            $this->db->exec("ALTER TABLE reg_property_alert ADD COLUMN sms_status INTEGER DEFAULT 0");
+        }
         $this->db->exec("BEGIN TRANSACTION");
     }
 
@@ -80,7 +97,7 @@ class SQLiteRegPropertyAlert {
                 Logger::getInstance()->error(__METHOD__.": 無法取得 $st_date ~ $ed_date 資料！ (".SQLiteDBFactory::getRegPropertyAlertDB().")");
             }
         } else {
-            if($stmt = $this->db->prepare('SELECT * FROM reg_property_alert WHERE createtime BETWEEN :bv_createtime_st AND :bv_createtime_ed AND (note LIKE :bv_keyword OR applicant LIKE :bv_keyword OR receiving_caseno LIKE :bv_keyword) ORDER BY modifytime DESC')) {
+            if($stmt = $this->db->prepare('SELECT * FROM reg_property_alert WHERE createtime BETWEEN :bv_createtime_st AND :bv_createtime_ed AND (note LIKE :bv_keyword OR applicant LIKE :bv_keyword OR receiving_caseno LIKE :bv_keyword OR serial_no LIKE :bv_keyword OR cellphone LIKE :bv_keyword) ORDER BY modifytime DESC')) {
                 $stmt->bindParam(':bv_createtime_st', $st);
                 // 在結束日的那天內都算，所以加上 86399 秒
                 $stmt->bindValue(':bv_createtime_ed', $ed + 86399);
@@ -112,13 +129,17 @@ class SQLiteRegPropertyAlert {
 
     public function add($post) {
         $serial_no = $this->generateSerialNo();
+        $cellphone = isset($post['cellphone']) ? trim($post['cellphone']) : '';
+        $sms_status = isset($post['sms_status']) ? (int)$post['sms_status'] : 0;
         $stm = $this->db->prepare("
-            INSERT INTO reg_property_alert ('applicant', 'receiving_type', 'receiving_caseno', 'note', 'serial_no', 'createtime', 'modifytime')
-            VALUES (:applicant, :receiving_type, :receiving_caseno, :note, :serial_no, :createtime, :modifytime)
+            INSERT INTO reg_property_alert ('applicant', 'receiving_type', 'receiving_caseno', 'cellphone', 'sms_status', 'note', 'serial_no', 'createtime', 'modifytime')
+            VALUES (:applicant, :receiving_type, :receiving_caseno, :cellphone, :sms_status, :note, :serial_no, :createtime, :modifytime)
         ");
         $stm->bindParam(':applicant', $post['applicant']);
         $stm->bindValue(':receiving_type', isset($post['receiving_type']) ? (int)$post['receiving_type'] : 0);
         $stm->bindValue(':receiving_caseno', isset($post['receiving_caseno']) ? $post['receiving_caseno'] : '');
+        $stm->bindParam(':cellphone', $cellphone);
+        $stm->bindValue(':sms_status', $sms_status);
         $stm->bindParam(':note', $post['note']);
         $stm->bindParam(':serial_no', $serial_no);
         $stm->bindValue(':createtime', time());
@@ -138,13 +159,17 @@ class SQLiteRegPropertyAlert {
         $applicant        = isset($post['applicant'])         ? $post['applicant']               : $record['applicant'];
         $receiving_type   = isset($post['receiving_type'])    ? (int)$post['receiving_type']      : (int)$record['receiving_type'];
         $receiving_caseno = isset($post['receiving_caseno'])  ? $post['receiving_caseno']         : $record['receiving_caseno'];
-        $note             = isset($post['note'])              ? $post['note']                    : $record['note'];
+        $cellphone        = isset($post['cellphone'])         ? trim($post['cellphone'])          : ($record['cellphone'] ?? '');
+        $sms_status       = isset($post['sms_status'])        ? (int)$post['sms_status']           : (int)($record['sms_status'] ?? 0);
+        $note             = isset($post['note'])              ? $post['note']                     : $record['note'];
         Logger::getInstance()->warning(__METHOD__.": 更新地籍異動即時通資料。(id: $id, applicant: $applicant)");
-        $stm = $this->db->prepare("UPDATE reg_property_alert SET applicant = :applicant, receiving_type = :receiving_type, receiving_caseno = :receiving_caseno, note = :note, modifytime = :modifytime WHERE id = :id");
+        $stm = $this->db->prepare("UPDATE reg_property_alert SET applicant = :applicant, receiving_type = :receiving_type, receiving_caseno = :receiving_caseno, cellphone = :cellphone, sms_status = :sms_status, note = :note, modifytime = :modifytime WHERE id = :id");
         $stm->bindParam(':id', $id);
         $stm->bindParam(':applicant', $applicant);
         $stm->bindValue(':receiving_type', $receiving_type);
         $stm->bindParam(':receiving_caseno', $receiving_caseno);
+        $stm->bindParam(':cellphone', $cellphone);
+        $stm->bindValue(':sms_status', $sms_status);
         $stm->bindParam(':note', $note);
         $stm->bindValue(':modifytime', time());
         return $stm->execute() !== FALSE;
