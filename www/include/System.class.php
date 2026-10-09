@@ -289,8 +289,18 @@ class System {
     }
 
     public function isMockMode() {
-        // global $client_ip;
-        // if ($client_ip == '127.0.0.1') return true;
+        // 1. 優先檢查 www/.env 中的 MOCK 或 ENABLE_MOCK_MODE 設定
+        $env_mock = Env::get('MOCK', Env::get('ENABLE_MOCK_MODE', null));
+        if ($env_mock !== null) {
+            $val = strtolower(trim((string)$env_mock));
+            if ($val === 'true' || $val === '1') {
+                return true;
+            }
+            if ($val === 'false' || $val === '0') {
+                return false;
+            }
+        }
+        // 2. 回退讀取 dimension.db 設定
         return $this->get('ENABLE_MOCK_MODE') === 'true';
     }
     
