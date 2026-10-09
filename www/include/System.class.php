@@ -1,5 +1,6 @@
 <?php
 require_once("init.php");
+require_once('Env.class.php');
 require_once('DynamicSQLite.class.php');
 require_once('Ping.class.php');
 require_once('SQLiteUser.class.php');
@@ -662,19 +663,28 @@ class System {
     }
 
     public function getConfigs() {
-        if($stmt = $this->sqlite3->prepare('SELECT * FROM config WHERE 1=1')) {
+        $return = [];
+        if ($stmt = $this->sqlite3->prepare('SELECT * FROM config WHERE 1=1')) {
             $result = $stmt->execute();
-            $return = [];
-            if ($result === false) return $return;
-            while($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                $return[$row['key']] = $row['value'];
+            if ($result !== false) {
+                while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                    $return[$row['key']] = $row['value'];
+                }
             }
-            return $return;
         } else {
-            
             Logger::getInstance()->error(__METHOD__.": 取得 system config 資料失敗！");
+            return false;
         }
-        return false;
+
+        // 合併 .env 設定值（.env 優先覆蓋）
+        $env_configs = Env::load();
+        if (is_array($env_configs)) {
+            foreach ($env_configs as $key => $value) {
+                $return[$key] = $value;
+            }
+        }
+
+        return $return;
     }
 
     public function updateConfigs($configs) {
@@ -702,6 +712,10 @@ class System {
     }
 
     public function get($key) {
+        $env_val = Env::get($key);
+        if ($env_val !== null) {
+            return $env_val;
+        }
         return $this->sqlite3->querySingle("SELECT value from config WHERE key = '$key'");
     }
 }

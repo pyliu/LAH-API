@@ -15,9 +15,9 @@ session_start();
 // some query take long time ...
 set_time_limit(0);
 
+require_once("Env.class.php");
 require_once("GlobalConstants.inc.php");
 require_once("GlobalFunctions.inc.php");
-require_once("Env.class.php");
 
 /**
  * 當 PHP 嘗試使用一個尚未載入的類別時，這個自動載入器會被觸發。
