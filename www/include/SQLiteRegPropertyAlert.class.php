@@ -187,4 +187,31 @@ class SQLiteRegPropertyAlert {
         $stm->bindParam(':id', $id);
         return $stm->execute() !== FALSE;
     }
+
+    /**
+     * 取得有填寫手機且簡訊狀態未成功的待比對資料 (sms_status NOT IN (1, 3))
+     * 0: 未發送, 1: 成功, 2: 失敗, 3: 忽略
+     * @return array
+     */
+    public function getPendingSmsRecords() {
+        if ($stmt = $this->db->prepare("SELECT * FROM reg_property_alert WHERE cellphone IS NOT NULL AND TRIM(cellphone) != '' AND (sms_status IS NULL OR sms_status NOT IN (1, 3)) ORDER BY createtime ASC")) {
+            return $this->prepareArray($stmt);
+        }
+        Logger::getInstance()->error(__METHOD__.": 無法取得待比對簡訊資料！");
+        return array();
+    }
+
+    /**
+     * 更新指定記錄之簡訊狀態
+     * @param int $id
+     * @param int $sms_status
+     * @return bool
+     */
+    public function updateSmsStatus($id, $sms_status) {
+        $stm = $this->db->prepare("UPDATE reg_property_alert SET sms_status = :sms_status, modifytime = :modifytime WHERE id = :id");
+        $stm->bindParam(':id', $id);
+        $stm->bindValue(':sms_status', (int)$sms_status);
+        $stm->bindValue(':modifytime', time());
+        return $stm->execute() !== FALSE;
+    }
 }

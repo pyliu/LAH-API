@@ -13,6 +13,10 @@ class OraDBWrapper {
 
 	private function isDBReachable($txt = __METHOD__)
 	{
+		if (!function_exists('oci_connect')) {
+			$this->db_ok = false;
+			return false;
+		}
 		$this->db_ok = System::getInstance()->isDBReachable();
 		if (!$this->db_ok) {
 			Logger::getInstance()->error('資料庫無法連線，無法取得資料。[' . $txt . ']');
