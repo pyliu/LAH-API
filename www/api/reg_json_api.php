@@ -341,8 +341,17 @@ switch ($_POST["type"]) {
         Logger::getInstance()->info("XHR [remove_property_alert] $message");
         echoJSONResponse($message, $response_code);
         break;
+    case "check_reg_sms_status":
+        Logger::getInstance()->info("XHR [check_reg_sms_status] check single case sms status request.");
+        $biz_type = isset($_POST['biz_type']) ? trim($_POST['biz_type']) : '';
+        $id = isset($_POST['id']) ? $_POST['id'] : '';
+        $res = $query->checkSingleRegSmsStatus($biz_type, $id);
+        Logger::getInstance()->info("XHR [check_reg_sms_status] " . $res['message']);
+        echoJSONResponse($res['message'], $res['status'], array('payload' => $res['payload']));
+        break;
     default:
         Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
         echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
         break;
 }
+

@@ -907,4 +907,136 @@ class MOISMS {
 		Logger::getInstance()->info(__METHOD__.": 設定 MOICAS.SMS_MA05 $ma5_no 簡訊重送成功");
     return true;
   }
+	/**
+	 * 依據單一手機號碼與起始日期 (民國 YYYMMDD)，查詢收件日期（含當日）之後的簡訊紀錄
+	 *
+	 * @param string $cell 手機號碼 (10碼數字)
+	 * @param string $st_date 起始民國日期 (YYYMMDD)
+	 * @return array|false 簡訊紀錄陣列，若 Oracle 無法連線則回傳 false
+	 */
+	public function getSMSRecordsByCellAndStartDate($cell, $st_date) {
+		$cleanCell = preg_replace('/[^0-9]/', '', $cell);
+		$cleanSt = preg_replace('/[^0-9]/', '', $st_date);
+		if (empty($cleanCell) || empty($cleanSt)) {
+			return array();
+		}
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
+		Logger::getInstance()->info(__METHOD__.": 依手機 {$cleanCell} 及起始日期 >= {$cleanSt} 查詢 Oracle 四大簡訊表。");
+
+		$db = $this->db_wrapper->getDB();
+
+		// 1. MOIADM.SMSLOG (地籍異動即時通 / 指定送達處所等)
+		$db->parse("
+			SELECT
+				MS03 AS SMS_YEAR,
+				MS04_1 AS SMS_CODE,
+				MS04_2 AS SMS_NUMBER,
+				(CASE
+					WHEN t.MS_TYPE = 'M' THEN '".mb_convert_encoding('地籍異動即時通', ORACLE_ENCODING, 'UTF-8')."'
+					WHEN t.MS_TYPE = 'W' THEN '".mb_convert_encoding('指定送達處所', ORACLE_ENCODING, 'UTF-8')."'
+					WHEN t.MS_TYPE = 'Z' THEN '".mb_convert_encoding('智慧控管系統', ORACLE_ENCODING, 'UTF-8')."'
+					WHEN t.MS_TYPE = 'O' THEN '".mb_convert_encoding('跨域代收代寄', ORACLE_ENCODING, 'UTF-8')."'
+					ELSE t.MS_TYPE
+				END) AS SMS_TYPE,
+				MS07_1 AS SMS_DATE,
+				MS07_2 AS SMS_TIME,
+				MS14 AS SMS_CELL,
+				MS_MAIL AS SMS_MAIL,
+				MS31 AS SMS_RESULT,
+				MS_NOTE AS SMS_CONTENT
+			FROM MOIADM.SMSLOG t
+			WHERE MS07_1 >= :bv_st
+			  AND MS14 LIKE '%' || :bv_cell || '%'
+			ORDER BY MS07_1 DESC, MS07_2 DESC
+		");
+		$db->bind(":bv_st", $cleanSt);
+		$db->bind(":bv_cell", $cleanCell);
+		$db->execute();
+		$moiadm_rows = $db->fetchAll() ?: array();
+
+		// 2. MOICAS.SMS_MA05 (住址隱匿 / 代收代寄 / 手動建檔)
+		$db->parse("
+			SELECT
+				SUBSTR(t.MA5_NO, 1, 3) AS SMS_YEAR,
+				SUBSTR(t.MA5_NO, 4, 4) AS SMS_CODE,
+				SUBSTR(t.MA5_NO, 8, 6) AS SMS_NUMBER,
+				(CASE
+					WHEN t.MA5_CONT LIKE '%".mb_convert_encoding('隱匿', ORACLE_ENCODING, 'UTF-8')."%' THEN '".mb_convert_encoding('住址隱匿', ORACLE_ENCODING, 'UTF-8')."'
+					WHEN t.MA5_CONT LIKE '%".mb_convert_encoding('跨縣市', ORACLE_ENCODING, 'UTF-8')."%' THEN '".mb_convert_encoding('跨域代收代寄', ORACLE_ENCODING, 'UTF-8')."'
+					ELSE '".mb_convert_encoding('手動', ORACLE_ENCODING, 'UTF-8')."'
+				END) AS SMS_TYPE,
+				NVL(t.MA5_SDATE, t.MA5_CDATE) AS SMS_DATE,
+				NVL(t.MA5_STIME, t.MA5_CTIME) AS SMS_TIME,
+				t.MA5_MP AS SMS_CELL,
+				t.MA5_MID AS SMS_MAIL,
+				(CASE WHEN t.MA5_STATUS = '2' THEN 'S' ELSE t.MA5_STATUS END) AS SMS_RESULT,
+				t.MA5_CONT AS SMS_CONTENT,
+				t.API_SENDMSG AS SMS_APIMSG
+			FROM MOICAS.SMS_MA05 t
+			WHERE NVL(t.MA5_SDATE, t.MA5_CDATE) >= :bv_st
+			  AND t.MA5_MP LIKE '%' || :bv_cell || '%'
+			ORDER BY NVL(t.MA5_SDATE, t.MA5_CDATE) DESC, NVL(t.MA5_STIME, t.MA5_CTIME) DESC
+		");
+		$db->bind(":bv_st", $cleanSt);
+		$db->bind(":bv_cell", $cleanCell);
+		$db->execute();
+		$ma05_rows = $db->fetchAll() ?: array();
+
+		// 3. MOICAS.SMS_MA04 (簡訊建檔)
+		$db->parse("
+			SELECT
+				SUBSTR(t.MA4_NO, 1, 3) AS SMS_YEAR,
+				SUBSTR(t.MA4_NO, 4, 4) AS SMS_CODE,
+				SUBSTR(t.MA4_NO, 8, 6) AS SMS_NUMBER,
+				(CASE
+					WHEN t.MA4_CONT LIKE '%".mb_convert_encoding('隱匿', ORACLE_ENCODING, 'UTF-8')."%' THEN '".mb_convert_encoding('住址隱匿', ORACLE_ENCODING, 'UTF-8')."'
+					WHEN t.MA4_CONT LIKE '%".mb_convert_encoding('跨縣市', ORACLE_ENCODING, 'UTF-8')."%' THEN '".mb_convert_encoding('跨域代收代寄', ORACLE_ENCODING, 'UTF-8')."'
+					ELSE '".mb_convert_encoding('手動', ORACLE_ENCODING, 'UTF-8')."'
+				END) AS SMS_TYPE,
+				t.EDITDATE AS SMS_DATE,
+				t.EDITTIME AS SMS_TIME,
+				t.MA4_MP AS SMS_CELL,
+				t.MA4_MID AS SMS_MAIL,
+				'S' AS SMS_RESULT,
+				t.MA4_CONT AS SMS_CONTENT,
+				'' AS SMS_APIMSG
+			FROM MOICAS.SMS_MA04 t
+			WHERE t.EDITDATE >= :bv_st
+			  AND t.MA4_MP LIKE '%' || :bv_cell || '%'
+			ORDER BY t.EDITDATE DESC, t.EDITTIME DESC
+		");
+		$db->bind(":bv_st", $cleanSt);
+		$db->bind(":bv_cell", $cleanCell);
+		$db->execute();
+		$ma04_rows = $db->fetchAll() ?: array();
+
+		// 4. SMS98.LOG_SMS (案件辦理情形)
+		$db->parse("
+			SELECT
+				t.M01 AS SMS_YEAR,
+				t.M02 AS SMS_CODE,
+				t.M03 AS SMS_NUMBER,
+				'".mb_convert_encoding('案件辦理情形', ORACLE_ENCODING, 'UTF-8')."' AS SMS_TYPE,
+				TO_CHAR(t.send_time, 'YYYYMMDD') - 19110000 AS SMS_DATE,
+				TO_CHAR(t.send_time, 'HH24MISS') AS SMS_TIME,
+				t.PHONE AS SMS_CELL,
+				t.ID AS SMS_MAIL,
+				(CASE WHEN t.LOG_REMARK = 'OK!' THEN 'S' ELSE t.LOG_REMARK END) AS SMS_RESULT,
+				t.SMS_BODY AS SMS_CONTENT,
+				'' AS SMS_APIMSG
+			FROM SMS98.LOG_SMS t
+			WHERE (TO_CHAR(t.send_time, 'YYYYMMDD') - 19110000) >= :bv_st
+			  AND t.PHONE LIKE '%' || :bv_cell || '%'
+			ORDER BY t.send_time DESC
+		");
+		$db->bind(":bv_st", $cleanSt);
+		$db->bind(":bv_cell", $cleanCell);
+		$db->execute();
+		$sms98_rows = $db->fetchAll() ?: array();
+
+		return array_merge($moiadm_rows, $ma05_rows, $ma04_rows, $sms98_rows);
+	}
 }
+
