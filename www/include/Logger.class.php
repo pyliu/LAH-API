@@ -184,7 +184,8 @@ class Logger {
         }
 
         global $client_ip;
-        $path = ($_SERVER["SERVER_NAME"] ?? getLocalhostIP()) . ($_SERVER["REQUEST_URI"] ?? '/CLI');
+        $host = $_SERVER["SERVER_NAME"] ?? (function_exists('getLocalhostIP') ? getLocalhostIP() : '127.0.0.1');
+        $path = $host . ($_SERVER["REQUEST_URI"] ?? '/CLI');
 
         //Grab time - based on timezone in php.ini
         $time = date($this->options['dateFormat']);

@@ -1006,6 +1006,43 @@ class WatchDog {
         $this->addNotification($message, "HA10013859", '外國人繼承限制通知');
     }
 
+    /**
+     * 安全執行單一檢測任務，發生例外或錯誤時詳細記錄 LOG，不影響後續任務執行
+     *
+     * @param string $taskName 任務名稱/描述
+     * @param callable $callback 執行的閉包函式
+     * @return bool 成功回傳 true，失敗回傳 false
+     */
+    private function safeRun(string $taskName, callable $callback): bool {
+        $startTime = microtime(true);
+        try {
+            $callback();
+            return true;
+        } catch (Throwable $t) {
+            $elapsed = round(microtime(true) - $startTime, 4);
+            $errClass = get_class($t);
+            $errCode = $t->getCode();
+            $errMsg = $t->getMessage();
+            $errFile = $t->getFile();
+            $errLine = $t->getLine();
+            $errTrace = $t->getTraceAsString();
+
+            $logMessage = sprintf(
+                "[%s] 執行失敗 (耗時: %ss) - %s (Code: %s): %s 在 %s:%d\nStack Trace:\n%s",
+                $taskName,
+                $elapsed,
+                $errClass,
+                $errCode,
+                $errMsg,
+                $errFile,
+                $errLine,
+                $errTrace
+            );
+            Logger::getInstance()->error(__CLASS__ . "::safeRun: " . $logMessage);
+            return false;
+        }
+    }
+
     public function do() {
         try {
             if ($this->isOfficeHours()) {
@@ -1013,28 +1050,59 @@ class WatchDog {
                 $this->checkingTime = time();
                 $this->checkingDay = date('D', $this->checkingTime);
                 $this->checkingHM = (new DateTime())->setTimestamp($this->checkingTime)->format('h:i A');
+
+                $startTime = microtime(true);
+                $successCount = 0;
+                $failCount = 0;
+
                 /**
-                 * 系統檢測作業
+                 * 系統檢測作業清單
                  */
-                $this->checkCrossSiteData();
-                $this->checkValCrossSiteData();
-                $this->checkValCrossOtherSitesData();
-                $this->findRegOverdueCases();
-                $this->findRegExpiredAnnouncementCases();
-                $this->findSurOverdueCases();
-                $this->findSurNearOverdueCases();
-                $this->findSurDestructionConcernedCases();
-                $this->checkRegaDailyStatsData();
-                $this->sendForeignerInheritanceRestrictionNotification();
-                $this->sendOfficeCheckNotification();
-                $this->checkPossibleFraudCases();
-                $this->checkFixCaseNotification();
+                $tasks = [
+                    '登記案件跨所註記遺失檢查' => function() { $this->checkCrossSiteData(); },
+                    '地價案件跨所註記遺失檢查' => function() { $this->checkValCrossSiteData(); },
+                    '地價跨他所案件檢查' => function() { $this->checkValCrossOtherSitesData(); },
+                    '登記逾期案件檢查' => function() { $this->findRegOverdueCases(); },
+                    '登記到期公告案件檢查' => function() { $this->findRegExpiredAnnouncementCases(); },
+                    '測量逾期案件檢查' => function() { $this->findSurOverdueCases(); },
+                    '測量即將逾期案件檢查' => function() { $this->findSurNearOverdueCases(); },
+                    '測量逕為分割銷號注意案件檢查' => function() { $this->findSurDestructionConcernedCases(); },
+                    '登記每日統計資料檢查' => function() { $this->checkRegaDailyStatsData(); },
+                    '外國人繼承限制通知' => function() { $this->sendForeignerInheritanceRestrictionNotification(); },
+                    '全國地所連線檢測通知' => function() { $this->sendOfficeCheckNotification(); },
+                    '疑似詐騙案件警訊檢查' => function() { $this->checkPossibleFraudCases(); },
+                    '補正到期案件檢查' => function() { $this->checkFixCaseNotification(); }
+                ];
+
+                foreach ($tasks as $taskName => $taskCallable) {
+                    if ($this->safeRun($taskName, $taskCallable)) {
+                        $successCount++;
+                    } else {
+                        $failCount++;
+                    }
+                }
+
+                $totalElapsed = round(microtime(true) - $startTime, 4);
+                $summaryMsg = sprintf(
+                    __CLASS__ . ": Watchdog 系統檢測作業完成。總計: %d, 成功: %d, 失敗: %d, 總耗時: %ss",
+                    count($tasks),
+                    $successCount,
+                    $failCount,
+                    $totalElapsed
+                );
+
+                if ($failCount > 0) {
+                    Logger::getInstance()->warning($summaryMsg);
+                } else {
+                    Logger::getInstance()->info($summaryMsg);
+                }
+
                 return true;
             }
             return false;
-        } catch (Exception $ex) {
-            Logger::getInstance()->warning(__METHOD__.': 執行 Watchdog 系統檢測作業發生例外錯誤。('.$ex->getMessage().')');
-        } finally {
+        } catch (Throwable $ex) {
+            Logger::getInstance()->error(__METHOD__.': 執行 Watchdog 系統檢測作業發生外層嚴重錯誤。('.$ex->getMessage().")\n".$ex->getTraceAsString());
+            return false;
         }
     }
 }

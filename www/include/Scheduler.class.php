@@ -81,16 +81,26 @@ class Scheduler
         Logger::getInstance()->info(__METHOD__ . ": Scheduler 開始執行。");
         
         // 依照時間長度由大到小檢查
-        $this->doOneDayJobs();
-        $this->doHalfDayJobs();
-        $this->do8HoursJobs();
-        $this->do4HoursJobs();
-        $this->do2HoursJobs(); // 檢查 2 小時排程
-        $this->do1HourJobs();
-        $this->do30minsJobs();
-        $this->do15minsJobs();
-        $this->do10minsJobs();
-        $this->do5minsJobs();
+        $jobs = [
+            '24h' => function() { $this->doOneDayJobs(); },
+            '12h' => function() { $this->doHalfDayJobs(); },
+            '8h'  => function() { $this->do8HoursJobs(); },
+            '4h'  => function() { $this->do4HoursJobs(); },
+            '2h'  => function() { $this->do2HoursJobs(); },
+            '1h'  => function() { $this->do1HourJobs(); },
+            '30m' => function() { $this->do30minsJobs(); },
+            '15m' => function() { $this->do15minsJobs(); },
+            '10m' => function() { $this->do10minsJobs(); },
+            '5m'  => function() { $this->do5minsJobs(); },
+        ];
+
+        foreach ($jobs as $jobName => $jobCallable) {
+            try {
+                $jobCallable();
+            } catch (Throwable $e) {
+                Logger::getInstance()->error(__METHOD__ . ": 週期 {$jobName} 排程執行發生未捕獲錯誤: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+            }
+        }
         
         Logger::getInstance()->info(__METHOD__ . ": Scheduler 執行完成。");
     }
@@ -118,8 +128,8 @@ class Scheduler
     public function do10minsJobs(): bool
     {
         return $this->executeJob('10m', '+10 mins', function() {
-            $this->fetchMonitorMail();
-            $this->findXCaseFailures();
+            $this->safeRun('接收監控郵件 (fetchMonitorMail)', function() { $this->fetchMonitorMail(); });
+            $this->safeRun('跨所案件檢測 (findXCaseFailures)', function() { $this->findXCaseFailures(); });
         });
     }
 
@@ -200,34 +210,123 @@ class Scheduler
     public function doOneDayJobs(): bool
     {
         return $this->executeJob('24h', '+1440 mins', function() {
-            // 1. 日誌與歷史資料清理
-            $this->compressLog();
-            SQLiteAPConnectionHistory::cleanOneDayAgoAll();
-            
-            $conn = new SQLiteConnectivity();
-            $conn->wipeHistory(1);
-            
-            $this->wipeOutdatedIPEntries();
-            $this->wipeOutdatedMonitorMail();
-            $this->removeOutdatedLog();
-            
-            // 2. 清除快取資料庫
-            $this->removePrefetchDB();
-            $this->removeAPConnectionHistoryDB();
-            
-            // 3. 匯入/同步外部資料
-            $this->importRKEYN();
-            $this->importRKEYNALL();
-            $this->importOFFICES();
-            $this->importUserFromL3HWEB();
-            $this->syncAdUsersToLocalDB(); 
-            $this->syncUserIPs();          // 同步使用者動態 IP (86400s = 1day)
+            $startTime = microtime(true);
+            $failedTasks = [];
+            $successCount = 0;
+
+            // 每日長時間任務清單 (1. 日誌清理 2. 快取刪除 3. 資料匯入與同步)
+            $tasks = [
+                '日誌檔壓縮 (compressLog)' => function() { $this->compressLog(); },
+                '清理AP連線歷史 (SQLiteAPConnectionHistory::cleanOneDayAgoAll)' => function() { SQLiteAPConnectionHistory::cleanOneDayAgoAll(); },
+                '清除全國連線紀錄歷史 (SQLiteConnectivity::wipeHistory)' => function() {
+                    $conn = new SQLiteConnectivity();
+                    $conn->wipeHistory(1);
+                },
+                '清除過時動態IP (wipeOutdatedIPEntries)' => function() { $this->wipeOutdatedIPEntries(); },
+                '清除過時監控郵件 (wipeOutdatedMonitorMail)' => function() { $this->wipeOutdatedMonitorMail(); },
+                '刪除過時記錄檔 (removeOutdatedLog)' => function() { $this->removeOutdatedLog(); },
+                '刪除Prefetch快取資料庫 (removePrefetchDB)' => function() { $this->removePrefetchDB(); },
+                '刪除AP連線歷史紀錄DB (removeAPConnectionHistoryDB)' => function() { $this->removeAPConnectionHistoryDB(); },
+                '匯入RKEYN代碼檔 (importRKEYN)' => function() { $this->importRKEYN(); },
+                '匯入RKEYN_ALL代碼檔 (importRKEYNALL)' => function() { $this->importRKEYNALL(); },
+                '匯入LANDIP資料 (importOFFICES)' => function() { $this->importOFFICES(); },
+                '匯入L3HWEB使用者資料 (importUserFromL3HWEB)' => function() { $this->importUserFromL3HWEB(); },
+                '同步AD使用者至本地DB (syncAdUsersToLocalDB)' => function() { $this->syncAdUsersToLocalDB(); },
+                '同步使用者動態IP (syncUserIPs)' => function() { $this->syncUserIPs(); },
+            ];
+
+            foreach ($tasks as $taskName => $taskCallable) {
+                if ($this->safeRun($taskName, $taskCallable, $failedTasks)) {
+                    $successCount++;
+                }
+            }
+
+            $failCount = count($failedTasks);
+            $totalElapsed = round(microtime(true) - $startTime, 4);
+
+            $summaryMsg = sprintf(
+                __CLASS__ . "::doOneDayJobs 執行完成。總計: %d, 成功: %d, 失敗: %d, 總耗時: %ss",
+                count($tasks),
+                $successCount,
+                $failCount,
+                $totalElapsed
+            );
+
+            if ($failCount > 0) {
+                Logger::getInstance()->warning($summaryMsg);
+
+                // 發送推播通知至 inf 頻道
+                $title = "每日維護排程異常提醒";
+                $report = "⚠ 智慧監控系統每日維護排程 (doOneDayJobs) 執行部分失敗：\n***\n";
+                $report .= "- **總任務數**: " . count($tasks) . "\n";
+                $report .= "- **成功**: {$successCount}\n";
+                $report .= "- **失敗**: {$failCount}\n\n";
+                $report .= "**失敗任務清單：**\n";
+                foreach ($failedTasks as $f) {
+                    $report .= "- ❌ **{$f['name']}** ({$f['elapsed']}s): {$f['message']}\n";
+                }
+                $report .= "\n***\n⚠ 請至主機查看排程記錄檔以取得完整 Stack Trace。\n執行時間: " . date('Y-m-d H:i:s');
+
+                $concernedChannel = 'inf';
+                $this->removeNotificationByTitle($title, $concernedChannel);
+                $this->addNotification($report, $concernedChannel, $title);
+            } else {
+                Logger::getInstance()->info($summaryMsg);
+            }
         });
     }
 
     // =========================================================================
     //  輔助方法 (Private Helper Methods)
     // =========================================================================
+
+    /**
+     * 安全執行單一子任務，發生例外或錯誤時詳細記錄 LOG，不影響後續任務執行
+     *
+     * @param string $taskName 任務名稱/描述
+     * @param callable $callback 執行的閉包函式
+     * @param array &$failedTasks 收集失敗任務資訊以供後續統計與推播
+     * @return bool 成功回傳 true，失敗回傳 false
+     */
+    private function safeRun(string $taskName, callable $callback, array &$failedTasks = []): bool
+    {
+        $startTime = microtime(true);
+        try {
+            $callback();
+            return true;
+        } catch (Throwable $t) {
+            $elapsed = round(microtime(true) - $startTime, 4);
+            $errClass = get_class($t);
+            $errCode = $t->getCode();
+            $errMsg = $t->getMessage();
+            $errFile = $t->getFile();
+            $errLine = $t->getLine();
+            $errTrace = $t->getTraceAsString();
+
+            $logMessage = sprintf(
+                "[%s] 執行失敗 (耗時: %ss) - %s (Code: %s): %s 在 %s:%d\nStack Trace:\n%s",
+                $taskName,
+                $elapsed,
+                $errClass,
+                $errCode,
+                $errMsg,
+                $errFile,
+                $errLine,
+                $errTrace
+            );
+            Logger::getInstance()->error(__CLASS__ . "::safeRun: " . $logMessage);
+
+            $failedTasks[] = [
+                'name' => $taskName,
+                'class' => $errClass,
+                'message' => $errMsg,
+                'file' => $errFile,
+                'line' => $errLine,
+                'elapsed' => $elapsed
+            ];
+            return false;
+        }
+    }
 
     private function executeJob($ticketKey, $nextTimeInterval, callable $callback): bool
     {
@@ -241,9 +340,9 @@ class Scheduler
                 $callback();
                 return true;
             }
-        } catch (Exception $e) {
-            Logger::getInstance()->warning(__CLASS__ . "::do{$ticketKey}Jobs: 執行失敗。");
-            Logger::getInstance()->warning("錯誤訊息: " . $e->getMessage());
+        } catch (Throwable $e) {
+            Logger::getInstance()->error(__CLASS__ . "::do{$ticketKey}Jobs: 執行失敗。");
+            Logger::getInstance()->error("錯誤訊息: " . $e->getMessage() . "\nStack Trace:\n" . $e->getTraceAsString());
         }
         return false;
     }
