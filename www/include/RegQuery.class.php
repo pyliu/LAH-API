@@ -106,6 +106,11 @@ class RegQuery {
 
 		$latestSuccess = null;
 		$latestFail = null;
+		$totalCellCount = 0;
+		$bizMatchedCount = 0;
+		$successCount = 0;
+		$failCount = 0;
+		$smsRecords = array();
 
 		foreach ($smsLogs as $sms) {
 			$rawCell = preg_replace('/[^0-9]/', '', $sms['SMS_CELL'] ?? '');
@@ -122,6 +127,8 @@ class RegQuery {
 			if ($rawDate < $stDate) {
 				continue;
 			}
+
+			$totalCellCount++;
 
 			$type = $sms['SMS_TYPE'] ?? '';
 			$content = $sms['SMS_CONTENT'] ?? '';
@@ -140,10 +147,6 @@ class RegQuery {
 				);
 			}
 
-			if (!$isBizMatch) {
-				continue;
-			}
-
 			$rawTimeDigits = preg_replace('/[^0-9]/', '', $sms['SMS_TIME'] ?? '');
 			$rawTime = str_pad(substr($rawTimeDigits, 0, 6), 6, '0', STR_PAD_RIGHT);
 			$sortKey = $rawDate . $rawTime;
@@ -155,7 +158,24 @@ class RegQuery {
 			$smsResult = strtoupper(trim($sms['SMS_RESULT'] ?? ''));
 			$isSuccess = ($smsResult === 'S' || $smsResult === 'OK' || strpos($smsResult, 'OK') !== false);
 
+			$smsRecords[] = array(
+				'sort_key' => $sortKey,
+				'time_str' => $timeStr,
+				'type' => $type ?: '一般簡訊',
+				'result' => $smsResult ?: '-',
+				'is_success' => $isSuccess,
+				'is_biz_match' => $isBizMatch,
+				'content' => $content
+			);
+
+			if (!$isBizMatch) {
+				continue;
+			}
+
+			$bizMatchedCount++;
+
 			if ($isSuccess) {
+				$successCount++;
 				if ($latestSuccess === null || $sortKey > $latestSuccess['sort_key']) {
 					$latestSuccess = array(
 						'sort_key' => $sortKey,
@@ -163,6 +183,7 @@ class RegQuery {
 					);
 				}
 			} else {
+				$failCount++;
 				if ($latestFail === null || $sortKey > $latestFail['sort_key']) {
 					$latestFail = array(
 						'sort_key' => $sortKey,
@@ -172,7 +193,22 @@ class RegQuery {
 			}
 		}
 
+		// 依時間由新到舊排序簡訊明細
+		usort($smsRecords, function ($a, $b) {
+			return strcmp($b['sort_key'], $a['sort_key']);
+		});
+
 		$applicant = $record['applicant'] ?? '';
+		$basePayload = array(
+			'id' => $id,
+			'intake_date' => $intakeDateStr,
+			'cellphone' => $cleanCell,
+			'total_count' => $totalCellCount,
+			'matched_count' => $bizMatchedCount,
+			'success_count' => $successCount,
+			'fail_count' => $failCount,
+			'sms_records' => $smsRecords
+		);
 
 		if ($latestSuccess !== null) {
 			$newStatus = 1;
@@ -183,13 +219,12 @@ class RegQuery {
 			return array(
 				'status' => STATUS_CODE::SUCCESS_NORMAL,
 				'message' => $message,
-				'payload' => array(
-					'id' => $id,
+				'payload' => array_merge($basePayload, array(
 					'sms_status' => $newStatus,
 					'updated' => true,
 					'modifytime' => $modifytime,
 					'sms_time' => $latestSuccess['time_str']
-				)
+				))
 			);
 		}
 
@@ -202,13 +237,12 @@ class RegQuery {
 			return array(
 				'status' => STATUS_CODE::SUCCESS_NORMAL,
 				'message' => $message,
-				'payload' => array(
-					'id' => $id,
+				'payload' => array_merge($basePayload, array(
 					'sms_status' => $newStatus,
 					'updated' => true,
 					'modifytime' => $modifytime,
 					'sms_time' => $latestFail['time_str']
-				)
+				))
 			);
 		}
 
@@ -217,13 +251,12 @@ class RegQuery {
 		return array(
 			'status' => STATUS_CODE::SUCCESS_WITH_NO_RECORD,
 			'message' => $message,
-			'payload' => array(
-				'id' => $id,
+			'payload' => array_merge($basePayload, array(
 				'sms_status' => (int)($record['sms_status'] ?? 0),
 				'updated' => false,
 				'modifytime' => (int)($record['modifytime'] ?? 0),
 				'sms_time' => ''
-			)
+			))
 		);
 	}
 }
