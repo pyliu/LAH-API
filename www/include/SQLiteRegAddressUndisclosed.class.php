@@ -41,6 +41,9 @@ class SQLiteRegAddressUndisclosed {
         if (!in_array('sms_status', $columns)) {
             $this->db->exec("ALTER TABLE reg_address_undisclosed ADD COLUMN sms_status INTEGER DEFAULT 0");
         }
+        if (!in_array('receiver', $columns)) {
+            $this->db->exec("ALTER TABLE reg_address_undisclosed ADD COLUMN receiver TEXT DEFAULT ''");
+        }
         $this->db->exec("BEGIN TRANSACTION");
     }
 
@@ -97,7 +100,7 @@ class SQLiteRegAddressUndisclosed {
                 Logger::getInstance()->error(__METHOD__.": 無法取得 $st_date ~ $ed_date 資料！ (".SQLiteDBFactory::getRegAddressUndisclosedDB().")");
             }
         } else {
-            if($stmt = $this->db->prepare('SELECT * FROM reg_address_undisclosed WHERE createtime BETWEEN :bv_createtime_st AND :bv_createtime_ed AND (note LIKE :bv_keyword OR applicant LIKE :bv_keyword OR receiving_caseno LIKE :bv_keyword OR serial_no LIKE :bv_keyword OR cellphone LIKE :bv_keyword) ORDER BY modifytime DESC')) {
+            if($stmt = $this->db->prepare('SELECT * FROM reg_address_undisclosed WHERE createtime BETWEEN :bv_createtime_st AND :bv_createtime_ed AND (note LIKE :bv_keyword OR applicant LIKE :bv_keyword OR receiving_caseno LIKE :bv_keyword OR serial_no LIKE :bv_keyword OR cellphone LIKE :bv_keyword OR receiver LIKE :bv_keyword) ORDER BY modifytime DESC')) {
                 $stmt->bindParam(':bv_createtime_st', $st);
                 // 在結束日的那天內都算，所以加上 86399 秒
                 $stmt->bindValue(':bv_createtime_ed', $ed + 86399);
@@ -131,9 +134,10 @@ class SQLiteRegAddressUndisclosed {
         $serial_no = $this->generateSerialNo();
         $cellphone = isset($post['cellphone']) ? trim($post['cellphone']) : '';
         $sms_status = isset($post['sms_status']) ? (int)$post['sms_status'] : 0;
+        $receiver = isset($post['receiver']) ? trim($post['receiver']) : '';
         $stm = $this->db->prepare("
-            INSERT INTO reg_address_undisclosed ('applicant', 'receiving_type', 'receiving_caseno', 'cellphone', 'sms_status', 'note', 'serial_no', 'createtime', 'modifytime')
-            VALUES (:applicant, :receiving_type, :receiving_caseno, :cellphone, :sms_status, :note, :serial_no, :createtime, :modifytime)
+            INSERT INTO reg_address_undisclosed ('applicant', 'receiving_type', 'receiving_caseno', 'cellphone', 'sms_status', 'note', 'serial_no', 'receiver', 'createtime', 'modifytime')
+            VALUES (:applicant, :receiving_type, :receiving_caseno, :cellphone, :sms_status, :note, :serial_no, :receiver, :createtime, :modifytime)
         ");
         $stm->bindParam(':applicant', $post['applicant']);
         $stm->bindValue(':receiving_type', isset($post['receiving_type']) ? (int)$post['receiving_type'] : 0);
@@ -142,6 +146,7 @@ class SQLiteRegAddressUndisclosed {
         $stm->bindValue(':sms_status', $sms_status);
         $stm->bindParam(':note', $post['note']);
         $stm->bindParam(':serial_no', $serial_no);
+        $stm->bindParam(':receiver', $receiver);
         $stm->bindValue(':createtime', time());
         $stm->bindValue(':modifytime', time());
 
@@ -162,8 +167,9 @@ class SQLiteRegAddressUndisclosed {
         $cellphone        = isset($post['cellphone'])        ? trim($post['cellphone'])         : ($record['cellphone'] ?? '');
         $sms_status       = isset($post['sms_status'])       ? (int)$post['sms_status']          : (int)($record['sms_status'] ?? 0);
         $note             = isset($post['note'])             ? $post['note']                    : $record['note'];
+        $receiver         = isset($post['receiver'])         ? trim($post['receiver'])          : ($record['receiver'] ?? '');
         Logger::getInstance()->warning(__METHOD__.": 更新地址隱匿資料。(id: $id, applicant: $applicant)");
-        $stm = $this->db->prepare("UPDATE reg_address_undisclosed SET applicant = :applicant, receiving_type = :receiving_type, receiving_caseno = :receiving_caseno, cellphone = :cellphone, sms_status = :sms_status, note = :note, modifytime = :modifytime WHERE id = :id");
+        $stm = $this->db->prepare("UPDATE reg_address_undisclosed SET applicant = :applicant, receiving_type = :receiving_type, receiving_caseno = :receiving_caseno, cellphone = :cellphone, sms_status = :sms_status, note = :note, receiver = :receiver, modifytime = :modifytime WHERE id = :id");
         $stm->bindParam(':id', $id);
         $stm->bindParam(':applicant', $applicant);
         $stm->bindValue(':receiving_type', $receiving_type);
@@ -171,6 +177,7 @@ class SQLiteRegAddressUndisclosed {
         $stm->bindParam(':cellphone', $cellphone);
         $stm->bindValue(':sms_status', $sms_status);
         $stm->bindParam(':note', $note);
+        $stm->bindParam(':receiver', $receiver);
         $stm->bindValue(':modifytime', time());
         return $stm->execute() !== FALSE;
     }
