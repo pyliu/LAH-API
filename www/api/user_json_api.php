@@ -379,7 +379,7 @@ switch ($_POST["type"]) {
             echoJSONResponse("查無 ".$query_ip." 資料/授權。", STATUS_CODE::FAIL_NOT_FOUND, array(
 				"data_count" => 0,
 				"info" => false,
-				"authority" => System::getInstance()->calcAuthority(0)
+				"authority" => System::getInstance()->calcEffectiveAuthority(0, $query_ip)
 			));
 		} else {
 			$_SESSION["myinfo"] = $results[0];
@@ -387,7 +387,7 @@ switch ($_POST["type"]) {
             echoJSONResponse("查詢 ".$query_ip." 成功。 (".$results[0]["id"].":".$results[0]["name"].")", STATUS_CODE::SUCCESS_NORMAL, array(
 				"data_count" => count($results),
 				"info" => $results[0],
-				"authority" => System::getInstance()->calcAuthority($_SESSION["myinfo"]['authority'])
+				"authority" => System::getInstance()->calcEffectiveAuthority($_SESSION["myinfo"]['authority'], $query_ip)
 			));
 		}
         break;

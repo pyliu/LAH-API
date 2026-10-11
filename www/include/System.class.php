@@ -430,17 +430,44 @@ class System {
         return $auth;
     }
 
+    /**
+     * 有效權限 = 使用者個人權限(位元, B) ∪ IP 角色(authority 表, A)
+     * A 只會增加權限，不會收回 B 的權限；DISABLED 只看 B。
+     * 127.0.0.1 / ::1 與 SUPER 角色 IP 視為全部權限。
+     */
+    public function calcEffectiveAuthority($intval, $ip) {
+        $auth = $this->calcAuthority($intval);
+        $auth['isSuper'] = false;
+        if (empty($ip)) {
+            return $auth;
+        }
+        $is_super = in_array($ip, ['127.0.0.1', '::1']) || in_array($ip, $this->getRoleSuperIps());
+        if ($is_super) {
+            $auth['isSuper'] = true;
+            $auth['isAdmin'] = true;
+            $auth['isChief'] = true;
+            $auth['isRAE'] = true;
+            $auth['isUserMgtStaff'] = true;
+            $auth['isNotifyMgtStaff'] = true;
+            return $auth;
+        }
+        if (in_array($ip, $this->getRoleAdminIps())) $auth['isAdmin'] = true;
+        if (in_array($ip, $this->getRoleChiefIps())) $auth['isChief'] = true;
+        if (in_array($ip, $this->getRoleRAEIps())) $auth['isRAE'] = true;
+        return $auth;
+    }
+
     public function getAuthority($ip) {
         $sqlite_user = new SQLiteUser();
 		$queried_user = $sqlite_user->getUserByIP($ip);
 		$found_count = count($queried_user);
 		if (empty($found_count)) {
-            return $this->calcAuthority(0);
+            return $this->calcEffectiveAuthority(0, $ip);
         } else {
 			if ($found_count > 1) {
 				$queried_user = array($queried_user[$found_count - 1]);
 			}
-            return $this->calcAuthority($queried_user[0]['authority']);
+            return $this->calcEffectiveAuthority($queried_user[0]['authority'], $ip);
 		}
     }
 
