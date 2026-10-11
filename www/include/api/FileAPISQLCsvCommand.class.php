@@ -93,9 +93,14 @@ class FileAPISQLCsvCommand extends FileAPICommand {
     }
 
     public function execute() {
+        $system = System::getInstance();
+        $mock = $system->isMockMode();
+        if ($mock) Logger::getInstance()->warning("現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！");
+        $cache = Cache::getInstance();
         $q = new Query();
         // true - get raw big5 data; default is false.
-        $data = $q->getSelectSQLData($this->sql, true);
+        $data = $mock ? $cache->get('FileAPISQLCsvCommand') : $q->getSelectSQLData($this->sql, true);
+        if (!$mock) $cache->set('FileAPISQLCsvCommand', $data);
         $this->writeCSVtmp($data);
         //$this->outputCSV($data);
     }

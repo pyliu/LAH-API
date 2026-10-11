@@ -47,6 +47,10 @@ class SQLiteRKEYN {
     }
 
     public function importFromOraDB() {
+        if (System::getInstance()->isMockMode()) {
+            Logger::getInstance()->warning(__METHOD__.': 現在處於模擬模式(mock mode)，略過從主DB匯入收件字快取資料庫。');
+            return 0;
+        }
         // check if l3hweb is reachable
         $main_db_ip = System::getInstance()->get('ORA_DB_HXWEB_IP');
         $main_db_port = System::getInstance()->get('ORA_DB_HXWEB_PORT');

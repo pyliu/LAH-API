@@ -398,7 +398,7 @@ class AdService
             if (is_array($cache) && isset($cache['timestamp'], $cache['data'])) {
                 $age = time() - $cache['timestamp'];
                 
-                if ($age < self::CACHE_TTL) {
+                if ($age < self::CACHE_TTL || System::getInstance()->isMockMode()) {
                     $this->logger->info("[AdService] 快取有效 (Age: {$age}s < " . self::CACHE_TTL . "s)，直接使用快取資料。");
                     return $cache['data'];
                 } else {
@@ -418,6 +418,10 @@ class AdService
      */
     private function saveToConfigFile($filename, $data)
     {
+        if (System::getInstance()->isMockMode()) {
+            $this->logger->warning("[AdService] 現在處於模擬模式(mock mode)，不進行 AD 快取寫入 ($filename)");
+            return false;
+        }
         try {
             $dir = __DIR__ . '/config';
             if (!is_dir($dir)) {
@@ -1006,6 +1010,10 @@ class AdService
      */
     private function fetchUsersByFilter($filter, $logAction)
     {
+        if (System::getInstance()->isMockMode()) {
+            $this->logger->warning("[AdService] 現在處於模擬模式(mock mode)，略過外部 LDAP 查詢 ({$logAction})");
+            return [];
+        }
         $conn = null;
         try {
             // 一般查詢，不需要加密連線 (False)

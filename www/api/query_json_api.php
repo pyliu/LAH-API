@@ -10,13 +10,17 @@ switch ($_POST["type"]) {
 	case "ping":
 		Logger::getInstance()->info("XHR [ping] Ping ".$_POST["ip"]." request.");
 		$ip = $_POST["ip"];
-		$ping = new Ping($ip, 1, 255);	// ip, timeout, ttl
 		$latency = 0;
-		if ($_POST['port']) {
-			$ping->setPort($_POST['port']);
-			$latency = $ping->ping('fsockopen');
+		if ($mock) {
+			$latency = 87;
 		} else {
-			$latency = $ping->ping();
+			$ping = new Ping($ip, 1, 255);	// ip, timeout, ttl
+			if ($_POST['port']) {
+				$ping->setPort($_POST['port']);
+				$latency = $ping->ping('fsockopen');
+			} else {
+				$latency = $ping->ping();
+			}
 		}
 		$response_code = ($latency > 999 || $latency == '') ? STATUS_CODE::FAIL_TIMEOUT : STATUS_CODE::SUCCESS_NORMAL;
 		$message = "$ip 回應時間".(($latency > 999 || $latency == '') ? "逾時" : "為 $latency ms");

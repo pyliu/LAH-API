@@ -39,7 +39,7 @@ switch ($_POST["type"]) {
 		break;
 	case "moicat_rindx":
 		Logger::getInstance()->info("XHR [moicat_rindx] get query temp rindx request.");
-		$id = $_POST['year'];
+		$year = $_POST['year'];
 		$code = $_POST['code'];
 		$num = $_POST['num'];
 		$rows = $mock ? $cache->get('moicat_rindx') : $moicat->getRINDXRecords($year, $code, $num);
@@ -53,11 +53,11 @@ switch ($_POST["type"]) {
 		break;
 	case "fix_moicat_rindx":
 		Logger::getInstance()->info("XHR [fix_moicat_rindx] fix reg case temp rindx request.");
-		$id = $_POST['year'];
+		$year = $_POST['year'];
 		$code = $_POST['code'];
 		$num = $_POST['num'];
 		$result = $mock ? $cache->get('fix_moicat_rindx') : $moicat->fixRINDXCode($year, $code, $num);
-		$cache->set('moicat_rindx', $result);
+		$cache->set('fix_moicat_rindx', $result);
 		$message = '設定 '.$year.'-'.$code.'-'.$num.' MOICAT.RINDX IP_CODE 為 F ';
 		$message .= $result ? "成功" : '失敗';
 		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;

@@ -62,8 +62,14 @@ class DGXLandCaseParser
         // H1
         $siteCodeCross = $siteCode[0] . (System::getInstance()->getSiteNumber() + 1);
         // 產製本所端案件號對應表
+        $cache = Cache::getInstance();
+        $mock = System::getInstance()->isMockMode();
         $moicas = new MOICAS();
-        $popular = $moicas->getMostPopularRM02();
+        $popular = $mock ? $cache->get('most_popular_rm02') : $moicas->getMostPopularRM02();
+        $cache->set('most_popular_rm02', $popular);
+        if (!is_array($popular)) {
+            $popular = array();
+        }
         
         $ownMap = array();
         foreach ($popular as $row) {
@@ -502,6 +508,14 @@ class DGXLandCaseParser
         }
         Logger::getInstance()->info("DGXLandCaseParser: [Regex] 未命中，交由 AI 處理。");
 
+        $cache = Cache::getInstance();
+        $mock = System::getInstance()->isMockMode();
+        if ($mock) {
+            Logger::getInstance()->warning("DGXLandCaseParser: 現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！");
+            $cached = $cache->get('dgx_parse_case_ids');
+            return is_array($cached) ? $cached : array('success' => true, 'results' => array(), 'errors' => array());
+        }
+
         // 動態注入當前日期至 system 訊息尾端
         $currentYearAd = (int)date('Y');
         $currentYearMiguo = $currentYearAd - 1911;
@@ -590,6 +604,7 @@ class DGXLandCaseParser
                     $parsedJson['results'] = $this->enrichResults($parsedJson['results']);
                 }
 
+                $cache->set('dgx_parse_case_ids', $parsedJson);
                 Logger::getInstance()->info("DGXLandCaseParser: 解析成功。輸出: \n" . print_r($parsedJson, true));
                 return $parsedJson;
             }

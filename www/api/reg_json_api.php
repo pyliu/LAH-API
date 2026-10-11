@@ -258,7 +258,8 @@ switch ($_POST["type"]) {
             break;
         }
         $case_data = new RegCaseData($caseno_raw);
-        $baked = $case_data->getBakedData();
+        $baked = ($mock && $cache->get('get_case_applicants')) ? $cache->get('get_case_applicants') : $case_data->getBakedData();
+        $cache->set('get_case_applicants', $baked);
         $applicants = array();
         // 代理人
         if (!empty($baked['代理人姓名'])) {

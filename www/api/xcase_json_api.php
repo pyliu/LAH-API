@@ -265,7 +265,7 @@ switch ($_POST["type"]) {
 		Logger::getInstance()->info("XHR [check_xcase_fix_data] 檢查遠端案件之補正連結資料【".$_POST["id"]."】請求");
 		$xcase = new XCase();
 		$response = $mock ? $cache->get('check_xcase_fix_data') : $xcase->getXCaseCRCLD($_POST["id"]);
-		$cache->set('sync_xcase_fix_data', $response);
+		$cache->set('check_xcase_fix_data', $response);
 		$message = "局端有 ".$_POST["id"]."補正連結資料。";
 		if ($response === -1) {
 			Logger::getInstance()->info("XHR [check_xcase_fix_data] 局端L3資料庫無法連線【".$_POST["id"]."】");
@@ -301,7 +301,7 @@ switch ($_POST["type"]) {
 	case "get_xcase_fix_data":
 		Logger::getInstance()->info("XHR [get_xcase_fix_data] 取得遠端案件之補正資料【".$_POST["id"]."】請求");
 		$xcase = new XCase();
-		$response = $mock ? $cache->get('sync_xcase_fix_data') : $xcase->getXCaseFixData($_POST["id"]);
+		$response = $mock ? $cache->get('get_xcase_fix_data') : $xcase->getXCaseFixData($_POST["id"]);
 		$cache->set('get_xcase_fix_data', $response);
 		if ($response !== false) {
 			Logger::getInstance()->info("XHR [get_xcase_fix_data] 取得遠端同步補正資料成功【".$_POST["id"]."】");
@@ -316,7 +316,8 @@ switch ($_POST["type"]) {
 	case "get_local_fix_data":
 		Logger::getInstance()->info("XHR [get_local_fix_data] 取得本地案件之補正資料【".$_POST["id"]."】請求");
 		$xcase = new XCase();
-		$local_crcld = $xcase->getLocalCRCLD($_POST["id"]);
+		$local_crcld = $mock ? $cache->get('get_local_crcld') : $xcase->getLocalCRCLD($_POST["id"]);
+		$cache->set('get_local_crcld', $local_crcld);
 		if (is_array($local_crcld)) {
 			$response = $mock ? $cache->get('get_local_fix_data') : $xcase->getLocalCRCRD($local_crcld);
 			$cache->set('get_local_fix_data', $response);

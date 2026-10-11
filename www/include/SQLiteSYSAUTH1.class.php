@@ -92,6 +92,10 @@ class SQLiteSYSAUTH1 {
     }
 
     public function importFromL3HWEBDB() {
+        if (System::getInstance()->isMockMode()) {
+            Logger::getInstance()->warning(__METHOD__.': 現在處於模擬模式(mock mode)，略過從 L3HWEB 匯入使用者名稱。');
+            return 0;
+        }
         // check if l3hweb is reachable
         $l3hweb_ip = System::getInstance()->get('ORA_DB_L3HWEB_IP');
         $l3hweb_port = System::getInstance()->get('ORA_DB_L3HWEB_PORT');

@@ -15,7 +15,7 @@ switch ($_POST["type"]) {
         //Optional parameters
         $options = OP_READONLY;
         $retries = 3;
-        $mailbox = imap_open($url, $id, $pwd, $options, $retries);
+        $mailbox = System::getInstance()->isMockMode() ? true : imap_open($url, $id, $pwd, $options, $retries);
         if($mailbox) {
             echoJSONResponse('郵件伺服器('.$_POST['host'].')可正常連線', STATUS_CODE::SUCCESS_NORMAL);
         } else {

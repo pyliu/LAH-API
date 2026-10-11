@@ -101,7 +101,8 @@ switch ($_POST["type"]) {
 		break;
 	case "crsms_update_by_date":
 			Logger::getInstance()->info("XHR [crsms_update_by_date] get CRSMS update by date request.");
-			$rows = $moicas->getCRSMSUpdateCase($_POST['qday']);
+			$rows = $mock ? $cache->get('crsms_update_by_date') : $moicas->getCRSMSUpdateCase($_POST['qday']);
+			$cache->set('crsms_update_by_date', $rows);
 			$response_code = STATUS_CODE::SUCCESS_NORMAL;
 			$message = $_POST['qday'].'已找到'.count($rows).'件CRSMS案件時間異動更新紀錄';
 			$baked = array();
@@ -114,7 +115,8 @@ switch ($_POST["type"]) {
 		break;
 	case "crsmslog":
 			Logger::getInstance()->info("XHR [crsmslog] get CRSMSLog request.");
-			$rows = $moicas->getConcernCRSMSLog($_POST['qday'], $_POST['qtime'] ?? '000000');
+			$rows = $mock ? $cache->get('crsmslog') : $moicas->getConcernCRSMSLog($_POST['qday'], $_POST['qtime'] ?? '000000');
+			$cache->set('crsmslog', $rows);
 			$response_code = STATUS_CODE::SUCCESS_NORMAL;
 			$message = $_POST['qday'].'已找到'.count($rows).'異動更新紀錄';
 			$baked = array();
@@ -127,7 +129,8 @@ switch ($_POST["type"]) {
 			break;
 	case "cusmm_by_date":
 			Logger::getInstance()->info("XHR [cusmm_by_date] get CUSMM by date request.");
-			$rows = $moicas->getCUSMMByDate($_POST['begin'], $_POST['end']);
+			$rows = $mock ? $cache->get('cusmm_by_date') : $moicas->getCUSMMByDate($_POST['begin'], $_POST['end']);
+			$cache->set('cusmm_by_date', $rows);
 			$response_code = count($rows) > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
 			$message = $_POST['begin'].' ~ '.$_POST['end'].' 已找到'.count($rows).'筆謄本調閱紀錄';
 			Logger::getInstance()->info("XHR [cusmm_by_date] $message");
@@ -135,7 +138,8 @@ switch ($_POST["type"]) {
 			break;
 	case "cusmm_by_pid":
 			Logger::getInstance()->info("XHR [cusmm_by_pid] get CUSMM by PID request.");
-			$rows = $moicas->getCUSMMByQuery($_POST['pid']);
+			$rows = $mock ? $cache->get('cusmm_by_pid') : $moicas->getCUSMMByQuery($_POST['pid']);
+			$cache->set('cusmm_by_pid', $rows);
 			$response_code = count($rows) > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
 			$message = '已找到'.count($rows).'筆 '.$_POST['pid'].' 有關的謄本調閱紀錄';
 			Logger::getInstance()->info("XHR [cusmm_by_pid] $message");
@@ -143,7 +147,6 @@ switch ($_POST["type"]) {
 			break;
 	case "workdays":
 			Logger::getInstance()->info("XHR [workdays] get workdays request.");
-			$rows = $moicas->getWorkdays($_POST['year']);
 			$rows = $mock ? $cache->get('workdays') : $moicas->getWorkdays($_POST['year']);
 			$cache->set('workdays', $rows);
 			$response_code = count($rows) > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;

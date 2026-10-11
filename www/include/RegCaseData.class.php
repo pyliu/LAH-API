@@ -109,6 +109,12 @@ class RegCaseData {
     
     private function fetch($id) {
         if ($this->formatID($id)) {
+            $cache = Cache::getInstance();
+            $mock = System::getInstance()->isMockMode();
+            if ($mock) {
+                $cached = $cache->get('reg_case');
+                return is_array($cached) ? $cached : array();
+            }
             $db = new OraDB();
             $db->parse("
                 SELECT s.*, v.KNAME AS RM11_CHT
@@ -129,7 +135,9 @@ class RegCaseData {
             $db->bind(":bv_rm03_number", substr($id, 7, 6));
 
             $db->execute();
-            return $db->fetch();
+            $row = $db->fetch();
+            $cache->set('reg_case', $row);
+            return $row;
         }
         return array();
     }

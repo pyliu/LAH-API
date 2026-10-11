@@ -7,11 +7,14 @@ require_once(INC_DIR."/LXHWEB.class.php");
 
 $cache = Cache::getInstance();
 $system = System::getInstance();
+$mock = $system->isMockMode();
 
 switch ($_POST["type"]) {
     case "import_l3hweb_users":
         $lxhweb = new LXHWEB(CONNECTION_TYPE::L3HWEB);
-        $mappings = $lxhweb->querySYSAUTH1UserNames();
+        $mappings = $mock ? $cache->get('l3hweb_user_mappings') : $lxhweb->querySYSAUTH1UserNames();
+        $cache->set('l3hweb_user_mappings', $mappings);
+        if (!is_array($mappings)) $mappings = array();
         $len = count($mappings);
         Logger::getInstance()->info("XHR [import_l3hweb_users] 匯入同步異動使用者請求($len)。");
         
@@ -55,7 +58,9 @@ switch ($_POST["type"]) {
     case "l3hweb_user_mappings":
         Logger::getInstance()->info("XHR [l3hweb_user_mappings] 查詢同步異動使用者對應表請求。");
         $lxhweb = new LXHWEB(CONNECTION_TYPE::L3HWEB);
-        $mappings = $lxhweb->querySYSAUTH1UserNames();
+        $mappings = $mock ? $cache->get('l3hweb_user_mappings') : $lxhweb->querySYSAUTH1UserNames();
+        $cache->set('l3hweb_user_mappings', $mappings);
+        if (!is_array($mappings)) $mappings = array();
         $len = count($mappings);
         Logger::getInstance()->info("XHR [l3hweb_user_mappings] 查詢同步異動使用者對應表成功($len)。");
         echoJSONResponse("查詢同步異動使用者對應表成功($len)", STATUS_CODE::SUCCESS_NORMAL, array(
@@ -389,8 +394,9 @@ switch ($_POST["type"]) {
 	case "ad_authentication":
         Logger::getInstance()->info("XHR [ad_authentication] AD 認證請求");
         $ad = new AdService();
-        $result = $ad->authenticate($_POST["id"], $_POST["password"]);
-        if ($result === true) {
+        $result = $mock ? $cache->get('ad_authentication') : $ad->authenticate($_POST["id"], $_POST["password"]);
+        $cache->set('ad_authentication', $result);
+        if ($result === true || is_array($result)) {
             Logger::getInstance()->info("XHR [ad_authentication] AD 認證成功。");
             echoJSONResponse("AD 認證成功。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "raw" => $result
@@ -404,6 +410,10 @@ switch ($_POST["type"]) {
         Logger::getInstance()->info("XHR [ad_users_valid] 取得所有AD有效使用者資料請求");
         $ad = new AdService();
         $users = $ad->getValidUsers();
+        if ($mock && empty($users)) {
+            $users = $cache->get('ad_users_valid') ?: [];
+        }
+        $cache->set('ad_users_valid', $users);
         if (empty($users)) {
             Logger::getInstance()->info("XHR [ad_users_valid] 查無AD有效使用者資料。");
             echoJSONResponse("查無AD有效使用者資料。");
@@ -419,6 +429,10 @@ switch ($_POST["type"]) {
         Logger::getInstance()->info("XHR [ad_users_locked] 查詢鎖定使用者資料請求");
         $ad = new AdService();
         $users = $ad->getLockedUsers();
+        if ($mock && empty($users)) {
+            $users = $cache->get('ad_users_locked') ?: [];
+        }
+        $cache->set('ad_users_locked', $users);
         if (empty($users)) {
             Logger::getInstance()->info("XHR [ad_users_locked] 查無鎖定使用者資料。");
             echoJSONResponse("查無鎖定使用者資料。");
@@ -435,7 +449,8 @@ switch ($_POST["type"]) {
         $type = $_POST["type"];
         Logger::getInstance()->info("XHR [$type] 解鎖使用者資料請求");
         $ad = new AdService();
-        $result = $ad->unlockUser($_POST["id"], $_POST["password"]);
+        $result = $mock ? $cache->get('ad_user_unlock') : $ad->unlockUser($_POST["id"], $_POST["password"]);
+        $cache->set('ad_user_unlock', $result);
         if ($result === true) {
             $msg = empty($_POST["password"]) ? "解鎖使用者資料成功" : "解鎖並重設使用者密碼成功";
             Logger::getInstance()->info("XHR [$type] $msg 。");
@@ -451,7 +466,8 @@ switch ($_POST["type"]) {
     case "ad_user_info":
         Logger::getInstance()->info("XHR [ad_user_info] 查詢使用者資料【".$_POST["id"]."】請求");
         $ad = new AdService();
-        $result = $ad->getUser($_POST["id"]);
+        $result = $mock ? $cache->get('ad_user_info') : $ad->getUser($_POST["id"]);
+        $cache->set('ad_user_info', $result);
         if (empty($result)) {
             Logger::getInstance()->info("XHR [ad_user_info] 查無 ".$_POST["id"]." 資料。");
             echoJSONResponse("查無 ".$_POST["id"]." 資料。");
@@ -487,7 +503,11 @@ switch ($_POST["type"]) {
     case "ad_test_connection":
         Logger::getInstance()->info("XHR [ad_test_connection] 測試AD連線請求");
         $ad = new AdService();
-        $arr = $ad->testConnection($_POST["config"]);
+        $arr = $mock ? $cache->get('ad_test_connection') : $ad->testConnection($_POST["config"]);
+        $cache->set('ad_test_connection', $arr);
+        if (!is_array($arr)) {
+            $arr = array('status' => (bool)$mock, 'message' => $mock ? 'AD 連線與認證成功 (Mock)' : 'AD 連線失敗');
+        }
         Logger::getInstance()->info("XHR [ad_test_connection] ".$arr['message']);
         if ($arr['status'] === true) {
             echoJSONResponse($arr['message'], STATUS_CODE::SUCCESS_NORMAL, array(

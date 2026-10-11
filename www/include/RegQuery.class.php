@@ -94,8 +94,11 @@ class RegQuery {
 		$stDate = sprintf("%03d%s", $rocYearStart, date('md', $caseCreatetime));
 		$intakeDateStr = sprintf("%03d/%s/%s", $rocYearStart, date('m', $caseCreatetime), date('d', $caseCreatetime));
 
+		$cache = Cache::getInstance();
+		$mock = System::getInstance()->isMockMode();
 		$moisms = new MOISMS();
-		$smsLogs = $moisms->getSMSRecordsByCellAndStartDate($cleanCell, $stDate);
+		$smsLogs = $mock ? $cache->get('moisms_records_by_cell') : $moisms->getSMSRecordsByCellAndStartDate($cleanCell, $stDate);
+		$cache->set('moisms_records_by_cell', $smsLogs);
 		if ($smsLogs === false) {
 			return array(
 				'status' => STATUS_CODE::FAIL_REMOTE_UNREACHABLE,
