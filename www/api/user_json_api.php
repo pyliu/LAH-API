@@ -387,7 +387,7 @@ switch ($_POST["type"]) {
             echoJSONResponse("查詢 ".$query_ip." 成功。 (".$results[0]["id"].":".$results[0]["name"].")", STATUS_CODE::SUCCESS_NORMAL, array(
 				"data_count" => count($results),
 				"info" => $results[0],
-				"authority" => System::getInstance()->calcEffectiveAuthority($_SESSION["myinfo"]['authority'], $query_ip)
+				"authority" => System::getInstance()->calcEffectiveAuthority($_SESSION["myinfo"]['authority'], $query_ip, $_SESSION["myinfo"]['unit'] ?? '')
 			));
 		}
         break;

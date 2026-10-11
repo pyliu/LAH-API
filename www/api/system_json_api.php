@@ -10,7 +10,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteOFFICES.class.php");
 // in case session not have myinfo
 prepareSessionMyInfo();
 
-$auth = System::getInstance()->calcEffectiveAuthority($_SESSION['myinfo']['authority'] ?? 0, $client_ip);
+$auth = System::getInstance()->calcEffectiveAuthority($_SESSION['myinfo']['authority'] ?? 0, $client_ip, $_SESSION['myinfo']['unit'] ?? '');
 if (!$auth['isAdmin']) {
     Logger::getInstance()->error("$client_ip 不是 Admin 使用者無法存取此API(".__FILE__.")");
     echoJSONResponse("非 Admin 無法執行命令。", STATUS_CODE::DEFAULT_FAIL);

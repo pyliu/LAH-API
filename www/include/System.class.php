@@ -431,11 +431,16 @@ class System {
     }
 
     /**
-     * 有效權限 = 使用者個人權限(位元, B) ∪ IP 角色(authority 表, A)
+     * 有效權限 = 使用者個人權限(位元, B) ∪ IP 角色(authority 表, A) ∪ 角色/部門預設權限
      * A 只會增加權限，不會收回 B 的權限；DISABLED 只看 B。
      * 127.0.0.1 / ::1 與 SUPER 角色 IP 視為全部權限。
+     * 預設權限(皆只增不減)：
+     *   研考、主管、總務角色(個人位元或 IP 角色) => 可發布公告 (isNotifyMgtStaff)
+     *   人事角色(IP 角色) 或 人事室人員 => 可發布公告 + 管理人員 (isUserMgtStaff)
+     *   資訊課人員 => 管理者 (isAdmin) + 可發布公告 + 管理人員
+     * 部門預設權限依使用者 unit 判定，離職(isDisabled)者不套用。
      */
-    public function calcEffectiveAuthority($intval, $ip) {
+    public function calcEffectiveAuthority($intval, $ip, $unit = '') {
         $auth = $this->calcAuthority($intval);
         $auth['isSuper'] = false;
         if (empty($ip)) {
@@ -454,6 +459,26 @@ class System {
         if (in_array($ip, $this->getRoleAdminIps())) $auth['isAdmin'] = true;
         if (in_array($ip, $this->getRoleChiefIps())) $auth['isChief'] = true;
         if (in_array($ip, $this->getRoleRAEIps())) $auth['isRAE'] = true;
+        // 總務、人事角色(IP 角色)預設權限
+        if (in_array($ip, $this->getRoleGAIps())) $auth['isNotifyMgtStaff'] = true;
+        if (in_array($ip, $this->getRoleHRIps())) {
+            $auth['isNotifyMgtStaff'] = true;
+            $auth['isUserMgtStaff'] = true;
+        }
+        if (!$auth['isDisabled']) {
+            // 研考、主管預設可發布公告
+            if ($auth['isChief'] || $auth['isRAE']) $auth['isNotifyMgtStaff'] = true;
+            // 部門預設權限
+            $unit = trim((string)$unit);
+            if ($unit === '人事室') {
+                $auth['isNotifyMgtStaff'] = true;
+                $auth['isUserMgtStaff'] = true;
+            } elseif ($unit === '資訊課') {
+                $auth['isAdmin'] = true;
+                $auth['isNotifyMgtStaff'] = true;
+                $auth['isUserMgtStaff'] = true;
+            }
+        }
         return $auth;
     }
 
@@ -467,7 +492,7 @@ class System {
 			if ($found_count > 1) {
 				$queried_user = array($queried_user[$found_count - 1]);
 			}
-            return $this->calcEffectiveAuthority($queried_user[0]['authority'], $ip);
+            return $this->calcEffectiveAuthority($queried_user[0]['authority'], $ip, $queried_user[0]['unit'] ?? '');
 		}
     }
 
