@@ -288,8 +288,8 @@ switch ($_POST["type"]) {
         break;
     case "stats_reg_period_count":
         $arr = $mock ? $cache->get('stats_reg_period_count') : $stats->getRegPeriodCount($_POST["st"], $_POST["ed"]);
-		$cache->set('stats_reg_period_count', $arr);
         if ($arr) {
+            $cache->set('stats_reg_period_count', $arr);
             $count = count($arr);
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "raw" => $arr
@@ -302,8 +302,8 @@ switch ($_POST["type"]) {
         break;
     case "stats_sur_period_count":
         $arr = $mock ? $cache->get('stats_sur_period_count') : $stats->getSurPeriodCount($_POST["st"], $_POST["ed"]);
-		$cache->set('stats_sur_period_count', $arr);
         if ($arr) {
+            $cache->set('stats_sur_period_count', $arr);
             $count = count($arr);
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "raw" => $arr

@@ -32,6 +32,8 @@ class Cache {
     private function getSqliteDB() {
         if ($this->sqlite3 === null) {
             $this->sqlite3 = new SQLite3($this->db_path);
+            $this->sqlite3->busyTimeout(5000);
+            $this->sqlite3->exec("PRAGMA journal_mode = WAL");
         }
         return $this->sqlite3;
     }
@@ -69,14 +71,23 @@ class Cache {
 
     public function set($key, $val, $expire = 86400) {
         if (System::getInstance()->isMockMode()) return false;
-        $stm = $this->getSqliteDB()->prepare("
-            REPLACE INTO cache ('key', 'value', 'expire')
-            VALUES (:key, :value, :expire)
-        ");
-        $stm->bindParam(':key', $key);
-        $stm->bindValue(':value', serialize($val));
-        $stm->bindValue(':expire', time() + $expire); // in seconds, 86400 => one day
-        return $stm->execute() === FALSE ? false : true;
+        try {
+            $stm = $this->getSqliteDB()->prepare("
+                REPLACE INTO cache ('key', 'value', 'expire')
+                VALUES (:key, :value, :expire)
+            ");
+            if ($stm === false) {
+                Logger::getInstance()->warning(__METHOD__.": 準備 statement 失敗: " . $this->getSqliteDB()->lastErrorMsg());
+                return false;
+            }
+            $stm->bindParam(':key', $key);
+            $stm->bindValue(':value', serialize($val));
+            $stm->bindValue(':expire', time() + $expire); // in seconds, 86400 => one day
+            return $stm->execute() === FALSE ? false : true;
+        } catch (Throwable $e) {
+            Logger::getInstance()->warning(__METHOD__.": " . $e->getMessage());
+            return false;
+        }
     }
 
     public function get($key) {
@@ -87,9 +98,18 @@ class Cache {
 
     public function del($key) {
         if (System::getInstance()->isMockMode()) return false;
-        $stm = $this->getSqliteDB()->prepare("DELETE from cache WHERE key = :key");
-        $stm->bindParam(':key', $key);
-        return $stm->execute() === FALSE ? false : true;
+        try {
+            $stm = $this->getSqliteDB()->prepare("DELETE from cache WHERE key = :key");
+            if ($stm === false) {
+                Logger::getInstance()->warning(__METHOD__.": 準備 statement 失敗: " . $this->getSqliteDB()->lastErrorMsg());
+                return false;
+            }
+            $stm->bindParam(':key', $key);
+            return $stm->execute() === FALSE ? false : true;
+        } catch (Throwable $e) {
+            Logger::getInstance()->warning(__METHOD__.": " . $e->getMessage());
+            return false;
+        }
     }
 
     public function isExpired($key) {
