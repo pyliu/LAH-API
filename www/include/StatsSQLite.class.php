@@ -23,6 +23,8 @@ class StatsSQLite {
     function __construct() {
         $path = SQLiteDBFactory::getLAHDB();
         $this->db = new SQLite3($path);
+        $this->db->busyTimeout(5000);
+        $this->db->exec("PRAGMA journal_mode = WAL");
         $this->db->exec("PRAGMA cache_size = 100000");
         $this->db->exec("PRAGMA temp_store = MEMORY");
         // $this->db->exec("BEGIN TRANSACTION");

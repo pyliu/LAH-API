@@ -25,6 +25,8 @@ class Temperature {
     function __construct() {
         $this->init();
         $this->db = new SQLite3(TEMPERATURE_SQLITE_DB);
+        $this->db->busyTimeout(5000);
+        $this->db->exec("PRAGMA journal_mode = WAL");
     }
 
     function __destruct() { }

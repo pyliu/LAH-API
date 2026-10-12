@@ -102,6 +102,8 @@ class Prefetch {
     public static function wipeExpiredData() {
         $one_week_ago_seconds = time() - 7 * 24 * 3600;
         $prefetch_db = new SQLite3(SQLiteDBFactory::getPrefetchDB());
+        $prefetch_db->busyTimeout(5000);
+        $prefetch_db->exec("PRAGMA journal_mode = WAL");
         if ($stm = $prefetch_db->prepare("DELETE FROM cache WHERE expire < :time")) {
             $stm->bindParam(':time', $one_week_ago_seconds, SQLITE3_TEXT);
             $ret = $stm->execute();

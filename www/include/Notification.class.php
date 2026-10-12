@@ -82,10 +82,17 @@ class Notification {
 
     function __destruct() { }
 
+    private function createDB($path) {
+        $db = new SQLite3($path);
+        $db->busyTimeout(5000);
+        $db->exec("PRAGMA journal_mode = WAL");
+        return $db;
+    }
+
     public function addLog($channel, $payload) {
         try {
             // notification log db
-            $db = new SQLite3(SQLiteDBFactory::getNotificationLogDB());
+            $db = $this->createDB(SQLiteDBFactory::getNotificationLogDB());
             $stm = $db->prepare("
                 INSERT INTO notification_log (
                     'channel',
@@ -110,6 +117,10 @@ class Notification {
                     :bv_flag
                 )
             ");
+            if ($stm === false) {
+                Logger::getInstance()->warning(__METHOD__.': 準備 statement 失敗: '.$db->lastErrorMsg());
+                return false;
+            }
             $create_datetime = date('Y-m-d H:i:s');
             $expire_datetime = empty($payload['expire_datetime']) ? '' : $payload['expire_datetime'];
             $priority = $payload['priority'] ?? 3;  // 0-3: critical -> high -> average -> low
@@ -124,7 +135,7 @@ class Notification {
             $stm->bindParam(':bv_from_ip', $payload['from_ip']);
             $stm->bindParam(':bv_flag', $flag);
             return $stm->execute();
-        } catch (Exception $ex) {
+        } catch (Throwable $ex) {
             Logger::getInstance()->warning(__CLASS__.': 寫入訊息紀錄 notification_log 失敗。('.$ex->getMessage().')');
         }
         return false;
@@ -136,16 +147,20 @@ class Notification {
     public function getLogs($st, $ed) {
         try {
             // notification log db
-            $db = new SQLite3(SQLiteDBFactory::getNotificationLogDB());
+            $db = $this->createDB(SQLiteDBFactory::getNotificationLogDB());
             $stm = $db->prepare("
                 SELECT * FROM notification_log
                 WHERE create_datetime BETWEEN :bv_st AND :bv_ed
                 ORDER BY id DESC
             ");
+            if ($stm === false) {
+                Logger::getInstance()->warning(__METHOD__.': 準備 statement 失敗: '.$db->lastErrorMsg());
+                return [];
+            }
             $stm->bindParam(':bv_st', $st);
             $stm->bindParam(':bv_ed', $ed);
             return $this->prepareArray($stm);
-        } catch (Exception $ex) {
+        } catch (Throwable $ex) {
             Logger::getInstance()->warning(__CLASS__.': 取得訊息紀錄 notification_log 失敗。('.$ex->getMessage().')');
         }
         return false;
@@ -163,7 +178,7 @@ class Notification {
             $channel = 'announcement_'.$channel;
         }
         if ($this->prepareDB($channel)) {
-            $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            $db = $this->createDB(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
             $stm = $db->prepare("
                 INSERT INTO message ('title', 'content', 'priority', 'create_datetime', 'expire_datetime', 'sender', 'from_ip', 'flag')
                 VALUES (:bv_title, :bv_content, :bv_priority, :bv_create_datetime, :bv_expire_datetime, :bv_sender, :bv_from_ip, :bv_flag)
@@ -198,7 +213,7 @@ class Notification {
         Logger::getInstance()->info(__METHOD__.': 準備刪除 '.$channel.' 頻道 '.$payload['id'].' 資料');
         if ($this->prepareDB($channel)) {
             // TODO: add message
-            $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            $db = $this->createDB(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
             if ($stm = $db->prepare("DELETE FROM message WHERE id = :bv_id")) {
                 $stm->bindParam(':bv_id', $payload['id']);
                 return $stm->execute() === FALSE ? false : true;
@@ -244,7 +259,7 @@ class Notification {
         }
         // get messages
         if ($this->prepareDB($channel)) {
-            $db = new SQLite3(SQLiteDBFactory::getMessageDB($channelDBPath));
+            $db = $this->createDB(SQLiteDBFactory::getMessageDB($channelDBPath));
             $stm = $db->prepare("SELECT * FROM message ORDER BY id DESC LIMIT :bv_top");
             $stm->bindParam(':bv_top', $top);
             $rows = $this->prepareArray($stm);
@@ -271,7 +286,7 @@ class Notification {
         }
         // get messages
         if ($this->prepareDB($channel)) {
-            $db = new SQLite3(SQLiteDBFactory::getMessageDB($channelDBPath));
+            $db = $this->createDB(SQLiteDBFactory::getMessageDB($channelDBPath));
             $stm = $db->prepare("SELECT * FROM message WHERE id < :bv_before ORDER BY id DESC LIMIT :bv_limit");
             $stm->bindParam(':bv_before', $before);
             $stm->bindParam(':bv_limit', $limit);
@@ -301,7 +316,7 @@ class Notification {
         // get messages
         if ($this->prepareDB($channel)) {
             // TODO: add message
-            // $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            // $db = $this->createDB(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
             // $stm = $db->prepare("
             //     INSERT INTO message ('title', 'content', 'priority', 'create_datetime', 'expire_datetime', 'sender', 'from_ip', 'flag')
             //     VALUES (:bv_title, :bv_content, :bv_priority, :bv_create_datetime, :bv_expire_datetime, :bv_sender, :bv_from_ip, :bv_flag)
@@ -322,7 +337,7 @@ class Notification {
         Logger::getInstance()->info(__METHOD__.': 準備刪除 '.$channel.' 頻道今日地所離線訊息');
         if ($this->prepareDB($channel)) {
             $today = date("Y-m-d");
-            $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            $db = $this->createDB(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
             if ($stm = $db->prepare("DELETE FROM message WHERE title = :bv_title and create_datetime like :bv_create_datetime")) {
                 $stm->bindValue(':bv_title', '地政系統跨域服務監測');
                 $stm->bindValue(':bv_create_datetime', $today.'%');
@@ -335,7 +350,7 @@ class Notification {
     public function removeOutdatedMessageByTitle($channel, $title) {
         Logger::getInstance()->info(__METHOD__.': 準備刪除「'.$channel.'」頻道標題為「'.$title.'」的訊息');
         if ($this->prepareDB($channel)) {
-            $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            $db = $this->createDB(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
             if ($stm = $db->prepare("DELETE FROM message WHERE title = :bv_title")) {
                 $stm->bindParam(':bv_title', $title);
                 return $stm->execute() === FALSE ? false : true;
@@ -347,7 +362,7 @@ class Notification {
     public function removeOutdatedMessageByContent($channel, $content) {
         Logger::getInstance()->info(__METHOD__.': 準備刪除「'.$channel.'」頻道內容為「'.$content.'」的訊息');
         if ($this->prepareDB($channel)) {
-            $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            $db = $this->createDB(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
             if ($stm = $db->prepare("DELETE FROM message WHERE content = :bv_content")) {
                 $stm->bindParam(':bv_content', $content);
                 return $stm->execute() === FALSE ? false : true;
@@ -403,7 +418,7 @@ class Notification {
         if (!is_numeric($top) || intval($top) < 1) {
             $top = 10;
         }
-        $db = new SQLite3(SQLiteDBFactory::getMessageDB($channelDBPath));
+        $db = $this->createDB(SQLiteDBFactory::getMessageDB($channelDBPath));
         $stm = $db->prepare("SELECT * FROM message ORDER BY id DESC LIMIT :bv_top");
         $stm->bindValue(':bv_top', intval($top), SQLITE3_INTEGER);
         $rows = $this->prepareArray($stm);
@@ -463,7 +478,7 @@ class Notification {
         if (!file_exists($channelDBPath)) {
             return [];
         }
-        $db = new SQLite3(SQLiteDBFactory::getMessageDB($channelDBPath));
+        $db = $this->createDB(SQLiteDBFactory::getMessageDB($channelDBPath));
         $stm = $db->prepare("SELECT * FROM message WHERE (flag & 2) <> 2 ORDER BY id DESC");
         $rows = $this->prepareArray($stm);
         $db->close();
@@ -517,7 +532,7 @@ class Notification {
         if (empty($channel)) return false;
         $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
         if (!file_exists($channelDBPath)) return false;
-        $db = new SQLite3(SQLiteDBFactory::getMessageDB($channelDBPath));
+        $db = $this->createDB(SQLiteDBFactory::getMessageDB($channelDBPath));
         $stm = $db->prepare("UPDATE message SET flag = (flag | 2) WHERE id = :bv_id");
         $stm->bindValue(':bv_id', intval($sn), SQLITE3_INTEGER);
         $res = $stm->execute() !== FALSE;
@@ -530,7 +545,7 @@ class Notification {
         if (empty($channel)) return false;
         $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
         if (!file_exists($channelDBPath)) return false;
-        $db = new SQLite3(SQLiteDBFactory::getMessageDB($channelDBPath));
+        $db = $this->createDB(SQLiteDBFactory::getMessageDB($channelDBPath));
         $stm = $db->prepare("UPDATE message SET flag = (CASE WHEN (flag & 2) = 2 THEN flag - 2 ELSE flag END) WHERE id = :bv_id");
         $stm->bindValue(':bv_id', intval($sn), SQLITE3_INTEGER);
         $res = $stm->execute() !== FALSE;
@@ -543,7 +558,7 @@ class Notification {
         if (empty($channel)) return false;
         $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
         if (!file_exists($channelDBPath)) return false;
-        $db = new SQLite3(SQLiteDBFactory::getMessageDB($channelDBPath));
+        $db = $this->createDB(SQLiteDBFactory::getMessageDB($channelDBPath));
         $stm = $db->prepare("DELETE FROM message WHERE id = :bv_id");
         $stm->bindValue(':bv_id', intval($sn), SQLITE3_INTEGER);
         $res = $stm->execute() !== FALSE;

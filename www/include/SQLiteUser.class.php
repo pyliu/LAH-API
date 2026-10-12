@@ -157,6 +157,7 @@ class SQLiteUser {
         $db_path = $this->getDimensionDB();
         $this->db = new SQLite3($db_path);
         // 設定 WAL 模式與快取，優化高併發讀寫效能
+        $this->db->busyTimeout(5000);
         $this->db->exec("PRAGMA journal_mode = WAL");
         $this->db->exec("PRAGMA cache_size = 100000");
         $this->db->exec("PRAGMA temp_store = MEMORY");

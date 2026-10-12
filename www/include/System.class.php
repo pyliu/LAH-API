@@ -89,6 +89,10 @@ class System {
             REPLACE INTO config ('key', 'value')
             VALUES (:key, :value)
         ");
+        if ($stm === false) {
+            Logger::getInstance()->warning(__METHOD__.": 準備 statement 失敗: " . $this->sqlite3->lastErrorMsg());
+            return false;
+        }
         $stm->bindValue(':key', 'ENABLE_MOCK_MODE');
         $stm->bindValue(':value', $flag ? 'true' : 'false');
         return $stm->execute() === FALSE ? false : true;
@@ -244,6 +248,8 @@ class System {
     private function __construct() {
         $db_path = $this->getDimensionDB();
         $this->sqlite3 = new SQLite3($db_path);
+        $this->sqlite3->busyTimeout(5000);
+        $this->sqlite3->exec("PRAGMA journal_mode = WAL");
     }
 
     // private because of singleton

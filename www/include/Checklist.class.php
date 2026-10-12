@@ -30,6 +30,8 @@ class Checklist {
                 )
             ');
             $this->db = new SQLite3(self::CHECKLIST_SQLITE_DB);
+            $this->db->busyTimeout(5000);
+            $this->db->exec("PRAGMA journal_mode = WAL");
         }
         return $this->db;
     }
