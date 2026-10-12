@@ -116,19 +116,41 @@ class SQLiteRegPropertyAlert {
 
     private function generateSerialNo() {
         $roc_year = (int)date('Y') - 1911;
-        $month_day = date('md'); // e.g. "0806"
-        $today_start = mktime(0, 0, 0);
-        $today_end   = mktime(23, 59, 59);
-        $count_stm = $this->db->prepare('SELECT COUNT(*) AS cnt FROM reg_property_alert WHERE createtime BETWEEN :bv_start AND :bv_end');
-        $count_stm->bindValue(':bv_start', $today_start);
-        $count_stm->bindValue(':bv_end',   $today_end);
-        $count_result = $count_stm->execute();
-        $cnt = 0;
-        if ($count_result) {
-            $row = $count_result->fetchArray(SQLITE3_ASSOC);
-            $cnt = $row ? (int)$row['cnt'] : 0;
+        $month_day = date('md'); // e.g. "1012"
+        $prefix = $roc_year . $month_day;
+
+        // 依前綴找出當日現存編號的最大序號
+        $stm = $this->db->prepare('SELECT serial_no FROM reg_property_alert WHERE serial_no LIKE :bv_prefix ORDER BY LENGTH(serial_no) DESC, serial_no DESC LIMIT 1');
+        $stm->bindValue(':bv_prefix', $prefix . '%');
+        $result = $stm->execute();
+        $max_seq = 0;
+        if ($result) {
+            $row = $result->fetchArray(SQLITE3_ASSOC);
+            if ($row && !empty($row['serial_no'])) {
+                $suffix = substr($row['serial_no'], strlen($prefix));
+                if (is_numeric($suffix)) {
+                    $max_seq = (int)$suffix;
+                }
+            }
         }
-        return $roc_year . $month_day . str_pad($cnt + 1, 3, '0', STR_PAD_LEFT);
+
+        // 以最大序號遞增，並以防呆迴圈確保絕對不產生重號
+        $next_seq = $max_seq + 1;
+        do {
+            $candidate = $prefix . str_pad($next_seq, 3, '0', STR_PAD_LEFT);
+            $check_stm = $this->db->prepare('SELECT COUNT(*) AS cnt FROM reg_property_alert WHERE serial_no = :bv_serial');
+            $check_stm->bindValue(':bv_serial', $candidate);
+            $res = $check_stm->execute();
+            $exists = false;
+            if ($res) {
+                $crow = $res->fetchArray(SQLITE3_ASSOC);
+                $exists = ($crow && (int)$crow['cnt'] > 0);
+            }
+            if (!$exists) {
+                return $candidate;
+            }
+            $next_seq++;
+        } while (true);
     }
 
     public function add($post) {
