@@ -1,6 +1,7 @@
 <?php
 require_once('init.php');
 require_once('SQLiteDBFactory.class.php');
+require_once('RegSmsPolicy.class.php');
 
 class SQLiteRegAddressUndisclosed {
     private $db;
@@ -158,6 +159,10 @@ class SQLiteRegAddressUndisclosed {
         $cellphone = isset($post['cellphone']) ? trim($post['cellphone']) : '';
         $sms_status = isset($post['sms_status']) ? (int)$post['sms_status'] : 0;
         $receiver = isset($post['receiver']) ? trim($post['receiver']) : '';
+        // 隨案且非本所案件，本所無法得知簡訊是否發送，一律設為忽略
+        if (RegSmsPolicy::shouldIgnoreSms(isset($post['receiving_type']) ? $post['receiving_type'] : 0, isset($post['receiving_caseno']) ? $post['receiving_caseno'] : '', $cellphone)) {
+            $sms_status = RegSmsPolicy::SMS_IGNORED;
+        }
         $stm = $this->db->prepare("
             INSERT INTO reg_address_undisclosed ('applicant', 'receiving_type', 'receiving_caseno', 'cellphone', 'sms_status', 'note', 'serial_no', 'receiver', 'createtime', 'modifytime')
             VALUES (:applicant, :receiving_type, :receiving_caseno, :cellphone, :sms_status, :note, :serial_no, :receiver, :createtime, :modifytime)
@@ -191,6 +196,10 @@ class SQLiteRegAddressUndisclosed {
         $sms_status       = isset($post['sms_status'])       ? (int)$post['sms_status']          : (int)($record['sms_status'] ?? 0);
         $note             = isset($post['note'])             ? $post['note']                    : $record['note'];
         $receiver         = isset($post['receiver'])         ? trim($post['receiver'])          : ($record['receiver'] ?? '');
+        // 隨案且非本所案件，本所無法得知簡訊是否發送，一律設為忽略（拒絕改為其他狀態）
+        if (RegSmsPolicy::shouldIgnoreSms($receiving_type, $receiving_caseno, $cellphone)) {
+            $sms_status = RegSmsPolicy::SMS_IGNORED;
+        }
         Logger::getInstance()->warning(__METHOD__.": 更新地址隱匿資料。(id: $id, applicant: $applicant)");
         $stm = $this->db->prepare("UPDATE reg_address_undisclosed SET applicant = :applicant, receiving_type = :receiving_type, receiving_caseno = :receiving_caseno, cellphone = :cellphone, sms_status = :sms_status, note = :note, receiver = :receiver, modifytime = :modifytime WHERE id = :id");
         $stm->bindParam(':id', $id);

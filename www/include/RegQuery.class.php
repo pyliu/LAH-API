@@ -5,6 +5,7 @@ require_once("RegCaseData.class.php");
 require_once("SQLiteRegForeignerPDF.class.php");
 require_once("SQLiteRegAddressUndisclosed.class.php");
 require_once("SQLiteRegPropertyAlert.class.php");
+require_once("RegSmsPolicy.class.php");
 require_once("MOISMS.class.php");
 
 class RegQuery {
@@ -85,6 +86,18 @@ class RegQuery {
 			return array(
 				'status' => STATUS_CODE::DEFAULT_FAIL,
 				'message' => '該筆案件無填寫手機號碼，無法查詢簡訊紀錄',
+				'payload' => array()
+			);
+		}
+
+		// 隨案且非本所案件：本所無法得知簡訊是否發送，不進行比對，並確保狀態為忽略
+		if (RegSmsPolicy::shouldIgnoreSms($record['receiving_type'] ?? 0, $record['receiving_caseno'] ?? '', $cleanCell)) {
+			if ((int)($record['sms_status'] ?? 0) !== RegSmsPolicy::SMS_IGNORED) {
+				$db->updateSmsStatus($id, RegSmsPolicy::SMS_IGNORED);
+			}
+			return array(
+				'status' => STATUS_CODE::DEFAULT_FAIL,
+				'message' => '非本所案件，本所無法確認簡訊發送狀態，已設為忽略',
 				'payload' => array()
 			);
 		}
