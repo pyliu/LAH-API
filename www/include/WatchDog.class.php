@@ -84,6 +84,15 @@ class WatchDog {
             'Thu' => ['09:04 AM', '01:35 PM'],
             'Fri' => ['09:04 AM', '01:35 PM'],
             'Sat' => []
+        ],
+        "once_at_night" => [
+            'Sun' => [],
+            'Mon' => ['08:55 PM'],
+            'Tue' => ['08:55 PM'],
+            'Wed' => ['08:55 PM'],
+            'Thu' => ['08:55 PM'],
+            'Fri' => ['08:55 PM'],
+            'Sat' => ['08:55 PM']
         ]
     );
 
@@ -949,7 +958,7 @@ class WatchDog {
      * @param bool $force 是否強制執行（忽略 once_a_day 時段檢查，供手動/測試使用）
      */
     public function checkRegSmsDeliveryStatus($force = false) {
-        if (!$force && !$this->isOnTime($this->checking_schedule["once_a_day"])) {
+        if (!$force && !$this->isOnTime($this->checking_schedule["once_at_night"])) {
             return;
         }
 
