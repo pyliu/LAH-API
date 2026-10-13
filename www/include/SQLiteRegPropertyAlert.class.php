@@ -234,12 +234,21 @@ class SQLiteRegPropertyAlert {
     }
 
     /**
-     * 更新指定記錄之簡訊狀態
+     * 更新指定記錄之簡訊狀態（可選一併更新備註）
      * @param int $id
      * @param int $sms_status
+     * @param string|null $note 若不為 null 則一併更新 note 欄位
      * @return bool
      */
-    public function updateSmsStatus($id, $sms_status) {
+    public function updateSmsStatus($id, $sms_status, $note = null) {
+        if ($note !== null) {
+            $stm = $this->db->prepare("UPDATE reg_property_alert SET sms_status = :sms_status, note = :note, modifytime = :modifytime WHERE id = :id");
+            $stm->bindParam(':id', $id);
+            $stm->bindValue(':sms_status', (int)$sms_status);
+            $stm->bindValue(':note', (string)$note);
+            $stm->bindValue(':modifytime', time());
+            return $stm->execute() !== FALSE;
+        }
         $stm = $this->db->prepare("UPDATE reg_property_alert SET sms_status = :sms_status, modifytime = :modifytime WHERE id = :id");
         $stm->bindParam(':id', $id);
         $stm->bindValue(':sms_status', (int)$sms_status);

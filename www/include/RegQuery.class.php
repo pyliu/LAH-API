@@ -195,7 +195,8 @@ class RegQuery {
 				if ($latestSuccess === null || $sortKey > $latestSuccess['sort_key']) {
 					$latestSuccess = array(
 						'sort_key' => $sortKey,
-						'time_str' => $timeStr
+						'time_str' => $timeStr,
+						'content' => $content
 					);
 				}
 			} else {
@@ -228,7 +229,8 @@ class RegQuery {
 
 		if ($latestSuccess !== null) {
 			$newStatus = 1;
-			$db->updateSmsStatus($id, $newStatus);
+			$newNote = RegSmsPolicy::appendSmsToNote($record['note'] ?? '', $latestSuccess['time_str'], $latestSuccess['content'] ?? '');
+			$db->updateSmsStatus($id, $newStatus, $newNote);
 			$modifytime = time();
 			$message = "{$applicant} ({$cleanCell}) 比對成功！發送時間：{$latestSuccess['time_str']}，已更新為「發送成功」";
 			Logger::getInstance()->info(__METHOD__.": [{$bizTitle}] ID: {$id} {$message}");
@@ -239,7 +241,8 @@ class RegQuery {
 					'sms_status' => $newStatus,
 					'updated' => true,
 					'modifytime' => $modifytime,
-					'sms_time' => $latestSuccess['time_str']
+					'sms_time' => $latestSuccess['time_str'],
+					'note' => $newNote
 				))
 			);
 		}

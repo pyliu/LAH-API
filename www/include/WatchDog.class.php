@@ -1035,6 +1035,7 @@ class WatchDog {
             $rawTime = str_pad(substr($rawTime, 0, 6), 6, '0', STR_PAD_RIGHT);
 
             $smsTs = 0;
+            $timeStr = '';
             if (strlen($rawDate) >= 6) {
                 $rYearLen = strlen($rawDate) - 4;
                 $rYear = (int)substr($rawDate, 0, $rYearLen);
@@ -1045,13 +1046,16 @@ class WatchDog {
                 $iI = substr($rawTime, 2, 2);
                 $sS = substr($rawTime, 4, 2);
                 $smsTs = strtotime("$adY-$mM-$dD $hH:$iI:$sS") ?: 0;
+                $fmtYear = str_pad((string)$rYear, 3, '0', STR_PAD_LEFT);
+                $timeStr = "{$fmtYear}/{$mM}/{$dD} {$hH}:{$iI}:{$sS}";
             }
 
             $validSmsList[] = [
                 'cell' => $rawCell,
                 'type' => $sms['SMS_TYPE'] ?? '',
                 'content' => $sms['SMS_CONTENT'] ?? '',
-                'timestamp' => $smsTs
+                'timestamp' => $smsTs,
+                'time_str' => $timeStr
             ];
         }
 
@@ -1063,7 +1067,7 @@ class WatchDog {
         foreach ($allPending as &$item) {
             $cleanCell = preg_replace('/[^0-9]/', '', $item['cellphone'] ?? '');
             $caseCreatetime = (int)($item['createtime'] ?? $now);
-            $isMatched = false;
+            $latestMatchedSms = null;
 
             if (!empty($cleanCell)) {
                 foreach ($validSmsList as $validSms) {
@@ -1077,36 +1081,42 @@ class WatchDog {
                     }
 
                     // 寬鬆業務型態判定
+                    $bizMatch = false;
                     if ($item['biz_type'] === 'property_alert') {
                         if (
                             mb_strpos($validSms['type'], '地籍異動') !== false ||
                             mb_strpos($validSms['content'], '異動即時通') !== false ||
                             mb_strpos($validSms['content'], '地籍異動') !== false
                         ) {
-                            $isMatched = true;
-                            break;
+                            $bizMatch = true;
                         }
                     } elseif ($item['biz_type'] === 'undisclosed') {
                         if (
                             mb_strpos($validSms['type'], '住址隱匿') !== false ||
                             mb_strpos($validSms['content'], '隱匿') !== false
                         ) {
-                            $isMatched = true;
-                            break;
+                            $bizMatch = true;
+                        }
+                    }
+
+                    if ($bizMatch) {
+                        if ($latestMatchedSms === null || $validSms['timestamp'] >= $latestMatchedSms['timestamp']) {
+                            $latestMatchedSms = $validSms;
                         }
                     }
                 }
             }
 
-            if ($isMatched) {
+            if ($latestMatchedSms !== null) {
+                $newNote = RegSmsPolicy::appendSmsToNote($item['note'] ?? '', $latestMatchedSms['time_str'], $latestMatchedSms['content']);
                 // 成功比對到發送成功簡訊
                 if ($item['biz_type'] === 'undisclosed') {
-                    $undisclosedDB->updateSmsStatus($item['id'], 1);
+                    $undisclosedDB->updateSmsStatus($item['id'], 1, $newNote);
                 } else {
-                    $propertyAlertDB->updateSmsStatus($item['id'], 1);
+                    $propertyAlertDB->updateSmsStatus($item['id'], 1, $newNote);
                 }
                 $matchedCount++;
-                Logger::getInstance()->info(__METHOD__.": [{$item['biz_title']}] ID: {$item['id']} 手機: {$cleanCell} 比對簡訊成功，已更新為發送成功 (sms_status=1)。");
+                Logger::getInstance()->info(__METHOD__.": [{$item['biz_title']}] ID: {$item['id']} 手機: {$cleanCell} 比對簡訊成功，已更新為發送成功 (sms_status=1) 並寫入備註。");
             } else {
                 // 未比對到成功簡訊，計算逾期天數
                 $elapsedDays = floor(($now - $caseCreatetime) / 86400);

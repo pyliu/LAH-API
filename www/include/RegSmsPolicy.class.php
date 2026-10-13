@@ -71,4 +71,29 @@ class RegSmsPolicy {
         $word = self::extractCaseWord($receiving_caseno);
         return self::isLocalCaseWord($word, $site_code) === false;
     }
+
+    /**
+     * 將簡訊發送紀錄格式化並附加至原備註 (若已存在相同內容則不重複附加)
+     * @param string|null $existing_note 原備註內容
+     * @param string $time_str 發送時間字串 (例如 115/10/12 14:20:05)
+     * @param string $sms_content 簡訊內容原文
+     * @return string 合併後的備註內容
+     */
+    public static function appendSmsToNote($existing_note, $time_str, $sms_content) {
+        $existing = rtrim((string)$existing_note);
+        $time_str = trim((string)$time_str);
+        $content = trim(preg_replace('/[\r\n]+/', ' ', (string)$sms_content));
+        if ($time_str === '' && $content === '') {
+            return $existing;
+        }
+        $line = $time_str !== '' ? "[{$time_str}] {$content}" : $content;
+        $line = trim($line);
+        if ($existing === '') {
+            return $line;
+        }
+        if (mb_strpos($existing, $line) !== false) {
+            return $existing;
+        }
+        return $existing . "\n" . $line;
+    }
 }
