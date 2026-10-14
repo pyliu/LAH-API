@@ -5,9 +5,53 @@ require_once(dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'include' . DIRE
 
 /**
  * Class Scheduler
- * 系統排程器
- * * 負責執行系統各類週期性任務，包括資料同步、日誌維護、系統監控與報表檢查。
- * 使用檔案 (Ticks) 來記錄上次執行時間，避免重複執行。
+ *
+ * 【固定時間週期排程與維護器 (Scheduler)】
+ *
+ * 核心定位：
+ * - 專注於「固定時間排程」的系統週期維護與批次作業 (Fixed-interval Maintenance & Batch Sync)。
+ * - 24 小時全天候定時運作，不受限於上下班時間，專門處理大資料量同步、歷史清理與系統保養。
+ *
+ * 主要職責：
+ * 1. 週期排程執行：基於檔案票券 (Tickets, 如 5m, 10m, 15m, 1h, 24h) 精確控制每次執行的間隔時間。
+ * 2. 系統維護清理：壓縮舊 Log 檔案、刪除過時日誌、清理 AP 連線歷史紀錄、清除動態 IP 快取。
+ * 3. 跨系統大資料同步：AD 帳號同步 (LDAP/AD)、Oracle 代碼檔匯入 (RKEYN/LANDIP/L3HWEB)。
+ * 4. 每日離線比對：住址隱匿與地籍異動即時通簡訊發送紀錄掃描 (checkRegSmsDeliveryStatus)。
+ * 5. 健全容錯與通報：每個任務均受 safeRun 隔離保護，若有失敗自動彙整發送警報至 inf 頻道。
+ *
+ * 與 Watchdog 的職責區隔：
+ * - Scheduler：專注全天候固定週期的「系統背景維護 + 批次資料同步與比對」。
+ * - Watchdog：專注上班時間的「即時業務異常監控 + 主動發送訊息通知」。
+ *
+ * 使用範例 (Usage Examples):
+ *
+ * 1. 外部排程常規觸發 (由 Linux Crontab 或 Windows Task Scheduler 每 5 分鐘呼叫):
+ *    POST http://localhost/api/schedule_json_api.php
+ *    Payload: type=regular
+ *
+ * 2. 手動觸發特定週期 (如手動執行每日維護):
+ *    POST http://localhost/api/schedule_json_api.php
+ *    Payload: type=24h
+ *
+ * 3. 程式碼內部手動調用:
+ *    ```php
+ *    $scheduler = new Scheduler();
+ *    // 自動檢查所有週期的 Ticket 並依序執行到期任務
+ *    $scheduler->do();
+ *
+ *    // 或直接強制執行特定週期
+ *    $scheduler->doOneDayJobs();
+ *    ```
+ *
+ * 4. 擴充每日維護任務 (在 doOneDayJobs() 的 $tasks 陣列中加入):
+ *    ```php
+ *    $tasks = [
+ *        // 既有維護任務...
+ *        '日誌檔壓縮 (compressLog)' => function() { $this->compressLog(); },
+ *        // 新增每日批次維護任務
+ *        '每日資料庫備份與優化'     => function() { $this->backupAndOptimizeDatabase(); }
+ *    ];
+ *    ```
  */
 class Scheduler
 {
@@ -233,6 +277,7 @@ class Scheduler
                 '匯入L3HWEB使用者資料 (importUserFromL3HWEB)' => function() { $this->importUserFromL3HWEB(); },
                 '同步AD使用者至本地DB (syncAdUsersToLocalDB)' => function() { $this->syncAdUsersToLocalDB(); },
                 '同步使用者動態IP (syncUserIPs)' => function() { $this->syncUserIPs(); },
+                '住址隱匿與異動即時通簡訊發送紀錄檢查 (checkRegSmsDeliveryStatus)' => function() { $this->checkRegSmsDeliveryStatus(); },
             ];
 
             foreach ($tasks as $taskName => $taskCallable) {
@@ -618,6 +663,239 @@ class Scheduler
         }
         $this->removeNotificationByTitle($title, 'inf');
         $this->addNotification($message, 'inf', $title);
+    }
+
+    /**
+     * 每日掃描住址隱匿與地籍異動即時通案件簡訊發送紀錄，並於未發送時發送即時通提醒
+     * 1. 取得有填寫手機且簡訊狀態未發送/失敗 (sms_status NOT IN (1, 3)) 的資料
+     * 2. 依最早已收件日批次查詢 Oracle 簡訊紀錄比對，命中成功者更新 sms_status = 1
+     * 3. 持續 3 天以上無發送紀錄者，依 receiver 分組彙整提醒承辦人員 (若無 receiver 則發至 reg 頻道)
+     * 4. 超過 7 天無發送紀錄者，發送警示通知至 inf 頻道
+     */
+    public function checkRegSmsDeliveryStatus()
+    {
+        Logger::getInstance()->info(__METHOD__ . ": 開始執行住址隱匿與地籍異動即時通簡訊發送紀錄掃描...");
+
+        $undisclosedDB = new SQLiteRegAddressUndisclosed();
+        $propertyAlertDB = new SQLiteRegPropertyAlert();
+
+        $undisclosedPending = $undisclosedDB->getPendingSmsRecords() ?: [];
+        $propertyAlertPending = $propertyAlertDB->getPendingSmsRecords() ?: [];
+
+        $allPending = [];
+        foreach ($undisclosedPending as $row) {
+            $row['biz_type'] = 'undisclosed';
+            $row['biz_title'] = '住址隱匿';
+            $allPending[] = $row;
+        }
+        foreach ($propertyAlertPending as $row) {
+            $row['biz_type'] = 'property_alert';
+            $row['biz_title'] = '地籍異動即時通';
+            $allPending[] = $row;
+        }
+
+        $totalPendingCount = count($allPending);
+        if ($totalPendingCount === 0) {
+            Logger::getInstance()->info(__METHOD__ . ": 無待比對之簡訊收件紀錄。");
+            return;
+        }
+
+        Logger::getInstance()->info(__METHOD__ . ": 共有 {$totalPendingCount} 筆待比對之案件 (住址隱匿: " . count($undisclosedPending) . ", 異動即時通: " . count($propertyAlertPending) . ")。");
+
+        // 計算最早收件日期
+        $minCreatetime = time();
+        foreach ($allPending as $item) {
+            if (!empty($item['createtime']) && $item['createtime'] < $minCreatetime) {
+                $minCreatetime = (int)$item['createtime'];
+            }
+        }
+
+        // 轉為民國年月日字串 (YYYMMDD)
+        $rocYearStart = (int)date('Y', $minCreatetime) - 1911;
+        $st = sprintf("%03d%s", $rocYearStart, date('md', $minCreatetime));
+
+        $rocYearEnd = (int)date('Y') - 1911;
+        $ed = sprintf("%03d%s", $rocYearEnd, date('md'));
+
+        Logger::getInstance()->info(__METHOD__ . ": 檢索 Oracle 簡訊紀錄區間 {$st} ~ {$ed}...");
+
+        $moisms = new MOISMS();
+        $moiadm_rows = $moisms->getMOIADMSMSLogRecordsByDate($st, $ed) ?: [];
+        $ma05_rows   = $moisms->getMOICASSMS_MA05RecordsByDate($st, $ed) ?: [];
+        $ma04_rows   = $moisms->getMOICASSMS_MA04RecordsByDate($st, $ed) ?: [];
+        $sms98_rows  = $moisms->getSMS98LOG_SMSRecordsByDate($st, $ed) ?: [];
+
+        $allSmsLogs = array_merge($moiadm_rows, $ma05_rows, $ma04_rows, $sms98_rows);
+        Logger::getInstance()->info(__METHOD__ . ": 自 Oracle 取得簡訊紀錄共 " . count($allSmsLogs) . " 筆。");
+
+        // 預先整理成功的簡訊紀錄以便快速比對
+        $validSmsList = [];
+        foreach ($allSmsLogs as $sms) {
+            $smsResult = strtoupper(trim($sms['SMS_RESULT'] ?? ''));
+            if ($smsResult !== 'S' && $smsResult !== 'OK' && strpos($smsResult, 'OK') === false) {
+                continue;
+            }
+
+            $rawCell = preg_replace('/[^0-9]/', '', $sms['SMS_CELL'] ?? '');
+            if (empty($rawCell)) {
+                continue;
+            }
+
+            // 解析發送時間
+            $rawDate = preg_replace('/[^0-9]/', '', $sms['SMS_DATE'] ?? '');
+            $rawTime = preg_replace('/[^0-9]/', '', $sms['SMS_TIME'] ?? '');
+            $rawTime = str_pad(substr($rawTime, 0, 6), 6, '0', STR_PAD_RIGHT);
+
+            $smsTs = 0;
+            $timeStr = '';
+            if (strlen($rawDate) >= 6) {
+                $rYearLen = strlen($rawDate) - 4;
+                $rYear = (int)substr($rawDate, 0, $rYearLen);
+                $adY = $rYear + 1911;
+                $mM = substr($rawDate, $rYearLen, 2);
+                $dD = substr($rawDate, $rYearLen + 2, 2);
+                $hH = substr($rawTime, 0, 2);
+                $iI = substr($rawTime, 2, 2);
+                $sS = substr($rawTime, 4, 2);
+                $smsTs = strtotime("$adY-$mM-$dD $hH:$iI:$sS") ?: 0;
+                $fmtYear = str_pad((string)$rYear, 3, '0', STR_PAD_LEFT);
+                $timeStr = "{$fmtYear}/{$mM}/{$dD} {$hH}:{$iI}:{$sS}";
+            }
+
+            $validSmsList[] = [
+                'cell' => $rawCell,
+                'type' => $sms['SMS_TYPE'] ?? '',
+                'content' => $sms['SMS_CONTENT'] ?? '',
+                'timestamp' => $smsTs,
+                'time_str' => $timeStr
+            ];
+        }
+
+        $matchedCount = 0;
+        $unmatched3Days = [];
+        $unmatched7Days = [];
+        $now = time();
+
+        foreach ($allPending as &$item) {
+            $cleanCell = preg_replace('/[^0-9]/', '', $item['cellphone'] ?? '');
+            $caseCreatetime = (int)($item['createtime'] ?? $now);
+            $latestMatchedSms = null;
+
+            if (!empty($cleanCell)) {
+                foreach ($validSmsList as $validSms) {
+                    if ($validSms['cell'] !== $cleanCell) {
+                        continue;
+                    }
+
+                    // 寬限 10 分鐘時鐘漂移
+                    if ($validSms['timestamp'] > 0 && $validSms['timestamp'] < ($caseCreatetime - 600)) {
+                        continue;
+                    }
+
+                    // 寬鬆業務型態判定
+                    $bizMatch = false;
+                    if ($item['biz_type'] === 'property_alert') {
+                        if (
+                            mb_strpos($validSms['type'], '地籍異動') !== false ||
+                            mb_strpos($validSms['content'], '異動即時通') !== false ||
+                            mb_strpos($validSms['content'], '地籍異動') !== false
+                        ) {
+                            $bizMatch = true;
+                        }
+                    } elseif ($item['biz_type'] === 'undisclosed') {
+                        if (
+                            mb_strpos($validSms['type'], '住址隱匿') !== false ||
+                            mb_strpos($validSms['content'], '隱匿') !== false
+                        ) {
+                            $bizMatch = true;
+                        }
+                    }
+
+                    if ($bizMatch) {
+                        if ($latestMatchedSms === null || $validSms['timestamp'] >= $latestMatchedSms['timestamp']) {
+                            $latestMatchedSms = $validSms;
+                        }
+                    }
+                }
+            }
+
+            if ($latestMatchedSms !== null) {
+                $newNote = RegSmsPolicy::appendSmsToNote($item['note'] ?? '', $latestMatchedSms['time_str'], $latestMatchedSms['content']);
+                // 成功比對到發送成功簡訊
+                if ($item['biz_type'] === 'undisclosed') {
+                    $undisclosedDB->updateSmsStatus($item['id'], 1, $newNote);
+                } else {
+                    $propertyAlertDB->updateSmsStatus($item['id'], 1, $newNote);
+                }
+                $matchedCount++;
+                Logger::getInstance()->info(__METHOD__ . ": [{$item['biz_title']}] ID: {$item['id']} 手機: {$cleanCell} 比對簡訊成功，已更新為發送成功 (sms_status=1) 並寫入備註。");
+            } else {
+                // 未比對到成功簡訊，計算逾期天數
+                $elapsedDays = floor(($now - $caseCreatetime) / 86400);
+
+                if ($elapsedDays >= 3) {
+                    $receiver = trim($item['receiver'] ?? '');
+                    $target = empty($receiver) ? 'reg' : $receiver;
+                    $unmatched3Days[$target][] = $item;
+                }
+
+                if ($elapsedDays >= 7) {
+                    $unmatched7Days[] = $item;
+                }
+            }
+        }
+        unset($item);
+
+        // 滿 3 天提醒：依收件同仁彙整通知
+        foreach ($unmatched3Days as $receiver => $cases) {
+            $caseCount = count($cases);
+            $msg = "📢 住址隱匿與地籍異動即時通未發送簡訊提醒\r\n***\r\n";
+            $msg .= "⚠ 系統偵測到您有 {$caseCount} 筆收件案件已超過 3 天尚未比對到簡訊發送紀錄，請確認簡訊是否已確實送出：\r\n\r\n";
+            $msg .= "| 業務類別 | 序號/字號 | 申請人 | 手機 | 收件日期 | 經過天數 |\r\n";
+            $msg .= "| :--- | :--- | :--- | :--- | :--- | :--- |\r\n";
+            foreach ($cases as $c) {
+                $cDate = date('Y-m-d', $c['createtime']);
+                $cDays = floor(($now - (int)$c['createtime']) / 86400);
+                $no = !empty($c['serial_no']) ? $c['serial_no'] : ($c['receiving_caseno'] ?? '-');
+                $cell = $c['cellphone'] ?? '';
+                $cellMasked = (strlen($cell) >= 7) ? substr($cell, 0, 4) . '***' . substr($cell, -3) : $cell;
+                $msg .= "| {$c['biz_title']} | {$no} | {$c['applicant']} | {$cellMasked} | {$cDate} | {$cDays}天 |\r\n";
+            }
+            $msg .= "\r\n***\r\n👉 如無需發送簡訊，請至登記收件管理畫面將該案件簡訊狀態調整為「忽略」。";
+
+            $title = "住址隱匿與異動即時通未發送簡訊提醒";
+            $this->removeNotificationByTitle($title, $receiver);
+            $this->addNotification($msg, $receiver, $title);
+        }
+
+        // 滿 7 天超期警示：發送至 inf 頻道
+        if (!empty($unmatched7Days)) {
+            $caseCount = count($unmatched7Days);
+            $infMsg = "⚠ 智慧控管系統警示：住址隱匿／地籍異動即時通超過 7 天無簡訊紀錄\r\n***\r\n";
+            $infMsg .= "系統偵測到下列 {$caseCount} 件收件案件已超過 7 天仍未查得相關簡訊發送紀錄，請資訊同仁協助確認系統或簡訊傳送線路是否正常：\r\n\r\n";
+            $infMsg .= "| 業務類別 | 序號/字號 | 申請人 | 承辦人員 | 收件日期 | 經過天數 |\r\n";
+            $infMsg .= "| :--- | :--- | :--- | :--- | :--- | :--- |\r\n";
+            foreach ($unmatched7Days as $c) {
+                $cDate = date('Y-m-d', $c['createtime']);
+                $cDays = floor(($now - (int)$c['createtime']) / 86400);
+                $no = !empty($c['serial_no']) ? $c['serial_no'] : ($c['receiving_caseno'] ?? '-');
+                $rec = !empty($c['receiver']) ? $c['receiver'] : '未填寫';
+                $infMsg .= "| {$c['biz_title']} | {$no} | {$c['applicant']} | {$rec} | {$cDate} | {$cDays}天 |\r\n";
+            }
+            $infMsg .= "\r\n***\r\n⚠ 請相關承辦人員儘速確認案件狀態。";
+
+            $title = "住址隱匿與異動即時通超過7天未發送簡訊警示";
+            $this->removeNotificationByTitle($title, 'inf');
+            $this->addNotification($infMsg, 'inf', $title);
+        }
+
+        Logger::getInstance()->info(sprintf(
+            __METHOD__ . ": 簡訊比對與掃描完成。待比對: %d 件, 成功比對: %d 件, 滿3天提醒: %d 人, 滿7天超期: %d 件。",
+            $totalPendingCount,
+            $matchedCount,
+            count($unmatched3Days),
+            count($unmatched7Days)
+        ));
     }
 
     /**
