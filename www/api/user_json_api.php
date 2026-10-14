@@ -310,6 +310,19 @@ switch ($_POST["type"]) {
             echoJSONResponse($message);
         }
         break;
+    case "update_authority":
+        Logger::getInstance()->info("XHR [update_authority] 變更使用者授權請求");
+        $result = $system->updateAuthority($_POST['old_role_id'], $_POST['role_id'], $_POST['ip']);
+        if ($result === true) {
+            $message = "變更使用者授權 ".$_POST['ip']." 成功";
+            Logger::getInstance()->info("XHR [update_authority] ${message}。");
+            echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL);
+        } else {
+            $message = '變更使用者授權失敗';
+            Logger::getInstance()->info("XHR [update_authority] ${message}。");
+            echoJSONResponse($message);
+        }
+        break;
     case "upd_ext":
         Logger::getInstance()->info("XHR [upd_ext] 更新分機號碼【".$_POST["id"].", ".$_POST["ext"]."】請求");
         $sqlite_user = new SQLiteUser();

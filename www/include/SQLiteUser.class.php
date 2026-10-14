@@ -702,9 +702,16 @@ class SQLiteUser {
             SELECT a.role_id, a.ip AS role_ip, r.name AS role_name, u.*
             FROM authority a 
             LEFT JOIN role r ON a.role_id = r.id
-            LEFT JOIN user u ON a.ip = u.ip AND (u.offboard_date = '')
-            WHERE 1=1 ORDER BY r.name, a.ip
-        ")) { return $this->prepareArray($stmt); }
+            LEFT JOIN user u ON a.ip = u.ip AND (u.offboard_date = '') AND ((u.authority & :disabled_bit) <> :disabled_bit)
+            WHERE NOT (
+                u.id IS NULL
+                AND EXISTS (SELECT 1 FROM user x WHERE x.ip = a.ip AND x.ip <> '' AND (x.offboard_date <> '' OR (x.authority & :disabled_bit) = :disabled_bit))
+            )
+            ORDER BY r.name, a.ip
+        ")) {
+            $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
+            return $this->prepareArray($stmt);
+        }
         return false;
     }
 

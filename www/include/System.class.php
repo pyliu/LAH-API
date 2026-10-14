@@ -545,6 +545,41 @@ class System {
         return false;
     }
 
+    /**
+     * 變更既有授權的角色（IP 不變）
+     */
+    public function updateAuthority($old_role_id, $new_role_id, $ip) {
+        if (empty($old_role_id) || empty($new_role_id)) {
+            Logger::getInstance()->warning(__METHOD__.": role_id could not be empty. ($old_role_id, $new_role_id)");
+            return false;
+        }
+        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+            Logger::getInstance()->warning(__METHOD__.": $ip is not a valid IP address.");
+            return false;
+        }
+        if ((int)$old_role_id === (int)$new_role_id) {
+            return true;
+        }
+        try {
+            $this->sqlite3->exec("BEGIN TRANSACTION");
+            $del = $this->sqlite3->prepare("DELETE FROM authority WHERE role_id = :role_id AND ip = :ip");
+            $del->bindValue(':role_id', $old_role_id);
+            $del->bindValue(':ip', $ip);
+            $add = $this->sqlite3->prepare("REPLACE INTO authority ('role_id', 'ip') VALUES (:role_id, :ip)");
+            $add->bindValue(':role_id', $new_role_id);
+            $add->bindValue(':ip', $ip);
+            if ($del && $add && $del->execute() !== FALSE && $add->execute() !== FALSE) {
+                $this->sqlite3->exec("COMMIT");
+                return true;
+            }
+            $this->sqlite3->exec("ROLLBACK");
+        } catch (\Exception $e) {
+            $this->sqlite3->exec("ROLLBACK");
+            Logger::getInstance()->warning(__METHOD__.": 更新授權失敗 (".$e->getMessage().")");
+        }
+        return false;
+    }
+
     public function getOraTargetDBIP() {
         $target = $this->get('ORA_DB_TARGET');
         switch ($target) {
