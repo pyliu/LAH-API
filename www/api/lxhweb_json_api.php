@@ -68,12 +68,14 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "lxhweb_tbl_update_time":
-        Logger::getInstance()->info("XHR [lxhweb_tbl_update_time] 查詢同步異動更新時間 請求 ".$_POST["site"]);
-		$rows = $mock ? $cache->get('lxhweb_tbl_update_time') : $lxhweb->queryTableUpdateTime($_POST["site"]);
-		if (!$mock) $cache->set('lxhweb_tbl_update_time', $rows);
+        Logger::getInstance()->info("XHR [lxhweb_tbl_update_time] 查詢同步異動更新時間 請求 ".$_POST["site"].(!empty($_POST["office"]) ? " 所別: ".$_POST["office"] : ""));
+		$target_office = !empty($_POST["office"]) ? $_POST["office"] : (strlen($_POST["site"]) == 2 ? $_POST["site"] : '');
+		$cache_key = 'lxhweb_tbl_update_time_'.$_POST["site"].'_'.$target_office;
+		$rows = $mock ? $cache->get($cache_key) : $lxhweb->queryTableUpdateTime($target_office);
+		if (!$mock) $cache->set($cache_key, $rows);
 		$count = $rows === false ? 0 : count($rows);
 		if (empty($count)) {
-			echoJSONResponse('查無 '.$_POST["office"].' 同步異動表格'.$_POST["site"].'更新時間資料');
+			echoJSONResponse('查無 '.(!empty($_POST["office"]) ? $_POST["office"] : '').' 同步異動表格'.$_POST["site"].'更新時間資料');
 		} else {
 			echoJSONResponse('共查詢到'.$count.'筆資料', STATUS_CODE::SUCCESS_NORMAL, array(
 				'data_count' => $count,
