@@ -108,6 +108,14 @@
 - 不要求升級 Composer major version、PHP 版本或框架版本
 - 變更後應能直接套用於既有環境
 
+## 3.5 Agent 開發環境強制 MOCK 模式
+
+使用 Agent 進行功能開發、除錯、測試與介面驗證時：
+
+- **必須強制處於 MOCK 模式**（確認或於 `.env` 中設定 `MOCK=true`）。
+- 防止對外部實體 Oracle 9i 資料庫產生非預期連線、阻滯或資料異動。
+- 嚴禁在未取得人工授權前擅自將 `MOCK` 關閉（改為 `false` 或 `0`）。
+
 ---
 
 # 4. Compatibility Rules（相容性規範）
