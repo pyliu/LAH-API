@@ -53,7 +53,7 @@ switch ($_POST["type"]) {
 				"items" => array(),
 				"items_by_id" => array(),
 				"data_count" => 0,
-				"raw" => $rows,
+				"raw" => is_array($rows) ? $rows : array(),
 				'cache_remaining_time' => $prefetch->getOverdueCaseCacheRemainingTime()
 			));
 		} else {
@@ -129,7 +129,7 @@ switch ($_POST["type"]) {
 				"items" => array(),
 				"items_by_id" => array(),
 				"data_count" => 0,
-				"raw" => $rows,
+				"raw" => is_array($rows) ? $rows : array(),
 				'cache_remaining_time' => $prefetch->getOverdueCaseCacheRemainingTime()
 			));
 		} else {
@@ -160,7 +160,7 @@ switch ($_POST["type"]) {
 				"items" => array(),
 				"items_by_id" => array(),
 				"data_count" => 0,
-				"raw" => $rows,
+				"raw" => is_array($rows) ? $rows : array(),
 				'cache_remaining_time' => $prefetch->getAlmostOverdueCaseCacheRemainingTime()
 			));
 		} else {
