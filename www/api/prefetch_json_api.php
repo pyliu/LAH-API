@@ -207,22 +207,24 @@ switch ($_POST["type"]) {
 		Logger::getInstance()->info("XHR [reg_cancel_ask_case] 查詢請示(取消)案件請求");
 		$begin = $_POST['begin'];
 		$end = $_POST['end'];
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadAskCase($begin, $end) : $prefetch->getAskCase($begin, $end);
+		$by = $_POST['by'] ?? 'receive_date';
+		$include_pending = isset($_POST['include_pending']) ? ($_POST['include_pending'] === 'true' || $_POST['include_pending'] === true) : true;
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadAskCase($begin, $end, $by, $include_pending) : $prefetch->getAskCase($begin, $end, 3600, $by, $include_pending);
 		if (empty($rows)) {
-			Logger::getInstance()->info("XHR [reg_cancel_ask_case] 查無曾經請示(取消)案件資料");
-			echoJSONResponse('查無曾經請示(取消)案件');
+			Logger::getInstance()->info("XHR [reg_cancel_ask_case] 查無請示(取消)案件資料");
+			echoJSONResponse('查無請示(取消)案件');
 		} else {
 			$total = count($rows);
-			Logger::getInstance()->info("XHR [reg_cancel_ask_case] 查詢成功($total, $begin ~ $end)");
+			Logger::getInstance()->info("XHR [reg_cancel_ask_case] 查詢成功($total, $begin ~ $end, by: $by)");
 			$baked = array();
 			foreach ($rows as $row) {
 				$data = new RegCaseData($row);
 				$baked[] = $data->getBakedData();
 			}
-			echoJSONResponse("查詢成功，找到 $total 筆曾經請示(取消)案件資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+			echoJSONResponse("查詢成功，找到 $total 筆請示(取消)案件資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"baked" => $baked,
-				'cache_remaining_time' => $prefetch->getAskCaseCacheRemainingTime($begin, $end)
+				'cache_remaining_time' => $prefetch->getAskCaseCacheRemainingTime($begin, $end, $by, $include_pending)
 			));
 		}
 		break;

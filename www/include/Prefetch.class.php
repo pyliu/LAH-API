@@ -367,39 +367,52 @@ class Prefetch {
         return $this->getCache()->get(self::KEYS['ALMOST_OVERDUE']);
     }
     /**
+    /**
      * 請示(取消)案件快取剩餘時間
      */
-    public function getAskCaseCacheRemainingTime($begin, $end) {
-        return $this->getRemainingCacheTimeByKey(self::KEYS['ASK']."_${begin}_${end}");
+    public function getAskCaseCacheRemainingTime($begin, $end, $by = 'RM07_1', $include_pending = true) {
+        $by_key = ($by === 'ask_date' || $by === 'RM80') ? 'RM80' : 'RM07_1';
+        $key = self::KEYS['ASK']."_${begin}_${end}_${by_key}_".($include_pending ? '1' : '0');
+        $remain = $this->getRemainingCacheTimeByKey($key);
+        if ($remain <= 0) {
+            $remain = $this->getRemainingCacheTimeByKey(self::KEYS['ASK']."_${begin}_${end}");
+        }
+        return $remain;
     }
     /**
      * 強制重新讀取請示(取消)案件
      */
-    public function reloadAskCase($begin, $end) {
+    public function reloadAskCase($begin, $end, $by = 'RM07_1', $include_pending = true) {
+        $by_key = ($by === 'ask_date' || $by === 'RM80') ? 'RM80' : 'RM07_1';
+        $this->getCache()->del(self::KEYS['ASK']."_${begin}_${end}_${by_key}_".($include_pending ? '1' : '0'));
         $this->getCache()->del(self::KEYS['ASK']."_${begin}_${end}");
-        return $this->getAskCase($begin, $end);
+        return $this->getAskCase($begin, $end, 3600, $by, $include_pending);
     }
     /**
-	 * 取得取消請示的案件
+	 * 取得請示(取消)案件（含進行中與歷史已取消案件）
      * default cache time is 60 minutes * 60 seconds = 3600 seconds
 	 */
-	public function getAskCase($begin, $end, $expire_duration = 3600) {
-        $cache_key = self::KEYS['ASK']."_${begin}_${end}";
+	public function getAskCase($begin, $end, $expire_duration = 3600, $by = 'RM07_1', $include_pending = true) {
+        if (System::getInstance()->isMockMode()) {
+            return $this->getMockAskCase($begin, $end);
+        }
+        $by_col = ($by === 'ask_date' || $by === 'RM80') ? 'RM80' : 'RM07_1';
+        $cache_key = self::KEYS['ASK']."_${begin}_${end}_${by_col}_".($include_pending ? '1' : '0');
         if ($this->getCache()->isExpired($cache_key)) {
             Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable($cache_key)) {
                 $db = $this->getOraDB();
+                $pending_clause = $include_pending ? "OR (t.RM80 IS NOT NULL AND t.RM83 IS NULL AND (t.RM31 IS NULL OR t.RM31 NOT IN ('A', 'B', 'C', 'D')))" : "";
                 $db->parse("
                     SELECT * FROM MOICAS.CRSMS t
                     LEFT JOIN MOIADM.RKEYN q ON t.RM09=q.KCDE_2 AND q.KCDE_1 = '06'
                     WHERE
-                        (RM02 LIKE :bv_office || '%' AND RM02 NOT LIKE 'H' || :bv_office_end || '%1') AND
-                        RM83 IS NOT NULL AND
-                        -- RM31 in ('A', 'B', 'C', 'D') AND
-                        -- RM29_1 < RM58_1 AND
-                        RM07_1 BETWEEN :bv_begin AND :bv_end
-                    --ORDER BY t.RM29_1 DESC, t.RM58_1 DESC
-                    ORDER BY t.RM01, t.RM02, t.RM03, t.RM83, t.RM07_1
+                        (t.RM02 LIKE :bv_office || '%' AND t.RM02 NOT LIKE 'H' || :bv_office_end || '%1') AND
+                        (
+                            (t.RM83 IS NOT NULL AND t.{$by_col} BETWEEN :bv_begin AND :bv_end)
+                            {$pending_clause}
+                        )
+                    ORDER BY t.RM80 DESC, t.RM01, t.RM02, t.RM03, t.RM83, t.RM07_1
                 ");
                 
                 $office = $this->site;    // e.g. HA
@@ -418,8 +431,169 @@ class Prefetch {
                 return array();
             }
         }
-        return $this->getCache()->get($cache_key);
+        $cached = $this->getCache()->get($cache_key);
+        return is_array($cached) ? $cached : array();
 	}
+    /**
+     * 產出開發/測試用請示案件模擬資料
+     */
+    private function getMockAskCase($begin, $end) {
+        $year = substr($begin, 0, 3);
+        return array(
+            // 1. 進行中請示 + 滯留超過 15 天 (未取消、未結案)
+            array(
+                "RM01" => $year, "RM02" => "HA01", "RM03" => "010520",
+                "RM04" => "115", "RM05" => "HA01", "RM06" => "0001",
+                "RM07_1" => $year."0910", "RM07_2" => "091520",
+                "RM09" => "01", "KCNT" => "買賣",
+                "RM10" => "01", "RM11" => "0001", "RM12" => "01230000",
+                "RM14" => "150.25", "RM15" => "", "RM17" => "",
+                "RM18" => "A123456789", "RM19" => "陳買方", "RM18_ADDR" => "桃園市桃園區縣府路1號",
+                "RM21" => "B223456789", "RM22" => "王賣方", "RM21_ADDR" => "桃園市中壢區中華路2段",
+                "RM24" => "C123456789", "AB02" => "李地政士", "AB03" => "桃園市桃園區成功路",
+                "RM27" => "32", "RM29_1" => $year."0915", "RM29_2" => "170000",
+                "RM30" => "E", "RM30_NOW" => "E", "RM31" => "",
+                "RM44_1" => $year."0910", "RM44_2" => "102030", "RM45" => "HA001", "RM45_CHT" => "陳大明",
+                "RM80" => $year."0912", "RM81" => "143000", "RM82" => "HA001",
+                "RM83" => "", "RM84" => "", "RM85" => "",
+                "RM58_1" => "", "RM58_2" => "", "RM59" => "",
+                "RM99" => "N", "RM100" => "HA", "RM101" => "HA"
+            ),
+            // 2. 壓線請示 (距原限辦到期僅 40 分鐘才掛請示，已取消已結案)
+            array(
+                "RM01" => $year, "RM02" => "HA01", "RM03" => "011240",
+                "RM04" => "", "RM05" => "", "RM06" => "",
+                "RM07_1" => $year."0925", "RM07_2" => "101500",
+                "RM09" => "06", "KCNT" => "設定",
+                "RM10" => "01", "RM11" => "0002", "RM12" => "05670000",
+                "RM14" => "88.60", "RM15" => "00123000", "RM17" => "120.30",
+                "RM18" => "D123456789", "RM19" => "合作金庫", "RM18_ADDR" => "台北市松山區長安東路",
+                "RM21" => "E223456789", "RM22" => "張地主", "RM21_ADDR" => "桃園市八德區介壽路",
+                "RM24" => "F123456789", "AB02" => "林專代", "AB03" => "桃園市桃園區三民路",
+                "RM27" => "24", "RM29_1" => $year."0928", "RM29_2" => "170000",
+                "RM30" => "F", "RM30_NOW" => "F", "RM31" => "A",
+                "RM44_1" => $year."0925", "RM44_2" => "110000", "RM45" => "HA002", "RM45_CHT" => "林小華",
+                "RM80" => $year."0928", "RM81" => "162000", "RM82" => "HA002",
+                "RM83" => $year."1002", "RM84" => "110000", "RM85" => "HA002",
+                "RM58_1" => $year."1003", "RM58_2" => "150000", "RM59" => "HA002",
+                "RM99" => "N", "RM100" => "HA", "RM101" => "HA"
+            ),
+            // 3. 取消請示後極速結案 (取消後 45 分鐘內結案)
+            array(
+                "RM01" => $year, "RM02" => "HA01", "RM03" => "012380",
+                "RM04" => "", "RM05" => "", "RM06" => "",
+                "RM07_1" => $year."0928", "RM07_2" => "142000",
+                "RM09" => "02", "KCNT" => "贈與",
+                "RM10" => "02", "RM11" => "0005", "RM12" => "00880000",
+                "RM14" => "210.00", "RM15" => "", "RM17" => "",
+                "RM18" => "G123456789", "RM19" => "劉子嗣", "RM18_ADDR" => "桃園市中壢區延平路",
+                "RM21" => "H223456789", "RM22" => "劉老父", "RM21_ADDR" => "桃園市中壢區延平路",
+                "RM24" => "", "AB02" => "", "AB03" => "",
+                "RM27" => "32", "RM29_1" => $year."1005", "RM29_2" => "170000",
+                "RM30" => "F", "RM30_NOW" => "F", "RM31" => "A",
+                "RM44_1" => $year."0928", "RM44_2" => "153000", "RM45" => "HA003", "RM45_CHT" => "張美玲",
+                "RM80" => $year."1001", "RM81" => "100000", "RM82" => "HA003",
+                "RM83" => $year."1006", "RM84" => "093000", "RM85" => "HA003",
+                "RM58_1" => $year."1006", "RM58_2" => "101500", "RM59" => "HA003",
+                "RM99" => "N", "RM100" => "HA", "RM101" => "HA"
+            ),
+            // 4. 請示後仍逾期 (結案日大於原定限辦日)
+            array(
+                "RM01" => $year, "RM02" => "HA01", "RM03" => "013490",
+                "RM04" => "", "RM05" => "", "RM06" => "",
+                "RM07_1" => $year."0915", "RM07_2" => "084500",
+                "RM09" => "08", "KCNT" => "繼承",
+                "RM10" => "01", "RM11" => "0010", "RM12" => "04560000",
+                "RM14" => "340.50", "RM15" => "", "RM17" => "",
+                "RM18" => "I123456789", "RM19" => "孫繼承", "RM18_ADDR" => "桃園市蘆竹區南崁路",
+                "RM21" => "J223456789", "RM22" => "孫被繼承人", "RM21_ADDR" => "桃園市蘆竹區南崁路",
+                "RM24" => "K123456789", "AB02" => "黃地政士", "AB03" => "桃園市蘆竹區中正路",
+                "RM27" => "40", "RM29_1" => $year."0922", "RM29_2" => "170000",
+                "RM30" => "F", "RM30_NOW" => "F", "RM31" => "A",
+                "RM44_1" => $year."0915", "RM44_2" => "093000", "RM45" => "HA004", "RM45_CHT" => "王建民",
+                "RM80" => $year."0918", "RM81" => "112000", "RM82" => "HA004",
+                "RM83" => $year."0925", "RM84" => "140000", "RM85" => "HA004",
+                "RM58_1" => $year."0930", "RM58_2" => "163000", "RM59" => "HA004",
+                "RM99" => "N", "RM100" => "HA", "RM101" => "HA"
+            ),
+            // 5. 逾期中才補掛請示 (原定限辦日已過才掛 RM80)
+            array(
+                "RM01" => $year, "RM02" => "HA01", "RM03" => "014560",
+                "RM04" => "", "RM05" => "", "RM06" => "",
+                "RM07_1" => $year."0918", "RM07_2" => "110000",
+                "RM09" => "04", "KCNT" => "塗銷",
+                "RM10" => "01", "RM11" => "0003", "RM12" => "07890000",
+                "RM14" => "95.10", "RM15" => "", "RM17" => "",
+                "RM18" => "L123456789", "RM19" => "周清償", "RM18_ADDR" => "桃園市桃園區春日路",
+                "RM21" => "M223456789", "RM22" => "台新銀行", "RM21_ADDR" => "台北市中山區民生東路",
+                "RM24" => "", "AB02" => "", "AB03" => "",
+                "RM27" => "16", "RM29_1" => $year."0920", "RM29_2" => "170000",
+                "RM30" => "F", "RM30_NOW" => "F", "RM31" => "A",
+                "RM44_1" => $year."0918", "RM44_2" => "133000", "RM45" => "HA002", "RM45_CHT" => "林小華",
+                "RM80" => $year."0922", "RM81" => "091500", "RM82" => "HA002",
+                "RM83" => $year."0924", "RM84" => "100000", "RM85" => "HA002",
+                "RM58_1" => $year."0924", "RM58_2" => "160000", "RM59" => "HA002",
+                "RM99" => "N", "RM100" => "HA", "RM101" => "HA"
+            ),
+            // 6. 多重複合高風險案件 (壓線請示 + 滯留14天 + 取消當天秒結案 + 仍逾期)
+            array(
+                "RM01" => $year, "RM02" => "HA01", "RM03" => "015670",
+                "RM04" => "", "RM05" => "", "RM06" => "",
+                "RM07_1" => $year."0912", "RM07_2" => "153000",
+                "RM09" => "01", "KCNT" => "買賣",
+                "RM10" => "01", "RM11" => "0008", "RM12" => "03210000",
+                "RM14" => "188.00", "RM15" => "", "RM17" => "",
+                "RM18" => "N123456789", "RM19" => "趙甲", "RM18_ADDR" => "桃園市桃園區經國路",
+                "RM21" => "O223456789", "RM22" => "錢乙", "RM21_ADDR" => "桃園市桃園區大興西路",
+                "RM24" => "P123456789", "AB02" => "孫代書", "AB03" => "桃園市桃園區中正路",
+                "RM27" => "24", "RM29_1" => $year."0916", "RM29_2" => "170000",
+                "RM30" => "F", "RM30_NOW" => "F", "RM31" => "A",
+                "RM44_1" => $year."0912", "RM44_2" => "160000", "RM45" => "HA001", "RM45_CHT" => "陳大明",
+                "RM80" => $year."0916", "RM81" => "165000", "RM82" => "HA001",
+                "RM83" => $year."0930", "RM84" => "150000", "RM85" => "HA001",
+                "RM58_1" => $year."0930", "RM58_2" => "154000", "RM59" => "HA001",
+                "RM99" => "N", "RM100" => "HA", "RM101" => "HA"
+            ),
+            // 7. 正常合規請示案件 (請示3天，正常結案無違規)
+            array(
+                "RM01" => $year, "RM02" => "HA01", "RM03" => "016780",
+                "RM04" => "", "RM05" => "", "RM06" => "",
+                "RM07_1" => $year."0920", "RM07_2" => "090000",
+                "RM09" => "07", "KCNT" => "拍賣",
+                "RM10" => "01", "RM11" => "0004", "RM12" => "09990000",
+                "RM14" => "112.40", "RM15" => "", "RM17" => "",
+                "RM18" => "Q123456789", "RM19" => "吳得標", "RM18_ADDR" => "桃園市桃園區民生路",
+                "RM21" => "R223456789", "RM22" => "桃園地方法院", "RM21_ADDR" => "桃園市桃園區正光路",
+                "RM24" => "", "AB02" => "", "AB03" => "",
+                "RM27" => "48", "RM29_1" => $year."1015", "RM29_2" => "170000",
+                "RM30" => "F", "RM30_NOW" => "F", "RM31" => "A",
+                "RM44_1" => $year."0920", "RM44_2" => "100000", "RM45" => "HA005", "RM45_CHT" => "吳素真",
+                "RM80" => $year."0922", "RM81" => "100000", "RM82" => "HA005",
+                "RM83" => $year."0925", "RM84" => "113000", "RM85" => "HA005",
+                "RM58_1" => $year."1002", "RM58_2" => "142000", "RM59" => "HA005",
+                "RM99" => "N", "RM100" => "HA", "RM101" => "HA"
+            ),
+            // 8. 正常進行中請示 (剛掛請示 1 天，正常研議中)
+            array(
+                "RM01" => $year, "RM02" => "HA01", "RM03" => "017890",
+                "RM04" => "", "RM05" => "", "RM06" => "",
+                "RM07_1" => $year."1010", "RM07_2" => "103000",
+                "RM09" => "01", "KCNT" => "買賣",
+                "RM10" => "01", "RM11" => "0006", "RM12" => "06540000",
+                "RM14" => "77.80", "RM15" => "", "RM17" => "",
+                "RM18" => "S123456789", "RM19" => "鄭買方", "RM18_ADDR" => "桃園市八德區和平路",
+                "RM21" => "T223456789", "RM22" => "韓賣方", "RM21_ADDR" => "桃園市八德區興豐路",
+                "RM24" => "U123456789", "AB02" => "周專代", "AB03" => "桃園市八德區建國路",
+                "RM27" => "32", "RM29_1" => $year."1025", "RM29_2" => "170000",
+                "RM30" => "E", "RM30_NOW" => "E", "RM31" => "",
+                "RM44_1" => $year."1010", "RM44_2" => "140000", "RM45" => "HA006", "RM45_CHT" => "蔡雅婷",
+                "RM80" => $year."1014", "RM81" => "093000", "RM82" => "HA006",
+                "RM83" => "", "RM84" => "", "RM85" => "",
+                "RM58_1" => "", "RM58_2" => "", "RM59" => "",
+                "RM99" => "N", "RM100" => "HA", "RM101" => "HA"
+            )
+        );
+    }
     /**
      * 信託註記建物所有部資料快取剩餘時間
      */

@@ -272,6 +272,18 @@ class RegCaseData {
             "異動人員" => $this->getIDorName($row["RM103"]),
             "手機號碼" => empty($row["RM102"]) ? "" : $row["RM102"]
         );
+        $askMetrics = $this->getAskMetrics();
+        $ret["請示狀態"] = $askMetrics['is_pending'] ? '進行中' : '已取消';
+        $ret["請示歷時天數"] = $askMetrics['duration_days'];
+        $ret["請示前剩餘時數"] = $askMetrics['hours_before_due'];
+        $ret["取消至結案時數"] = $askMetrics['hours_cancel_to_close'];
+        $ret["是否壓線請示"] = $askMetrics['is_rush'];
+        $ret["是否請示滯留"] = $askMetrics['is_stagnant'];
+        $ret["是否極速結案"] = $askMetrics['is_speedy_close'];
+        $ret["是否請示逾期"] = $askMetrics['is_overdue'];
+        $ret["是否疑似規避"] = $askMetrics['is_suspicious'];
+        $ret["規避風險標籤"] = $askMetrics['risk_tags'];
+
         return $ret + $row; // merge raw data ($row["RM01"] ... etc) and keep original key index
     }
 
@@ -437,9 +449,135 @@ class RegCaseData {
         return "success";
     }
 
+    public function getAskMetrics() {
+        $row = &$this->row;
+        $is_pending = !empty($row["RM80"]) && empty($row["RM83"]) && !in_array($row["RM31"], RegCaseData::$RM31_CASE_CLOSE_STATE);
+        
+        // 1. 請示時戳 (RM80, RM81)
+        $ask_time = !empty($row["RM81"]) ? str_pad($row["RM81"], 6, "0", STR_PAD_RIGHT) : "080000";
+        $ask_ts = $this->getTimestamp($row["RM80"], $ask_time);
+        
+        // 2. 取消請示時戳 (RM83, RM84)
+        $cancel_ts = null;
+        if (!empty($row["RM83"])) {
+            $cancel_time = !empty($row["RM84"]) ? str_pad($row["RM84"], 6, "0", STR_PAD_RIGHT) : "170000";
+            $cancel_ts = $this->getTimestamp($row["RM83"], $cancel_time);
+        }
+        
+        // 3. 預定結案時戳 (RM29_1, RM29_2)
+        $due_ts = null;
+        if (!empty($row["RM29_1"])) {
+            $due_time = !empty($row["RM29_2"]) ? str_pad($row["RM29_2"], 6, "0", STR_PAD_RIGHT) : "170000";
+            $due_ts = $this->getTimestamp($row["RM29_1"], $due_time);
+        }
+        
+        // 4. 結案時戳 (RM58_1, RM58_2) 或 駁回/撤回
+        $close_ts = null;
+        if (!empty($row["RM58_1"])) {
+            $close_time = !empty($row["RM58_2"]) ? str_pad($row["RM58_2"], 6, "0", STR_PAD_RIGHT) : "170000";
+            $close_ts = $this->getTimestamp($row["RM58_1"], $close_time);
+        } else if (!empty($row["RM48_1"])) {
+            $close_time = !empty($row["RM48_2"]) ? str_pad($row["RM48_2"], 6, "0", STR_PAD_RIGHT) : "170000";
+            $close_ts = $this->getTimestamp($row["RM48_1"], $close_time);
+        } else if (!empty($row["RM93_1"])) {
+            $close_time = !empty($row["RM93_2"]) ? str_pad($row["RM93_2"], 6, "0", STR_PAD_RIGHT) : "170000";
+            $close_ts = $this->getTimestamp($row["RM93_1"], $close_time);
+        }
+        
+        // 請示歷時（天數）
+        $duration_days = 0;
+        if ($ask_ts) {
+            $end_ts = $cancel_ts ? $cancel_ts : time();
+            $duration_days = round(max(0, $end_ts - $ask_ts) / 86400, 1);
+        }
+        
+        // 距限辦時長（小時）：請示當下距離預定結案的時間
+        $hours_before_due = null;
+        if ($ask_ts && $due_ts) {
+            $hours_before_due = round(($due_ts - $ask_ts) / 3600, 1);
+        }
+        
+        // 取消後至結案時間（小時）
+        $hours_cancel_to_close = null;
+        if ($cancel_ts && $close_ts) {
+            $hours_cancel_to_close = round(max(0, $close_ts - $cancel_ts) / 3600, 1);
+        }
+        
+        // 判定4大特徵標籤
+        $tags = array();
+        
+        // 1. 壓線請示：限辦到期前 24 小時內掛請示 (0 <= hours_before_due <= 24)
+        $is_rush = false;
+        if ($hours_before_due !== null && $hours_before_due >= 0 && $hours_before_due <= 24) {
+            $is_rush = true;
+            $tags[] = '壓線請示';
+        }
+        
+        // 2. 滯留過長：請示天數 > 7 天
+        $is_stagnant = false;
+        if ($duration_days > 7) {
+            $is_stagnant = true;
+            $tags[] = '請示滯留';
+        }
+        
+        // 3. 極速結案：取消請示後 24 小時內結案
+        $is_speedy_close = false;
+        if ($hours_cancel_to_close !== null && $hours_cancel_to_close <= 24) {
+            $is_speedy_close = true;
+            $tags[] = '極速結案';
+        }
+        
+        // 4. 請示逾期：掛請示時已逾期 或 取消/結案時仍逾期 或 當前進行中且已逾期
+        $is_overdue = false;
+        if ($hours_before_due !== null && $hours_before_due < 0) {
+            $is_overdue = true;
+            $tags[] = '逾期中掛請示';
+        } else if ($due_ts) {
+            if ($close_ts && $close_ts > $due_ts) {
+                $is_overdue = true;
+                $tags[] = '請示仍逾期';
+            } else if ($is_pending && time() > $due_ts) {
+                $is_overdue = true;
+                $tags[] = '請示中逾期';
+            }
+        }
+        
+        return array(
+            'is_pending' => $is_pending,
+            'duration_days' => $duration_days,
+            'hours_before_due' => $hours_before_due,
+            'hours_cancel_to_close' => $hours_cancel_to_close,
+            'is_rush' => $is_rush,
+            'is_stagnant' => $is_stagnant,
+            'is_speedy_close' => $is_speedy_close,
+            'is_overdue' => $is_overdue,
+            'is_suspicious' => count($tags) > 0,
+            'risk_tags' => $tags
+        );
+    }
+
     public function trafficLightAsk() {
         // RM83 - 取消請示日期
         if (empty($this->row["RM83"])) {
+            if (!empty($this->row["RM80"])) {
+                // 進行中請示案件
+                $now = time();
+                if (!empty($this->row["RM29_1"])) {
+                    $Y = substr($this->row["RM29_1"], 0, 3) + 1911;
+                    $M = substr($this->row["RM29_1"], 3, 2);
+                    $D = substr($this->row["RM29_1"], 5, 2);
+                    $deadline = mktime(17, 0, 0, $M, $D, $Y);
+                    if ($now - $deadline > 0) {
+                        return "danger";
+                    }
+                }
+                $ask_time = !empty($this->row["RM81"]) ? $this->row["RM81"] : "080000";
+                $ask_ts = $this->getTimestamp($this->row["RM80"], $ask_time);
+                if ($ask_ts && ($now - $ask_ts) > 7 * 86400) {
+                    return "warning";
+                }
+                return "info";
+            }
             return "light";
         }
         
