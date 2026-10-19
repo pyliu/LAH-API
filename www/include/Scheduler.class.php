@@ -672,7 +672,7 @@ class Scheduler
      * 1. 取得有填寫手機且簡訊狀態未發送/失敗 (sms_status NOT IN (1, 3)) 的資料
      * 2. 依最早已收件日批次查詢 Oracle 簡訊紀錄比對，命中成功者更新 sms_status = 1
      * 3. 持續 3 天以上無發送紀錄者，依 receiver 分組彙整提醒承辦人員 (若無 receiver 則發至 reg 頻道)
-     * 4. 超過 7 天無發送紀錄者，發送警示通知至 inf 頻道
+     * 4. 超過 7 天無發送紀錄者，發送警示通知至 reg (登記課) 頻道
      */
     public function checkRegSmsDeliveryStatus()
     {
@@ -891,51 +891,52 @@ class Scheduler
         }
         unset($item);
 
+        $host_ip = getLocalhostIP();
+        $undisclosedUrl = "http://{$host_ip}:8080/reg/undisclosed";
+        $propertyAlertUrl = "http://{$host_ip}:8080/reg/propertyalert";
+        $userNames = Cache::getInstance()->getUserNames() ?: [];
+
         // 滿 3 天提醒：依收件同仁彙整通知
         foreach ($unmatched3Days as $receiver => $cases) {
             $caseCount = count($cases);
-            $msg = "📢 住址隱匿與地籍異動即時通未發送簡訊提醒\r\n***\r\n";
-            $msg .= "⚠ 系統偵測到您有 {$caseCount} 筆收件案件已超過 3 天尚未比對到簡訊發送紀錄，請確認簡訊是否已確實送出：\r\n\r\n";
-            $msg .= "| 業務類別 | 序號/字號 | 申請人 | 手機 | 收件日期 | 經過天數 |\r\n";
-            $msg .= "| :--- | :--- | :--- | :--- | :--- | :--- |\r\n";
+            $msg = "📢 簡訊未發送逾 3 天提醒 ({$caseCount}件)\r\n***\r\n";
             foreach ($cases as $c) {
-                $cDate = date('Y-m-d', $c['createtime']);
+                $bizShort = ($c['biz_type'] === 'undisclosed') ? '隱匿' : '異動';
                 $cDays = $c['elapsed_days'] ?? floor(($now - (int)$c['createtime']) / 86400);
-                $daysDisplay = !empty($c['is_case_based']) ? "{$cDays}天(結案起算)" : "{$cDays}天";
+                $daysDisplay = !empty($c['is_case_based']) ? "結案{$cDays}天" : "{$cDays}天";
                 $isAttached = ((int)($c['receiving_type'] ?? 0) === 1);
                 $no = $isAttached ? (!empty($c['receiving_caseno']) ? $c['receiving_caseno'] : '-') : (!empty($c['serial_no']) ? $c['serial_no'] : ($c['receiving_caseno'] ?? '-'));
-                $cell = $c['cellphone'] ?? '';
-                $cellMasked = (strlen($cell) >= 7) ? substr($cell, 0, 4) . '***' . substr($cell, -3) : $cell;
-                $msg .= "| {$c['biz_title']} | {$no} | {$c['applicant']} | {$cellMasked} | {$cDate} | {$daysDisplay} |\r\n";
+                $applicant = trim($c['applicant'] ?? '');
+                $msg .= "• [{$bizShort}] {$no} {$applicant} ({$daysDisplay})\r\n";
             }
-            $msg .= "\r\n***\r\n👉 如無需發送簡訊，請至登記收件管理畫面將該案件簡訊狀態調整為「忽略」。";
+            $msg .= "\r\n***\r\n👉 前往 [住址隱匿]({$undisclosedUrl}) ／ [異動即時通]({$propertyAlertUrl}) 確認或設為「忽略」。";
 
             $title = "住址隱匿與異動即時通未發送簡訊提醒";
             $this->removeNotificationByTitle($title, $receiver);
             $this->addNotification($msg, $receiver, $title);
         }
 
-        // 滿 7 天超期警示：發送至 inf 頻道
+        // 滿 7 天超期警示：發送至 reg (登記課) 頻道
         if (!empty($unmatched7Days)) {
             $caseCount = count($unmatched7Days);
-            $infMsg = "⚠ 智慧控管系統警示：住址隱匿／地籍異動即時通超過 7 天無簡訊紀錄\r\n***\r\n";
-            $infMsg .= "系統偵測到下列 {$caseCount} 件收件案件已超過 7 天仍未查得相關簡訊發送紀錄，請資訊同仁協助確認系統或簡訊傳送線路是否正常：\r\n\r\n";
-            $infMsg .= "| 業務類別 | 序號/字號 | 申請人 | 承辦人員 | 收件日期 | 經過天數 |\r\n";
-            $infMsg .= "| :--- | :--- | :--- | :--- | :--- | :--- |\r\n";
+            $regAlertMsg = "⚠ 簡訊未發送逾 7 天警示 ({$caseCount}件)\r\n***\r\n";
             foreach ($unmatched7Days as $c) {
-                $cDate = date('Y-m-d', $c['createtime']);
+                $bizShort = ($c['biz_type'] === 'undisclosed') ? '隱匿' : '異動';
                 $cDays = $c['elapsed_days'] ?? floor(($now - (int)$c['createtime']) / 86400);
-                $daysDisplay = !empty($c['is_case_based']) ? "{$cDays}天(結案起算)" : "{$cDays}天";
+                $daysDisplay = !empty($c['is_case_based']) ? "結案{$cDays}天" : "{$cDays}天";
                 $isAttached = ((int)($c['receiving_type'] ?? 0) === 1);
                 $no = $isAttached ? (!empty($c['receiving_caseno']) ? $c['receiving_caseno'] : '-') : (!empty($c['serial_no']) ? $c['serial_no'] : ($c['receiving_caseno'] ?? '-'));
-                $rec = !empty($c['receiver']) ? $c['receiver'] : '未填寫';
-                $infMsg .= "| {$c['biz_title']} | {$no} | {$c['applicant']} | {$rec} | {$cDate} | {$daysDisplay} |\r\n";
+                $applicant = trim($c['applicant'] ?? '');
+                $recId = trim($c['receiver'] ?? '');
+                $recName = !empty($recId) ? ($userNames[$recId] ?? $recId) : '未填寫';
+                $regAlertMsg .= "• [{$bizShort}] {$no} {$applicant}｜{$recName} ({$daysDisplay})\r\n";
             }
-            $infMsg .= "\r\n***\r\n⚠ 請相關承辦人員儘速確認案件狀態。";
+            $regAlertMsg .= "\r\n***\r\n👉 前往 [住址隱匿]({$undisclosedUrl}) ／ [異動即時通]({$propertyAlertUrl}) 確認狀態。";
 
             $title = "住址隱匿與異動即時通超過7天未發送簡訊警示";
             $this->removeNotificationByTitle($title, 'inf');
-            $this->addNotification($infMsg, 'inf', $title);
+            $this->removeNotificationByTitle($title, 'reg');
+            $this->addNotification($regAlertMsg, 'reg', $title);
         }
 
         Logger::getInstance()->info(sprintf(

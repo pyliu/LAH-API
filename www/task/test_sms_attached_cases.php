@@ -286,10 +286,10 @@ $caseInfo2B = $moicas->getCaseCloseInfo($testCaseno2B);
 $elapsed2B = floor((time() - $caseInfo2B['close_timestamp']) / 86400);
 assertTest("2B (結案 4 天前): 起算天數為 4 天 (>= 3 天，應提醒)", $elapsed2B >= 3 && $elapsed2B < 7, "實際天數: {$elapsed2B}");
 
-// 驗證訊息顯示標註「(結案起算)」
+// 驗證訊息顯示標註「結案X天」
 $isCaseBased = true;
-$daysDisplay2B = !empty($isCaseBased) ? "{$elapsed2B}天(結案起算)" : "{$elapsed2B}天";
-assertTest("訊息表格標註包含「(結案起算)」", mb_strpos($daysDisplay2B, '(結案起算)') !== false, "顯示: {$daysDisplay2B}");
+$daysDisplay2B = !empty($isCaseBased) ? "結案{$elapsed2B}天" : "{$elapsed2B}天";
+assertTest("訊息條列標註包含「結案」字樣", mb_strpos($daysDisplay2B, '結案') !== false, "顯示: {$daysDisplay2B}");
 
 echo "\n";
 
@@ -434,8 +434,8 @@ assertTest("非隨案案件依收件日起算天數為 5 天", $elapsed5 === 5.0
 $noDisplay5 = $isAttached5 ? ($item5['receiving_caseno'] ?: '-') : (!empty($item5['serial_no']) ? $item5['serial_no'] : '-');
 assertTest("非隨案案件訊息表格顯示 serial_no", $noDisplay5 === $testSerial5);
 
-$daysDisplay5 = !empty($item5['is_case_based']) ? "{$elapsed5}天(結案起算)" : "{$elapsed5}天";
-assertTest("非隨案案件訊息表格經過天數不含「(結案起算)」", mb_strpos($daysDisplay5, '(結案起算)') === false);
+$daysDisplay5 = !empty($item5['is_case_based']) ? "結案{$elapsed5}天" : "{$elapsed5}天";
+assertTest("非隨案案件訊息條列經過天數不含「結案」字樣", mb_strpos($daysDisplay5, '結案') === false);
 
 echo "\n";
 
