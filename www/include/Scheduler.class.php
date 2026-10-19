@@ -2,6 +2,8 @@
 
 // 載入系統初始化檔案 (包含 Autoloader)
 require_once(dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'include' . DIRECTORY_SEPARATOR . 'init.php');
+require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'MOICAS.class.php');
+require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'RegSmsPolicy.class.php');
 
 /**
  * Class Scheduler
@@ -775,6 +777,7 @@ class Scheduler
         $unmatched3Days = [];
         $unmatched7Days = [];
         $now = time();
+        $moicas = new MOICAS();
 
         foreach ($allPending as &$item) {
             $cleanCell = preg_replace('/[^0-9]/', '', $item['cellphone'] ?? '');
@@ -830,8 +833,50 @@ class Scheduler
                 $matchedCount++;
                 Logger::getInstance()->info(__METHOD__ . ": [{$item['biz_title']}] ID: {$item['id']} 手機: {$cleanCell} 比對簡訊成功，已更新為發送成功 (sms_status=1) 並寫入備註。");
             } else {
-                // 未比對到成功簡訊，計算逾期天數
-                $elapsedDays = floor(($now - $caseCreatetime) / 86400);
+                // 未比對到成功簡訊，檢查是否為隨案案件 (receiving_type = 1)
+                $isAttached = ((int)($item['receiving_type'] ?? 0) === 1);
+                $baseTimestamp = $caseCreatetime;
+                $item['is_case_based'] = false;
+                $item['close_date'] = '';
+
+                if ($isAttached) {
+                    $caseno = trim($item['receiving_caseno'] ?? '');
+                    $caseInfo = !empty($caseno) ? $moicas->getCaseCloseInfo($caseno) : false;
+
+                    if ($caseInfo === false) {
+                        Logger::getInstance()->warning(__METHOD__ . ": [{$item['biz_title']}] ID: {$item['id']} 隨案主案案號({$caseno})查無主案或案號異常，回退以收件日計算天數。");
+                    } else {
+                        if (!empty($caseInfo['is_cancelled'])) {
+                            // 主案為撤回(B)或駁回(D)：地政主機不會發送簡訊，自動更新為忽略(3)
+                            $cancelTypeStr = ($caseInfo['rm31'] === 'B') ? '撤回' : '駁回';
+                            $timeStr = date('Y/m/d H:i:s');
+                            $statusNote = "隨案主案({$caseno})已{$cancelTypeStr}，系統自動調整為忽略。";
+                            $newNote = RegSmsPolicy::appendSmsToNote($item['note'] ?? '', $timeStr, $statusNote);
+                            if ($item['biz_type'] === 'undisclosed') {
+                                $undisclosedDB->updateSmsStatus($item['id'], RegSmsPolicy::SMS_IGNORED, $newNote);
+                            } else {
+                                $propertyAlertDB->updateSmsStatus($item['id'], RegSmsPolicy::SMS_IGNORED, $newNote);
+                            }
+                            Logger::getInstance()->info(__METHOD__ . ": [{$item['biz_title']}] ID: {$item['id']} 隨案主案({$caseno})已{$cancelTypeStr}，已更新為忽略 (sms_status=3) 並註記備註。");
+                            continue;
+                        }
+
+                        if (empty($caseInfo['is_closed'])) {
+                            // 主案尚未結案：簡訊須等主案結案後送出，暫不發送提醒
+                            Logger::getInstance()->info(__METHOD__ . ": [{$item['biz_title']}] ID: {$item['id']} 隨案主案({$caseno})尚未結案(RM31: {$caseInfo['rm31']})，暫不發送未發送簡訊提醒。");
+                            continue;
+                        }
+
+                        // 已結案：改以結案日(RM58_1/RM58_2)起算經過天數
+                        $baseTimestamp = !empty($caseInfo['close_timestamp']) ? $caseInfo['close_timestamp'] : $caseCreatetime;
+                        $item['is_case_based'] = true;
+                        $item['close_date'] = $caseInfo['close_date'] ?? '';
+                    }
+                }
+
+                // 計算經過天數
+                $elapsedDays = floor(($now - $baseTimestamp) / 86400);
+                $item['elapsed_days'] = $elapsedDays;
 
                 if ($elapsedDays >= 3) {
                     $receiver = trim($item['receiver'] ?? '');
@@ -855,11 +900,13 @@ class Scheduler
             $msg .= "| :--- | :--- | :--- | :--- | :--- | :--- |\r\n";
             foreach ($cases as $c) {
                 $cDate = date('Y-m-d', $c['createtime']);
-                $cDays = floor(($now - (int)$c['createtime']) / 86400);
-                $no = !empty($c['serial_no']) ? $c['serial_no'] : ($c['receiving_caseno'] ?? '-');
+                $cDays = $c['elapsed_days'] ?? floor(($now - (int)$c['createtime']) / 86400);
+                $daysDisplay = !empty($c['is_case_based']) ? "{$cDays}天(結案起算)" : "{$cDays}天";
+                $isAttached = ((int)($c['receiving_type'] ?? 0) === 1);
+                $no = $isAttached ? (!empty($c['receiving_caseno']) ? $c['receiving_caseno'] : '-') : (!empty($c['serial_no']) ? $c['serial_no'] : ($c['receiving_caseno'] ?? '-'));
                 $cell = $c['cellphone'] ?? '';
                 $cellMasked = (strlen($cell) >= 7) ? substr($cell, 0, 4) . '***' . substr($cell, -3) : $cell;
-                $msg .= "| {$c['biz_title']} | {$no} | {$c['applicant']} | {$cellMasked} | {$cDate} | {$cDays}天 |\r\n";
+                $msg .= "| {$c['biz_title']} | {$no} | {$c['applicant']} | {$cellMasked} | {$cDate} | {$daysDisplay} |\r\n";
             }
             $msg .= "\r\n***\r\n👉 如無需發送簡訊，請至登記收件管理畫面將該案件簡訊狀態調整為「忽略」。";
 
@@ -877,10 +924,12 @@ class Scheduler
             $infMsg .= "| :--- | :--- | :--- | :--- | :--- | :--- |\r\n";
             foreach ($unmatched7Days as $c) {
                 $cDate = date('Y-m-d', $c['createtime']);
-                $cDays = floor(($now - (int)$c['createtime']) / 86400);
-                $no = !empty($c['serial_no']) ? $c['serial_no'] : ($c['receiving_caseno'] ?? '-');
+                $cDays = $c['elapsed_days'] ?? floor(($now - (int)$c['createtime']) / 86400);
+                $daysDisplay = !empty($c['is_case_based']) ? "{$cDays}天(結案起算)" : "{$cDays}天";
+                $isAttached = ((int)($c['receiving_type'] ?? 0) === 1);
+                $no = $isAttached ? (!empty($c['receiving_caseno']) ? $c['receiving_caseno'] : '-') : (!empty($c['serial_no']) ? $c['serial_no'] : ($c['receiving_caseno'] ?? '-'));
                 $rec = !empty($c['receiver']) ? $c['receiver'] : '未填寫';
-                $infMsg .= "| {$c['biz_title']} | {$no} | {$c['applicant']} | {$rec} | {$cDate} | {$cDays}天 |\r\n";
+                $infMsg .= "| {$c['biz_title']} | {$no} | {$c['applicant']} | {$rec} | {$cDate} | {$daysDisplay} |\r\n";
             }
             $infMsg .= "\r\n***\r\n⚠ 請相關承辦人員儘速確認案件狀態。";
 

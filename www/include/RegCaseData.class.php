@@ -823,4 +823,17 @@ class RegCaseData {
         return $closer_in_secs - $received_in_secs - $first_reviewed_consumed_in_secs - $second_reviewed_consumed_in_secs - $pre_register_consumed_in_secs - $register_consumed_in_secs - $checker_consumed_in_secs;
     }
 
+    public function isClosed() {
+        return in_array($this->row["RM31"] ?? '', self::$RM31_CASE_CLOSE_STATE);
+    }
+
+    public function isCompleted() {
+        return ($this->row["RM31"] ?? '') === 'A';
+    }
+
+    public function isCancelled() {
+        $c = $this->row["RM31"] ?? '';
+        return $c === 'B' || $c === 'D';
+    }
+
 }

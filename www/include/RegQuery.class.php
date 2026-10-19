@@ -7,6 +7,7 @@ require_once("SQLiteRegAddressUndisclosed.class.php");
 require_once("SQLiteRegPropertyAlert.class.php");
 require_once("RegSmsPolicy.class.php");
 require_once("MOISMS.class.php");
+require_once("MOICAS.class.php");
 
 class RegQuery {
 
@@ -106,6 +107,44 @@ class RegQuery {
 		$rocYearStart = (int)date('Y', $caseCreatetime) - 1911;
 		$stDate = sprintf("%03d%s", $rocYearStart, date('md', $caseCreatetime));
 		$intakeDateStr = sprintf("%03d/%s/%s", $rocYearStart, date('m', $caseCreatetime), date('d', $caseCreatetime));
+
+		$isAttached = ((int)($record['receiving_type'] ?? 0) === 1);
+		$attachedCaseno = trim($record['receiving_caseno'] ?? '');
+		$attachedCaseInfo = false;
+		if ($isAttached && !empty($attachedCaseno)) {
+			$moicas = new MOICAS();
+			$attachedCaseInfo = $moicas->getCaseCloseInfo($attachedCaseno);
+			if ($attachedCaseInfo !== false) {
+				if (!empty($attachedCaseInfo['is_cancelled'])) {
+					$cancelText = ($attachedCaseInfo['rm31'] === 'B') ? '撤回' : '駁回';
+					$timeStr = date('Y/m/d H:i:s');
+					$cancelNote = "隨案主案({$attachedCaseno})已{$cancelText}，系統自動調整為忽略。";
+					$newNote = RegSmsPolicy::appendSmsToNote($record['note'] ?? '', $timeStr, $cancelNote);
+					$db->updateSmsStatus($id, RegSmsPolicy::SMS_IGNORED, $newNote);
+					$message = "隨案主案({$attachedCaseno})已{$cancelText}，無需發送簡訊，已自動設為忽略";
+					Logger::getInstance()->info(__METHOD__.": [{$bizTitle}] ID: {$id} {$message}");
+					return array(
+						'status' => STATUS_CODE::SUCCESS_NORMAL,
+						'message' => $message,
+						'payload' => array(
+							'id' => $id,
+							'sms_status' => RegSmsPolicy::SMS_IGNORED,
+							'updated' => true,
+							'modifytime' => time(),
+							'note' => $newNote,
+							'sms_time' => '',
+							'intake_date' => $intakeDateStr,
+							'cellphone' => $cleanCell,
+							'total_count' => 0,
+							'matched_count' => 0,
+							'success_count' => 0,
+							'fail_count' => 0,
+							'sms_records' => array()
+						)
+					);
+				}
+			}
+		}
 
 		$cache = Cache::getInstance();
 		$mock = System::getInstance()->isMockMode();
@@ -266,6 +305,9 @@ class RegQuery {
 		}
 
 		$message = "查無 {$applicant} ({$cleanCell}) 於收件日 ({$intakeDateStr}) 後之{$bizTitle}簡訊紀錄";
+		if ($isAttached && $attachedCaseInfo !== false && empty($attachedCaseInfo['is_closed'])) {
+			$message .= "（隨案主案尚未結案，簡訊將於主案結案後發送）";
+		}
 		Logger::getInstance()->info(__METHOD__.": [{$bizTitle}] ID: {$id} {$message}");
 		return array(
 			'status' => STATUS_CODE::SUCCESS_WITH_NO_RECORD,

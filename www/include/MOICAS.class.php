@@ -897,4 +897,144 @@ class MOICAS
 			return strpos($item['CASE_WORD'], $filter) === 0;
 		});
 	}
+
+	/**
+	 * 取得登記案件結案/辦理狀態資訊
+	 *
+	 * @param string $id 13 碼案號或帶有連字號之案號 (如 113HA01001234, 113-HA01-001234)
+	 * @return array|false 查無案件或格式不合回傳 false，成功回傳結案狀態資訊陣列
+	 */
+	public function getCaseCloseInfo($id) {
+		if (!$this->checkCaseID($id)) {
+			return false;
+		}
+
+		if (System::getInstance()->isMockMode()) {
+			$cached = Cache::getInstance()->get('mock_case_close_info_' . $id);
+			if ($cached !== false) {
+				if ($cached === 'NOT_FOUND' || $cached === null || (is_array($cached) && !empty($cached['not_found']))) {
+					return false;
+				}
+				if (is_array($cached)) {
+					return $cached;
+				}
+			}
+			// 模擬模式預設回傳未結案結構
+			return array(
+				'case_id' => $id,
+				'rm30' => 'H',
+				'rm31' => '',
+				'close_code' => '',
+				'is_closed' => false,
+				'is_completed' => false,
+				'is_cancelled' => false,
+				'close_date' => '',
+				'close_time' => '',
+				'close_timestamp' => 0
+			);
+		}
+
+		if (!$this->db_wrapper->reachable()) {
+			Logger::getInstance()->warning(__METHOD__.": Oracle DB 無法連線");
+			return false;
+		}
+
+		$year = substr($id, 0, 3);
+		$code = substr($id, 3, 4);
+		$num = substr($id, 7, 6);
+
+		$db = $this->db_wrapper->getDB();
+		$db->parse("
+			SELECT RM01, RM02, RM03, RM30, RM31, RM58_1, RM58_2, RM48_1, RM48_2, RM93_1, RM93_2
+			FROM MOICAS.CRSMS
+			WHERE RM01 = :bv_year
+			  AND RM02 = :bv_code
+			  AND RM03 = :bv_number
+		");
+		$db->bind(":bv_year", $year);
+		$db->bind(":bv_code", $code);
+		$db->bind(":bv_number", $num);
+		$db->execute();
+		$row = $db->fetch(true);
+
+		if (empty($row)) {
+			Logger::getInstance()->warning(__METHOD__.": MOICAS.CRSMS 查無 $id 案件資料");
+			return false;
+		}
+
+		$rm30 = trim((string)($row['RM30'] ?? ''));
+		$rm31 = trim((string)($row['RM31'] ?? ''));
+		$closeCode = $rm31;
+		$isClosed = in_array($rm31, array('A', 'B', 'C', 'D'), true);
+		$isCompleted = ($rm31 === 'A');
+		$isCancelled = ($rm31 === 'B' || $rm31 === 'D');
+
+		$rawDate = '';
+		$rawTime = '';
+		if ($rm31 === 'A') {
+			$rawDate = trim((string)($row['RM58_1'] ?? ''));
+			$rawTime = trim((string)($row['RM58_2'] ?? ''));
+		} elseif ($rm31 === 'D') {
+			$rawDate = trim((string)($row['RM48_1'] ?? ''));
+			$rawTime = trim((string)($row['RM48_2'] ?? ''));
+		} elseif ($rm31 === 'B') {
+			$rawDate = trim((string)($row['RM93_1'] ?? ''));
+			$rawTime = trim((string)($row['RM93_2'] ?? ''));
+		} else {
+			$rawDate = trim((string)($row['RM58_1'] ?? ''));
+			$rawTime = trim((string)($row['RM58_2'] ?? ''));
+		}
+
+		$closeTimestamp = 0;
+		$rawDateDigits = preg_replace('/[^0-9]/', '', $rawDate);
+		if (strlen($rawDateDigits) >= 6) {
+			$rYearLen = strlen($rawDateDigits) - 4;
+			$rYear = (int)substr($rawDateDigits, 0, $rYearLen);
+			$adY = $rYear + 1911;
+			$mM = (int)substr($rawDateDigits, $rYearLen, 2);
+			$dD = (int)substr($rawDateDigits, $rYearLen + 2, 2);
+
+			$rawTimeDigits = preg_replace('/[^0-9]/', '', $rawTime);
+			$rawTimeDigits = str_pad(substr($rawTimeDigits, 0, 6), 6, '0', STR_PAD_RIGHT);
+			$hH = (int)substr($rawTimeDigits, 0, 2);
+			$iI = (int)substr($rawTimeDigits, 2, 2);
+			$sS = (int)substr($rawTimeDigits, 4, 2);
+
+			$closeTimestamp = (int)mktime($hH, $iI, $sS, $mM, $dD, $adY);
+		}
+
+		return array(
+			'case_id' => $id,
+			'rm30' => $rm30,
+			'rm31' => $rm31,
+			'close_code' => $closeCode,
+			'is_closed' => $isClosed,
+			'is_completed' => $isCompleted,
+			'is_cancelled' => $isCancelled,
+			'close_date' => $rawDate,
+			'close_time' => $rawTime,
+			'close_timestamp' => $closeTimestamp
+		);
+	}
+
+	/**
+	 * 批次取得登記案件結案/辦理狀態資訊
+	 *
+	 * @param array $ids 案號陣列
+	 * @return array 以 13 碼案號為 key 的關聯陣列
+	 */
+	public function getCasesCloseInfo(array $ids) {
+		$results = array();
+		foreach ($ids as $id) {
+			$normId = $id;
+			$info = $this->getCaseCloseInfo($normId);
+			if ($info !== false) {
+				$results[$info['case_id']] = $info;
+			} else {
+				$key = (is_string($normId) && strlen($normId) === 13) ? $normId : str_replace('-', '', (string)$id);
+				$results[$key] = false;
+			}
+		}
+		return $results;
+	}
 }
