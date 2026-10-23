@@ -9,11 +9,13 @@
 ## 📖 目錄 (Table of Contents)
 
 - [1. 專案簡介 (Introduction)](#1-專案簡介-introduction)
-- [2. 系統架構與資料庫整合 (System Architecture)](#2-系統架構與資料庫整合-system-architecture)
+- [2. 系統架構與雙軌並行 (System Architecture & Dual-Track)](#2-系統架構與雙軌並行-system-architecture--dual-track)
+  - [2.1 雙軌架構概覽 (PHP 7.4 vs PHP 8.5)](#21-雙軌架構概覽-php-74-vs-php-85)
+  - [2.2 資料庫整合能力](#22-資料庫整合能力)
 - [3. 目錄結構說明 (Directory Layout)](#3-目錄結構說明-directory-layout)
 - [4. 快速安裝與環境建置 (Quick Start & Installation)](#4-快速安裝與環境建置-quick-start--installation)
   - [English Installation Guide](#english-installation-guide)
-  - [中文手動安裝說明（以 Windows x64 為例）](#中文手動安裝說明以-windows-x64-為例)
+  - [中文手動安裝說明（Windows x64 標準環境）](#中文手動安裝說明windows-x64-標準環境)
 - [5. 環境變數設定與 MOCK 模式 (.env & Configuration)](#5-環境變數設定與-mock-模式-env--configuration)
 - [6. 核心 API 模組一覽 (API Modules Overview)](#6-核心-api-模組一覽-api-modules-overview)
 - [7. 本機開發與聯調 (Local Development)](#7-本機開發與聯調-local-development)
@@ -32,14 +34,57 @@
 
 ---
 
-## 2. 系統架構與資料庫整合 (System Architecture)
+## 2. 系統架構與雙軌並行 (System Architecture & Dual-Track)
 
-系統後端採用 **PHP 7.3** 構建，具備多種異質資料庫連線能力與本地 SQLite 多層快取機制：
+本專案現正推行**「雙軌並行、平滑升級」**架構，兼顧線上既有地政業務穩定與 PHP 現代化遷移：
+
+### 2.1 雙軌架構概覽 (PHP 7.4 vs PHP 8.5)
+
+| 軌道 | 目錄 | 執行期與處理器 | 監聽埠 / 路由 | 主要職責與特點 |
+| :--- | :--- | :--- | :--- | :--- |
+| **線上生產軌道<br>(Legacy)** | `www/` | Apache `mod_php7`<br>(PHP 7.4.33 ZTS) | `http://127.0.0.1/api/*`<br>(Port 80) | 承擔現行線上穩定生產流量，嚴格遵守 PHP 7.3 保守相容性。詳見 [`www/AGENTS.md`](www/AGENTS.md)。 |
+| **現代化移植軌道<br>(Migration)** | `v85/` | PM2 FastCGI 守護<br>(PHP 8.5.12 NTS) | `http://127.0.0.1/v85/api/*`<br>(Port 9085 轉發) | 漸進式移植核心 API，修正 P0/P1 相容性，具備 FastCGI 16 程序併發與 Oracle 9i 雙模連線。詳見 [`v85/README.md`](v85/README.md)。 |
+
+```mermaid
+flowchart TD
+    subgraph Clients["客戶端層 (Clients)"]
+        FE["LAH-FE 智慧管控前端 (Nuxt 2)"]
+        CLIENT["lah-messenger 桌面客戶端 (Electron)"]
+    end
+
+    subgraph Gateway["Web 閘道 (Apache 2.4 - Port 80)"]
+        APACHE["Apache 2.4 (C:\\AppServ\\Apache24)"]
+    end
+
+    subgraph ServiceLayer["雙軌執行期 (Runtime Layer)"]
+        PHP7["舊軌 mod_php7 (C:\\AppServ\\php7)<br/>執行 www/ 原始碼"]
+        PHP85["新軌 PM2 FastCGI lah-api-v85 (127.0.0.1:9085)<br/>C:\\AppServ\\php85\\php-cgi.exe 執行 v85/ 原始碼"]
+    end
+
+    subgraph PersistenceLayer["資料持久層 (Shared Single Source of Truth)"]
+        ENV["共用組態 www/.env (強制 MOCK=true)"]
+        SQLITE[("共用 SQLite 3 快取與分庫<br/>www/assets/db/*.db")]
+        ORACLE[("地政核心 Oracle 9i 資料庫")]
+        MSSQL[("公文歷史 MS SQL Server")]
+    end
+
+    FE --> APACHE
+    CLIENT --> APACHE
+
+    APACHE -- "路徑 /api/*" --> PHP7
+    APACHE -- "路徑 /v85/* (mod_proxy_fcgi)" --> PHP85
+
+    PHP7 --> ENV & SQLITE & ORACLE & MSSQL
+    PHP85 --> ENV & SQLITE & MSSQL
+    PHP85 -. "未載入 oci8 時透過 PHP 7 CLI 橋接" .-> PHP7
+```
+
+### 2.2 資料庫整合能力
 
 | 資料庫類型 | 驅動 / 擴充 | 用途說明 |
 | :--- | :--- | :--- |
-| **Oracle Database** | `php_oci8_11g.dll` | 核心地政業務資料庫（包含主要 HXWEB、備份 BACKUP、測試 HXT，以及 L1HWEB/L2HWEB/L3HWEB 跨所同步庫） |
-| **Microsoft SQL Server** | `php_sqlsrv.dll` | 舊版公文管理、差勤與歷史紀錄查詢庫（`MS_DB_*`, `MS_DOC_DB_*`, `MS_TDOC_DB_*`） |
+| **Oracle Database** | `php_oci8_11g.dll` (www) / 雙模橋接 (v85) | 核心地政業務資料庫（包含主要 HXWEB、備份 BACKUP、測試 HXT，以及 L1HWEB/L2HWEB/L3HWEB 跨所同步庫） |
+| **Microsoft SQL Server** | `php_sqlsrv.dll` / `pdo_odbc` | 舊版公文管理、差勤與歷史紀錄查詢庫（`MS_DB_*`, `MS_DOC_DB_*`, `MS_TDOC_DB_*`） |
 | **SQLite 3** | `pdo_sqlite` / `sqlite3` | 本地快取（`cache.db`）、代碼檔（`RKEYN.db`）、IP解析（`IPResolver.db`）、維度資料與系統備份設定（`dimension.db`） |
 
 ---
@@ -48,100 +93,88 @@
 
 ```text
 LAH-API/
-├── README.md               # 專案說明文件
-├── installation.txt        # 詳細手動部署設定筆記
+├── README.md               # 專案雙軌主說明文件（本文件）
+├── AGENTS.md               # AI Agent 專案分層治理總則（定義雙軌邊界與單一真實來源）
+├── installation.txt        # 手動部署設定筆記
 ├── php.ini-ref             # 產線 php.ini 參考配置
 ├── httpd.conf-ref          # 產線 Apache httpd.conf 參考配置
 ├── snap.jpg                # 系統儀表板畫面預覽
-└── www/                    # Web 服務根目錄 (DocumentRoot / ROOT_DIR)
-    ├── .env.example        # 環境變數設定範本 (35+ 項非 MSSQL 設定)
-    ├── .env                # 實際環境變數檔 (依環境自訂，受 .gitignore 保護)
-    ├── composer.json       # PHP 依賴宣告 (PhpSpreadsheet, php-imap 等)
-    ├── run_dev_http.bat    # 本機開發用內建 HTTP 快速啟動腳本
-    ├── api/                # API 進入點 (共 30+ 支業務 RESTful/JSON API)
-    │   ├── auth_json_api.php         # 認證與登入授權
-    │   ├── query_json_api.php        # 通用查詢、系統設定與看板資訊
-    │   ├── system_json_api.php       # 系統模式開關與代碼檔匯入
-    │   ├── reg_json_api.php          # 登記案件業務查詢
-    │   ├── sur_json_api.php          # 測量業務查詢
-    │   ├── moicas_json_api.php       # MOICAS 相關案件查詢
-    │   ├── notification_json_api.php # 訊息與公告通知查詢
-    │   └── export_xlsx_api.php       # Excel 統計報表匯出
-    ├── include/            # 核心邏輯類別與系統類別庫
-    │   ├── init.php                  # 核心引導初始化、Session 與全域自動載入
-    │   ├── Env.class.php             # 輕量零依賴環境變數解析核心 (.env 讀取)
-    │   ├── System.class.php          # 系統核心設定、權限運算與 MOCK 判斷
-    │   ├── GlobalConstants.inc.php   # 全域常數定義
-    │   ├── GlobalFunctions.inc.php   # 全域公用函式庫
-    │   ├── Cache.class.php           # SQLite 記憶體快取封裝
-    │   ├── OraDB.class.php           # Oracle OCI8 資料庫連線底層
-    │   ├── MSDB.class.php            # MSSQL SQLSRV 連線底層
-    │   ├── SQLiteDBFactory.class.php # SQLite 本地分庫工廠
-    │   └── ...                       # 各業務實體類別
-    ├── assets/             # 系統資源檔
-    │   ├── db/             # SQLite 本地資料庫目錄 (cache.db, dimension.db 等)
-    │   ├── img/            # 圖檔與使用者大頭照目錄
-    │   ├── files/          # SQL 樣板檔 (.tpl) 與法規參考文件
-    │   └── xlsx/           # 統計報表匯出 Excel 樣板
-    ├── project/            # 整合子專案 (航空城、印表機監控、Watchdog 等)
-    ├── import/             # 批次排程匯入作業目錄
-    ├── export/             # 匯出暫存目錄
-    └── log/                # 系統運作與錯誤記錄日誌目錄
+│
+├── www/                    # [舊軌] 線上正式 DocumentRoot (PHP 7.4 執行目錄)
+│   ├── AGENTS.md           # PHP 7.3 線上生產維護規範 (保守維護與最小變更)
+│   ├── .env.example        # 全專案共用環境變數範本 (35+ 項非 MSSQL 設定)
+│   ├── .env                # 全專案唯一設定檔 (受 .gitignore 保護，強制 MOCK=true)
+│   ├── composer.json       # PHP 7 依賴宣告 (PhpSpreadsheet ^1.14 等)
+│   ├── run_dev_http.bat    # 本機開發用內建 HTTP 快速啟動腳本
+│   ├── api/                # 既有線上 API 進入點 (共 30+ 支業務 RESTful/JSON API)
+│   ├── include/            # 既有業務邏輯類別庫 (init.php, System, OraDB 等)
+│   ├── assets/             # 全專案共用資源目錄 (全軌道共用單一真實來源)
+│   │   ├── db/             # 共用 SQLite 本地快取與資料庫目錄 (*.db)
+│   │   ├── img/            # 圖檔與使用者大頭照目錄
+│   │   ├── files/          # SQL 樣板檔 (.tpl) 與法規參考文件
+│   │   └── xlsx/           # 統計報表匯出 Excel 樣板
+│   ├── import/             # 共用批次排程匯入目錄
+│   ├── export/             # 共用匯出暫存目錄
+│   └── log/                # 共用日誌目錄
+│
+└── v85/                    # [新軌] 現代化移植目錄 (PHP 8.5 FastCGI 服務)
+    ├── README.md           # PHP 8.5 移植與雙軌架構技術手冊
+    ├── manual.html         # 離線可列印技術手冊 (含 Oracle 12c 升級備忘錄)
+    ├── AGENTS.md           # PHP 8.5 移植規範 (最小差異移植、P0/P1 修復與驗證清單)
+    ├── ecosystem.config.js # PM2 FastCGI 行程守護設定檔 (lah-api-v85, 16 併發子程序)
+    ├── composer.json       # PHP 8.5 依賴宣告 (PhpSpreadsheet ^2.0)
+    ├── ver.php             # 雙軌健康檢查與模組探針 API (http://127.0.0.1/v85/ver.php)
+    ├── api/                # 已完成 PHP 8.5 移植之核心端點 (auth, system, query 等)
+    └── include/            # 已修復 PHP 8.5 相容之核心類別庫 (含 OraDB 智慧雙模橋接)
 ```
 
 ---
 
 ## 4. 快速安裝與環境建置 (Quick Start & Installation)
 
+各地政事務所伺服器建議全面收斂至 **`C:\AppServ`** 標準架構目錄：
+
 ### English Installation Guide
 
-1. **Install Apache & PHP**: Recommended PHP 7.4 Thread Safe (x64) with Apache 2.4 (x64) or AppServ (x64).
-2. **Setup PHP Extensions**:
-   - Download `php_oci8_11g.dll` (from PECL for Oracle 9i/11g support) and place it in your PHP extensions directory (e.g., `C:\AppServ\php7\ext\`).
-   - Download `php_sqlsrv.dll` (for Microsoft SQL Server support) and place it in `C:\AppServ\php7\ext\`.
-3. **Configure `php.ini`**:
-   - Enable Oracle extension: `extension=oci8_11g` (or `extension=php_oci8_11g.dll`).
-   - Enable MSSQL extension: `extension=sqlsrv` (or `extension=php_sqlsrv.dll`).
-   - Enable SQLite extension: `extension=pdo_sqlite` and `extension=sqlite3`.
-   - Enable additional required modules: `curl`, `fileinfo`, `gd2`, `intl`, `mbstring`, `openssl`, `sockets`.
-4. **Install Oracle Instant Client**:
-   - Download `instantclient-basic-windows.x64-11.2.0.4.0.zip` from Oracle Official Site.
-   - Extract it to a designated path (e.g., `C:\instantclient_11_2`).
-   - Add the Instant Client directory (`C:\instantclient_11_2`) and PHP directory to the Windows **System PATH** environment variable.
-5. **Deploy Source Files**:
-   - Copy all files from the `www/` directory to the web server document root (e.g., `C:\AppServ\www\`).
-   - Copy `www/.env.example` to `www/.env` and update the parameters for your environment.
-6. **Restart Services / Machine**: Restart Apache (or reboot your computer) to apply all environment variables and extensions.
+1. **Server Root Layout**:
+   - Apache 2.4: `C:\AppServ\Apache24`
+   - PHP 7 (Legacy): `C:\AppServ\php7`
+   - PHP 8.5 (Modern): `C:\AppServ\php85`
+   - Production Root (www): `C:\AppServ\www`
+   - Migration Target (v85): `C:\AppServ\v85`
+2. **Oracle Instant Client**:
+   - Extract `instantclient_11_2` to `C:\Tools\instantclient_11_2`.
+   - Add `C:\AppServ\Apache24\bin`, `C:\AppServ\php7`, `C:\AppServ\php85`, and `C:\Tools\instantclient_11_2` to System `PATH`.
+3. **Configure Apache (`httpd.conf`)**:
+   - Point `DocumentRoot` to `C:/AppServ/www`.
+   - Enable `mod_proxy` & `mod_proxy_fcgi` and set `Alias /v85 "C:/AppServ/v85"`.
+   - Forward `/v85/*.php` to `fcgi://127.0.0.1:9085/`.
+4. **Start Services**:
+   - Start Apache: `httpd.exe -k start`.
+   - Start PM2 FastCGI: `cd C:\AppServ\v85 && pm2 start ecosystem.config.js && pm2 save`.
 
 ---
 
-### 中文手動安裝說明（以 Windows x64 為例）
+### 中文手動安裝說明（Windows x64 標準環境）
 
-本系統所有環境元件皆為 **Windows x64** 架構，請依照下列步驟進行安裝設定（建議使用具備系統管理員權限之帳戶）：
-
-#### 步驟 1：安裝 Apache 與 PHP 7.4
-- 建議安裝路徑範例：
-  - Apache24：`D:\DEV\Apache24`
-  - PHP 7.4 (Thread Safe x64)：`D:\DEV\php7`
-  - Oracle Instant Client：`D:\DEV\instantclient_11_2`
+#### 步驟 1：安裝環境與目錄配置
+各所標準安裝路徑：
+- Apache 2.4 (x64)：`C:\AppServ\Apache24`
+- PHP 7.4 (Thread Safe x64)：`C:\AppServ\php7`
+- PHP 8.5 (Non Thread Safe x64)：`C:\AppServ\php85`
+- Oracle Instant Client：`C:\Tools\instantclient_11_2`
 
 #### 步驟 2：設定系統環境變數 (System PATH)
-務必將下列三個路徑加入 Windows 系統環境變數的 `PATH` 中：
-1. `D:\DEV\Apache24\bin`
-2. `D:\DEV\php7`
-3. `D:\DEV\instantclient_11_2`
+將下列路徑加入 Windows 系統環境變數的 `Path` 中：
+1. `C:\AppServ\Apache24\bin`
+2. `C:\AppServ\php7`
+3. `C:\AppServ\php85`
+4. `C:\Tools\instantclient_11_2`
 
-#### 步驟 3：部署資料庫連線 DLL 擴充套件
-1. 下載並複製 **PHP 7.4 x64 Thread Safe** 版本之：
-   - `php_oci8_11g.dll` (支援 Oracle 9i / 11g)
-   - `php_sqlsrv_74_ts.dll` (支援 Microsoft SQL Server)
-2. 放置於 PHP 擴充目錄：`D:\DEV\php7\ext\`
-
-#### 步驟 4：設定 `php.ini`
-編輯 `D:\DEV\php7\php.ini`：
-1. 確認擴充目錄路徑：`extension_dir = "D:/DEV/php7/ext"`
-2. 啟用下列核心模組（移除前面分號或手動加入）：
+#### 步驟 3：設定 `php.ini`
+1. **PHP 7 (`C:\AppServ\php7\php.ini`)**：
    ```ini
+   extension_dir = "C:/AppServ/php7/ext"
    extension=curl
    extension=fileinfo
    extension=gd2
@@ -151,45 +184,79 @@ LAH-API/
    extension=pdo_sqlite
    extension=sqlite3
    extension=sockets
-   ; Oracle 連線
    extension=oci8_11g
-   ; MSSQL 連線
    extension=sqlsrv_74_ts
    ```
-
-#### 步驟 5：設定 Apache `httpd.conf`
-編輯 `D:\DEV\Apache24\conf\httpd.conf`：
-1. 在檔案開頭加入 PHP 模組載入設定：
-   ```apache
-   AddHandler application/x-httpd-php .php
-   AddType application/x-httpd-php .php .html
-   AddType application/x-httpd-php-source .phps
-   LoadModule php7_module "D:/DEV/php7/php7apache2_4.dll"
-   PHPIniDir "D:/DEV/php7"
-   ```
-2. 設定 `DocumentRoot` 指向本專案之 `www` 目錄。
-3. 啟用 `mod_headers` 以支援 CORS 跨域存取：
-   ```apache
-   LoadModule headers_module modules/mod_headers.so
-   ```
-4. 在 `<Directory "D:/DEV/.../www">` 區塊中加入：
-   ```apache
-   Header set Access-Control-Allow-Origin "*"
+2. **PHP 8.5 (`C:\AppServ\php85\php.ini`)**：
+   ```ini
+   extension_dir = "ext"
+   extension=curl
+   extension=fileinfo
+   extension=gd
+   extension=intl
+   extension=mbstring
+   extension=odbc
+   extension=openssl
+   extension=pdo_odbc
+   extension=pdo_sqlite
+   extension=sqlite3
+   extension=sockets
+   extension=zip
    ```
 
-#### 步驟 6：註冊與啟動 Windows 服務
-以管理員身分開啟命令提示字元 (cmd) 執行：
-```cmd
-httpd.exe -k install
-httpd.exe -k start
-```
-可將 `ApacheMonitor.exe` 設為開機自動啟動以利隨時檢視運行狀態。
+#### 步驟 4：設定 Apache `httpd.conf`
+編輯 `C:\AppServ\Apache24\conf\httpd.conf`：
+1. 載入 PHP 7 內嵌模組：
+   ```apache
+   Define SRVROOT "C:/AppServ/Apache24"
+   ServerRoot "${SRVROOT}"
+   LoadFile "C:/AppServ/php7/php7ts.dll"
+   LoadModule php7_module "C:/AppServ/php7/php7apache2_4.dll"
+   PHPIniDir "C:/AppServ/php7"
+   DocumentRoot "C:/AppServ/www"
+   ```
+2. 啟用 FastCGI 模組並設定 `/v85` 雙軌分流：
+   ```apache
+   LoadModule proxy_module modules/mod_proxy.so
+   LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so
+
+   Alias /v85 "C:/AppServ/v85"
+   <Directory "C:/AppServ/v85">
+       Header set Access-Control-Allow-Origin "*"
+       Options Indexes FollowSymLinks
+       AllowOverride None
+       Require all granted
+
+       <FilesMatch "\.php$">
+           <If "-f %{REQUEST_FILENAME}">
+               SetHandler "proxy:fcgi://127.0.0.1:9085/"
+               ProxyFCGISetEnvIf "reqenv('SCRIPT_FILENAME') =~ m#^proxy:fcgi://127\.0\.0\.1:9085/(.*)$#" SCRIPT_FILENAME "$1"
+           </If>
+       </FilesMatch>
+   </Directory>
+
+   <Proxy "fcgi://127.0.0.1:9085/" enablereuse=on max=16>
+       ProxySet timeout=300
+   </Proxy>
+   ```
+
+#### 步驟 5：啟動服務與開機自啟
+1. **啟動 Apache 服務**：
+   ```powershell
+   httpd.exe -k start
+   ```
+2. **啟動 PHP 8.5 FastCGI (PM2)**：
+   ```powershell
+   cd C:\AppServ\v85
+   pm2 start ecosystem.config.js
+   pm2 save
+   ```
 
 ---
 
 ## 5. 環境變數設定與 MOCK 模式 (.env & Configuration)
 
-本專案支援 **雙軌環境設定架構**，具備「`.env` 優先覆蓋，無設定時自動回退 `dimension.db`」之特性：
+全專案統一以 [`www/.env`](www/.env) 作為單一真實來源，`v85/` 透過共用機制自動讀取，嚴禁建立獨立副本：
 
 ### 5.1 設定方式
 1. 複製 `www/.env.example` 為 `www/.env`：
@@ -198,27 +265,20 @@ httpd.exe -k start
    ```
 2. 編輯 `www/.env` 填入該主機站台所屬之 Oracle IP、所別代碼、WebAP 門檻與金鑰。
 
-### 5.2 MOCK 模式（本機開發免連線 Oracle / MSSQL）
-當本機開發無法連線地政內網 Oracle 時，可在 `www/.env` 中開啟 MOCK 模式：
-
+### 5.2 MOCK 模式（開發與離線安全防護）
+在 `www/.env` 中控制 MOCK 開關：
 ```ini
 # 開啟 MOCK 模式（支援 true, false, 1, 0）
 MOCK=true
 ```
-
-- **MOCK 開啟時**：所有地政查詢 API 會優先讀取本地 SQLite 快取或回傳模擬資料，並自動注入本機測試管理者權限，極大加速離線開發效率。
-- **MOCK 關閉時**：設為 `MOCK=false` 或註解該行，系統將回退至正式資料庫連線模式。
-
-### 5.3 設定項歸屬分類
-- **`.env` 管理（共 35+ 項）**：包含 Oracle 各主機 IP/Port、所別 `SITE`、WebAP JNDI 門檻、推播 WebSocket 參數、監控郵件帳密、API 金鑰等。
-- **`dimension.db` 保留管理（共 16 項）**：包含 Microsoft SQL Server 連線參數（`ENABLE_MSSQL_CONN`, `MS_DB_*`, `MS_DOC_DB_*`, `MS_TDOC_DB_*`）。
+- **MOCK 開啟時**：所有地政查詢 API 優先讀取本地 SQLite 快取或回傳模擬資料，並自動注入本機測試管理者權限。
+- **Agent 約束**：使用 Agent 進行開發協作時，`MOCK=true` 強制保持開啟，嚴禁未經授權連線實體 Oracle。
 
 ---
 
 ## 6. 核心 API 模組一覽 (API Modules Overview)
 
-所有 API 端點皆位於 `/api/` 目錄下，遵循標準 JSON 回應協定：
-
+API 端點遵循標準 JSON 回應協定：
 ```json
 {
   "status": 1,
@@ -227,38 +287,49 @@ MOCK=true
 }
 ```
 
-| API 端點 | 主要功能 | 說明 |
+| API 端點 (舊軌 `/api/` ； 新軌 `/v85/api/`) | 主要功能 | 說明 |
 | :--- | :--- | :--- |
-| `api/auth_json_api.php` | 登入與身份驗證 | 包含使用者權限驗證、IP 登入檢查與 WebSocket 資訊獲取 |
-| `api/query_json_api.php` | 綜合資訊與設定查詢 | 查詢 `configs` 系統參數、綜合看板統計、快照歷史等 |
-| `api/system_json_api.php` | 系統模式與代碼維護 | 切換 MOCK/MSSQL 模式、同步匯入 SYSAUTH1 使用者名冊與 RKEYN 代碼 |
-| `api/reg_json_api.php` | 登記案件管理 | 逾期管制、未歸檔案件追蹤、地籍異動與外國人地權管控 |
-| `api/sur_json_api.php` | 測量案件業務 | 建物滅失追蹤管制、測量延期管制與會同辦理案件查詢 |
-| `api/moicas_json_api.php` | 地政核心系統介接 | MOICAS 案件跨所、跨縣市、跨域代收代寄與智慧控管系統查詢 |
-| `api/notification_json_api.php`| 訊息與公告通知 | 公告推播、課室廣播紀錄回溯與附檔自動關聯讀取 |
-| `api/stats_json_api.php` | 業務統計看板 | 今日案件、各所跨所業務量、謄本核發量即時統計 |
-| `api/export_xlsx_api.php` | Excel 報表匯出 | 統計數據轉化並套用官方樣板匯出 Excel 活頁簿 |
-| `api/export_txt_data.php` | 地籍匯出與資料打包 | 支援大筆地籍文字檔產出、ZIP 壓縮串流下載與定時清理 |
+| `auth_json_api.php` | 登入與身份驗證 | 使用者權限驗證、IP 登入檢查與 WebSocket 資訊獲取 |
+| `query_json_api.php` | 綜合資訊與設定查詢 | 查詢 `configs` 系統參數、綜合看板統計、快照歷史 |
+| `system_json_api.php` | 系統模式與代碼維護 | 切換 MOCK/MSSQL 模式、全縣事務所代碼、使用者名冊同步 |
+| `reg_json_api.php` | 登記案件管理 | 逾期管制、未歸檔案件追蹤、地籍異動與外國人地權管控 |
+| `sur_json_api.php` | 測量案件業務 | 建物滅失追蹤管制、測量延期管制與會同辦理案件查詢 |
+| `moicas_json_api.php` | 地政核心系統介接 | MOICAS 案件跨所、跨縣市、跨域代收代寄與智慧控管系統查詢 |
+| `notification_json_api.php`| 訊息與公告通知 | 公告推播、課室廣播紀錄回溯與附檔自動關聯讀取 |
+| `stats_json_api.php` | 業務統計看板 | 今日案件、各所跨所業務量、謄本核發量即時統計 |
+| `export_xlsx_api.php` | Excel 報表匯出 | 統計數據轉化並套用官方樣板匯出 Excel 活頁簿 |
+| `export_txt_data.php` | 地籍匯出與資料打包 | 支援大筆地籍文字檔產出、ZIP 壓縮串流下載與定時清理 |
 
 ---
 
 ## 7. 本機開發與聯調 (Local Development)
 
-針對日常前後端聯調，可直接使用 PHP 內建伺服器快速啟動：
+### 方式 A：一鍵啟動工作區整合開發環境（推薦）
+雙擊或於終端機執行根目錄快捷腳本：
+```powershell
+.\start_dev.bat
+```
+腳本會自動檢查並啟動 Apache（Port 80）、前端 `LAH-FE`（Port 8080）與即時通推播伺服器 `lah-messenger-server`（Port 8081/8082），並於背景保持 PM2 託管之 `lah-api-v85`（Port 9085）。
 
-1. 進入 `www/` 目錄並執行快速啟動批次檔：
-   ```cmd
-   cd www
-   run_dev_http.bat
-   ```
-   *(等同於執行：`php.exe -S 0.0.0.0:80 -t .`)*
+### 方式 B：雙軌獨立啟動與驗證
 
-2. 若有啟動前端 `LAH-FE` 或 `lah-messenger`，確保前端代理或 API URL 指向 `http://127.0.0.1:80`。
+1. **舊軌 (PHP 7.4) 獨立測試**：
+   - 瀏覽器開啟 `http://127.0.0.1/ver.php` 確認顯示 PHP 7.4.33。
+   - 若不開 Apache，可進入 `www/` 執行內建伺服器：`cd www && run_dev_http.bat`。
+2. **新軌 (PHP 8.5) 獨立測試**：
+   - 確認 PM2 守護狀態：`pm2 status`（確認 `lah-api-v85` 為 `online`）。
+   - 瀏覽器開啟 `http://127.0.0.1/v85/ver.php` 確認回傳 `"channel": "v85"`, `"php_version": "8.5.12"`。
+   - 若欲單獨除錯 PHP 8.5：
+     ```powershell
+     C:\AppServ\php85\php.exe -S 127.0.0.1:8085 -t C:\AppServ\v85
+     ```
+     瀏覽器開啟 `http://127.0.0.1:8085/ver.php`。
 
 ---
 
 ## 8. 注意事項 (Notes & Limitations)
 
-- **不支援 Internet Explorer (NO IE support)**：前端畫面與 API 通訊採用現代標準規範（RFC 5987 UTF-8 Content-Disposition、Fetch/Axios、現代密碼雜湊等），已全面停止支援 IE 瀏覽器。
+- **不支援 Internet Explorer (NO IE support)**：系統採用現代標準規範（RFC 5987 UTF-8、Fetch/Axios 等），全面停止支援 IE。
 - **Windows 檔案編碼**：專案內部腳本全面採用 **UTF-8（無 BOM）** 編碼。
-- **環境變數安全性**：`www/.env` 包含敏感資料庫密碼與 API 金鑰，已列入 `.gitignore`，切勿將其推播至公開版本控制倉庫。
+- **環境變數安全性**：`www/.env` 包含資料庫密碼與 API 金鑰，已列入 `.gitignore`，切勿推播至公開儲存庫。
+- **雙軌遷移參考指引**：詳細 PHP 8.5 移植步驟、Oracle 9i 雙模連線與 Oracle 12c 升級備忘，請參閱 [`v85/README.md`](v85/README.md) 與 [`v85/manual.html`](v85/manual.html)。
