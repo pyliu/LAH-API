@@ -1,4 +1,4 @@
-﻿# LAH-API
+# LAH-API
 
 > 地政中台核心 Web API 服務 (A WEB API for LAH-FE & lah-messenger)
 
@@ -43,7 +43,7 @@
 | 軌道 | 目錄 | 執行期與處理器 | 監聽埠 / 路由 | 主要職責與特點 |
 | :--- | :--- | :--- | :--- | :--- |
 | **線上生產軌道<br>(Legacy)** | `www/` | Apache `mod_php7`<br>(PHP 7.4.33 ZTS) | `http://127.0.0.1/api/*`<br>(Port 80) | 承擔現行線上穩定生產流量，嚴格遵守 PHP 7.3 保守相容性。詳見 [`www/AGENTS.md`](www/AGENTS.md)。 |
-| **現代化移植軌道<br>(Migration)** | `API/` | PM2 FastCGI 守護<br>(PHP 8.5.12 NTS) | `http://127.0.0.1/v85/api/*`<br>(Port 9085 轉發) | 漸進式移植核心 API，修正 P0/P1 相容性，具備 FastCGI 16 程序併發與 Oracle 9i 雙模連線。詳見 [`API/README.md`](API/README.md)。 |
+| **現代化移植軌道<br>(Migration)** | `API/` | PM2 FastCGI 守護<br>(PHP 8.5.12 NTS) | `http://127.0.0.1/LAH-API/api/*`<br>(Port 9085 轉發) | 漸進式移植核心 API，修正 P0/P1 相容性，具備 FastCGI 16 程序併發與 Oracle 9i 雙模連線。詳見 [`API/README.md`](API/README.md)。 |
 
 ```mermaid
 flowchart TD
@@ -72,7 +72,7 @@ flowchart TD
     CLIENT --> APACHE
 
     APACHE -- "路徑 /api/*" --> PHP7
-    APACHE -- "路徑 /v85/* (mod_proxy_fcgi)" --> PHP85
+    APACHE -- "路徑 /LAH-API/* (mod_proxy_fcgi)" --> PHP85
 
     PHP7 --> ENV & SQLITE & ORACLE & MSSQL
     PHP85 --> ENV & SQLITE & MSSQL
@@ -123,7 +123,7 @@ LAH-API/
     ├── AGENTS.md           # PHP 8.5 移植規範 (最小差異移植、P0/P1 修復與驗證清單)
     ├── ecosystem.config.js # PM2 FastCGI 行程守護設定檔 (lah-api-v85, 16 併發子程序)
     ├── composer.json       # PHP 8.5 依賴宣告 (PhpSpreadsheet ^2.0)
-    ├── ver.php             # 雙軌健康檢查與模組探針 API (http://127.0.0.1/v85/ver.php)
+    ├── ver.php             # 雙軌健康檢查與模組探針 API (http://127.0.0.1/LAH-API/ver.php)
     ├── api/                # 已完成 PHP 8.5 移植之核心端點 (auth, system, query 等)
     └── include/            # 已修復 PHP 8.5 相容之核心類別庫 (含 OraDB 智慧雙模橋接)
 ```
@@ -141,17 +141,17 @@ LAH-API/
    - PHP 7 (Legacy): `C:\AppServ\php7`
    - PHP 8.5 (Modern): `C:\AppServ\php85`
    - Production Root (www): `C:\AppServ\www`
-   - Migration Target (v85): `C:\AppServ\API`
+   - Migration Target (v85): `C:\AppServ\LAH-API`
 2. **Oracle Instant Client**:
    - Extract `instantclient_11_2` to `C:\Tools\instantclient_11_2`.
    - Add `C:\AppServ\Apache24\bin`, `C:\AppServ\php7`, `C:\AppServ\php85`, and `C:\Tools\instantclient_11_2` to System `PATH`.
 3. **Configure Apache (`httpd.conf`)**:
    - Point `DocumentRoot` to `C:/AppServ/www`.
-   - Enable `mod_proxy` & `mod_proxy_fcgi` and set `Alias /v85 "C:/AppServ/API"`.
+   - Enable `mod_proxy` & `mod_proxy_fcgi` and set `Alias /LAH-API "C:/AppServ/LAH-API"`.
    - Forward `/v85/*.php` to `fcgi://127.0.0.1:9085/`.
 4. **Start Services**:
    - Start Apache: `httpd.exe -k start`.
-   - Start PM2 FastCGI: `cd C:\AppServ\API && pm2 start ecosystem.config.js && pm2 save`.
+   - Start PM2 FastCGI: `cd C:\AppServ\LAH-API && pm2 start ecosystem.config.js && pm2 save`.
 
 ---
 
@@ -220,8 +220,8 @@ LAH-API/
    LoadModule proxy_module modules/mod_proxy.so
    LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so
 
-   Alias /v85 "C:/AppServ/API"
-   <Directory "C:/AppServ/API">
+   Alias /LAH-API "C:/AppServ/LAH-API"
+   <Directory "C:/AppServ/LAH-API">
        Header set Access-Control-Allow-Origin "*"
        Options Indexes FollowSymLinks
        AllowOverride None
@@ -247,7 +247,7 @@ LAH-API/
    ```
 2. **啟動 PHP 8.5 FastCGI (PM2)**：
    ```powershell
-   cd C:\AppServ\API
+   cd C:\AppServ\LAH-API
    pm2 start ecosystem.config.js
    pm2 save
    ```
@@ -287,7 +287,7 @@ API 端點遵循標準 JSON 回應協定：
 }
 ```
 
-| API 端點 (舊軌 `/api/` ； 新軌 `/v85/api/`) | 主要功能 | 說明 |
+| API 端點 (舊軌 `/api/` ； 新軌 `/LAH-API/api/`) | 主要功能 | 說明 |
 | :--- | :--- | :--- |
 | `auth_json_api.php` | 登入與身份驗證 | 使用者權限驗證、IP 登入檢查與 WebSocket 資訊獲取 |
 | `query_json_api.php` | 綜合資訊與設定查詢 | 查詢 `configs` 系統參數、綜合看板統計、快照歷史 |
@@ -318,10 +318,10 @@ API 端點遵循標準 JSON 回應協定：
    - 若不開 Apache，可進入 `www/` 執行內建伺服器：`cd www && run_dev_http.bat`。
 2. **新軌 (PHP 8.5) 獨立測試**：
    - 確認 PM2 守護狀態：`pm2 status`（確認 `lah-api-v85` 為 `online`）。
-   - 瀏覽器開啟 `http://127.0.0.1/v85/ver.php` 確認回傳 `"channel": "v85"`, `"php_version": "8.5.12"`。
+   - 瀏覽器開啟 `http://127.0.0.1/LAH-API/ver.php` 確認回傳 `"channel": "LAH-API"`, `"php_version": "8.5.12"`。
    - 若欲單獨除錯 PHP 8.5：
      ```powershell
-     C:\AppServ\php85\php.exe -S 127.0.0.1:8085 -t C:\AppServ\API
+     C:\AppServ\php85\php.exe -S 127.0.0.1:8085 -t C:\AppServ\LAH-API
      ```
      瀏覽器開啟 `http://127.0.0.1:8085/ver.php`。
 

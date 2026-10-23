@@ -558,11 +558,12 @@ PHPIniDir "C:/AppServ/php7"
 </FilesMatch>
 
 # =====================================================================
-# LAH-API v85 (PHP 8.5 FastCGI via PM2 on 127.0.0.1:9085) Dual-Track
+# LAH-API (PHP 8.5 FastCGI via PM2 on 127.0.0.1:9085)
 # =====================================================================
-Alias /v85 "C:/AppServ/API"
+Alias /LAH-API "C:/AppServ/LAH-API"
+Alias /lah-api "C:/AppServ/LAH-API"
 
-<Directory "C:/AppServ/API">
+<Directory "C:/AppServ/LAH-API">
     Header set Access-Control-Allow-Origin "*"
     Options Indexes FollowSymLinks
     AllowOverride None

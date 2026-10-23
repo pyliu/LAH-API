@@ -2,7 +2,7 @@
 header('Content-Type: application/json; charset=utf-8');
 echo json_encode([
     'status' => 1,
-    'channel' => 'v85',
+    'channel' => 'LAH-API',
     'php_version' => PHP_VERSION,
     'sapi' => PHP_SAPI,
     'extensions' => [

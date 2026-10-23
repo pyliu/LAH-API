@@ -54,7 +54,7 @@ flowchart TD
 
     FE & MSG -- "HTTP 請求" --> ROUTER
     ROUTER -- "舊路徑 /api/*" --> MODPHP
-    ROUTER -- "新路徑 /v85/api/*<br/>(或已移植之 API)" --> MODFCGI
+    ROUTER -- "新路徑 /LAH-API/api/*<br/>(或已移植之 API)" --> MODFCGI
     MODPHP --> WWW
     MODFCGI --> PM2_PHP85
     PM2_PHP85 --> V85
@@ -93,7 +93,7 @@ module.exports = {
       name: "lah-api-v85",
       script: "C:\\AppServ\\php85\\php-cgi.exe",
       args: "-b 127.0.0.1:9085 -c C:\\AppServ\\php85\\php.ini",
-      cwd: __dirname,               // 自動取得目錄（各所伺服器與開發筆電 Junction 皆為 C:\\AppServ\\API）,
+      cwd: __dirname,               // 自動取得目錄（各所伺服器與開發筆電 Junction 皆為 C:\\AppServ\\LAH-API）,
       interpreter: "none",          // 關鍵：告知 PM2 這是原生 .exe，不透過 node 執行
       exec_mode: "fork",            // 關鍵限制：PM2 cluster 僅支援 Node.js；原生 .exe 設 cluster 會因監聽同 Port 衝突 (EADDRINUSE) 崩潰，故必須使用 fork 模式
       instances: 1,                 // PM2 僅需守護 1 個主父程序，內部多程序併發完全交由下方的 PHP_FCGI_CHILDREN 接管
@@ -195,7 +195,7 @@ c:\Temp\DEV\LAH-Workspace\LAH-API\
     ├── ecosystem.config.js             # PM2 啟動 PHP 8.5 FastCGI 設定檔
     ├── composer.json                   # PHP 8.5 專用套件宣告 (PhpSpreadsheet ^2.0)
     ├── vendor/                         # PHP 8.5 專用 Composer 依賴目錄
-    ├── ver.php                         # PHP 8.5 雙軌健康檢查端點 (/v85/ver.php)
+    ├── ver.php                         # PHP 8.5 雙軌健康檢查端點 (/LAH-API/ver.php)
     ├── include/                        # 修正 PHP 8.5 相容性後之核心類別
     │   ├── init.php
     │   ├── Env.class.php
@@ -203,7 +203,7 @@ c:\Temp\DEV\LAH-Workspace\LAH-API\
     │   ├── GlobalFunctions.inc.php
     │   ├── System.class.php
     │   └── OraDB.class.php
-    └── api/                            # 逐支移植過來的 API 端點 (/v85/api/*.php)
+    └── api/                            # 逐支移植過來的 API 端點 (/LAH-API/api/*.php)
 ```
 
 ### 4.2 `v85/include/GlobalConstants.inc.php` 路徑常數對齊寫法
@@ -294,9 +294,9 @@ LoadModule rewrite_module modules/mod_rewrite.so
 # =====================================================================
 
 # 1. 將 /v85 虛擬路徑映射至實體 LAH-API/API 目錄
-Alias /v85 "C:/AppServ/API"
+Alias /LAH-API "C:/AppServ/LAH-API"
 
-<Directory "C:/AppServ/API">
+<Directory "C:/AppServ/LAH-API">
     Header set Access-Control-Allow-Origin "*"
     Options Indexes FollowSymLinks
     AllowOverride None
@@ -396,7 +396,7 @@ Alias /v85 "C:/AppServ/API"
 1. 將第二章的 `ecosystem.config.js` 存放在 `c:\Temp\DEV\LAH-Workspace\LAH-API\API\ecosystem.config.js`。
 2. 在 PowerShell 啟動 PM2 服務（直接使用您現有的 Node v16 環境即可）：
    ```powershell
-   cd C:\AppServ\API
+   cd C:\AppServ\LAH-API
    pm2 start ecosystem.config.js
    pm2 status
    ```
@@ -409,7 +409,7 @@ Alias /v85 "C:/AppServ/API"
 * **情境 A（筆電已安裝並啟動 Apache 2.4）**：
   依第六章設定好 `httpd.conf` 並重啟 Apache 後，開啟瀏覽器分別測試：
   * `http://127.0.0.1/ver.php` 👉 由舊版 `mod_php7` 回應（顯示 PHP 7.3 / 7.4）。
-  * `http://127.0.0.1/v85/ver.php` 👉 由 Apache `mod_proxy_fcgi` 轉發給 PM2 的 PHP 8.5 回應（顯示 `"php_version": "8.5.x"`, `"sapi": "cgi-fcgi"`）！
+  * `http://127.0.0.1/LAH-API/ver.php` 👉 由 Apache `mod_proxy_fcgi` 轉發給 PM2 的 PHP 8.5 回應（顯示 `"php_version": "8.5.x"`, `"sapi": "cgi-fcgi"`）！
 * **情境 B（筆電平時沒開 Apache，而是用 `start_dev.bat` 內建伺服器）**：
   在筆電日常不開 Apache 時，也可隨時直接用 PHP 8.5 內建伺服器在 Port `8085` 快速測試 `v85/`：
   ```powershell

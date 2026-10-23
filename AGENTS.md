@@ -12,7 +12,7 @@
 | 目錄 | 軌道角色 | 執行環境與技術棧 | 路由與監聽埠 | 適用 Agent 規範 |
 |---|---|---|---|---|
 | `./www/` | **線上生產軌道 (Legacy Production)** | PHP 7.3 / 7.4、Apache `mod_php7`、Oracle 9i (OCI8)、SQLite 3 | `http://127.0.0.1/api/*.php` (Port 80) | 參閱 [`www/AGENTS.md`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/www/AGENTS.md) |
-| `./API/` | **現代化移植軌道 (PHP 8.5 Migration)** | PHP 8.5.12 NTS、PM2 FastCGI 守護 (`php-cgi.exe`)、智慧雙模連線 | `http://127.0.0.1/v85/api/*.php` (Port 9085 轉發) | 參閱 [`API/AGENTS.md`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/API/AGENTS.md) |
+| `./API/` | **現代化移植軌道 (PHP 8.5 Migration)** | PHP 8.5.12 NTS、PM2 FastCGI 守護 (`php-cgi.exe`)、智慧雙模連線 | `http://127.0.0.1/LAH-API/api/*.php` (Port 9085 轉發) | 參閱 [`API/AGENTS.md`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/API/AGENTS.md) |
 
 ### 1.1 架構資料流向
 
@@ -42,7 +42,7 @@ flowchart TD
     CLIENT --> APACHE
 
     APACHE -- "路徑 /api/*" --> PHP7
-    APACHE -- "路徑 /v85/* (mod_proxy_fcgi)" --> PHP85
+    APACHE -- "路徑 /LAH-API/* (mod_proxy_fcgi)" --> PHP85
 
     PHP7 --> ENV
     PHP7 --> SQLITE

@@ -165,7 +165,7 @@
 
 <div class="meta-box">
   <strong>文件版本：</strong>v1.1（2026-10-23）<br>
-  <strong>目標目錄：</strong><code>C:\AppServ\API\</code>（開發環境映射至 <code>c:\Temp\DEV\LAH-Workspace\LAH-API\API\</code>）<br>
+  <strong>目標目錄：</strong><code>C:\AppServ\LAH-API\</code>（開發環境映射至 <code>c:\Temp\DEV\LAH-Workspace\LAH-API\API\</code>）<br>
   <strong>採用架構：</strong>保留 Apache 2.4 (<code>mod_php7</code> + <code>mod_proxy_fcgi</code>) ＋ PM2 託管 PHP 8.5 FastCGI (<code>127.0.0.1:9085</code>，16 子程序併發)<br>
   <strong>資料庫環境：</strong>後端地政核心 Oracle 9i（搭配 <code>instantclient_11_2</code> 智慧雙模）＋ 本地快取 SQLite 3 ＋ 舊公文 MS SQL Server
 </div>
@@ -207,7 +207,7 @@ flowchart TD
     CLIENT --> APACHE
 
     APACHE -- "路徑 /api/*" --> PHP7
-    APACHE -- "路徑 /v85/* (mod_proxy_fcgi)" --> PHP85
+    APACHE -- "路徑 /LAH-API/* (mod_proxy_fcgi)" --> PHP85
 
     PHP7 --> ENV & SQLITE & ORACLE & MSSQL
     PHP85 --> ENV & SQLITE & MSSQL
@@ -250,7 +250,7 @@ flowchart TD
   </li>
 </ol>
 
-<h3>2.3 PM2 FastCGI 服務設定檔（<code>C:\AppServ\API\ecosystem.config.js</code>）</h3>
+<h3>2.3 PM2 FastCGI 服務設定檔（<code>C:\AppServ\LAH-API\ecosystem.config.js</code>）</h3>
 <p>以下為專案標準 <code>ecosystem.config.js</code> 配置：</p>
 <pre><code>module.exports = {
   apps: [
@@ -332,7 +332,7 @@ flowchart TD
   <li><strong>重啟 PM2 服務即自動完成切換</strong>：
     <ul>
       <li>執行 <code>pm2 restart lah-api-v85 --update-env</code>。</li>
-      <li>開啟 <code>http://127.0.0.1/v85/ver.php</code> 確認 <code>"oci8": true</code>。</li>
+      <li>開啟 <code>http://127.0.0.1/LAH-API/ver.php</code> 確認 <code>"oci8": true</code>。</li>
       <li>一旦 <code>extension_loaded('oci8')</code> 為 <code>true</code>，<code>API/include/OraDB.class.php</code> 的 <code>$this-&gt;use_cli_bridge</code> 會自動變為 <code>false</code>，<strong>一行 PHP 程式碼都不用改</strong>，系統就會自動跳過 PHP 7.4 橋接，全面改走純 PHP 8.5 原生 <code>oci_connect()</code>、<code>oci_parse()</code> 與 <code>oci_bind_by_name()</code> 高速直連 Oracle 12c，屆時即可正式退役移除舊版 PHP 7.4！</li>
     </ul>
   </li>
@@ -407,9 +407,9 @@ LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so
 LoadModule rewrite_module modules/mod_rewrite.so</code></pre>
 
 <p><strong>2. 於 <code>httpd.conf</code> 最下方加入 <code>/v85</code> 路由轉發區塊：</strong></p>
-<pre><code>Alias /v85 "C:/AppServ/API"
+<pre><code>Alias /LAH-API "C:/AppServ/LAH-API"
 
-&lt;Directory "C:/AppServ/API"&gt;
+&lt;Directory "C:/AppServ/LAH-API"&gt;
     Header set Access-Control-Allow-Origin "*"
     Options Indexes FollowSymLinks
     AllowOverride None
@@ -433,13 +433,13 @@ LoadModule rewrite_module modules/mod_rewrite.so</code></pre>
   <li><strong>安裝 PHP 8.5 NTS</strong>：下載 Windows PHP 8.5 (VS17 x64 Non Thread Safe) 解壓至 <code>C:\AppServ\php85</code>，複製 <code>php.ini-development</code> 為 <code>php.ini</code>，開啟 <code>curl, fileinfo, gd, intl, mbstring, odbc, openssl, pdo_odbc, pdo_sqlite, sqlite3, sockets, zip</code>。</li>
   <li><strong>建立 <code>LAH-API\API</code> 目錄</strong>：將 <code>LAH-API\v1</code> 重新命名為 <code>LAH-API\API</code>，放入 <code>ecosystem.config.js</code> 與測試用 <code>ver.php</code>。</li>
   <li><strong>使用 PM2 啟動 PHP 8.5 FastCGI</strong>：
-    <pre><code>cd C:\AppServ\API
+    <pre><code>cd C:\AppServ\LAH-API
 pm2 start ecosystem.config.js
 pm2 status</code></pre>
   </li>
   <li><strong>驗證雙軌連線</strong>：
     <ul>
-      <li>若已啟動 Apache 2.4：瀏覽器開啟 <code>http://127.0.0.1/ver.php</code> (顯示 PHP 7.4) 與 <code>http://127.0.0.1/v85/ver.php</code> (顯示 PHP 8.5 <code>cgi-fcgi</code>)。</li>
+      <li>若已啟動 Apache 2.4：瀏覽器開啟 <code>http://127.0.0.1/ver.php</code> (顯示 PHP 7.4) 與 <code>http://127.0.0.1/LAH-API/ver.php</code> (顯示 PHP 8.5 <code>cgi-fcgi</code>)。</li>
       <li>若筆電未開 Apache，想快速單獨測 PHP 8.5：執行 <code>C:\AppServ\php85\php.exe -S 127.0.0.1:8085 -t c:\Temp\DEV\LAH-Workspace\LAH-API\API</code>，開啟 <code>http://127.0.0.1:8085/ver.php</code>。</li>
     </ul>
   </li>
