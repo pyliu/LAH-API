@@ -214,7 +214,7 @@ flowchart TD
     PHP85 -. "未載入 oci8 時透過 PHP 7 CLI 橋接" .-> PHP7
 </pre>
 
-<h2>第二章：Node.js v16 限制、PM2 託管與 <code>nvm-windows</code> 完整解析</h2>
+<h2>第二章：Node.js v16 限制、PM2 託管與 <code>C:\AppServ\node</code> 隔離架構</h2>
 
 <h3>2.1 關鍵解答：PM2 託管 PHP 8.5 完全不受 Node.js v16 限制！</h3>
 <ul>
@@ -222,16 +222,33 @@ flowchart TD
   PM2 雖然執行於 Node.js v16 上，但當設定 <code>interpreter: "none"</code> 時，PM2 是直接透過 Windows 系統呼叫啟動原生的 <code>C:\AppServ\php85\php-cgi.exe</code> 執行檔，並監控其 PID。因此，<strong>現有跑在 Node.js v16 上的 PM2 可以直接同時管理 <code>LAH-FE</code> (Node 16)、<code>lah-messenger-server</code> 與 <code>lah-api-v85</code> (PHP 8.5)</strong>，完全不會互相干擾！</li>
 </ul>
 
-<h3>2.2 進階：若未來同台伺服器需安裝 <code>nvm-windows</code> 跑多版本 Node.js 的避坑指南</h3>
-<div class="callout-warn">
-  <strong>⚠️ Windows 上使用 <code>nvm-windows</code> 的重要陷阱：</strong><br>
-  <code>nvm use &lt;version&gt;</code> 在 Windows 的原理是切換全域符號連結 <code>C:\Program Files\nodejs</code>。若在伺服器上直接執行 <code>nvm use 22</code>，當 <code>LAH-FE</code> 重啟時會誤抓到 Node 22 而崩潰！<br>
-  <strong>正確作法（進階實體隔離方案）：</strong>
-  <ol>
-    <li>若未來有需要跑 Node 22 的專案，直接下載 Node 22 zip 解壓至 <code>C:\Tools\node-v22\</code>。</li>
-    <li>在該專案的 PM2 設定檔或啟動腳本內，以絕對路徑指向 <code>C:\Tools\node-v22\node.exe</code>，完全不碰全域 PATH 與 NVM 切換，現有 <code>LAH-FE</code> 便永遠安全。</li>
-  </ol>
+<h3>2.2 進階避坑與架構設計：<code>LAH-FE</code> 的 Cluster 限制與 <code>C:\AppServ\node</code> 專屬隔離</h3>
+<div class="callout-tip">
+  <strong>💡 核心觀念：PM2 <code>cluster</code> 模式下的 <code>interpreter</code> 繼承原理</strong><br>
+  工程師常直覺想在 <code>LAH-FE</code> 的 <code>ecosystem.config.js</code> 中指定 <code>interpreter: "C:/AppServ/node/node.exe"</code> 來鎖定 Node 16。然而在 PM2 的底層架構中：
+  <ul>
+    <li><strong><code>exec_mode: "cluster"</code>（多行程負載均衡）</strong>：Node.js 核心的 <code>cluster.fork()</code> 深度依賴 PM2 Daemon 所在的執行緒，<strong>在 cluster 模式下 PM2 會忽略自訂 interpreter 路徑，強制繼承啟動 PM2 Daemon 本身的 Node 版本</strong>！</li>
+    <li><strong><code>exec_mode: "fork"</code>（單行程分支模式）</strong>：自訂 <code>interpreter</code> 才能生效，但會失去 PM2 內建的 Cluster 多核負載均衡與零停機熱重載優勢。</li>
+  </ul>
 </div>
+
+<div class="callout-warn">
+  <strong>⚠️ Windows 上全域升級或 <code>nvm-windows</code> 的潛在風險：</strong><br>
+  <code>nvm use &lt;version&gt;</code> 在 Windows 的原理是動態切換全域符號連結 <code>C:\Program Files\nodejs</code>。若管理師日後在伺服器全域安裝或切換至 Node 20/22，當 PM2 守護服務重啟時，PM2 Daemon 便會誤以 Node 20/22 啟動，進而導致以 <code>cluster</code> 模式運行的 <code>LAH-FE</code> (Nuxt 2 / Vue 2) 因 Webpack 4 與原生模組 ABI 不相容而崩潰！
+</div>
+
+<p><strong>🎯 官方最佳實踐（實體專屬隔離方案）：將 Node 16.20.2 集中部署至 <code>C:\AppServ\node\</code></strong></p>
+<ol>
+  <li><strong>集中放置綠色執行檔</strong>：
+    下載 Node.js 官方最終版本 <code>node-v16.20.2-win-x64.zip</code> 解壓至 <code>C:\AppServ\node\</code>（內含 <code>node.exe</code>、<code>npm</code>、<code>yarn</code>、<code>pm2</code>）。
+  </li>
+  <li><strong>鎖定 PM2 守護服務啟動源</strong>：
+    在 Windows 服務或 PM2 啟動腳本中，<strong>明確由 <code>C:\AppServ\node\node.exe</code> 來喚醒 PM2 Daemon</strong>（例如 <code>"C:\AppServ\node\node.exe" "C:\AppServ\node\node_modules\pm2\bin\pm2" resurrect</code>）。
+  </li>
+  <li><strong>徹底免疫全域環境變更</strong>：
+    如此一來，PM2 Daemon 本身永遠 100% 固定跑在 Node 16.20.2 上，底下的 <code>LAH-FE</code>（Nuxt 2）與 <code>lah-messenger-server</code> 在 <code>cluster</code> 模式下自然繼承穩定的 Node 16 執行期。無論整台伺服器全域安裝了什麼軟體或如何切換 NVM，地政智慧管控系統皆能永久穩定運行！
+  </li>
+</ol>
 
 <h3>2.3 PM2 FastCGI 服務設定檔（<code>C:\AppServ\v85\ecosystem.config.js</code>）</h3>
 <p>以下為專案標準 <code>ecosystem.config.js</code> 配置：</p>
