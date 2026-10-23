@@ -316,7 +316,7 @@ Alias /v85 "c:/Temp/DEV/LAH-Workspace/LAH-API/v85"
 
 ## 第七章：開發筆電（`c:\Temp\DEV\LAH-Workspace`）實作步驟 Step-by-Step
 
-以下步驟專為您的開發筆電量身打造，與您現有的 `C:\Tools\php74` 及 [`start_dev.bat`](file:///c:/Temp/DEV/LAH-Workspace/start_dev.bat) 完全相容：
+以下步驟專為您的開發筆電量身打造，與您現有的 `C:\AppServ\php7` 及 [`start_dev.bat`](file:///c:/Temp/DEV/LAH-Workspace/start_dev.bat) 完全相容：
 
 ### Step 1：準備 PHP 8.5 (NTS x64) 執行環境
 1. 前往 [windows.php.net/download](https://windows.php.net/download/) 下載 **PHP 8.5 (8.5.x) VS17 x64 Non Thread Safe (NTS)** `.zip` 壓縮包。

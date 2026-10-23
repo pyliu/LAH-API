@@ -273,7 +273,7 @@
   <li>在 <code>v85/include/OraDB.class.php</code> 的建構子（第 81 行）中已預先寫入自動偵測邏輯：
     <pre><code>$this-&gt;use_cli_bridge = !extension_loaded('oci8');</code></pre>
   </li>
-  <li><strong>現階段（後端為 Oracle 9i）</strong>：PHP 8.5 的 <code>php.ini</code> 未開啟 <code>oci8</code>，因此 <code>$this-&gt;use_cli_bridge</code> 為 <code>true</code>。當呼叫 <code>$db-&gt;execute()</code> 時，會自動走<strong>方案 1（本機 PHP 7.4 內部橋接）</strong>，透過 <code>proc_open</code> 呼叫 <code>C:\Tools\php74\php.exe</code> 執行同目錄下的 <code>v85/include/ora_cli_worker.php</code>（搭配 <code>instantclient_11_2</code> 與 <code>php_oci8_11g.dll</code>），並將原始 BIG5 位元組以 Base64 傳回 PHP 8.5 進行轉碼。既有 30 多支業務 API 的 <code>:bv_...</code> 具名參數綁定一行都不用改。</li>
+  <li><strong>現階段（後端為 Oracle 9i）</strong>：PHP 8.5 的 <code>php.ini</code> 未開啟 <code>oci8</code>，因此 <code>$this-&gt;use_cli_bridge</code> 為 <code>true</code>。當呼叫 <code>$db-&gt;execute()</code> 時，會自動走<strong>方案 1（本機 PHP 7.4 內部橋接）</strong>，透過 <code>proc_open</code> 呼叫 <code>C:\AppServ\php7\php.exe</code> 執行同目錄下的 <code>v85/include/ora_cli_worker.php</code>（搭配 <code>instantclient_11_2</code> 與 <code>php_oci8_11g.dll</code>），並將原始 BIG5 位元組以 Base64 傳回 PHP 8.5 進行轉碼。既有 30 多支業務 API 的 <code>:bv_...</code> 具名參數綁定一行都不用改。</li>
 </ul>
 
 <p><strong>2. 將來後端升級為 Oracle 12c 時，切換為「純 PHP 8.5 原生直連」的 3 個操作步驟（零程式碼修改）：</strong></p>
