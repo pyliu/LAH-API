@@ -169,7 +169,7 @@ class OraDB {
 
     public function execute() {
         if ($this->use_cli_bridge) {
-            $php7_cli = Env::get('PHP7_CLI_PATH', getenv('PHP7_CLI_PATH') ?: 'C:\\Tools\\php74\\php.exe');
+            $php7_cli = Env::get('PHP7_CLI_PATH', getenv('PHP7_CLI_PATH') ?: 'C:\\AppServ\\php74\\php.exe');
             $worker_script = __DIR__ . DIRECTORY_SEPARATOR . 'ora_cli_worker.php';
             $payload = json_encode(array(
                 'user'     => $this->user,
