@@ -59,13 +59,11 @@
     overflow-x: auto;
     font-size: 9pt;
     line-height: 1.45;
-    page-break-inside: avoid;
   }
   pre code {
     background: transparent;
     color: inherit;
     padding: 0;
-    font-size: 9pt;
   }
   table {
     width: 100%;
@@ -76,90 +74,100 @@
   }
   th, td {
     border: 1px solid #cbd5e1;
-    padding: 7px 9px;
+    padding: 8px 10px;
     text-align: left;
     vertical-align: top;
   }
   th {
-    background: #eff6ff;
-    color: #1e3a8a;
-    font-weight: 700;
+    background-color: #f1f5f9;
+    color: #0f172a;
+    font-weight: 600;
   }
-  tr:nth-child(even) td {
-    background: #f8fafc;
+  tr:nth-child(even) {
+    background-color: #f8fafc;
+  }
+  .callout-warn {
+    background-color: #fef2f2;
+    border-left: 4px solid #ef4444;
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    margin: 12px 0;
+    color: #991b1b;
+    page-break-inside: avoid;
+  }
+  .callout-tip {
+    background-color: #f0fdf4;
+    border-left: 4px solid #22c55e;
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    margin: 12px 0;
+    color: #166534;
+    page-break-inside: avoid;
   }
   .meta-box {
     background: #f8fafc;
-    border: 1px solid #cbd5e1;
-    border-left: 5px solid #0284c7;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
     padding: 10px 14px;
-    border-radius: 4px;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
     font-size: 9.5pt;
-  }
-  .callout {
-    background: #eff6ff;
-    border-left: 4px solid #2563eb;
-    padding: 10px 14px;
-    margin: 12px 0;
-    border-radius: 4px;
-    page-break-inside: avoid;
-  }
-  .callout-warn {
-    background: #fffbeb;
-    border-left: 4px solid #d97706;
-    padding: 10px 14px;
-    margin: 12px 0;
-    border-radius: 4px;
-    page-break-inside: avoid;
-  }
-  .arch-flow {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
-    padding: 12px;
-    border-radius: 6px;
-    margin: 10px 0;
-    page-break-inside: avoid;
-  }
-  .arch-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-  }
-  .arch-node {
-    flex: 1;
-    background: #ffffff;
-    border: 1.5px solid #2563eb;
-    border-radius: 6px;
-    padding: 8px 10px;
-    text-align: center;
-    font-size: 9pt;
-  }
-  .arch-node strong {
-    display: block;
-    color: #1d4ed8;
-    margin-bottom: 2px;
-  }
-  .arch-arrow {
-    font-weight: bold;
     color: #475569;
-    font-size: 11pt;
+  }
+  .mermaid {
+    text-align: center;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
+    page-break-inside: avoid;
+  }
+  @media print {
+    body {
+      color: #000;
+    }
+    h1, h2, h3 {
+      color: #000;
+    }
+    .mermaid {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      page-break-inside: avoid;
+    }
+    pre {
+      background: #f8fafc;
+      color: #0f172a;
+      border: 1px solid #cbd5e1;
+    }
+    a {
+      text-decoration: none;
+      color: #000;
+    }
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    if (window.mermaid) {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+        securityLevel: 'loose'
+      });
+    }
+  });
+</script>
 </head>
 <body>
 
 <h1>LAH-API 漸進式升級 PHP 8.5（<code>v85</code> 雙軌架構）完整技術與實作手冊</h1>
 
 <div class="meta-box">
-  <strong>文件版本：</strong>v1.0（2026-10-23）<br>
-  <strong>目標目錄：</strong><code>c:\Temp\DEV\LAH-Workspace\LAH-API\v85\</code><br>
-  <strong>採用架構：</strong>方案 B — 保留 Apache 2.4 (<code>mod_php7</code> + <code>mod_proxy_fcgi</code>) ＋ PM2 託管 PHP 8.5 FastCGI (<code>127.0.0.1:9085</code>)<br>
-  <strong>資料庫環境：</strong>後端地政核心 Oracle 9i（搭配 <code>instantclient_11_2</code>）＋ 本地快取 SQLite 3 ＋ 舊公文 MS SQL Server
+  <strong>文件版本：</strong>v1.1（2026-10-23）<br>
+  <strong>目標目錄：</strong><code>C:\AppServ\v85\</code>（開發環境映射至 <code>c:\Temp\DEV\LAH-Workspace\LAH-API\v85\</code>）<br>
+  <strong>採用架構：</strong>保留 Apache 2.4 (<code>mod_php7</code> + <code>mod_proxy_fcgi</code>) ＋ PM2 託管 PHP 8.5 FastCGI (<code>127.0.0.1:9085</code>，16 子程序併發)<br>
+  <strong>資料庫環境：</strong>後端地政核心 Oracle 9i（搭配 <code>instantclient_11_2</code> 智慧雙模）＋ 本地快取 SQLite 3 ＋ 舊公文 MS SQL Server
 </div>
 
 <h2>第一章：整體升級策略與系統架構藍圖</h2>
@@ -168,23 +176,43 @@
 <ol>
   <li><strong>新舊目錄並存（<code>www/</code> 與 <code>v85/</code>）</strong>：既有 <code>LAH-API/www/</code> 維持 PHP 7.3/7.4 穩定運作；新建 <code>LAH-API/v85/</code> 作為 PHP 8.5 專屬目錄，逐支檢視、修正並遷移 API。</li>
   <li><strong>保留 Apache 2.4 並啟用 <code>mod_proxy_fcgi</code> 分流</strong>：不替換現有 Apache 2.4 服務，各所防火牆與自動更新工具 <code>LAH-Updater</code> 無需大幅變動。Apache 以原本的 <code>mod_php7</code> 服務 <code>/</code>，同時將 <code>/v85/</code> 轉發給本機 Port <code>9085</code> 的 PHP 8.5 FastCGI。</li>
-  <li><strong>PM2 進程守護</strong>：利用各所伺服器既有的 PM2 守護 <code>C:\AppServ\php85\php-cgi.exe</code>，自動處理程序回收與崩潰重啟，徹底消除 Windows 下 FastCGI 滿載退出的 502 問題。</li>
+  <li><strong>PM2 進程守護與 FastCGI 原生多程序併發</strong>：利用各所伺服器既有的 PM2 守護 <code>C:\AppServ\php85\php-cgi.exe</code>（設定 <code>exec_mode: "fork"</code>），並藉由 FastCGI 內部環境變數 <code>PHP_FCGI_CHILDREN: "16"</code> 由 Windows 核心自動衍生 16 個 Worker 程序，徹底解決 Windows 下 FastCGI 請求併發與崩潰重啟問題。</li>
 </ol>
 
-<div class="arch-flow">
-  <div class="arch-row">
-    <div class="arch-node"><strong>客戶端請求</strong>LAH-FE (Nuxt 2) / lah-messenger</div>
-    <div class="arch-arrow">➔</div>
-    <div class="arch-node"><strong>Apache 2.4 (Port 80)</strong>依 URL 路徑分流</div>
-  </div>
-  <div class="arch-row">
-    <div class="arch-node" style="border-color:#64748b;"><strong>舊路徑 <code>/api/*.php</code></strong>由 <code>mod_php7</code> 執行 <code>LAH-API/www/</code></div>
-    <div class="arch-node" style="border-color:#16a34a;"><strong>新路徑 <code>/v85/api/*.php</code></strong>由 <code>mod_proxy_fcgi</code> 轉發 <code>127.0.0.1:9085</code> (PM2 PHP 8.5) 執行 <code>LAH-API/v85/</code></div>
-  </div>
-  <div class="arch-row">
-    <div class="arch-node" style="border-color:#0284c7;"><strong>共用底層資料與設定</strong>共用 <code>www/.env</code>、<code>www/assets/db/*.db</code> (SQLite 3)、<code>www/log/</code> 及後端 Oracle 9i</div>
-  </div>
-</div>
+<h3>1.2 雙軌運作系統架構拓撲圖</h3>
+<pre class="mermaid">
+flowchart TD
+    subgraph Clients["客戶端層 (Clients)"]
+        FE["LAH-FE 智慧管控前端 (Nuxt 2)"]
+        CLIENT["lah-messenger 桌面客戶端 (Electron)"]
+    end
+
+    subgraph Gateway["Web 閘道 (Apache 2.4 - Port 80)"]
+        APACHE["Apache 2.4 (C:\\AppServ\\Apache24)"]
+    end
+
+    subgraph ServiceLayer["雙軌執行期 (Runtime Layer)"]
+        PHP7["舊軌 mod_php7 (C:\\AppServ\\php7)<br/>執行 www/ 原始碼"]
+        PHP85["新軌 PM2 FastCGI lah-api-v85 (127.0.0.1:9085)<br/>C:\\AppServ\\php85\\php-cgi.exe 執行 v85/ 原始碼"]
+    end
+
+    subgraph PersistenceLayer["資料持久層 (Shared Single Source of Truth)"]
+        ENV["共用組態 www/.env (強制 MOCK=true)"]
+        SQLITE[("共用 SQLite 3 快取與分庫<br/>www/assets/db/*.db")]
+        ORACLE[("地政核心 Oracle 9i 資料庫")]
+        MSSQL[("公文歷史 MS SQL Server")]
+    end
+
+    FE --> APACHE
+    CLIENT --> APACHE
+
+    APACHE -- "路徑 /api/*" --> PHP7
+    APACHE -- "路徑 /v85/* (mod_proxy_fcgi)" --> PHP85
+
+    PHP7 --> ENV & SQLITE & ORACLE & MSSQL
+    PHP85 --> ENV & SQLITE & MSSQL
+    PHP85 -. "未載入 oci8 時透過 PHP 7 CLI 橋接" .-> PHP7
+</pre>
 
 <h2>第二章：Node.js v16 限制、PM2 託管與 <code>nvm-windows</code> 完整解析</h2>
 
@@ -198,58 +226,36 @@
 <div class="callout-warn">
   <strong>⚠️ Windows 上使用 <code>nvm-windows</code> 的重要陷阱：</strong><br>
   <code>nvm use &lt;version&gt;</code> 在 Windows 的原理是切換全域符號連結 <code>C:\Program Files\nodejs</code>。若在伺服器上直接執行 <code>nvm use 22</code>，當 <code>LAH-FE</code> 重啟時會誤抓到 Node 22 而崩潰！<br>
-  <strong>✅ 正確做法：</strong>只用 <code>nvm install</code> 下載各版本，並在 PM2 的 <code>ecosystem.config.js</code> 中以 <code>interpreter</code> 明確指定該版本 <code>node.exe</code> 的實體絕對路徑（例如 <code>C:\nvm\v16.20.2\node.exe</code>）。
+  <strong>正確作法（進階實體隔離方案）：</strong>
+  <ol>
+    <li>若未來有需要跑 Node 22 的專案，直接下載 Node 22 zip 解壓至 <code>C:\Tools\node-v22\</code>。</li>
+    <li>在該專案的 PM2 設定檔或啟動腳本內，以絕對路徑指向 <code>C:\Tools\node-v22\node.exe</code>，完全不碰全域 PATH 與 NVM 切換，現有 <code>LAH-FE</code> 便永遠安全。</li>
+  </ol>
 </div>
 
-<h3>2.3 <code>LAH-API\v85\ecosystem.config.js</code> 完整設定檔範本</h3>
+<h3>2.3 PM2 FastCGI 服務設定檔（<code>C:\AppServ\v85\ecosystem.config.js</code>）</h3>
+<p>以下為專案標準 <code>ecosystem.config.js</code> 配置：</p>
 <pre><code>module.exports = {
   apps: [
     {
       name: "lah-api-v85",
-      script: "C:\\AppServ\\php85\\php-cgi.exe",
-      args: "-b 127.0.0.1:9085 -c C:\\AppServ\\php85\\php.ini",
-      cwd: __dirname,               // 自動取得目前目錄（各所伺服器與開發筆電 Junction 皆為 C:\AppServ\v85）
-      interpreter: "none",          // 關鍵：告知 PM2 這是原生 .exe，不透過 node 執行
-      exec_mode: "fork",            // 關鍵限制：PM2 cluster 僅支援 Node.js；原生 .exe 設 cluster 會因監聽同 Port 衝突 (EADDRINUSE) 崩潰，故必須使用 fork 模式
-      instances: 1,                 // PM2 僅需守護 1 個主父程序，內部多程序併發完全交由下方的 PHP_FCGI_CHILDREN 接管
-      autorestart: true,            // 異常退出或達到 MAX_REQUESTS 時立即自動重啟
-      watch: false,
-      max_memory_restart: "1G",
+      script: "C:/AppServ/php85/php-cgi.exe",
+      args: "-b 127.0.0.1:9085",
+      instances: 1,
+      exec_mode: "fork",
+      autorestart: true,
+      max_restarts: 10,
+      restart_delay: 2000,
+      interpreter: "none",
       env: {
-        PATH: "C:\\Tools\\instantclient_11_2;C:\\AppServ\\php85;" + process.env.PATH,
-        NLS_LANG: "American_America.US7ASCII",
-        // FastCGI 核心併發參數：
-        // 1. PHP_FCGI_CHILDREN: 父程序會在 Windows 底層衍生 16 個 worker 子程序共享 Port 9085（實測共 17 個 php-cgi.exe，約佔 400MB RAM）
-        // 2. PHP_FCGI_MAX_REQUESTS: 每個 worker 滿 10000 次請求自動平滑退出並由父程序重建，消除記憶體洩漏
         PHP_FCGI_CHILDREN: "16",
-        PHP_FCGI_MAX_REQUESTS: "10000"
+        PHP_FCGI_MAX_REQUESTS: "10000",
+        PHPRC: "C:/AppServ/php85",
+        PATH: "C:/AppServ/php85;C:/AppServ/php7;C:/Tools/instantclient_11_2;" + process.env.PATH
       }
     }
   ]
 };</code></pre>
-
-<h3>2.4 常見疑問：PM2 模式可以設為 cluster 嗎？如何實現 FastCGI 高併發？</h3>
-<div class="callout">
-  <strong>💡 核心結論：PM2 的 <code>cluster</code> 模式「不適用」於原生 FastCGI 程式，必須使用 <code>fork</code> 模式！</strong><br>
-  但這絕不代表系統只有單執行緒處理能力。FastCGI 是透過環境變數 <code>PHP_FCGI_CHILDREN</code> 在 Windows 底層原生建立多程序處理池來達成高併發。
-</div>
-
-<ol>
-  <li><strong>為什麼 PM2 <code>cluster</code> 模式無法用於 <code>php-cgi.exe</code>？</strong><br>
-    <ul>
-      <li><strong>Node.js 專屬機制</strong>：PM2 的 Cluster Mode 是基於 Node.js 核心的 <code>cluster</code> 模組（以 IPC channel 共享 Server Handle）。當指定 <code>interpreter: "none"</code> 執行原生 Windows 二進位檔時，PM2 無法注入 Node.js 的 Cluster 機制。</li>
-      <li><strong>Port 衝突崩潰 (EADDRINUSE)</strong>：若在 PM2 強制設定 <code>instances: 2</code> 以上，PM2 會啟動兩個獨立的 <code>php-cgi.exe</code> 同時嘗試 <code>bind()</code> 監聽 <code>127.0.0.1:9085</code>，第二個程序會立即觸發 Windows 網路錯誤 <code>WSAEADDRINUSE (Error 10048: 通訊端位址已被佔用)</code> 而陷入不斷重啟崩潰迴圈。</li>
-    </ul>
-  </li>
-  <li><strong>FastCGI 在 Windows 上的真正併發機制：<code>PHP_FCGI_CHILDREN</code></strong><br>
-    <ul>
-      <li>由 PM2 守護 1 個 <code>php-cgi.exe</code> 主父程序（PID 監控與崩潰恢復）。</li>
-      <li>在啟動時注入環境變數 <code>PHP_FCGI_CHILDREN: "16"</code>，父程序會在 Windows 核心底層安全共享 Socket 句柄，自動衍生 <strong>16 個 worker 子程序</strong>（實機以 <code>Get-Process php-cgi</code> 驗證共 17 個程序在線）。</li>
-      <li><strong>記憶體與效能實測</strong>：每個 <code>php-cgi.exe</code> 約佔 24MB，17 個程序合計僅耗用約 <strong>400MB 記憶體</strong>，可同時平行處理 16 條 HTTP 請求。</li>
-      <li><strong>防記憶體洩漏機制</strong>：配合 <code>PHP_FCGI_MAX_REQUESTS: "10000"</code>，任一子程序處理滿 10,000 次請求後會自動平滑退出，並由父程序無縫重啟，徹底消除 Windows 下 FastCGI 長期運行的記憶體洩漏風險。</li>
-    </ul>
-  </li>
-</ol>
 
 <h2>第三章：破解「PHP 8.5 ↔ Oracle 9i」雙重死結的實戰方案</h2>
 
@@ -259,52 +265,47 @@
   <li><strong>死結 2（PHP 8.5 DLL 函式限制）</strong>：PHP 8.5 官方預編譯僅提供 <code>php_oci8_12c.dll</code> / <code>19.dll</code>，其二進位匯入表強制要求 Oracle 12c 才新增的 <code>OCIStmtGetNextResult</code> 函式，因此無法載入 <code>instantclient_11_2\oci.dll</code>。</li>
 </ol>
 
-<h3>3.2 破解方案比較（推薦在 <code>v85/include/OraDB.class.php</code> 採用智慧雙模）</h3>
-<p>由於整個專案對 Oracle 9i 的呼叫 100% 集中在 <code>OraDB.class.php</code> 單一類別內，您有以下三種選擇：</p>
-<table>
-  <thead>
-    <tr>
-      <th style="width:22%">方案名稱</th>
-      <th style="width:46%">運作機制</th>
-      <th style="width:32%">建置成本與評價</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>🥇 方案 1（最推薦起步）：<br>本機 127.0.0.1 內部橋接</strong></td>
-      <td>雙軌期間 Apache 本來就帶有 <code>mod_php7</code> + <code>instantclient_11_2</code>。當 <code>v85</code> (PHP 8.5) 需要查 Oracle 9i 時，由 <code>v85/include/OraDB.class.php</code> 透過本機 <code>127.0.0.1</code> 內部端點委派 PHP 7 執行 SQL 並回傳結果。</td>
-      <td>⭐ <strong>零編譯成本、立即可用</strong>。<br>30 支業務 API 的 SQL 與 <code>:bv_</code> 綁定一行都不用改！</td>
-    </tr>
-    <tr>
-      <td><strong>🥈 方案 2（純 PHP 8.5）：<br>Windows ODBC 橋接</strong></td>
-      <td>安裝 <code>instantclient-odbc-11.2.0.4</code>，在 PHP 8.5 開啟內建 <code>extension=odbc</code>，透過 Windows <code>odbc32.dll</code> 呼叫 11.2 Driver 連 Oracle 9i。</td>
-      <td>⭐⭐ 免編譯 C++，可完全移除 PHP 7；僅需改寫 <code>OraDB.class.php</code> 將 <code>:var</code> 轉為 <code>?</code>。</td>
-    </tr>
-    <tr>
-      <td><strong>🥉 方案 3（純 PHP 8.5 原生）：<br>VS2022 自編譯 DLL</strong></td>
-      <td>下載 PECL <code>oci8-3.4.x</code> 原始碼，使用 Visual Studio 2022 搭配 <code>instantclient_11_2\sdk</code> 自行編譯出 PHP 8.5 專用的 <code>php_oci8_11g.dll</code>。</td>
-      <td>⭐⭐⭐⭐ 需建置 C++ 編譯環境，但編出後可 100% 原生呼叫 <code>oci_connect()</code>。</td>
-    </tr>
-  </tbody>
-</table>
+<h3>3.2 現行採用方案：智慧雙模（本機 PHP 7.4 CLI Worker 內部橋接）</h3>
+<p>由於整個專案對 Oracle 9i 的呼叫 100% 封裝於 <code>v85/include/OraDB.class.php</code> 單一類別內，本系統已實作並全面採用<strong>本機 PHP 7.4 CLI Worker 智慧雙模內部橋接機制</strong>：</p>
 
-<h3>3.3 📌 給未來的備忘錄：目前 <code>OraDB.class.php</code> 實作狀態與將來升級 Oracle 12c 的無縫切換步驟</h3>
-<div class="callout-warn">
-  <strong>🔔 給未來的提醒（當後端資料庫從 Oracle 9i 正式升級為 Oracle 12c 時請執行此步驟）：</strong><br>
-  將來後端資料庫升級為 <strong>Oracle 12c</strong> 後，3.1 節所述的「雙重死結」將徹底消失！屆時<strong>完全不需要使用方案 2（Windows ODBC 橋接）</strong>，也不必再透過 PHP 7.4 橋接，而是可以直接啟用 <strong>純 PHP 8.5 官方原生 OCI8 直連</strong>。
+<div class="callout-tip">
+  <strong>⭐ 核心優勢與採用理由：</strong>
+  <ul>
+    <li><strong>零編譯成本、立即可用</strong>：無需在 Windows 伺服器建置 Visual Studio C++ 工具鏈重新編譯非官方 DLL。</li>
+    <li><strong>業務 API 100% 零修改</strong>：現行 30 多支業務 API 的 SQL 語法與 <code>:bv_...</code> 具名參數綁定完全相容保留。</li>
+    <li><strong>程序隔離與安全穩定</strong>：PHP 8.5 FastCGI 程序與 PHP 7.4 CLI 獨立隔離，Oracle 9i 查詢透過標準輸入/輸出 (STDIN/STDOUT) 傳遞資料，避免記憶體洩漏互相干擾。</li>
+  </ul>
 </div>
 
-<p><strong>1. 目前已實作於 <code>v85/include/OraDB.class.php</code> 的「智慧雙模（Dual-Mode）」機制：</strong></p>
-<ul>
-  <li>在 <code>v85/include/OraDB.class.php</code> 的建構子（第 81 行）中已預先寫入自動偵測邏輯：
+<p><strong>運作架構與資料流：</strong></p>
+<ol>
+  <li>在 <code>v85/include/OraDB.class.php</code> 建構子中自動偵測執行環境：
     <pre><code>$this-&gt;use_cli_bridge = !extension_loaded('oci8');</code></pre>
   </li>
-  <li><strong>現階段（後端為 Oracle 9i）</strong>：PHP 8.5 的 <code>php.ini</code> 未開啟 <code>oci8</code>，因此 <code>$this-&gt;use_cli_bridge</code> 為 <code>true</code>。當呼叫 <code>$db-&gt;execute()</code> 時，會自動走<strong>方案 1（本機 PHP 7.4 內部橋接）</strong>，透過 <code>proc_open</code> 呼叫 <code>C:\AppServ\php7\php.exe</code> 執行同目錄下的 <code>v85/include/ora_cli_worker.php</code>（搭配 <code>instantclient_11_2</code> 與 <code>php_oci8_11g.dll</code>），並將原始 BIG5 位元組以 Base64 傳回 PHP 8.5 進行轉碼。既有 30 多支業務 API 的 <code>:bv_...</code> 具名參數綁定一行都不用改。</li>
-</ul>
+  <li><strong>現階段（後端為 Oracle 9i）</strong>：
+    <ul>
+      <li>因 PHP 8.5 官方未提供支援 Oracle 9i 的 <code>php_oci8_11g.dll</code>，因此 <code>extension_loaded('oci8')</code> 為 <code>false</code>，<code>$this-&gt;use_cli_bridge</code> 自動判定為 <code>true</code>。</li>
+      <li>當業務 API 呼叫 <code>$db-&gt;execute()</code> 時，<code>OraDB</code> 透過 <code>proc_open</code> 呼叫 <code>C:\AppServ\php7\php.exe</code> 執行同目錄下的 <code>v85/include/ora_cli_worker.php</code>。</li>
+      <li>該 Worker 搭配舊軌穩定運作的 <code>instantclient_11_2</code> 與 <code>php_oci8_11g.dll</code> 連線 Oracle 9i 執行查詢，並將原始 BIG5 欄位以 Base64 編碼透過 STDOUT 回傳。</li>
+      <li><code>OraDB</code> 接收後自動調用 <code>UConverter::transcode</code> 轉為 UTF-8，達成 100% 正確的中文編碼轉換。</li>
+    </ul>
+  </li>
+</ol>
 
-<p><strong>2. 將來後端升級為 Oracle 12c 時，切換為「純 PHP 8.5 原生直連」的 3 個操作步驟（零程式碼修改）：</strong></p>
+<h3>3.3 📌 未來升級備忘：資料庫升級至 Oracle 12c 時之原生 PHP 8.5 OCI8 直連無縫切換步驟</h3>
+<div class="callout-warn">
+  <strong>🔔 給未來的提醒（當後端資料庫從 Oracle 9i 正式升級為 Oracle 12c / 19c 時請執行此步驟）：</strong><br>
+  將來後端資料庫升級為 <strong>Oracle 12c 或更高版本</strong> 後，3.1 節所述的「雙重死結」將徹底消失！屆時不必再透過 PHP 7.4 CLI 橋接，而是可以直接啟用 <strong>純 PHP 8.5 官方原生 OCI8 高速直連</strong>。
+</div>
+
+<p><strong>切換為「純 PHP 8.5 官方原生直連」的 3 個操作步驟（零程式碼修改）：</strong></p>
 <ol>
-  <li><strong>更換伺服器 Instant Client 為 19c</strong>：Oracle 官方規範（Doc ID 207303.1）明訂 <code>Oracle Instant Client 19c</code> 完全向下相容連線 Oracle 12c (12.1 / 12.2) 資料庫。請將伺服器上的 Instant Client 升級為 19c（例如解壓至 <code>C:\Tools\instantclient_19_25</code>），並同步更新 <code>v85/ecosystem.config.js</code> 中的 <code>PATH</code> 環境變數。</li>
+  <li><strong>更換伺服器 Instant Client 為 19c</strong>：
+    <ul>
+      <li>Oracle 官方規範（Doc ID 207303.1）明訂 <code>Oracle Instant Client 19c</code> 完全向下相容連線 Oracle 12c (12.1 / 12.2) 資料庫。</li>
+      <li>請將伺服器上的 Instant Client 升級為 19c（例如解壓至 <code>C:\AppServ\instantclient_19_25</code>），並同步更新 <code>v85/ecosystem.config.js</code> 中的 <code>PATH</code> 環境變數。</li>
+    </ul>
+  </li>
   <li><strong>放入 PHP 8.5 官方 <code>php_oci8_19.dll</code> 並啟用設定</strong>：
     <ul>
       <li>前往 PECL 官方下載頁面取得 <code>php_oci8-3.4.1-8.5-nts-vs17-x64.zip</code>，將裡面的 <code>php_oci8_19.dll</code> 複製到 <code>C:\AppServ\php85\ext\</code>。</li>
@@ -323,9 +324,9 @@
 <h2>第四章：<code>LAH-API\v85\</code> 目錄結構與共用資料庫設計</h2>
 <p>為了讓新舊 API 在過渡期讀寫同一份本地快取與系統設定，<code>v85/</code> 僅獨立程式碼與 <code>vendor/</code>，其餘資產與 SQLite 資料庫均指向 <code>../www/</code>：</p>
 <pre><code><?php
-// 檔案：c:\Temp\DEV\LAH-Workspace\LAH-API\v85\include\GlobalConstants.inc.php
-define('V85_ROOT_DIR', dirname(__DIR__));                              // LAH-API/v85
-define('ROOT_DIR', dirname(V85_ROOT_DIR) . DIRECTORY_SEPARATOR . 'www'); // 指向 LAH-API/www 共用資產
+// v85/include/GlobalConstants.inc.php
+define('V85_ROOT_DIR', dirname(__DIR__));
+define('ROOT_DIR', dirname(V85_ROOT_DIR) . DIRECTORY_SEPARATOR . 'www');  // 指向既有 www/
 
 define('INC_DIR', V85_ROOT_DIR . DIRECTORY_SEPARATOR . 'include');     // 引入 v85 修正版類別
 define('ASSETS_DIR', ROOT_DIR . DIRECTORY_SEPARATOR . 'assets');       // 共用 www/assets
