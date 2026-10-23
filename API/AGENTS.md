@@ -1,4 +1,4 @@
-﻿# API/AGENTS.md - PHP 8.5 移植與現代化架構規範
+# API/AGENTS.md - PHP 8.5 移植與現代化架構規範
 
 > **適用範圍**：`LAH-API/API/` 目錄下所有 PHP 8.5 程式碼、API 端點與服務設定。  
 > **核心目標**：規範 AI Agent 進行 PHP 8.5 移植作業時的「最小差異相容移植」準則、P0/P1 相容性修復標準與驗證清單。
@@ -96,7 +96,7 @@ Agent 完成任何 `v85` 的檔案修改或 API 移植後，**必須在回覆前
 - [ ] **語法與棄用檢查**：
   執行 `C:\AppServ\php85\php.exe -l <modified_file>`，確認 0 語法錯誤且無 `Deprecated` 警告。
 - [ ] **端點實機執行測試**：
-  透過 CLI 或 HTTP 測試該 API（例如 `curl.exe -s -X POST -d "type=..." http://127.0.0.1/v85/api/<endpoint>.php`），確認回傳合規 JSON 且不含任何 PHP 報錯或 HTML 雜訊。
+  透過 CLI 或 HTTP 測試該 API（例如 `curl.exe -s -X POST -d "type=..." http://127.0.0.1/LAH-API/v1/<endpoint>.php`，或相容路由 `/LAH-API/api/<endpoint>.php`），確認回傳合規 JSON 且不含任何 PHP 報錯或 HTML 雜訊。
 - [ ] **隔離邊界檢查**：
   執行 `git status` 確認 `www/` 目錄零變更，確認 `www/.env` 中的 `MOCK=true` 依然維持開啟。
 - [ ] **Git 提交規範**：

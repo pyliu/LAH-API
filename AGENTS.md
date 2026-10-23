@@ -1,4 +1,4 @@
-﻿# LAH-API 專案架構與 Agent 治理契約
+# LAH-API 專案架構與 Agent 治理契約
 
 > **適用範圍**：本儲存庫根目錄及其轄下之 `www/` 與 `API/` 雙軌子目錄。  
 > **核心目標**：規範 AI Agent 在維護舊版 PHP 7.3/7.4 API 與推進 PHP 8.5 漸進式移植時的邊界、相容性原則與安全防護機制。
@@ -12,7 +12,7 @@
 | 目錄 | 軌道角色 | 執行環境與技術棧 | 路由與監聽埠 | 適用 Agent 規範 |
 |---|---|---|---|---|
 | `./www/` | **線上生產軌道 (Legacy Production)** | PHP 7.3 / 7.4、Apache `mod_php7`、Oracle 9i (OCI8)、SQLite 3 | `http://127.0.0.1/api/*.php` (Port 80) | 參閱 [`www/AGENTS.md`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/www/AGENTS.md) |
-| `./API/` | **現代化移植軌道 (PHP 8.5 Migration)** | PHP 8.5.12 NTS、PM2 FastCGI 守護 (`php-cgi.exe`)、智慧雙模連線 | `http://127.0.0.1/LAH-API/api/*.php` (Port 9085 轉發) | 參閱 [`API/AGENTS.md`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/API/AGENTS.md) |
+| `./API/` | **現代化移植軌道 (PHP 8.5 Migration)** | PHP 8.5.12 NTS、PM2 FastCGI 守護 (`php-cgi.exe`)、智慧雙模連線 | `http://127.0.0.1/LAH-API/v1/*.php` (Port 9085 轉發，相容 `/api/`) | 參閱 [`API/AGENTS.md`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/API/AGENTS.md) |
 
 ### 1.1 架構資料流向
 

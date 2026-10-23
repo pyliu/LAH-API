@@ -560,6 +560,11 @@ PHPIniDir "C:/AppServ/php7"
 # =====================================================================
 # LAH-API (PHP 8.5 FastCGI via PM2 on 127.0.0.1:9085)
 # =====================================================================
+# 優先定義相容 Alias：將舊呼叫端之 /api/ 映射至實體 /v1/ 目錄
+Alias /LAH-API/api "C:/AppServ/LAH-API/v1"
+Alias /lah-api/api "C:/AppServ/LAH-API/v1"
+
+# 服務根目錄映射
 Alias /LAH-API "C:/AppServ/LAH-API"
 Alias /lah-api "C:/AppServ/LAH-API"
 

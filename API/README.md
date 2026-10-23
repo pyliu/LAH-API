@@ -1,4 +1,4 @@
-﻿# LAH-API 漸進式升級 PHP 8.5（`v85` 雙軌架構）完整技術與實作手冊
+# LAH-API 漸進式升級 PHP 8.5（`v85` 雙軌架構）完整技術與實作手冊
 
 > **文件版本**：v1.0  
 > **適用專案**：`LAH-API`（`c:\Temp\DEV\LAH-Workspace\LAH-API\`）  
@@ -54,7 +54,7 @@ flowchart TD
 
     FE & MSG -- "HTTP 請求" --> ROUTER
     ROUTER -- "舊路徑 /api/*" --> MODPHP
-    ROUTER -- "新路徑 /LAH-API/api/*<br/>(或已移植之 API)" --> MODFCGI
+    ROUTER -- "新路徑 /LAH-API/v1/*<br/>(相容 /api/*)" --> MODFCGI
     MODPHP --> WWW
     MODFCGI --> PM2_PHP85
     PM2_PHP85 --> V85
@@ -203,7 +203,7 @@ c:\Temp\DEV\LAH-Workspace\LAH-API\
     │   ├── GlobalFunctions.inc.php
     │   ├── System.class.php
     │   └── OraDB.class.php
-    └── api/                            # 逐支移植過來的 API 端點 (/LAH-API/api/*.php)
+    └── v1/                             # 逐支移植過來的 API 端點 (/LAH-API/v1/*.php，相容 /api/)
 ```
 
 ### 4.2 `v85/include/GlobalConstants.inc.php` 路徑常數對齊寫法
@@ -294,7 +294,10 @@ LoadModule rewrite_module modules/mod_rewrite.so
 # =====================================================================
 
 # 1. 將 /v85 虛擬路徑映射至實體 LAH-API/API 目錄
+Alias /LAH-API/api "C:/AppServ/LAH-API/v1"
+Alias /lah-api/api "C:/AppServ/LAH-API/v1"
 Alias /LAH-API "C:/AppServ/LAH-API"
+Alias /lah-api "C:/AppServ/LAH-API"
 
 <Directory "C:/AppServ/LAH-API">
     Header set Access-Control-Allow-Origin "*"

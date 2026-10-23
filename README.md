@@ -43,7 +43,7 @@
 | 軌道 | 目錄 | 執行期與處理器 | 監聽埠 / 路由 | 主要職責與特點 |
 | :--- | :--- | :--- | :--- | :--- |
 | **線上生產軌道<br>(Legacy)** | `www/` | Apache `mod_php7`<br>(PHP 7.4.33 ZTS) | `http://127.0.0.1/api/*`<br>(Port 80) | 承擔現行線上穩定生產流量，嚴格遵守 PHP 7.3 保守相容性。詳見 [`www/AGENTS.md`](www/AGENTS.md)。 |
-| **現代化移植軌道<br>(Migration)** | `API/` | PM2 FastCGI 守護<br>(PHP 8.5.12 NTS) | `http://127.0.0.1/LAH-API/api/*`<br>(Port 9085 轉發) | 漸進式移植核心 API，修正 P0/P1 相容性，具備 FastCGI 16 程序併發與 Oracle 9i 雙模連線。詳見 [`API/README.md`](API/README.md)。 |
+| **現代化移植軌道<br>(Migration)** | `API/` | PM2 FastCGI 守護<br>(PHP 8.5.12 NTS) | `http://127.0.0.1/LAH-API/v1/*`<br>(Port 9085 轉發，相容 `/api/*`) | 漸進式移植核心 API，修正 P0/P1 相容性，具備 FastCGI 16 程序併發與 Oracle 9i 雙模連線。詳見 [`API/README.md`](API/README.md)。 |
 
 ```mermaid
 flowchart TD
@@ -124,7 +124,7 @@ LAH-API/
     ├── ecosystem.config.js # PM2 FastCGI 行程守護設定檔 (lah-api-v85, 16 併發子程序)
     ├── composer.json       # PHP 8.5 依賴宣告 (PhpSpreadsheet ^2.0)
     ├── ver.php             # 雙軌健康檢查與模組探針 API (http://127.0.0.1/LAH-API/ver.php)
-    ├── api/                # 已完成 PHP 8.5 移植之核心端點 (auth, system, query 等)
+    ├── v1/                 # 已完成 PHP 8.5 移植之核心端點 (/LAH-API/v1/*.php，相容 /api/)
     └── include/            # 已修復 PHP 8.5 相容之核心類別庫 (含 OraDB 智慧雙模橋接)
 ```
 
@@ -287,7 +287,7 @@ API 端點遵循標準 JSON 回應協定：
 }
 ```
 
-| API 端點 (舊軌 `/api/` ； 新軌 `/LAH-API/api/`) | 主要功能 | 說明 |
+| API 端點 (舊軌 `/api/` ； 新軌 `/LAH-API/v1/`，相容 `/LAH-API/api/`) | 主要功能 | 說明 |
 | :--- | :--- | :--- |
 | `auth_json_api.php` | 登入與身份驗證 | 使用者權限驗證、IP 登入檢查與 WebSocket 資訊獲取 |
 | `query_json_api.php` | 綜合資訊與設定查詢 | 查詢 `configs` 系統參數、綜合看板統計、快照歷史 |
