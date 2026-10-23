@@ -145,12 +145,12 @@ LoadModule log_config_module modules/mod_log_config.so
 LoadModule mime_module modules/mod_mime.so
 #LoadModule mime_magic_module modules/mod_mime_magic.so
 LoadModule negotiation_module modules/mod_negotiation.so
-#LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_module modules/mod_proxy.so
 #LoadModule proxy_ajp_module modules/mod_proxy_ajp.so
 #LoadModule proxy_balancer_module modules/mod_proxy_balancer.so
 #LoadModule proxy_connect_module modules/mod_proxy_connect.so
 #LoadModule proxy_express_module modules/mod_proxy_express.so
-#LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so
+LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so
 #LoadModule proxy_ftp_module modules/mod_proxy_ftp.so
 #LoadModule proxy_html_module modules/mod_proxy_html.so
 #LoadModule proxy_http_module modules/mod_proxy_http.so
@@ -188,13 +188,7 @@ LoadModule status_module modules/mod_status.so
 #LoadModule watchdog_module modules/mod_watchdog.so
 #LoadModule xml2enc_module modules/mod_xml2enc.so
 
-# Load PHP7 in Apache
-LoadModule php7_module C:/AppServ/php7/php7apache2_4.dll
-<IfModule mod_php7.c>
-  AddType application/x-httpd-php .php
-  AddType application/x-httpd-php-source .phps
-</IfModule>
-PHPIniDir "C:/AppServ/php7/"
+# Note: PHP 7.4 and PHP 8.5 configurations are located at the end of this file.
 
 <IfModule unixd_module>
 #
@@ -260,8 +254,8 @@ ServerName localhost:80
 # documents. By default, all requests are taken from this directory, but
 # symbolic links and aliases may be used to point to other locations.
 #
-DocumentRoot "d:/DEV/Land-Affairs-Helper/www"
-<Directory "d:/DEV/Land-Affairs-Helper/www">
+DocumentRoot "C:/AppServ/www"
+<Directory "C:/AppServ/www">
 	Header set Access-Control-Allow-Origin "*"
     #
     # Possible values for the Options directive are "None", "All",
@@ -546,3 +540,42 @@ Include conf/extra/httpd-proxy-html.conf
     Protocols h2 h2c http/1.1
 </IfModule>
 
+
+# =====================================================================
+# PHP 7.4 (mod_php7) Configuration
+# =====================================================================
+LoadFile "C:/AppServ/php7/php7ts.dll"
+LoadFile "C:/AppServ/php7/libcrypto-1_1-x64.dll"
+LoadFile "C:/AppServ/php7/libssl-1_1-x64.dll"
+LoadFile "C:/AppServ/php7/libssh2.dll"
+LoadFile "C:/AppServ/php7/nghttp2.dll"
+LoadFile "C:/AppServ/php7/libsqlite3.dll"
+LoadFile "C:/AppServ/php7/libsodium.dll"
+LoadModule php7_module "C:/AppServ/php7/php7apache2_4.dll"
+PHPIniDir "C:/AppServ/php7"
+<FilesMatch \.php$>
+    SetHandler application/x-httpd-php
+</FilesMatch>
+
+# =====================================================================
+# LAH-API v85 (PHP 8.5 FastCGI via PM2 on 127.0.0.1:9085) Dual-Track
+# =====================================================================
+Alias /v85 "C:/AppServ/v85"
+
+<Directory "C:/AppServ/v85">
+    Header set Access-Control-Allow-Origin "*"
+    Options Indexes FollowSymLinks
+    AllowOverride None
+    Require all granted
+
+    <FilesMatch "\.php$">
+        <If "-f %{REQUEST_FILENAME}">
+            SetHandler "proxy:fcgi://127.0.0.1:9085/"
+            ProxyFCGISetEnvIf "reqenv('SCRIPT_FILENAME') =~ m#^proxy:fcgi://127\.0\.0\.1:9085/(.*)$#" SCRIPT_FILENAME "$1"
+        </If>
+    </FilesMatch>
+</Directory>
+
+<Proxy "fcgi://127.0.0.1:9085/" enablereuse=on max=16>
+    ProxySet timeout=300
+</Proxy>

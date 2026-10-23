@@ -961,7 +961,7 @@ cli_server.color = On
 [Date]
 ; Defines the default timezone used by the date functions
 ; http://php.net/date.timezone
-;date.timezone =
+date.timezone = Asia/Taipei
 
 ; http://php.net/date.default-latitude
 ;date.default_latitude = 31.7667
@@ -1373,7 +1373,7 @@ session.save_handler = files
 ; does not overwrite the process's umask.
 ; http://php.net/session.save-path
 ;session.save_path = "/tmp"
-session.save_path = "C:/Users/ADMINI~1.HBL/AppData/Local/Temp"
+session.save_path = "C:/Windows/Temp"
 
 ; Whether to use strict session mode.
 ; Strict session mode does not accept an uninitialized session ID, and
