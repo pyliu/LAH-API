@@ -1,4 +1,4 @@
-# LAH-API 漸進式升級 PHP 8.5（`v85` 雙軌架構）完整技術與實作手冊
+﻿# LAH-API 漸進式升級 PHP 8.5（`v85` 雙軌架構）完整技術與實作手冊
 
 > **文件版本**：v1.0  
 > **適用專案**：`LAH-API`（`c:\Temp\DEV\LAH-Workspace\LAH-API\`）  
@@ -13,7 +13,7 @@
 
 1. **新舊並存目錄（`www/` 與 `v85/`）**：
    * 既有 [`LAH-API/www/`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/www) 維持 PHP 7.3 / 7.4 原狀運作，確保線上地政業務零中斷。
-   * 於 [`LAH-API/v85/`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API) 建立全新 PHP 8.5 專屬目錄，逐支檢視、修正並移植 API。
+   * 於 [`LAH-API/API/`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API) 建立全新 PHP 8.5 專屬目錄，逐支檢視、修正並移植 API。
 2. **伺服器雙軌分流（方案 B：保留 Apache 2.4 ＋ `mod_proxy_fcgi`）**：
    * **不替換現有 Apache 2.4 服務**，因此各地所現有的防火牆規則、SSL 憑證與自動更新部署工具 [`LAH-Updater/updater.py`](file:///c:/Temp/DEV/LAH-Workspace/LAH-Updater/updater.py) 均無需大幅改動。
    * Apache 2.4 繼續以 `mod_php7` 處理舊版 `/` 請求；同時啟用 Apache 內建的 `mod_proxy_fcgi` 模組，將 `/v85/`（或已移植之 API）透過本機迴路轉發至 `127.0.0.1:9085` 的 **PHP 8.5 FastCGI** 服務。
@@ -43,7 +43,7 @@ flowchart TD
 
     subgraph Codebase["LAH-API 程式碼與共用資料層"]
         WWW["LAH-API/www/<br/>(舊版程式碼)"]
-        V85["LAH-API/v85/<br/>(PHP 8.5 程式碼)"]
+        V85["LAH-API/API/<br/>(PHP 8.5 程式碼)"]
         SHARED["共用資源 (www/.env & www/assets/db/*.db)<br/>SQLite 3 快取與設定庫"]
     end
 
@@ -85,7 +85,7 @@ flowchart TD
   用 `nvm install 16.20.2` 與 `nvm install 22.14.0` 下載好各版本後，**在 PM2 的 `ecosystem.config.js` 中，直接將 `interpreter` 指向該版本 `node.exe` 的實體絕對路徑**，繞過全域捷徑：
 
 ```javascript
-// 檔案位置範例：c:\Temp\DEV\LAH-Workspace\LAH-API\v85\ecosystem.config.js
+// 檔案位置範例：c:\Temp\DEV\LAH-Workspace\LAH-API\API\ecosystem.config.js
 module.exports = {
   apps: [
     // 1. 新增的 LAH-API v85 (PHP 8.5 FastCGI 服務)
@@ -93,7 +93,7 @@ module.exports = {
       name: "lah-api-v85",
       script: "C:\\AppServ\\php85\\php-cgi.exe",
       args: "-b 127.0.0.1:9085 -c C:\\AppServ\\php85\\php.ini",
-      cwd: __dirname,               // 自動取得目錄（各所伺服器與開發筆電 Junction 皆為 C:\\AppServ\\v85）,
+      cwd: __dirname,               // 自動取得目錄（各所伺服器與開發筆電 Junction 皆為 C:\\AppServ\\API）,
       interpreter: "none",          // 關鍵：告知 PM2 這是原生 .exe，不透過 node 執行
       exec_mode: "fork",            // 關鍵限制：PM2 cluster 僅支援 Node.js；原生 .exe 設 cluster 會因監聽同 Port 衝突 (EADDRINUSE) 崩潰，故必須使用 fork 模式
       instances: 1,                 // PM2 僅需守護 1 個主父程序，內部多程序併發完全交由下方的 PHP_FCGI_CHILDREN 接管
@@ -174,7 +174,7 @@ flowchart LR
 
 ---
 
-## 第四章：`LAH-API\v85\` 目錄結構與共用資源設計
+## 第四章：`LAH-API\API\` 目錄結構與共用資源設計
 
 ### 4.1 為什麼要共用 `.env` 與 `assets/db/`？
 在漸進移植期間，部分 API 跑在 `www/` (PHP 7)，部分 API 跑在 `v85/` (PHP 8.5)。若兩邊各自擁有一份 SQLite 資料庫（`dimension.db`、`cache.db`、`RKEYN.db`），會造成**使用者權限、系統設定與快取不同步**。因此，`v85/` 僅隔離 PHP 程式碼與 `vendor/`，底層資料一律指向 `www/`：
@@ -210,7 +210,7 @@ c:\Temp\DEV\LAH-Workspace\LAH-API\
 
 ```php
 <?php
-// v85 專屬程式碼根目錄：c:\Temp\DEV\LAH-Workspace\LAH-API\v85
+// v85 專屬程式碼根目錄：c:\Temp\DEV\LAH-Workspace\LAH-API\API
 define('V85_ROOT_DIR', dirname(__DIR__));
 // 指向既有 www 目錄以共用資料庫與資產：c:\Temp\DEV\LAH-Workspace\LAH-API\www
 define('ROOT_DIR', dirname(V85_ROOT_DIR) . DIRECTORY_SEPARATOR . 'www');
@@ -293,10 +293,10 @@ LoadModule rewrite_module modules/mod_rewrite.so
 # LAH-API v85 (PHP 8.5 FastCGI via PM2 on 127.0.0.1:9085) 雙軌設定
 # =====================================================================
 
-# 1. 將 /v85 虛擬路徑映射至實體 LAH-API/v85 目錄
-Alias /v85 "C:/AppServ/v85"
+# 1. 將 /v85 虛擬路徑映射至實體 LAH-API/API 目錄
+Alias /v85 "C:/AppServ/API"
 
-<Directory "C:/AppServ/v85">
+<Directory "C:/AppServ/API">
     Header set Access-Control-Allow-Origin "*"
     Options Indexes FollowSymLinks
     AllowOverride None
@@ -323,8 +323,8 @@ Alias /v85 "C:/AppServ/v85"
 > 只要在原本 `<Directory ".../LAH-API/www">` 區塊內加上以下 5 行 Rewrite 規則：當前端呼叫 `/api/reg_json_api.php` 時，Apache 會先偷看 `v85/api/reg_json_api.php` 存不存在；**若存在就自動轉給 PHP 8.5 執行，若還沒搬過去就繼續給原本的 PHP 7 執行**！
 > ```apache
 > RewriteEngine On
-> RewriteCond "c:/Temp/DEV/LAH-Workspace/LAH-API/v85%{REQUEST_URI}" -f
-> RewriteRule ^/(.*\.php)$ "fcgi://127.0.0.1:9085/c:/Temp/DEV/LAH-Workspace/LAH-API/v85/$1" [P,L]
+> RewriteCond "c:/Temp/DEV/LAH-Workspace/LAH-API/API%{REQUEST_URI}" -f
+> RewriteRule ^/(.*\.php)$ "fcgi://127.0.0.1:9085/c:/Temp/DEV/LAH-Workspace/LAH-API/API/$1" [P,L]
 > ```
 
 ---
@@ -365,12 +365,12 @@ Alias /v85 "C:/AppServ/v85"
    C:\AppServ\php85\php.exe -m
    ```
 
-### Step 2：建立 `LAH-API\v85\` 目錄與測試端點
+### Step 2：建立 `LAH-API\API\` 目錄與測試端點
 1. 將先前建立的空目錄 `v1` 重新命名為 `v85`：
    ```powershell
    Rename-Item -Path "c:\Temp\DEV\LAH-Workspace\LAH-API\v1" -NewName "v85"
    ```
-2. 在 `c:\Temp\DEV\LAH-Workspace\LAH-API\v85\ver.php` 建立第一支 PHP 8.5 驗證腳本：
+2. 在 `c:\Temp\DEV\LAH-Workspace\LAH-API\API\ver.php` 建立第一支 PHP 8.5 驗證腳本：
    ```php
    <?php
    header('Content-Type: application/json; charset=utf-8');
@@ -393,10 +393,10 @@ Alias /v85 "C:/AppServ/v85"
    ```
 
 ### Step 3：使用 PM2 啟動 PHP 8.5 FastCGI 服務 (`127.0.0.1:9085`)
-1. 將第二章的 `ecosystem.config.js` 存放在 `c:\Temp\DEV\LAH-Workspace\LAH-API\v85\ecosystem.config.js`。
+1. 將第二章的 `ecosystem.config.js` 存放在 `c:\Temp\DEV\LAH-Workspace\LAH-API\API\ecosystem.config.js`。
 2. 在 PowerShell 啟動 PM2 服務（直接使用您現有的 Node v16 環境即可）：
    ```powershell
-   cd C:\AppServ\v85
+   cd C:\AppServ\API
    pm2 start ecosystem.config.js
    pm2 status
    ```
@@ -413,7 +413,7 @@ Alias /v85 "C:/AppServ/v85"
 * **情境 B（筆電平時沒開 Apache，而是用 `start_dev.bat` 內建伺服器）**：
   在筆電日常不開 Apache 時，也可隨時直接用 PHP 8.5 內建伺服器在 Port `8085` 快速測試 `v85/`：
   ```powershell
-  C:\AppServ\php85\php.exe -S 127.0.0.1:8085 -t c:\Temp\DEV\LAH-Workspace\LAH-API\v85
+  C:\AppServ\php85\php.exe -S 127.0.0.1:8085 -t c:\Temp\DEV\LAH-Workspace\LAH-API\API
   ```
   瀏覽器打開 `http://127.0.0.1:8085/ver.php` 即可立即驗證。
 

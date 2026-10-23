@@ -17,8 +17,9 @@ abstract class STATUS_CODE {
     const FAIL_DB_ERROR = -11;
 }
 
-define('V85_ROOT_DIR', dirname(__DIR__));
-define('ROOT_DIR', dirname(V85_ROOT_DIR) . DIRECTORY_SEPARATOR . 'www');
+define('API_ROOT_DIR', dirname(__DIR__));
+define('V85_ROOT_DIR', API_ROOT_DIR);
+define('ROOT_DIR', dirname(API_ROOT_DIR) . DIRECTORY_SEPARATOR . 'www');
 define('ASSETS_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'assets');
 define('EXPORT_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'export');
 define('IMPORT_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'import');

@@ -1,7 +1,7 @@
 <?php
-$v85_inc = __DIR__;
+$api_inc = __DIR__;
 $legacy_inc = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'www' . DIRECTORY_SEPARATOR . 'include';
-set_include_path($v85_inc . PATH_SEPARATOR . $legacy_inc . PATH_SEPARATOR . get_include_path());
+set_include_path($api_inc . PATH_SEPARATOR . $legacy_inc . PATH_SEPARATOR . get_include_path());
 
 error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
 date_default_timezone_set("ASIA/TAIPEI");

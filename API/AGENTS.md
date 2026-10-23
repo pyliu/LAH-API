@@ -1,6 +1,6 @@
-# v85/AGENTS.md - PHP 8.5 移植與現代化架構規範
+﻿# API/AGENTS.md - PHP 8.5 移植與現代化架構規範
 
-> **適用範圍**：`LAH-API/v85/` 目錄下所有 PHP 8.5 程式碼、API 端點與服務設定。  
+> **適用範圍**：`LAH-API/API/` 目錄下所有 PHP 8.5 程式碼、API 端點與服務設定。  
 > **核心目標**：規範 AI Agent 進行 PHP 8.5 移植作業時的「最小差異相容移植」準則、P0/P1 相容性修復標準與驗證清單。
 
 ---
@@ -14,7 +14,7 @@
 - SQLite 3 跨版本讀寫安全
 
 你的任務是：
-- 將既有 `www/` 的 API 端點與相依業務類別**逐支、漸進式地移植至 `v85/`**。
+- 將既有 `www/` 的 API 端點與相依業務類別**逐支、漸進式地移植至 `API/`**。
 - 嚴格修復 PHP 8.5 的致命錯誤（P0）與棄用警告（P1）。
 - 確保回傳之 JSON 契約（Status Code、Key 名稱、資料型別）與既有系統 100% 一致。
 - **維持最小差異移植，非必要不重構既有業務邏輯。**
@@ -24,11 +24,11 @@
 ## 2. 核心原則：最小差異相容移植（Minimal Diff Migration）
 
 1. **單向移植隔離**：
-   - 移植任何檔案時，一律從 `www/` 讀取並複製至 `v85/` 後進行修改。
+   - 移植任何檔案時，一律從 `www/` 讀取並複製至 `API/` 後進行修改。
    - **嚴格禁止修改 `www/` 目錄下的任何既有檔案**。
 2. **單一真實來源（Single Source of Truth）**：
-   - 嚴格禁止在 `v85/` 建立獨立的 `.env`，一律由 `Env.class.php` 共用 [`www/.env`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/www/.env)（且必須維持 `MOCK=true`）。
-   - 嚴格禁止在 `v85/` 建立或複製 SQLite 資料庫，一律由 `GlobalConstants.inc.php` 共用 [`www/assets/db/*.db`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/www/assets/db/)。
+   - 嚴格禁止在 `API/` 建立獨立的 `.env`，一律由 `Env.class.php` 共用 [`www/.env`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/www/.env)（且必須維持 `MOCK=true`）。
+   - 嚴格禁止在 `API/` 建立或複製 SQLite 資料庫，一律由 `GlobalConstants.inc.php` 共用 [`www/assets/db/*.db`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/www/assets/db/)。
    - 一律共用 `www/log/`、`www/export/` 與 `www/import/`。
 3. **介面契約零破壞（Zero Breaking Changes）**：
    - 禁止修改 API 路由名稱、Request 參數名稱或型別。
@@ -80,12 +80,12 @@
 
 由於目前後端資料庫為 **Oracle 9i**，而 PHP 8.5 無法直接載入 `instantclient_11_2`：
 1. **現行運作（雙模 CLI 橋接）**：
-   - 當 `extension_loaded('oci8')` 為 `false` 時，[`v85/include/OraDB.class.php`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/v85/include/OraDB.class.php) 自動啟用 `use_cli_bridge`。
+   - 當 `extension_loaded('oci8')` 為 `false` 時，[`API/include/OraDB.class.php`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/API/include/OraDB.class.php) 自動啟用 `use_cli_bridge`。
    - 透過 `proc_open` 呼叫 `C:\AppServ\php7\php.exe` 執行同目錄下的 `ora_cli_worker.php`。
    - 既有業務 API 的具名綁定（如 `:bv_land_id`）與 Big5 轉碼邏輯完全不需改動。
 2. **未來切換（Oracle 12c+ 原生直連）**：
    - 當後端資料庫正式升級為 Oracle 12c/19c 後，只需於 `C:\AppServ\php85\php.ini` 啟用 `php_oci8_19.dll`。
-   - 一旦 `extension_loaded('oci8')` 轉為 `true`，`OraDB` 會自動跳過 PHP 7 橋接，改走純 PHP 8.5 原生直連，**v85 業務程式碼零修改**。
+   - 一旦 `extension_loaded('oci8')` 轉為 `true`，`OraDB` 會自動跳過 PHP 7 橋接，改走純 PHP 8.5 原生直連，**API 業務程式碼零修改**。
 
 ---
 

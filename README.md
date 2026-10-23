@@ -1,4 +1,4 @@
-# LAH-API
+﻿# LAH-API
 
 > 地政中台核心 Web API 服務 (A WEB API for LAH-FE & lah-messenger)
 
@@ -43,7 +43,7 @@
 | 軌道 | 目錄 | 執行期與處理器 | 監聽埠 / 路由 | 主要職責與特點 |
 | :--- | :--- | :--- | :--- | :--- |
 | **線上生產軌道<br>(Legacy)** | `www/` | Apache `mod_php7`<br>(PHP 7.4.33 ZTS) | `http://127.0.0.1/api/*`<br>(Port 80) | 承擔現行線上穩定生產流量，嚴格遵守 PHP 7.3 保守相容性。詳見 [`www/AGENTS.md`](www/AGENTS.md)。 |
-| **現代化移植軌道<br>(Migration)** | `v85/` | PM2 FastCGI 守護<br>(PHP 8.5.12 NTS) | `http://127.0.0.1/v85/api/*`<br>(Port 9085 轉發) | 漸進式移植核心 API，修正 P0/P1 相容性，具備 FastCGI 16 程序併發與 Oracle 9i 雙模連線。詳見 [`v85/README.md`](v85/README.md)。 |
+| **現代化移植軌道<br>(Migration)** | `API/` | PM2 FastCGI 守護<br>(PHP 8.5.12 NTS) | `http://127.0.0.1/v85/api/*`<br>(Port 9085 轉發) | 漸進式移植核心 API，修正 P0/P1 相容性，具備 FastCGI 16 程序併發與 Oracle 9i 雙模連線。詳見 [`API/README.md`](API/README.md)。 |
 
 ```mermaid
 flowchart TD
@@ -58,7 +58,7 @@ flowchart TD
 
     subgraph ServiceLayer["雙軌執行期 (Runtime Layer)"]
         PHP7["舊軌 mod_php7 (C:\\AppServ\\php7)<br/>執行 www/ 原始碼"]
-        PHP85["新軌 PM2 FastCGI lah-api-v85 (127.0.0.1:9085)<br/>C:\\AppServ\\php85\\php-cgi.exe 執行 v85/ 原始碼"]
+        PHP85["新軌 PM2 FastCGI lah-api-v85 (127.0.0.1:9085)<br/>C:\\AppServ\\php85\\php-cgi.exe 執行 API/ 原始碼"]
     end
 
     subgraph PersistenceLayer["資料持久層 (Shared Single Source of Truth)"]
@@ -117,7 +117,7 @@ LAH-API/
 │   ├── export/             # 共用匯出暫存目錄
 │   └── log/                # 共用日誌目錄
 │
-└── v85/                    # [新軌] 現代化移植目錄 (PHP 8.5 FastCGI 服務)
+└── API/                    # [新軌] 現代化移植目錄 (PHP 8.5 FastCGI 服務)
     ├── README.md           # PHP 8.5 移植與雙軌架構技術手冊
     ├── manual.html         # 離線可列印技術手冊 (含 Oracle 12c 升級備忘錄)
     ├── AGENTS.md           # PHP 8.5 移植規範 (最小差異移植、P0/P1 修復與驗證清單)
@@ -141,17 +141,17 @@ LAH-API/
    - PHP 7 (Legacy): `C:\AppServ\php7`
    - PHP 8.5 (Modern): `C:\AppServ\php85`
    - Production Root (www): `C:\AppServ\www`
-   - Migration Target (v85): `C:\AppServ\v85`
+   - Migration Target (v85): `C:\AppServ\API`
 2. **Oracle Instant Client**:
    - Extract `instantclient_11_2` to `C:\Tools\instantclient_11_2`.
    - Add `C:\AppServ\Apache24\bin`, `C:\AppServ\php7`, `C:\AppServ\php85`, and `C:\Tools\instantclient_11_2` to System `PATH`.
 3. **Configure Apache (`httpd.conf`)**:
    - Point `DocumentRoot` to `C:/AppServ/www`.
-   - Enable `mod_proxy` & `mod_proxy_fcgi` and set `Alias /v85 "C:/AppServ/v85"`.
+   - Enable `mod_proxy` & `mod_proxy_fcgi` and set `Alias /v85 "C:/AppServ/API"`.
    - Forward `/v85/*.php` to `fcgi://127.0.0.1:9085/`.
 4. **Start Services**:
    - Start Apache: `httpd.exe -k start`.
-   - Start PM2 FastCGI: `cd C:\AppServ\v85 && pm2 start ecosystem.config.js && pm2 save`.
+   - Start PM2 FastCGI: `cd C:\AppServ\API && pm2 start ecosystem.config.js && pm2 save`.
 
 ---
 
@@ -220,8 +220,8 @@ LAH-API/
    LoadModule proxy_module modules/mod_proxy.so
    LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so
 
-   Alias /v85 "C:/AppServ/v85"
-   <Directory "C:/AppServ/v85">
+   Alias /v85 "C:/AppServ/API"
+   <Directory "C:/AppServ/API">
        Header set Access-Control-Allow-Origin "*"
        Options Indexes FollowSymLinks
        AllowOverride None
@@ -247,7 +247,7 @@ LAH-API/
    ```
 2. **啟動 PHP 8.5 FastCGI (PM2)**：
    ```powershell
-   cd C:\AppServ\v85
+   cd C:\AppServ\API
    pm2 start ecosystem.config.js
    pm2 save
    ```
@@ -321,7 +321,7 @@ API 端點遵循標準 JSON 回應協定：
    - 瀏覽器開啟 `http://127.0.0.1/v85/ver.php` 確認回傳 `"channel": "v85"`, `"php_version": "8.5.12"`。
    - 若欲單獨除錯 PHP 8.5：
      ```powershell
-     C:\AppServ\php85\php.exe -S 127.0.0.1:8085 -t C:\AppServ\v85
+     C:\AppServ\php85\php.exe -S 127.0.0.1:8085 -t C:\AppServ\API
      ```
      瀏覽器開啟 `http://127.0.0.1:8085/ver.php`。
 
@@ -332,4 +332,4 @@ API 端點遵循標準 JSON 回應協定：
 - **不支援 Internet Explorer (NO IE support)**：系統採用現代標準規範（RFC 5987 UTF-8、Fetch/Axios 等），全面停止支援 IE。
 - **Windows 檔案編碼**：專案內部腳本全面採用 **UTF-8（無 BOM）** 編碼。
 - **環境變數安全性**：`www/.env` 包含資料庫密碼與 API 金鑰，已列入 `.gitignore`，切勿推播至公開儲存庫。
-- **雙軌遷移參考指引**：詳細 PHP 8.5 移植步驟、Oracle 9i 雙模連線與 Oracle 12c 升級備忘，請參閱 [`v85/README.md`](v85/README.md) 與 [`v85/manual.html`](v85/manual.html)。
+- **雙軌遷移參考指引**：詳細 PHP 8.5 移植步驟、Oracle 9i 雙模連線與 Oracle 12c 升級備忘，請參閱 [`API/README.md`](API/README.md) 與 [`API/manual.html`](API/manual.html)。

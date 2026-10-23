@@ -3,7 +3,7 @@
 > **PHP 7.3 RESTful API 線上維護架構規範 (Legacy Track)**
 >
 > **適用範圍**：本規範**嚴格僅適用於 www/ 目錄**下的 PHP 7.3 / 7.4 既有線上服務維護。
-> 若任務涉及 **PHP 8.5 移植、新版端點重整或 FastCGI 服務**，請參閱根目錄 [../AGENTS.md](../AGENTS.md) 與 [../v85/AGENTS.md](../v85/AGENTS.md)。
+> 若任務涉及 **PHP 8.5 移植、新版端點重整或 FastCGI 服務**，請參閱根目錄 [../AGENTS.md](../AGENTS.md) 與 [../API/AGENTS.md](../API/AGENTS.md)。
 >
 > 本專案以 **系統穩定性（Stability）**、**最高相容性（Maximum Compatibility）** 與 **最低風險（Lowest Risk）** 為最高原則。
 ---
