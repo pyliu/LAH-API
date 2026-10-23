@@ -93,7 +93,7 @@ module.exports = {
       name: "lah-api-v85",
       script: "C:\\AppServ\\php85\\php-cgi.exe",
       args: "-b 127.0.0.1:9085 -c C:\\AppServ\\php85\\php.ini",
-      cwd: "C:\\Temp\\DEV\\LAH-Workspace\\LAH-API\\v85",
+      cwd: __dirname,               // 自動取得目錄（各所伺服器與開發筆電 Junction 皆為 C:\\AppServ\\v85）,
       interpreter: "none",          // 關鍵：告知 PM2 這是原生 .exe，不透過 node 執行
       exec_mode: "fork",
       instances: 1,                 // Windows 下由 PHP_FCGI_CHILDREN 控制內部子程序數
@@ -279,9 +279,9 @@ LoadModule rewrite_module modules/mod_rewrite.so
 # =====================================================================
 
 # 1. 將 /v85 虛擬路徑映射至實體 LAH-API/v85 目錄
-Alias /v85 "c:/Temp/DEV/LAH-Workspace/LAH-API/v85"
+Alias /v85 "C:/AppServ/v85"
 
-<Directory "c:/Temp/DEV/LAH-Workspace/LAH-API/v85">
+<Directory "C:/AppServ/v85">
     Header set Access-Control-Allow-Origin "*"
     Options Indexes FollowSymLinks
     AllowOverride None
@@ -381,7 +381,7 @@ Alias /v85 "c:/Temp/DEV/LAH-Workspace/LAH-API/v85"
 1. 將第二章的 `ecosystem.config.js` 存放在 `c:\Temp\DEV\LAH-Workspace\LAH-API\v85\ecosystem.config.js`。
 2. 在 PowerShell 啟動 PM2 服務（直接使用您現有的 Node v16 環境即可）：
    ```powershell
-   cd c:\Temp\DEV\LAH-Workspace\LAH-API\v85
+   cd C:\AppServ\v85
    pm2 start ecosystem.config.js
    pm2 status
    ```

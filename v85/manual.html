@@ -208,7 +208,7 @@
       name: "lah-api-v85",
       script: "C:\\AppServ\\php85\\php-cgi.exe",
       args: "-b 127.0.0.1:9085 -c C:\\AppServ\\php85\\php.ini",
-      cwd: "C:\\Temp\\DEV\\LAH-Workspace\\LAH-API\\v85",
+      cwd: __dirname,               // 自動取得目錄（各所伺服器與開發筆電 Junction 皆為 C:\\AppServ\\v85）,
       interpreter: "none",          // 告知 PM2 此為原生 Windows 執行檔，不經由 node 執行
       exec_mode: "fork",
       instances: 1,
@@ -363,9 +363,9 @@ LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so
 LoadModule rewrite_module modules/mod_rewrite.so</code></pre>
 
 <p><strong>2. 於 <code>httpd.conf</code> 最下方加入 <code>/v85</code> 路由轉發區塊：</strong></p>
-<pre><code>Alias /v85 "c:/Temp/DEV/LAH-Workspace/LAH-API/v85"
+<pre><code>Alias /v85 "C:/AppServ/v85"
 
-&lt;Directory "c:/Temp/DEV/LAH-Workspace/LAH-API/v85"&gt;
+&lt;Directory "C:/AppServ/v85"&gt;
     Header set Access-Control-Allow-Origin "*"
     Options Indexes FollowSymLinks
     AllowOverride None
@@ -389,7 +389,7 @@ LoadModule rewrite_module modules/mod_rewrite.so</code></pre>
   <li><strong>安裝 PHP 8.5 NTS</strong>：下載 Windows PHP 8.5 (VS17 x64 Non Thread Safe) 解壓至 <code>C:\AppServ\php85</code>，複製 <code>php.ini-development</code> 為 <code>php.ini</code>，開啟 <code>curl, fileinfo, gd, intl, mbstring, odbc, openssl, pdo_odbc, pdo_sqlite, sqlite3, sockets, zip</code>。</li>
   <li><strong>建立 <code>LAH-API\v85</code> 目錄</strong>：將 <code>LAH-API\v1</code> 重新命名為 <code>LAH-API\v85</code>，放入 <code>ecosystem.config.js</code> 與測試用 <code>ver.php</code>。</li>
   <li><strong>使用 PM2 啟動 PHP 8.5 FastCGI</strong>：
-    <pre><code>cd c:\Temp\DEV\LAH-Workspace\LAH-API\v85
+    <pre><code>cd C:\AppServ\v85
 pm2 start ecosystem.config.js
 pm2 status</code></pre>
   </li>
