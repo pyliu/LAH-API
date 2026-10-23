@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<title>LAH-API 漸進式升級 PHP 8.5 (v85 雙軌架構) 完整技術與實作手冊</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 16mm 18mm 16mm;
+  }
+  body {
+    font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.65;
+    color: #1e293b;
+    margin: 0;
+    padding: 0;
+  }
+  h1 {
+    font-size: 20pt;
+    color: #0f172a;
+    border-bottom: 3px solid #2563eb;
+    padding-bottom: 8px;
+    margin-top: 0;
+  }
+  h2 {
+    font-size: 14.5pt;
+    color: #1d4ed8;
+    border-left: 5px solid #2563eb;
+    padding-left: 10px;
+    margin-top: 24px;
+    margin-bottom: 10px;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 12pt;
+    color: #0f172a;
+    margin-top: 16px;
+    margin-bottom: 6px;
+    page-break-after: avoid;
+  }
+  p, li {
+    margin-top: 4px;
+    margin-bottom: 6px;
+  }
+  code {
+    font-family: Consolas, "Courier New", monospace;
+    background: #f1f5f9;
+    color: #be123c;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 9.5pt;
+  }
+  pre {
+    background: #0f172a;
+    color: #f8fafc;
+    padding: 12px 14px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 9pt;
+    line-height: 1.45;
+    page-break-inside: avoid;
+  }
+  pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    font-size: 9pt;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 9.5pt;
+    page-break-inside: avoid;
+  }
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 7px 9px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #eff6ff;
+    color: #1e3a8a;
+    font-weight: 700;
+  }
+  tr:nth-child(even) td {
+    background: #f8fafc;
+  }
+  .meta-box {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-left: 5px solid #0284c7;
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin-bottom: 18px;
+    font-size: 9.5pt;
+  }
+  .callout {
+    background: #eff6ff;
+    border-left: 4px solid #2563eb;
+    padding: 10px 14px;
+    margin: 12px 0;
+    border-radius: 4px;
+    page-break-inside: avoid;
+  }
+  .callout-warn {
+    background: #fffbeb;
+    border-left: 4px solid #d97706;
+    padding: 10px 14px;
+    margin: 12px 0;
+    border-radius: 4px;
+    page-break-inside: avoid;
+  }
+  .arch-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    padding: 12px;
+    border-radius: 6px;
+    margin: 10px 0;
+    page-break-inside: avoid;
+  }
+  .arch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .arch-node {
+    flex: 1;
+    background: #ffffff;
+    border: 1.5px solid #2563eb;
+    border-radius: 6px;
+    padding: 8px 10px;
+    text-align: center;
+    font-size: 9pt;
+  }
+  .arch-node strong {
+    display: block;
+    color: #1d4ed8;
+    margin-bottom: 2px;
+  }
+  .arch-arrow {
+    font-weight: bold;
+    color: #475569;
+    font-size: 11pt;
+  }
+</style>
+</head>
+<body>
+
+<h1>LAH-API 漸進式升級 PHP 8.5（<code>v85</code> 雙軌架構）完整技術與實作手冊</h1>
+
+<div class="meta-box">
+  <strong>文件版本：</strong>v1.0（2026-10-23）<br>
+  <strong>目標目錄：</strong><code>c:\Temp\DEV\LAH-Workspace\LAH-API\v85\</code><br>
+  <strong>採用架構：</strong>方案 B — 保留 Apache 2.4 (<code>mod_php7</code> + <code>mod_proxy_fcgi</code>) ＋ PM2 託管 PHP 8.5 FastCGI (<code>127.0.0.1:9085</code>)<br>
+  <strong>資料庫環境：</strong>後端地政核心 Oracle 9i（搭配 <code>instantclient_11_2</code>）＋ 本地快取 SQLite 3 ＋ 舊公文 MS SQL Server
+</div>
+
+<h2>第一章：整體升級策略與系統架構藍圖</h2>
+
+<h3>1.1 核心設計決策</h3>
+<ol>
+  <li><strong>新舊目錄並存（<code>www/</code> 與 <code>v85/</code>）</strong>：既有 <code>LAH-API/www/</code> 維持 PHP 7.3/7.4 穩定運作；新建 <code>LAH-API/v85/</code> 作為 PHP 8.5 專屬目錄，逐支檢視、修正並遷移 API。</li>
+  <li><strong>保留 Apache 2.4 並啟用 <code>mod_proxy_fcgi</code> 分流</strong>：不替換現有 Apache 2.4 服務，各所防火牆與自動更新工具 <code>LAH-Updater</code> 無需大幅變動。Apache 以原本的 <code>mod_php7</code> 服務 <code>/</code>，同時將 <code>/v85/</code> 轉發給本機 Port <code>9085</code> 的 PHP 8.5 FastCGI。</li>
+  <li><strong>PM2 進程守護</strong>：利用各所伺服器既有的 PM2 守護 <code>C:\Tools\php85\php-cgi.exe</code>，自動處理程序回收與崩潰重啟，徹底消除 Windows 下 FastCGI 滿載退出的 502 問題。</li>
+</ol>
+
+<div class="arch-flow">
+  <div class="arch-row">
+    <div class="arch-node"><strong>客戶端請求</strong>LAH-FE (Nuxt 2) / lah-messenger</div>
+    <div class="arch-arrow">➔</div>
+    <div class="arch-node"><strong>Apache 2.4 (Port 80)</strong>依 URL 路徑分流</div>
+  </div>
+  <div class="arch-row">
+    <div class="arch-node" style="border-color:#64748b;"><strong>舊路徑 <code>/api/*.php</code></strong>由 <code>mod_php7</code> 執行 <code>LAH-API/www/</code></div>
+    <div class="arch-node" style="border-color:#16a34a;"><strong>新路徑 <code>/v85/api/*.php</code></strong>由 <code>mod_proxy_fcgi</code> 轉發 <code>127.0.0.1:9085</code> (PM2 PHP 8.5) 執行 <code>LAH-API/v85/</code></div>
+  </div>
+  <div class="arch-row">
+    <div class="arch-node" style="border-color:#0284c7;"><strong>共用底層資料與設定</strong>共用 <code>www/.env</code>、<code>www/assets/db/*.db</code> (SQLite 3)、<code>www/log/</code> 及後端 Oracle 9i</div>
+  </div>
+</div>
+
+<h2>第二章：Node.js v16 限制、PM2 託管與 <code>nvm-windows</code> 完整解析</h2>
+
+<h3>2.1 關鍵解答：PM2 託管 PHP 8.5 完全不受 Node.js v16 限制！</h3>
+<ul>
+  <li><strong>為什麼不需要升級 Node.js 或切換 NVM 就能用 PM2 管 PHP 8.5？</strong><br>
+  PM2 雖然執行於 Node.js v16 上，但當設定 <code>interpreter: "none"</code> 時，PM2 是直接透過 Windows 系統呼叫啟動原生的 <code>C:\Tools\php85\php-cgi.exe</code> 執行檔，並監控其 PID。因此，<strong>現有跑在 Node.js v16 上的 PM2 可以直接同時管理 <code>LAH-FE</code> (Node 16)、<code>lah-messenger-server</code> 與 <code>lah-api-v85</code> (PHP 8.5)</strong>，完全不會互相干擾！</li>
+</ul>
+
+<h3>2.2 進階：若未來同台伺服器需安裝 <code>nvm-windows</code> 跑多版本 Node.js 的避坑指南</h3>
+<div class="callout-warn">
+  <strong>⚠️ Windows 上使用 <code>nvm-windows</code> 的重要陷阱：</strong><br>
+  <code>nvm use &lt;version&gt;</code> 在 Windows 的原理是切換全域符號連結 <code>C:\Program Files\nodejs</code>。若在伺服器上直接執行 <code>nvm use 22</code>，當 <code>LAH-FE</code> 重啟時會誤抓到 Node 22 而崩潰！<br>
+  <strong>✅ 正確做法：</strong>只用 <code>nvm install</code> 下載各版本，並在 PM2 的 <code>ecosystem.config.js</code> 中以 <code>interpreter</code> 明確指定該版本 <code>node.exe</code> 的實體絕對路徑（例如 <code>C:\nvm\v16.20.2\node.exe</code>）。
+</div>
+
+<h3>2.3 <code>LAH-API\v85\ecosystem.config.js</code> 完整設定檔範本</h3>
+<pre><code>module.exports = {
+  apps: [
+    {
+      name: "lah-api-v85",
+      script: "C:\\Tools\\php85\\php-cgi.exe",
+      args: "-b 127.0.0.1:9085 -c C:\\Tools\\php85\\php.ini",
+      cwd: "C:\\Temp\\DEV\\LAH-Workspace\\LAH-API\\v85",
+      interpreter: "none",          // 告知 PM2 此為原生 Windows 執行檔，不經由 node 執行
+      exec_mode: "fork",
+      instances: 1,
+      autorestart: true,            // 異常退出或達到 MAX_REQUESTS 時立即自動重啟
+      watch: false,
+      max_memory_restart: "1G",
+      env: {
+        PATH: "C:\\Tools\\instantclient_11_2;C:\\Tools\\php85;" + process.env.PATH,
+        NLS_LANG: "American_America.US7ASCII",
+        PHP_FCGI_CHILDREN: "16",
+        PHP_FCGI_MAX_REQUESTS: "10000"
+      }
+    }
+  ]
+};</code></pre>
+
+<h2>第三章：破解「PHP 8.5 ↔ Oracle 9i」雙重死結的實戰方案</h2>
+
+<h3>3.1 為什麼 PHP 8.5 連 Oracle 9i 會有雙重死結？</h3>
+<ol>
+  <li><strong>死結 1（Client 版本限制）</strong>：Oracle Instant Client 12c / 19c 已在底層移除對 Oracle 9i (<code>9.2</code>) 的連線支援，連線必噴 <code>ORA-03134: Connections to this server version are no longer supported</code>。因此<strong>唯一能連上 Oracle 9i 的 Client 只有 <code>instantclient_11_2</code> (11.2.0.4)</strong>。</li>
+  <li><strong>死結 2（PHP 8.5 DLL 函式限制）</strong>：PHP 8.5 官方預編譯僅提供 <code>php_oci8_12c.dll</code> / <code>19.dll</code>，其二進位匯入表強制要求 Oracle 12c 才新增的 <code>OCIStmtGetNextResult</code> 函式，因此無法載入 <code>instantclient_11_2\oci.dll</code>。</li>
+</ol>
+
+<h3>3.2 破解方案比較（推薦在 <code>v85/include/OraDB.class.php</code> 採用智慧雙模）</h3>
+<p>由於整個專案對 Oracle 9i 的呼叫 100% 集中在 <code>OraDB.class.php</code> 單一類別內，您有以下三種選擇：</p>
+<table>
+  <thead>
+    <tr>
+      <th style="width:22%">方案名稱</th>
+      <th style="width:46%">運作機制</th>
+      <th style="width:32%">建置成本與評價</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>🥇 方案 1（最推薦起步）：<br>本機 127.0.0.1 內部橋接</strong></td>
+      <td>雙軌期間 Apache 本來就帶有 <code>mod_php7</code> + <code>instantclient_11_2</code>。當 <code>v85</code> (PHP 8.5) 需要查 Oracle 9i 時，由 <code>v85/include/OraDB.class.php</code> 透過本機 <code>127.0.0.1</code> 內部端點委派 PHP 7 執行 SQL 並回傳結果。</td>
+      <td>⭐ <strong>零編譯成本、立即可用</strong>。<br>30 支業務 API 的 SQL 與 <code>:bv_</code> 綁定一行都不用改！</td>
+    </tr>
+    <tr>
+      <td><strong>🥈 方案 2（純 PHP 8.5）：<br>Windows ODBC 橋接</strong></td>
+      <td>安裝 <code>instantclient-odbc-11.2.0.4</code>，在 PHP 8.5 開啟內建 <code>extension=odbc</code>，透過 Windows <code>odbc32.dll</code> 呼叫 11.2 Driver 連 Oracle 9i。</td>
+      <td>⭐⭐ 免編譯 C++，可完全移除 PHP 7；僅需改寫 <code>OraDB.class.php</code> 將 <code>:var</code> 轉為 <code>?</code>。</td>
+    </tr>
+    <tr>
+      <td><strong>🥉 方案 3（純 PHP 8.5 原生）：<br>VS2022 自編譯 DLL</strong></td>
+      <td>下載 PECL <code>oci8-3.4.x</code> 原始碼，使用 Visual Studio 2022 搭配 <code>instantclient_11_2\sdk</code> 自行編譯出 PHP 8.5 專用的 <code>php_oci8_11g.dll</code>。</td>
+      <td>⭐⭐⭐⭐ 需建置 C++ 編譯環境，但編出後可 100% 原生呼叫 <code>oci_connect()</code>。</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>第四章：<code>LAH-API\v85\</code> 目錄結構與共用資料庫設計</h2>
+<p>為了讓新舊 API 在過渡期讀寫同一份本地快取與系統設定，<code>v85/</code> 僅獨立程式碼與 <code>vendor/</code>，其餘資產與 SQLite 資料庫均指向 <code>../www/</code>：</p>
+<pre><code><?php
+// 檔案：c:\Temp\DEV\LAH-Workspace\LAH-API\v85\include\GlobalConstants.inc.php
+define('V85_ROOT_DIR', dirname(__DIR__));                              // LAH-API/v85
+define('ROOT_DIR', dirname(V85_ROOT_DIR) . DIRECTORY_SEPARATOR . 'www'); // 指向 LAH-API/www 共用資產
+
+define('INC_DIR', V85_ROOT_DIR . DIRECTORY_SEPARATOR . 'include');     // 引入 v85 修正版類別
+define('ASSETS_DIR', ROOT_DIR . DIRECTORY_SEPARATOR . 'assets');       // 共用 www/assets
+define('DB_DIR', ASSETS_DIR . DIRECTORY_SEPARATOR . 'db');             // 共用 www/assets/db/*.db
+define('LOG_DIR', ROOT_DIR . DIRECTORY_SEPARATOR . 'log');             // 共用 www/log
+define('EXPORT_DIR', ROOT_DIR . DIRECTORY_SEPARATOR . 'export');       // 共用 www/export
+define('IMPORT_DIR', ROOT_DIR . DIRECTORY_SEPARATOR . 'import');       // 共用 www/import</code></pre>
+
+<h2>第五章：<code>LAH-API</code> 移植至 PHP 8.5 程式碼修改檢核表</h2>
+<table>
+  <thead>
+    <tr>
+      <th style="width:24%">目標檔案與行號</th>
+      <th style="width:32%">原本寫法 (PHP 7.3)</th>
+      <th style="width:44%">PHP 8.5 修正寫法與原因</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>include/init.php</code><br>(L11-14)</td>
+      <td><code>session_set_cookie_params(["SameSite" =&gt; "None"]);</code> (分三次呼叫且大寫)</td>
+      <td><code>session_set_cookie_params(['samesite' =&gt; 'Lax', 'secure' =&gt; false, 'httponly' =&gt; true]);</code><br>(PHP 8 陣列 Key 強制小寫，且布林不可用字串)</td>
+    </tr>
+    <tr>
+      <td><code>System.class.php</code> (L626-664)<br><code>MSDB.class.php</code> (L48)<br><code>Logger.class.php</code> (L99-101)<br><code>Message.class.php</code><br><code>MOIEXP.class.php</code></td>
+      <td><code>"(HOST=${ip})(PORT=${port})"</code><br><code>"log-${date}.zip"</code></td>
+      <td>全部改為 <code>"{$ip}"</code>、<code>"{$port}"</code>、<code>"log-{$date}.zip"</code><br>(PHP 8.2 起棄用 <code>${var}</code> 字串插值語法)</td>
+    </tr>
+    <tr>
+      <td><code>OraDB.class.php</code><br>(L110, L141, L152)</td>
+      <td><code>trigger_error(..., E_USER_ERROR);</code></td>
+      <td><code>throw new \RuntimeException($e['message']);</code><br>(PHP 8.4 / 8.5 正式棄用 <code>E_USER_ERROR</code>)</td>
+    </tr>
+    <tr>
+      <td><code>GlobalFunctions.inc.php</code> (L130, 380)<br><code>ADService.class.php</code> (L986)<br><code>DGXLandCaseParser.class.php</code> (L569)<br><code>MOISMS.class.php</code> (L62, 87, 115, 140)</td>
+      <td><code>curl_close($ch);</code><br><code>imagedestroy($image);</code></td>
+      <td>直接移除或改為 <code>unset($ch);</code><br>(<strong>PHP 8.5 最新棄用</strong>：<code>CurlHandle</code> 與 <code>GdImage</code> 物件已自動管理記憶體)</td>
+    </tr>
+    <tr>
+      <td><code>SQLSRV_DataBase.class.php</code><br>(L286, 321, 399, 438)</td>
+      <td><code>utf8_decode($value)</code></td>
+      <td><code>mb_convert_encoding($value, 'ISO-8859-1', 'UTF-8')</code><br>(PHP 8.2+ 棄用 <code>utf8_decode</code>)</td>
+    </tr>
+    <tr>
+      <td><code>v85/composer.json</code></td>
+      <td><code>"phpoffice/phpspreadsheet": "^1.14"</code></td>
+      <td>升級為 <code>"^2.0"</code> 或更高版本（舊版 1.14 在 PHP 8.5 會因舊語法 Fatal Error）</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>第六章：Apache 2.4 (<code>httpd.conf</code>) <code>mod_proxy_fcgi</code> 雙軌設定</h2>
+<p><strong>1. 於 <code>httpd.conf</code> 取消註解啟用模組：</strong></p>
+<pre><code>LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so
+LoadModule rewrite_module modules/mod_rewrite.so</code></pre>
+
+<p><strong>2. 於 <code>httpd.conf</code> 最下方加入 <code>/v85</code> 路由轉發區塊：</strong></p>
+<pre><code>Alias /v85 "c:/Temp/DEV/LAH-Workspace/LAH-API/v85"
+
+&lt;Directory "c:/Temp/DEV/LAH-Workspace/LAH-API/v85"&gt;
+    Header set Access-Control-Allow-Origin "*"
+    Options Indexes FollowSymLinks
+    AllowOverride None
+    Require all granted
+
+    &lt;FilesMatch "\.php$"&gt;
+        &lt;If "-f %{REQUEST_FILENAME}"&gt;
+            SetHandler "proxy:fcgi://127.0.0.1:9085/"
+            ProxyFCGISetEnvIf "reqenv('SCRIPT_FILENAME') =~ m#^proxy:fcgi://127\.0\.0\.1:9085/(.*)$#" SCRIPT_FILENAME "$1"
+        &lt;/If&gt;
+    &lt;/FilesMatch&gt;
+&lt;/Directory&gt;
+
+&lt;Proxy "fcgi://127.0.0.1:9085/" enablereuse=on max=16&gt;
+    ProxySet timeout=300
+&lt;/Proxy&gt;</code></pre>
+
+<h2>第七章：開發筆電（<code>c:\Temp\DEV\LAH-Workspace</code>）實驗步驟</h2>
+<ol>
+  <li><strong>安裝 PHP 8.5 NTS</strong>：下載 Windows PHP 8.5 (VS17 x64 Non Thread Safe) 解壓至 <code>C:\Tools\php85</code>，複製 <code>php.ini-development</code> 為 <code>php.ini</code>，開啟 <code>curl, fileinfo, gd, intl, mbstring, odbc, openssl, pdo_odbc, pdo_sqlite, sqlite3, sockets, zip</code>。</li>
+  <li><strong>建立 <code>LAH-API\v85</code> 目錄</strong>：將 <code>LAH-API\v1</code> 重新命名為 <code>LAH-API\v85</code>，放入 <code>ecosystem.config.js</code> 與測試用 <code>ver.php</code>。</li>
+  <li><strong>使用 PM2 啟動 PHP 8.5 FastCGI</strong>：
+    <pre><code>cd c:\Temp\DEV\LAH-Workspace\LAH-API\v85
+pm2 start ecosystem.config.js
+pm2 status</code></pre>
+  </li>
+  <li><strong>驗證雙軌連線</strong>：
+    <ul>
+      <li>若已啟動 Apache 2.4：瀏覽器開啟 <code>http://127.0.0.1/ver.php</code> (顯示 PHP 7.4) 與 <code>http://127.0.0.1/v85/ver.php</code> (顯示 PHP 8.5 <code>cgi-fcgi</code>)。</li>
+      <li>若筆電未開 Apache，想快速單獨測 PHP 8.5：執行 <code>C:\Tools\php85\php.exe -S 127.0.0.1:8085 -t c:\Temp\DEV\LAH-Workspace\LAH-API\v85</code>，開啟 <code>http://127.0.0.1:8085/ver.php</code>。</li>
+    </ul>
+  </li>
+</ol>
+
+</body>
+</html>
+
