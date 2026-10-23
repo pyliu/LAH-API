@@ -1,0 +1,568 @@
+<?php
+require_once("Logger.class.php");
+require_once("System.class.php");
+require_once("SQLiteDBFactory.class.php");
+require_once("StatsSQLite.class.php");
+require_once("SQLiteUser.class.php");
+
+class Notification {
+    
+    private $ws_db_path;
+    private $ws_share_db_file;
+
+    private function fileExists($channel) {
+        return file_exists($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db');
+    }
+
+    private function prepareDB($channel) {
+        if (!$this->fileExists($channel)) {
+            // copy predefined sqlite db
+            $res = copy($this->ws_share_db_file, $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db');
+            if (!$res) {
+                Logger::getInstance()->error(__METHOD__.': copy message.db failed. ('.$this->ws_share_db_file.' => '.$this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'.')');
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private function bindParams(&$stm, &$row) {
+        if ($stm === false) {
+            Logger::getInstance()->error(__METHOD__.": bindUserParams because of \$stm is false.");
+            return false;
+        }
+        $create_datetime = date('Y-m-d H:i:s');
+        $expire_datetime = empty($row['expire_datetime']) ? '' : $row['expire_datetime'];
+        $priority = $row['priority'] ?? 3;  // 0-3: critical -> high -> average -> low
+        $flag = empty(intval($row['flag'])) ? 0 : intval($row['flag']);
+        $stm->bindParam(':bv_title', $row['title']);
+        $stm->bindParam(':bv_content', $row['content']);
+        $stm->bindParam(':bv_priority', $priority);
+        $stm->bindParam(':bv_create_datetime', $create_datetime);
+        $stm->bindParam(':bv_expire_datetime', $expire_datetime);
+        $stm->bindParam(':bv_sender', $row['sender']);
+        $stm->bindParam(':bv_from_ip', $row['from_ip']);
+        $stm->bindParam(':bv_flag', $flag);
+
+        return true;
+    }
+
+    private function prepareArray(&$stmt) {
+        $result = $stmt->execute();
+        $return = [];
+        if ($result) {
+            while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                $return[] = $row;
+            }
+        } else {
+            Logger::getInstance()->warning(__CLASS__."::".__METHOD__.": execute SQL unsuccessfully.");
+        }
+        return $return;
+    }
+
+    function __construct() {
+        $this->ws_db_path = System::getInstance()->getWSDBPath();
+        $this->ws_share_db_file = dirname($this->ws_db_path).DIRECTORY_SEPARATOR.'dimension'.DIRECTORY_SEPARATOR.'message.db';
+        if (!is_dir($this->ws_db_path) || !is_file($this->ws_share_db_file)) {
+            Logger::getInstance()->info('ws_db_path: '.$this->ws_db_path.", ws_share_db_file: ".$this->ws_share_db_file);
+            Logger::getInstance()->warning(__CLASS__.': 即時通DB設定參數錯誤，改用預設值！');
+            // use default lah-messenger-server path
+            $defaultNotificationDBPath = dirname(dirname(dirname(__DIR__))).DIRECTORY_SEPARATOR.'lah-messenger-server'.DIRECTORY_SEPARATOR.'db';
+            $defaultNotificationMessageFile = dirname($defaultNotificationDBPath).DIRECTORY_SEPARATOR.'dimension'.DIRECTORY_SEPARATOR.'message.db';
+            if (!is_dir($defaultNotificationDBPath) || !is_file($defaultNotificationMessageFile)) {
+                $defaultNotificationDBPath = dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'lah-messenger-server'.DIRECTORY_SEPARATOR.'db';
+                $defaultNotificationMessageFile = dirname($defaultNotificationDBPath).DIRECTORY_SEPARATOR.'dimension'.DIRECTORY_SEPARATOR.'message.db';
+            }
+            Logger::getInstance()->info('ws_db_path: '.$defaultNotificationDBPath.", ws_share_db_file: ".$defaultNotificationMessageFile);
+            $this->ws_db_path = $defaultNotificationDBPath;
+            $this->ws_share_db_file = $defaultNotificationMessageFile;
+        }
+        $this->ws_share_db_file = dirname($this->ws_db_path).DIRECTORY_SEPARATOR.'dimension'.DIRECTORY_SEPARATOR.'message.db';
+    }
+
+    function __destruct() { }
+
+    private function createDB($path) {
+        $db = new SQLite3($path);
+        $db->busyTimeout(5000);
+        $db->exec("PRAGMA journal_mode = WAL");
+        return $db;
+    }
+
+    public function addLog($channel, $payload) {
+        try {
+            // notification log db
+            $db = $this->createDB(SQLiteDBFactory::getNotificationLogDB());
+            $stm = $db->prepare("
+                INSERT INTO notification_log (
+                    'channel',
+                    'title',
+                    'content',
+                    'priority',
+                    'create_datetime',
+                    'expire_datetime',
+                    'sender',
+                    'from_ip',
+                    'flag'
+                )
+                VALUES (
+                    :bv_channel,
+                    :bv_title,
+                    :bv_content,
+                    :bv_priority,
+                    :bv_create_datetime,
+                    :bv_expire_datetime,
+                    :bv_sender,
+                    :bv_from_ip, 
+                    :bv_flag
+                )
+            ");
+            if ($stm === false) {
+                Logger::getInstance()->warning(__METHOD__.': 準備 statement 失敗: '.$db->lastErrorMsg());
+                return false;
+            }
+            $create_datetime = date('Y-m-d H:i:s');
+            $expire_datetime = empty($payload['expire_datetime']) ? '' : $payload['expire_datetime'];
+            $priority = $payload['priority'] ?? 3;  // 0-3: critical -> high -> average -> low
+            $flag = empty(intval($payload['flag'])) ? 0 : intval($payload['flag']);
+            $stm->bindParam(':bv_channel', $channel);
+            $stm->bindParam(':bv_title', $payload['title']);
+            $stm->bindParam(':bv_content', $payload['content']);
+            $stm->bindParam(':bv_priority', $priority);
+            $stm->bindParam(':bv_create_datetime', $create_datetime);
+            $stm->bindParam(':bv_expire_datetime', $expire_datetime);
+            $stm->bindParam(':bv_sender', $payload['sender']);
+            $stm->bindParam(':bv_from_ip', $payload['from_ip']);
+            $stm->bindParam(':bv_flag', $flag);
+            return $stm->execute();
+        } catch (Throwable $ex) {
+            Logger::getInstance()->warning(__CLASS__.': 寫入訊息紀錄 notification_log 失敗。('.$ex->getMessage().')');
+        }
+        return false;
+    }
+    /**
+     * Get Logs by create_datetime
+     * e.g. 2024-01-01 00:00:00 ~ 2024-12-31 23:59:59
+     */
+    public function getLogs($st, $ed) {
+        try {
+            // notification log db
+            $db = $this->createDB(SQLiteDBFactory::getNotificationLogDB());
+            $stm = $db->prepare("
+                SELECT * FROM notification_log
+                WHERE create_datetime BETWEEN :bv_st AND :bv_ed
+                ORDER BY id DESC
+            ");
+            if ($stm === false) {
+                Logger::getInstance()->warning(__METHOD__.': 準備 statement 失敗: '.$db->lastErrorMsg());
+                return [];
+            }
+            $stm->bindParam(':bv_st', $st);
+            $stm->bindParam(':bv_ed', $ed);
+            return $this->prepareArray($stm);
+        } catch (Throwable $ex) {
+            Logger::getInstance()->warning(__CLASS__.': 取得訊息紀錄 notification_log 失敗。('.$ex->getMessage().')');
+        }
+        return false;
+    }
+
+    public function addMessage($channel, $payload, $skip_announcement_convert = true) {
+        if (empty($channel) || !is_array($payload) || empty($payload)) {
+            Logger::getInstance()->error(__METHOD__.': required param is missing. ('.$channel.')');
+            return false;
+        }
+        // 公告頻道轉換
+        if ($channel === 'all') {
+            $channel = 'announcement';
+        } else if (!$skip_announcement_convert && in_array($channel, array('all', 'hr', 'acc', 'adm', 'reg', 'sur', 'val', 'inf', 'supervisor'))) {
+            $channel = 'announcement_'.$channel;
+        }
+        if ($this->prepareDB($channel)) {
+            $db = $this->createDB(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            $stm = $db->prepare("
+                INSERT INTO message ('title', 'content', 'priority', 'create_datetime', 'expire_datetime', 'sender', 'from_ip', 'flag')
+                VALUES (:bv_title, :bv_content, :bv_priority, :bv_create_datetime, :bv_expire_datetime, :bv_sender, :bv_from_ip, :bv_flag)
+            ");
+            if ($this->bindParams($stm, $payload)) {
+                if ($stm->execute() !== FALSE) {
+                    // add to notification log
+                    $this->addLog($channel, $payload);
+                    // return last inserted id
+                    return $db->querySingle("SELECT id from message ORDER BY id DESC LIMIT 1");
+                }
+            }
+            return false;
+        }
+        return false;
+    }
+
+    public function removeMessage($channel, $payload) {
+        // expect payload has id and type info
+        if (empty($channel) || empty($payload['type'])) {
+            Logger::getInstance()->error(__METHOD__.': required param is missing. ('.$channel.', '.$payload['type'].')');
+            return false;
+        }
+        if (empty($payload['id'])) {
+            Logger::getInstance()->warning(__METHOD__.': 沒有指定 id 略過處理本次刪除請求. ('.$channel.', '.$payload['type'].')');
+            return true;
+        }
+        // special handling for announcement
+        if ($payload['type'] === 'announcement' && in_array($channel, array('all', 'hr', 'acc', 'adm', 'reg', 'sur', 'val', 'inf', 'supervisor'))) {
+            $channel = $channel === 'all' ? 'announcement' : 'announcement_'.$channel;
+        }
+        Logger::getInstance()->info(__METHOD__.': 準備刪除 '.$channel.' 頻道 '.$payload['id'].' 資料');
+        if ($this->prepareDB($channel)) {
+            // TODO: add message
+            $db = $this->createDB(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            if ($stm = $db->prepare("DELETE FROM message WHERE id = :bv_id")) {
+                $stm->bindParam(':bv_id', $payload['id']);
+                return $stm->execute() === FALSE ? false : true;
+            }
+        }
+        return false;
+    }
+
+    public function getAttachments($channel, $messageId) {
+        $uploadsDir = dirname($this->ws_db_path).DIRECTORY_SEPARATOR.'uploads'.DIRECTORY_SEPARATOR.$channel.DIRECTORY_SEPARATOR.$messageId;
+        if (!is_dir($uploadsDir)) {
+            return array();
+        }
+        $files = scandir($uploadsDir);
+        if ($files === false) {
+            return array();
+        }
+        $attachments = array();
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..' || strpos($file, '.') === 0) {
+                continue;
+            }
+            $filePath = $uploadsDir.DIRECTORY_SEPARATOR.$file;
+            if (is_file($filePath)) {
+                $attachments[] = array(
+                    'name' => $file,
+                    'size' => filesize($filePath)
+                );
+            }
+        }
+        return $attachments;
+    }
+
+    public function getMessages($channel, $top = 10) {
+        $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
+        if (!file_exists($channelDBPath)) {
+            Logger::getInstance()->error(__METHOD__.': DB檔案路徑有誤('.$channelDBPath.')有誤，無法取得訊息。');
+            return false;
+        }
+        if (!is_numeric($top) || intval($top) < 1 ) {
+            Logger::getInstance()->warning(__METHOD__.': $top 變數('.$top.')有誤，改用預設值 $top = 10');
+            $top = 10;
+        }
+        // get messages
+        if ($this->prepareDB($channel)) {
+            $db = $this->createDB(SQLiteDBFactory::getMessageDB($channelDBPath));
+            $stm = $db->prepare("SELECT * FROM message ORDER BY id DESC LIMIT :bv_top");
+            $stm->bindParam(':bv_top', $top);
+            $rows = $this->prepareArray($stm);
+            if (is_array($rows)) {
+                foreach ($rows as &$row) {
+                    $row['attachments'] = $this->getAttachments($channel, $row['id']);
+                }
+                unset($row);
+            }
+            return $rows;
+        }
+        return false;
+    }
+
+    public function getMessagesBefore($channel, $before, $limit) {
+        $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
+        if (!file_exists($channelDBPath)) {
+            Logger::getInstance()->error(__METHOD__.': DB檔案路徑有誤('.$channelDBPath.')有誤，無法取得訊息。');
+            return false;
+        }
+        if (!is_numeric($limit) || intval($limit) < 1 ) {
+            Logger::getInstance()->warning(__METHOD__.': $limit 變數('.$limit.')有誤，改用預設值 $limit = 10');
+            $limit = 10;
+        }
+        // get messages
+        if ($this->prepareDB($channel)) {
+            $db = $this->createDB(SQLiteDBFactory::getMessageDB($channelDBPath));
+            $stm = $db->prepare("SELECT * FROM message WHERE id < :bv_before ORDER BY id DESC LIMIT :bv_limit");
+            $stm->bindParam(':bv_before', $before);
+            $stm->bindParam(':bv_limit', $limit);
+            $rows = $this->prepareArray($stm);
+            if (is_array($rows)) {
+                foreach ($rows as &$row) {
+                    $row['attachments'] = $this->getAttachments($channel, $row['id']);
+                }
+                unset($row);
+            }
+            return $rows;
+        }
+        return false;
+    }
+
+    public function getMessageByDuration($channel, $payload) {
+        if (is_array($payload)) {
+            Logger::getInstance()->warning(__METHOD__.': 查詢的參數應為陣列!');
+            Logger::getInstance()->info(__METHOD__.': $payload => '.$payload);
+            return false;
+        }
+        if (!array_key_exists('st', $payload) || !array_key_exists('ed', $payload) || $payload['st'] > $payload['ed']) {
+            Logger::getInstance()->warning(__METHOD__.': 查詢的參數錯誤');
+            Logger::getInstance()->info(__METHOD__.': $payload => '.$payload);
+            return false;
+        }
+        // get messages
+        if ($this->prepareDB($channel)) {
+            // TODO: add message
+            // $db = $this->createDB(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            // $stm = $db->prepare("
+            //     INSERT INTO message ('title', 'content', 'priority', 'create_datetime', 'expire_datetime', 'sender', 'from_ip', 'flag')
+            //     VALUES (:bv_title, :bv_content, :bv_priority, :bv_create_datetime, :bv_expire_datetime, :bv_sender, :bv_from_ip, :bv_flag)
+            // ");
+            // if ($this->bindParams($stm, $payload)) {
+            //     if ($stm->execute() !== FALSE) {
+            //         // return last inserted id
+            //         return $db->querySingle("SELECT id from message ORDER BY id DESC LIMIT 1");
+            //     }
+            // }
+            return false;
+        }
+        $messages = array();
+        return $messages;
+    }
+
+    public function removeTodayOfficeDownMessage($channel = 'lds') {
+        Logger::getInstance()->info(__METHOD__.': 準備刪除 '.$channel.' 頻道今日地所離線訊息');
+        if ($this->prepareDB($channel)) {
+            $today = date("Y-m-d");
+            $db = $this->createDB(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            if ($stm = $db->prepare("DELETE FROM message WHERE title = :bv_title and create_datetime like :bv_create_datetime")) {
+                $stm->bindValue(':bv_title', '地政系統跨域服務監測');
+                $stm->bindValue(':bv_create_datetime', $today.'%');
+                return $stm->execute() === FALSE ? false : true;
+            }
+        }
+        return false;
+    }
+
+    public function removeOutdatedMessageByTitle($channel, $title) {
+        Logger::getInstance()->info(__METHOD__.': 準備刪除「'.$channel.'」頻道標題為「'.$title.'」的訊息');
+        if ($this->prepareDB($channel)) {
+            $db = $this->createDB(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            if ($stm = $db->prepare("DELETE FROM message WHERE title = :bv_title")) {
+                $stm->bindParam(':bv_title', $title);
+                return $stm->execute() === FALSE ? false : true;
+            }
+        }
+        return false;
+    }
+
+    public function removeOutdatedMessageByContent($channel, $content) {
+        Logger::getInstance()->info(__METHOD__.': 準備刪除「'.$channel.'」頻道內容為「'.$content.'」的訊息');
+        if ($this->prepareDB($channel)) {
+            $db = $this->createDB(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            if ($stm = $db->prepare("DELETE FROM message WHERE content = :bv_content")) {
+                $stm->bindParam(':bv_content', $content);
+                return $stm->execute() === FALSE ? false : true;
+            }
+        }
+        return false;
+    }
+
+    public function getUserInfo($name_or_id_or_ip) {
+        $sqlite_user = new SQLiteUser();
+        $name_or_id_or_ip = trim($name_or_id_or_ip);
+        if (empty($name_or_id_or_ip)) {
+            return false;
+        }
+        $res = $sqlite_user->getUser($name_or_id_or_ip);
+        if (empty($res)) {
+            $res = $sqlite_user->getUserByName($name_or_id_or_ip);
+        }
+        if (empty($res)) {
+            $res = $sqlite_user->getUserByIP($name_or_id_or_ip);
+        }
+        if (empty($res) || count($res) < 1) {
+            return false;
+        }
+        return $res[0];
+    }
+
+    public function getUserChannel($param) {
+        if (empty($param)) {
+            global $client_ip;
+            $param = $client_ip;
+        }
+        $userInfo = $this->getUserInfo($param);
+        if ($userInfo && !empty($userInfo['id'])) {
+            return $userInfo['id'];
+        }
+        if (!empty($param) && is_string($param)) {
+            return trim($param);
+        }
+        return false;
+    }
+
+    public function getUserMessages($param, $top = 10) {
+        $channel = $this->getUserChannel($param);
+        if (empty($channel)) {
+            Logger::getInstance()->warning(__METHOD__.": 無法解析使用者或頻道資訊【{$param}】");
+            return false;
+        }
+        $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
+        if (!file_exists($channelDBPath)) {
+            return [];
+        }
+        if (!is_numeric($top) || intval($top) < 1) {
+            $top = 10;
+        }
+        $db = $this->createDB(SQLiteDBFactory::getMessageDB($channelDBPath));
+        $stm = $db->prepare("SELECT * FROM message ORDER BY id DESC LIMIT :bv_top");
+        $stm->bindValue(':bv_top', intval($top), SQLITE3_INTEGER);
+        $rows = $this->prepareArray($stm);
+        $db->close();
+
+        $sqlite_user = new SQLiteUser();
+        $results = [];
+        foreach ($rows as $row) {
+            $sender = $row['sender'] ?? '';
+            $sendCname = $sender;
+            if (!empty($sender)) {
+                $senderUser = $sqlite_user->getUser($sender);
+                if (!empty($senderUser) && isset($senderUser[0]['name'])) {
+                    $sendCname = $senderUser[0]['name'];
+                }
+            }
+
+            $createDt = $row['create_datetime'] ?? '';
+            $expireDt = $row['expire_datetime'] ?? '';
+            $flag = intval($row['flag'] ?? 0);
+            $done = ($flag & 2) === 2 ? 1 : 0;
+            $title = $row['title'] ?? '';
+            if (empty($title) || $title === 'dontcare' || strpos($title, '{"to"') === 0 || strpos($title, '{"id"') === 0) {
+                $title = '即時通私訊';
+            }
+
+            $results[] = array(
+                'id' => $row['id'],
+                'sn' => $row['id'],
+                'title' => $title,
+                'xname' => $title,
+                'content' => $row['content'] ?? '',
+                'xcontent' => $row['content'] ?? '',
+                'priority' => $row['priority'] ?? 3,
+                'create_datetime' => $createDt,
+                'sendtime' => array('date' => $createDt),
+                'expire_datetime' => $expireDt,
+                'enddate' => array('date' => $expireDt),
+                'sender' => $sender,
+                'sendCname' => $sendCname,
+                'from_ip' => $row['from_ip'] ?? '',
+                'sendIP' => $row['from_ip'] ?? '',
+                'flag' => $flag,
+                'done' => $done
+            );
+        }
+        return $results;
+    }
+
+    public function getUserUnreadMessages($param) {
+        $channel = $this->getUserChannel($param);
+        if (empty($channel)) {
+            Logger::getInstance()->warning(__METHOD__.": 無法解析使用者或頻道資訊【{$param}】");
+            return false;
+        }
+        $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
+        if (!file_exists($channelDBPath)) {
+            return [];
+        }
+        $db = $this->createDB(SQLiteDBFactory::getMessageDB($channelDBPath));
+        $stm = $db->prepare("SELECT * FROM message WHERE (flag & 2) <> 2 ORDER BY id DESC");
+        $rows = $this->prepareArray($stm);
+        $db->close();
+
+        $sqlite_user = new SQLiteUser();
+        $results = [];
+        foreach ($rows as $row) {
+            $sender = $row['sender'] ?? '';
+            $sendCname = $sender;
+            if (!empty($sender)) {
+                $senderUser = $sqlite_user->getUser($sender);
+                if (!empty($senderUser) && isset($senderUser[0]['name'])) {
+                    $sendCname = $senderUser[0]['name'];
+                }
+            }
+
+            $createDt = $row['create_datetime'] ?? '';
+            $expireDt = $row['expire_datetime'] ?? '';
+            $flag = intval($row['flag'] ?? 0);
+            $done = 0;
+            $title = $row['title'] ?? '';
+            if (empty($title) || $title === 'dontcare' || strpos($title, '{"to"') === 0 || strpos($title, '{"id"') === 0) {
+                $title = '即時通私訊';
+            }
+
+            $results[] = array(
+                'id' => $row['id'],
+                'sn' => $row['id'],
+                'title' => $title,
+                'xname' => $title,
+                'content' => $row['content'] ?? '',
+                'xcontent' => $row['content'] ?? '',
+                'priority' => $row['priority'] ?? 3,
+                'create_datetime' => $createDt,
+                'sendtime' => array('date' => $createDt),
+                'expire_datetime' => $expireDt,
+                'enddate' => array('date' => $expireDt),
+                'sender' => $sender,
+                'sendCname' => $sendCname,
+                'from_ip' => $row['from_ip'] ?? '',
+                'sendIP' => $row['from_ip'] ?? '',
+                'flag' => $flag,
+                'done' => $done
+            );
+        }
+        return $results;
+    }
+
+    public function setUserMessageRead($param, $sn) {
+        $channel = $this->getUserChannel($param);
+        if (empty($channel)) return false;
+        $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
+        if (!file_exists($channelDBPath)) return false;
+        $db = $this->createDB(SQLiteDBFactory::getMessageDB($channelDBPath));
+        $stm = $db->prepare("UPDATE message SET flag = (flag | 2) WHERE id = :bv_id");
+        $stm->bindValue(':bv_id', intval($sn), SQLITE3_INTEGER);
+        $res = $stm->execute() !== FALSE;
+        $db->close();
+        return $res;
+    }
+
+    public function setUserMessageUnread($param, $sn) {
+        $channel = $this->getUserChannel($param);
+        if (empty($channel)) return false;
+        $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
+        if (!file_exists($channelDBPath)) return false;
+        $db = $this->createDB(SQLiteDBFactory::getMessageDB($channelDBPath));
+        $stm = $db->prepare("UPDATE message SET flag = (CASE WHEN (flag & 2) = 2 THEN flag - 2 ELSE flag END) WHERE id = :bv_id");
+        $stm->bindValue(':bv_id', intval($sn), SQLITE3_INTEGER);
+        $res = $stm->execute() !== FALSE;
+        $db->close();
+        return $res;
+    }
+
+    public function deleteUserMessage($param, $sn) {
+        $channel = $this->getUserChannel($param);
+        if (empty($channel)) return false;
+        $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
+        if (!file_exists($channelDBPath)) return false;
+        $db = $this->createDB(SQLiteDBFactory::getMessageDB($channelDBPath));
+        $stm = $db->prepare("DELETE FROM message WHERE id = :bv_id");
+        $stm->bindValue(':bv_id', intval($sn), SQLITE3_INTEGER);
+        $res = $stm->execute() !== FALSE;
+        $db->close();
+        return $res;
+    }
+}

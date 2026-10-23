@@ -18,7 +18,7 @@
    * **不替換現有 Apache 2.4 服務**，因此各地所現有的防火牆規則、SSL 憑證與自動更新部署工具 [`LAH-Updater/updater.py`](file:///c:/Temp/DEV/LAH-Workspace/LAH-Updater/updater.py) 均無需大幅改動。
    * Apache 2.4 繼續以 `mod_php7` 處理舊版 `/` 請求；同時啟用 Apache 內建的 `mod_proxy_fcgi` 模組，將 `/v85/`（或已移植之 API）透過本機迴路轉發至 `127.0.0.1:9085` 的 **PHP 8.5 FastCGI** 服務。
 3. **進程高可用守護（PM2 託管 `php-cgi.exe`）**：
-   * 由於 Windows 版 PHP 無原生 `php-fpm`，直接使用各所伺服器已安裝之 **PM2** 守護 `C:\Tools\php85\php-cgi.exe`，解決 Windows 下 `php-cgi.exe` 滿載自動退出造成的 `502 Bad Gateway` 問題。
+   * 由於 Windows 版 PHP 無原生 `php-fpm`，直接使用各所伺服器已安裝之 **PM2** 守護 `C:\AppServ\php85\php-cgi.exe`，解決 Windows 下 `php-cgi.exe` 滿載自動退出造成的 `502 Bad Gateway` 問題。
 
 ### 1.2 雙軌運作架構拓撲圖
 
@@ -72,7 +72,7 @@ flowchart TD
 
 1. **為什麼不需要為了 PHP 8.5 升級 Node.js？**
    * PM2 雖然本身是用 Node.js 寫的守護程式，但當它管理非 Node.js 程式（如 `php-cgi.exe`、Python、Go 執行檔）時，只需在設定檔指定 `interpreter: "none"`。
-   * 此時 PM2 只負責透過 Windows OS API 啟動 `C:\Tools\php85\php-cgi.exe`、監聽其 Process ID (PID)，並在它崩潰或退出時於 100 毫秒內自動重啟。
+   * 此時 PM2 只負責透過 Windows OS API 啟動 `C:\AppServ\php85\php-cgi.exe`、監聽其 Process ID (PID)，並在它崩潰或退出時於 100 毫秒內自動重啟。
    * 因此，**您現有跑在 Node.js v16 上的 PM2，可以直接把 PHP 8.5 (`php-cgi.exe`) 納管進同一個 `pm2 list` 面板中**，跟 `LAH-FE` (Node 16) 完全相安無事！
 
 ### 2.2 若未來同台伺服器確實需要「多版本 Node.js 共存」（例如 Node 16 + Node 22），`nvm-windows` 該怎麼用才不會踩坑？
@@ -91,8 +91,8 @@ module.exports = {
     // 1. 新增的 LAH-API v85 (PHP 8.5 FastCGI 服務)
     {
       name: "lah-api-v85",
-      script: "C:\\Tools\\php85\\php-cgi.exe",
-      args: "-b 127.0.0.1:9085 -c C:\\Tools\\php85\\php.ini",
+      script: "C:\\AppServ\\php85\\php-cgi.exe",
+      args: "-b 127.0.0.1:9085 -c C:\\AppServ\\php85\\php.ini",
       cwd: "C:\\Temp\\DEV\\LAH-Workspace\\LAH-API\\v85",
       interpreter: "none",          // 關鍵：告知 PM2 這是原生 .exe，不透過 node 執行
       exec_mode: "fork",
@@ -102,7 +102,7 @@ module.exports = {
       max_memory_restart: "1G",
       env: {
         // 將 Oracle Instant Client 注入環境變數
-        PATH: "C:\\Tools\\instantclient_11_2;C:\\Tools\\php85;" + process.env.PATH,
+        PATH: "C:\\Tools\\instantclient_11_2;C:\\AppServ\\php85;" + process.env.PATH,
         NLS_LANG: "American_America.US7ASCII",
         // Windows PHP-CGI 穩定度關鍵參數：允許併發子程序與拉高回收門檻
         PHP_FCGI_CHILDREN: "16",
@@ -320,10 +320,10 @@ Alias /v85 "c:/Temp/DEV/LAH-Workspace/LAH-API/v85"
 
 ### Step 1：準備 PHP 8.5 (NTS x64) 執行環境
 1. 前往 [windows.php.net/download](https://windows.php.net/download/) 下載 **PHP 8.5 (8.5.x) VS17 x64 Non Thread Safe (NTS)** `.zip` 壓縮包。
-2. 解壓縮至 `C:\Tools\php85\`（確認 `C:\Tools\php85\php-cgi.exe` 存在）。
-3. 複製 `C:\Tools\php85\php.ini-development` 為 `C:\Tools\php85\php.ini`，並修改以下關鍵設定：
+2. 解壓縮至 `C:\AppServ\php85\`（確認 `C:\AppServ\php85\php-cgi.exe` 存在）。
+3. 複製 `C:\AppServ\php85\php.ini-development` 為 `C:\AppServ\php85\php.ini`，並修改以下關鍵設定：
    ```ini
-   extension_dir = "C:/Tools/php85/ext"
+   extension_dir = "ext"
    date.timezone = "Asia/Taipei"
    memory_limit = 512M
    max_execution_time = 300
@@ -346,8 +346,8 @@ Alias /v85 "c:/Temp/DEV/LAH-Workspace/LAH-API/v85"
    ```
 4. 在 PowerShell 驗證 PHP 8.5 是否正常運作：
    ```powershell
-   C:\Tools\php85\php.exe -v
-   C:\Tools\php85\php.exe -m
+   C:\AppServ\php85\php.exe -v
+   C:\AppServ\php85\php.exe -m
    ```
 
 ### Step 2：建立 `LAH-API\v85\` 目錄與測試端點
@@ -398,7 +398,7 @@ Alias /v85 "c:/Temp/DEV/LAH-Workspace/LAH-API/v85"
 * **情境 B（筆電平時沒開 Apache，而是用 `start_dev.bat` 內建伺服器）**：
   在筆電日常不開 Apache 時，也可隨時直接用 PHP 8.5 內建伺服器在 Port `8085` 快速測試 `v85/`：
   ```powershell
-  C:\Tools\php85\php.exe -S 127.0.0.1:8085 -t c:\Temp\DEV\LAH-Workspace\LAH-API\v85
+  C:\AppServ\php85\php.exe -S 127.0.0.1:8085 -t c:\Temp\DEV\LAH-Workspace\LAH-API\v85
   ```
   瀏覽器打開 `http://127.0.0.1:8085/ver.php` 即可立即驗證。
 
@@ -414,6 +414,6 @@ Alias /v85 "c:/Temp/DEV/LAH-Workspace/LAH-API/v85"
    * `v85/api/moicas_json_api.php`（跨所與智慧控管查詢）
    * `v85/api/stats_json_api.php`、`v85/api/notification_json_api.php`
 4. **第四批（含 Composer 外部套件與排程）**：
-   * 在 `v85/` 執行 `C:\Tools\php85\php.exe composer.phar install` 安裝新版 `phpoffice/phpspreadsheet`。
+   * 在 `v85/` 執行 `C:\AppServ\php85\php.exe composer.phar install` 安裝新版 `phpoffice/phpspreadsheet`。
    * 移植 `v85/api/export_xlsx_api.php`、`v85/api/export_txt_data.php` 與 `v85/task/` 排程腳本。
 

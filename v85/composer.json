@@ -1,0 +1,6 @@
+{
+    "require": {
+        "phpoffice/phpspreadsheet": "^2.0",
+        "php-imap/php-imap": "4.5.3"
+    }
+}

@@ -1,0 +1,814 @@
+<?php
+require_once("init.php");
+require_once('Env.class.php');
+require_once('DynamicSQLite.class.php');
+require_once('Ping.class.php');
+require_once('SQLiteUser.class.php');
+
+define('DIMENSION_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."dimension.db");
+
+abstract class ROLE {
+    const NORMAL = 1;
+    const SUPER = 2;                    // 超級管理者
+    const ADMIN = 3;                    // 管理者
+    const CHIEF = 4;                    // 主管
+    const RESEARCH_AND_EVALUATION = 5;  // 研考
+    const GENERAL_AFFAIRS = 6;          // 總務
+    const HUMAN_RESOURCE = 7;           // 人事
+    const ACCOUNTING = 8;               // 會計
+}
+
+// could processed by bitwise operation
+abstract class AUTHORITY {
+    const NORMAL = 0;
+    const DISABLED = 1;
+    const ADMIN = 2;
+    const ANNOUNCEMENT_MANAGEMENT = 4;
+    const USER_MANAGEMENT = 8;
+    const CHIEF = 16;
+    const RESEARCH_AND_EVALUATION = 32;
+    // const REVIEW_LV_1 = 64;     // 初審
+    // const REVIEW_LV_2 = 128;    // 複審
+}
+
+class System {
+    // singleton
+    private static $_instance = null;
+
+    private $sqlite3;
+
+    private function getRoleIps($role_id) {
+        $return = [];
+        if($stmt = $this->sqlite3->prepare('SELECT * FROM authority WHERE role_id = :role_id')) {
+            $stmt->bindParam(':role_id', $role_id);
+            $result = $stmt->execute();
+            if ($result === false) return $return;
+            while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                if (!in_array($row['ip'], $return)) {
+                    $return[] = $row['ip'];
+                }
+            }
+        } else {
+            Logger::getInstance()->error(__METHOD__.": 取得 $role_id IPs 資料失敗！");
+        }
+        return $return;
+    }
+
+    private function addLoopIPsAuthority() {
+        $ret = false;
+        
+        $super_array = $this->getRoleSuperIps();
+        if (!in_array('127.0.0.1', $super_array)) {
+            $super_array[] = '127.0.0.1';
+            $stm = $this->sqlite3->prepare("
+                REPLACE INTO authority ('role_id', 'ip')
+                VALUES (:role_id, :ip)
+            ");
+            $stm->bindValue(':role_id', ROLE::SUPER);
+            $stm->bindValue(':ip', '127.0.0.1');
+            $ret = $stm->execute() === FALSE ? false : true;
+        }
+        
+        $adm_array = $this->getRoleAdminIps();
+        if (!in_array('::1', $adm_array)) {
+            $adm_array[] = '::1';
+            $stm = $this->sqlite3->prepare("
+                REPLACE INTO authority ('role_id', 'ip')
+                VALUES (:role_id, :ip)
+            ");
+            $stm->bindValue(':role_id', ROLE::ADMIN);
+            $stm->bindValue(':ip', '::1');
+            $ret = $stm->execute() === FALSE ? false : true;
+        }
+
+        return $ret;
+    }
+
+    private function setMockMode($flag) {
+        $stm = $this->sqlite3->prepare("
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ");
+        if ($stm === false) {
+            Logger::getInstance()->warning(__METHOD__.": 準備 statement 失敗: " . $this->sqlite3->lastErrorMsg());
+            return false;
+        }
+        $stm->bindValue(':key', 'ENABLE_MOCK_MODE');
+        $stm->bindValue(':value', $flag ? 'true' : 'false');
+        return $stm->execute() === FALSE ? false : true;
+    }
+
+    private function addSuperUser() {
+        if ($stm = $this->sqlite3->prepare("
+            REPLACE INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
+            VALUES (:id, :name, :sex, :addr, :tel, :ext, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday)
+        ")) {
+            $stm->bindValue(':id', 'HBSUPER');
+            $stm->bindValue(':name', '開發人員');
+            $stm->bindValue(':sex', 1);
+            $stm->bindValue(':addr', '虛構的世界');
+            $stm->bindValue(':tel', '034917647', SQLITE3_TEXT);
+            $stm->bindValue(':ext', '503', SQLITE3_TEXT); // 總機 153
+            $stm->bindValue(':cell', '0912345678', SQLITE3_TEXT);
+            $stm->bindValue(':unit', '庶務一課');
+            $stm->bindValue(':title', '雜役工');
+            $stm->bindValue(':work', '打怪');
+            $stm->bindValue(':exam', '109年邦頭特考三級');
+            $stm->bindValue(':education', '國立台北科技大學資訊工程所');
+            $stm->bindValue(':birthday', '066/05/23');
+            $stm->bindValue(':onboard_date', '107/10/31');
+            $stm->bindValue(':offboard_date', '');
+            $stm->bindValue(':ip', '127.0.0.1');
+            // $stm->bindValue(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');    // HB default
+            $stm->bindValue(':authority', AUTHORITY::ADMIN);
+            return $stm->execute() === FALSE ? false : true;
+        }
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ 
+            REPLACE INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
+            VALUES (:id, :name, :sex, :addr, :tel, :ext, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday
+        ) ] 失敗。");
+        return false;
+    }
+
+    private function addWatchdogUser() {
+        if ($stm = $this->sqlite3->prepare("
+            REPLACE INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
+            VALUES (:id, :name, :sex, :addr, :tel, :ext, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday)
+        ")) {
+            $stm->bindValue(':id', 'HBWATCHDOG');
+            $stm->bindValue(':name', '看門狗');
+            $stm->bindValue(':sex', 0);
+            $stm->bindValue(':addr', '虛構的世界');
+            $stm->bindValue(':tel', '034917647', SQLITE3_TEXT);
+            $stm->bindValue(':ext', '153', SQLITE3_TEXT); // 總機 153
+            $stm->bindValue(':cell', '0912345678', SQLITE3_TEXT);
+            $stm->bindValue(':unit', '庶務二課');
+            $stm->bindValue(':title', '看門狗');
+            $stm->bindValue(':work', '定時工');
+            $stm->bindValue(':exam', '109年邦頭特考四級');
+            $stm->bindValue(':education', '國立台北科技大學資訊工程研究所');
+            $stm->bindValue(':birthday', '066/05/23');
+            $stm->bindValue(':onboard_date', '107/10/31');
+            $stm->bindValue(':offboard_date', '');
+            $stm->bindValue(':ip', '::1');
+            // $stm->bindValue(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');    // HB default
+            $stm->bindValue(':authority', AUTHORITY::ADMIN);
+            return $stm->execute() === FALSE ? false : true;
+        }
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ 
+            REPLACE INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
+            VALUES (:id, :name, :sex, :addr, :tel, :ext, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday)
+        ] 失敗。");
+        return false;
+    }
+
+    private function removeSuperUser() {
+        if ($stm = $this->sqlite3->prepare("DELETE from user WHERE id = :id")) {
+            $stm->bindValue(':id', 'HBSUPER');
+            return $stm->execute() === FALSE ? false : true;
+        }
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ DELETE from user WHERE id = :id ] 失敗。(HBSUPER)");
+        return false;
+    }
+
+    private function removeWatchdogUser() {
+        if ($stm = $this->sqlite3->prepare("DELETE from user WHERE id = :id")) {
+            $stm->bindValue(':id', 'HBWATCHDOG');
+            return $stm->execute() === FALSE ? false : true;
+        }
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ DELETE from user WHERE id = :id ] 失敗。(HBWATCHDOG");
+        return false;
+    }
+
+    private function getDimensionDB() {
+        $db_path = DIMENSION_SQLITE_DB;
+        $sqlite = new DynamicSQLite($db_path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "config" (
+                "key"	TEXT NOT NULL,
+                "value"	TEXT,
+                PRIMARY KEY("key")
+            )
+        ');
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "authority" (
+                "role_id"	INTEGER NOT NULL DEFAULT 0,
+                "ip"	TEXT NOT NULL DEFAULT \'192.168.xx.xx\',
+                PRIMARY KEY("role_id","ip")
+            )
+        ');
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "role" (
+                "id"	INTEGER NOT NULL,
+                "e_name"	TEXT NOT NULL,
+                "name"	TEXT NOT NULL,
+                "authority"	INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY("id" AUTOINCREMENT)
+            )
+        ');
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "user" (
+                "id"	TEXT NOT NULL,
+                "name"	TEXT NOT NULL,
+                "sex"	INTEGER NOT NULL DEFAULT 0,
+                "addr"	TEXT,
+                "tel"	TEXT,
+                "ext"	NUMERIC NOT NULL DEFAULT 153,
+                "cell"	TEXT,
+                "unit"	TEXT NOT NULL DEFAULT \'行政課\',
+                "title"	TEXT,
+                "work"	TEXT,
+                "exam"	TEXT,
+                "education"	TEXT,
+                "onboard_date"	TEXT,
+                "offboard_date"	TEXT,
+                "ip"	TEXT NOT NULL DEFAULT \'192.168.xx.xx\',
+                "pw_hash"	TEXT NOT NULL DEFAULT \'827ddd09eba5fdaee4639f30c5b8715d\',
+                "authority"	INTEGER NOT NULL DEFAULT 0,
+                "birthday"	TEXT,
+                PRIMARY KEY("id")
+            )
+        ');
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "unit" (
+                "id"	INTEGER NOT NULL DEFAULT 0,
+                "name"	TEXT NOT NULL,
+                PRIMARY KEY("id" AUTOINCREMENT)
+            )
+        ');
+        return $db_path;
+    }
+
+    // private because of singleton
+    private function __construct() {
+        $db_path = $this->getDimensionDB();
+        $this->sqlite3 = new SQLite3($db_path);
+        $this->sqlite3->busyTimeout(5000);
+        $this->sqlite3->exec("PRAGMA journal_mode = WAL");
+    }
+
+    // private because of singleton
+    private function __clone() { }
+
+    function __destruct() { unset($this->sqlite3); }
+
+    // singleton
+    public static function getInstance() {
+        if (!(self::$_instance instanceof System)) {
+            self::$_instance = new System();
+        }
+        return self::$_instance;
+    }
+
+    public function ping($ip, $port = 0, $timeout = 1, $ttl = 255){
+        if ($this->isMockMode()) {
+            return 87;
+        }
+        $ping = new Ping($ip, $timeout, $ttl);
+        $port = intval($port);
+        if ($port < 1 || $port > 65535) {
+            $latency = $ping->ping();
+        } else {
+            $ping->setPort($port);
+            $latency = $ping->ping('fsockopen');
+        }
+        return $latency;
+    }
+
+    public function isHB() {
+        return $this->getSiteCode() === 'HB';
+    }
+
+    public function isDBReachable() {
+        $db_ip = $this->getOraTargetDBIP();
+        $db_port = $this->getOraTargetDBPort();
+        $latency = $this->ping($db_ip, $db_port, 3, 255);
+        return !($latency > 2999 || $latency == '');
+    }
+
+    public function isKeyValid($key) {
+        return $key == $this->get('API_KEY');
+    }
+
+    public function isMockMode() {
+        // 1. 優先檢查 www/.env 中的 MOCK 或 ENABLE_MOCK_MODE 設定
+        $env_mock = Env::get('MOCK', Env::get('ENABLE_MOCK_MODE', null));
+        if ($env_mock !== null) {
+            $val = strtolower(trim((string)$env_mock));
+            if ($val === 'true' || $val === '1') {
+                return true;
+            }
+            if ($val === 'false' || $val === '0') {
+                return false;
+            }
+        }
+        // 2. 回退讀取 dimension.db 設定
+        return $this->get('ENABLE_MOCK_MODE') === 'true';
+    }
+    
+    public function enableMockMode() {
+        $this->addLoopIPsAuthority();
+        $this->addSuperUser();
+        $this->addWatchdogUser();
+        return $this->setMockMode(true);
+    }
+    
+    public function disableMockMode() {
+        return $this->setMockMode(false);
+    }
+    
+    public function isMSSQLEnable() {
+        return $this->get('ENABLE_MSSQL_CONN') !== 'false';
+    }
+
+    public function setMSSQLConnection($flag) {
+        if ($stm = $this->sqlite3->prepare("
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ")) {
+            $stm->bindValue(':key', 'ENABLE_MSSQL_CONN');
+            $stm->bindValue(':value', $flag ? 'true' : 'false');
+            return $stm->execute() === FALSE ? false : true;
+        }
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ 
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ] 失敗。($flag)");
+        return false;
+    }
+    
+    public function isOfficeHoursEnable() {
+        return $this->get('ENABLE_OFFICE_HOURS') !== 'false';
+    }
+
+    public function setOfficeHoursEnable($flag) {
+        if ($stm = $this->sqlite3->prepare("
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ")) {
+            $stm->bindValue(':key', 'ENABLE_OFFICE_HOURS');
+            $stm->bindValue(':value', $flag ? 'true' : 'false');
+            return $stm->execute() === FALSE ? false : true;
+        }
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ 
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ] 失敗。($flag)");
+        return false;
+    }
+
+    public function isAvatarEnable() {
+        return $this->get('ENABLE_AVATAR') === 'true';
+    }
+
+    public function setAvatarEnable($flag) {
+        if ($stm = $this->sqlite3->prepare("
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ")) {
+            $stm->bindValue(':key', 'ENABLE_AVATAR');
+            $stm->bindValue(':value', $flag ? 'true' : 'false');
+            return $stm->execute() === FALSE ? false : true;
+        }
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ 
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ] 失敗。($flag)");
+        return false;
+    }
+
+    public function getUserPhotoFolderPath() {
+        return rtrim($this->get('USER_PHOTO_FOLDER'), "\\");
+    }
+
+    public function getRoleAdminIps() {
+        $array = $this->getRoleIps(ROLE::ADMIN);
+        if (!in_array('127.0.0.1', $array)) {
+            $array[] = '127.0.0.1';
+        }
+        if (!in_array('::1', $array)) {
+            $array[] = '::1';
+        }
+        return $array;
+    }
+
+    public function getRoleChiefIps() {
+        return $this->getRoleIps(ROLE::CHIEF);
+    }
+
+    public function getRoleSuperIps() {
+        return $this->getRoleIps(ROLE::SUPER);
+    }
+
+    public function getRoleRAEIps() {
+        return $this->getRoleIps(ROLE::RESEARCH_AND_EVALUATION);
+    }
+
+    public function getRoleGAIps() {
+        return $this->getRoleIps(ROLE::GENERAL_AFFAIRS);
+    }
+
+    public function getRoleHRIps() {
+        return $this->getRoleIps(ROLE::HUMAN_RESOURCE);
+    }
+
+    public function getRoleAccountingIps() {
+        return $this->getRoleIps(ROLE::ACCOUNTING);
+    }
+
+    public function calcAuthority($intval) {
+        $auth = [];
+        $authority = intval($intval) ?? 0;
+        $auth['isDisabled'] = boolval($authority & AUTHORITY::DISABLED);
+        $auth['isAdmin'] = boolval($authority & AUTHORITY::ADMIN);
+        $auth['isChief'] = boolval($authority & AUTHORITY::CHIEF);
+        $auth['isRAE'] = boolval($authority & AUTHORITY::RESEARCH_AND_EVALUATION);
+        $auth['isUserMgtStaff'] = boolval($authority & AUTHORITY::USER_MANAGEMENT);
+        $auth['isNotifyMgtStaff'] = boolval($authority & AUTHORITY::ANNOUNCEMENT_MANAGEMENT);
+        return $auth;
+    }
+
+    /**
+     * 有效權限 = 使用者個人權限(位元, B) ∪ IP 角色(authority 表, A) ∪ 角色/部門預設權限
+     * A 只會增加權限，不會收回 B 的權限；DISABLED 只看 B。
+     * 127.0.0.1 / ::1 與 SUPER 角色 IP 視為全部權限。
+     * 預設權限(皆只增不減)：
+     *   研考、主管、總務角色(個人位元或 IP 角色) => 可發布公告 (isNotifyMgtStaff)
+     *   人事角色(IP 角色) 或 人事室人員 => 可發布公告 + 管理人員 (isUserMgtStaff)
+     *   資訊課人員 => 管理者 (isAdmin) + 可發布公告 + 管理人員
+     * 部門預設權限依使用者 unit 判定，離職(isDisabled)者不套用。
+     */
+    public function calcEffectiveAuthority($intval, $ip, $unit = '') {
+        $auth = $this->calcAuthority($intval);
+        $auth['isSuper'] = false;
+        if (empty($ip)) {
+            return $auth;
+        }
+        $is_super = in_array($ip, ['127.0.0.1', '::1']) || in_array($ip, $this->getRoleSuperIps());
+        if ($is_super) {
+            $auth['isSuper'] = true;
+            $auth['isAdmin'] = true;
+            $auth['isChief'] = true;
+            $auth['isRAE'] = true;
+            $auth['isUserMgtStaff'] = true;
+            $auth['isNotifyMgtStaff'] = true;
+            return $auth;
+        }
+        if (in_array($ip, $this->getRoleAdminIps())) $auth['isAdmin'] = true;
+        if (in_array($ip, $this->getRoleChiefIps())) $auth['isChief'] = true;
+        if (in_array($ip, $this->getRoleRAEIps())) $auth['isRAE'] = true;
+        // 總務、人事角色(IP 角色)預設權限
+        if (in_array($ip, $this->getRoleGAIps())) $auth['isNotifyMgtStaff'] = true;
+        if (in_array($ip, $this->getRoleHRIps())) {
+            $auth['isNotifyMgtStaff'] = true;
+            $auth['isUserMgtStaff'] = true;
+        }
+        if (!$auth['isDisabled']) {
+            // 研考、主管預設可發布公告
+            if ($auth['isChief'] || $auth['isRAE']) $auth['isNotifyMgtStaff'] = true;
+            // 部門預設權限
+            $unit = trim((string)$unit);
+            if ($unit === '人事室') {
+                $auth['isNotifyMgtStaff'] = true;
+                $auth['isUserMgtStaff'] = true;
+            } elseif ($unit === '資訊課') {
+                $auth['isAdmin'] = true;
+                $auth['isNotifyMgtStaff'] = true;
+                $auth['isUserMgtStaff'] = true;
+            }
+        }
+        return $auth;
+    }
+
+    public function getAuthority($ip) {
+        $sqlite_user = new SQLiteUser();
+		$queried_user = $sqlite_user->getUserByIP($ip);
+		$found_count = count($queried_user);
+		if (empty($found_count)) {
+            return $this->calcEffectiveAuthority(0, $ip);
+        } else {
+			if ($found_count > 1) {
+				$queried_user = array($queried_user[$found_count - 1]);
+			}
+            return $this->calcEffectiveAuthority($queried_user[0]['authority'], $ip, $queried_user[0]['unit'] ?? '');
+		}
+    }
+
+    public function removeAuthority($user) {
+        $role_id = $user['role_id'];
+        $ip = $user['role_ip'];
+        
+        if (empty($role_id)) {
+            Logger::getInstance()->warning(__METHOD__.": role_id could not be empty. $role_id");
+            return false;
+        }
+        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+            Logger::getInstance()->warning(__METHOD__.": $ip is not a valid IP address.");
+            return false;
+        }
+        if ($stm = $this->sqlite3->prepare("DELETE from authority WHERE role_id = :role_id AND ip = :ip")) {
+            $stm->bindParam(':role_id', $role_id);
+            $stm->bindParam(':ip', $ip);
+            return $stm->execute() === FALSE ? false : true;
+        }
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ DELETE from authority WHERE role_id = :role_id AND ip = :ip ] 失敗。($role_id, $ip)");
+        return false;
+    }
+
+    public function addAuthority($role_id, $ip) {
+        
+        if (empty($role_id)) {
+            Logger::getInstance()->warning(__METHOD__.": role_id could not be empty. $role_id");
+            return false;
+        }
+        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+            Logger::getInstance()->warning(__METHOD__.": $ip is not a valid IP address.");
+            return false;
+        }
+        if ($stm = $this->sqlite3->prepare("
+            REPLACE INTO authority ('role_id', 'ip')
+            VALUES (:role_id, :ip)
+        ")) {
+            $stm->bindParam(':role_id', $role_id);
+            $stm->bindParam(':ip', $ip);
+            return $stm->execute() === FALSE ? false : true;
+        }
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ REPLACE INTO authority ('role_id', 'ip') VALUES (:role_id, :ip) ] 失敗。($role_id, $ip)");
+        return false;
+    }
+
+    /**
+     * 變更既有授權的角色（IP 不變）
+     */
+    public function updateAuthority($old_role_id, $new_role_id, $ip) {
+        if (empty($old_role_id) || empty($new_role_id)) {
+            Logger::getInstance()->warning(__METHOD__.": role_id could not be empty. ($old_role_id, $new_role_id)");
+            return false;
+        }
+        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+            Logger::getInstance()->warning(__METHOD__.": $ip is not a valid IP address.");
+            return false;
+        }
+        if ((int)$old_role_id === (int)$new_role_id) {
+            return true;
+        }
+        try {
+            $this->sqlite3->exec("BEGIN TRANSACTION");
+            $del = $this->sqlite3->prepare("DELETE FROM authority WHERE role_id = :role_id AND ip = :ip");
+            $del->bindValue(':role_id', $old_role_id);
+            $del->bindValue(':ip', $ip);
+            $add = $this->sqlite3->prepare("REPLACE INTO authority ('role_id', 'ip') VALUES (:role_id, :ip)");
+            $add->bindValue(':role_id', $new_role_id);
+            $add->bindValue(':ip', $ip);
+            if ($del && $add && $del->execute() !== FALSE && $add->execute() !== FALSE) {
+                $this->sqlite3->exec("COMMIT");
+                return true;
+            }
+            $this->sqlite3->exec("ROLLBACK");
+        } catch (\Exception $e) {
+            $this->sqlite3->exec("ROLLBACK");
+            Logger::getInstance()->warning(__METHOD__.": 更新授權失敗 (".$e->getMessage().")");
+        }
+        return false;
+    }
+
+    public function getOraTargetDBIP() {
+        $target = $this->get('ORA_DB_TARGET');
+        switch ($target) {
+            case 'HXT':
+            case 'TEST':
+                return $this->get('ORA_DB_HXT_IP');
+            case 'BACKUP':
+                return $this->get('ORA_DB_BACKUP_IP');
+            default:
+                return $this->get('ORA_DB_HXWEB_IP');
+        }
+    }
+
+    public function getOraTargetDBPort() {
+        $target = $this->get('ORA_DB_TARGET');
+        switch ($target) {
+            case 'HXT':
+            case 'TEST':
+                return $this->get('ORA_DB_HXT_PORT');
+            case 'BACKUP':
+                return $this->get('ORA_DB_BACKUP_PORT');
+            default:
+                return $this->get('ORA_DB_HXWEB_PORT');
+        }
+    }
+
+    public function getOraConnectTarget() {
+        $target = $this->get('ORA_DB_TARGET');
+        switch ($target) {
+            case 'HXT':
+            case 'TEST':
+                return 'TEST';
+            case 'BACKUP':
+                return 'BACKUP';
+            default:
+                return 'MAIN';
+        }
+    }
+
+    public function getOraMainDBConnStr() {
+        $site = strtoupper($this->get('SITE'));
+        $ip = $this->get('ORA_DB_HXWEB_IP');
+        $port = $this->get('ORA_DB_HXWEB_PORT');
+        return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST={$ip})(PORT={$port})))(CONNECT_DATA=(SERVICE_NAME={$site}WEB)))";
+    }
+
+    public function getOraBackupDBConnStr() {
+        $site = strtoupper($this->get('SITE'));
+        $ip = $this->get('ORA_DB_BACKUP_IP');
+        $port = $this->get('ORA_DB_BACKUP_PORT');
+        return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST={$ip})(PORT={$port})))(CONNECT_DATA=(SERVICE_NAME={$site}WEB)))";
+    }
+
+    public function getOraTestDBConnStr() {
+        $site = strtoupper($this->get('SITE'));
+        $ip = $this->get('ORA_DB_HXT_IP');
+        $port = $this->get('ORA_DB_HXT_PORT');
+        return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST={$ip})(PORT={$port})))(CONNECT_DATA=(SERVICE_NAME={$site}WEBT)))";
+    }
+
+    public function getOraL3hwebDBConnStr() {
+        $ip = $this->get('ORA_DB_L3HWEB_IP');
+        $port = $this->get('ORA_DB_L3HWEB_PORT');
+        return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST={$ip})(PORT={$port})))(CONNECT_DATA=(SERVICE_NAME=L3HWEB)))";
+    }
+
+    public function getOraL3hwebL1DBConnStr() {
+        $ip = $this->get('ORA_DB_L3HWEB_IP');
+        $port = $this->get('ORA_DB_L3HWEB_PORT');
+        return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST={$ip})(PORT={$port})))(CONNECT_DATA=(SERVICE_NAME=L1HWEB)))";
+    }
+
+    public function getOraL1hwebDBConnStr() {
+        $ip = $this->get('ORA_DB_L1HWEB_IP');
+        $port = $this->get('ORA_DB_L1HWEB_PORT');
+        return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST={$ip})(PORT={$port})))(CONNECT_DATA=(SERVICE_NAME=L1HWEB)))";
+    }
+
+    public function getOraL2hwebDBConnStr() {
+        $ip = $this->get('ORA_DB_L2HWEB_IP');
+        $port = $this->get('ORA_DB_L2HWEB_PORT');
+        return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST={$ip})(PORT={$port})))(CONNECT_DATA=(SERVICE_NAME=L2HWEB)))";
+    }
+    
+    public function getLXHWEBConfigs() {
+        $configs = $this->getConfigs();
+        return array(
+            'ORA_DB_L1HWEB_IP' => $configs['ORA_DB_L1HWEB_IP'],
+            'ORA_DB_L1HWEB_PORT' => $configs['ORA_DB_L1HWEB_PORT'],
+            'ORA_DB_L2HWEB_IP' => $configs['ORA_DB_L2HWEB_IP'],
+            'ORA_DB_L2HWEB_PORT' => $configs['ORA_DB_L2HWEB_PORT'],
+            'ORA_DB_L3HWEB_IP' => $configs['ORA_DB_L3HWEB_IP'],
+            'ORA_DB_L3HWEB_PORT' => $configs['ORA_DB_L3HWEB_PORT'],
+            'PING_INTERVAL_SECONDS' => $configs['PING_INTERVAL_SECONDS']
+        );
+    }
+
+    public function getL3hwebDBIp() {
+        return $this->get('ORA_DB_L3HWEB_IP');
+    }
+
+    public function setWebAPJndiXaLocal($xalocal) {
+        if ($stm = $this->sqlite3->prepare("
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ")) {
+            $stm->bindValue(':key', 'WEBAP_JNDI_XALOCAL');
+            $stm->bindParam(':value', $xalocal);
+            return $stm->execute() === FALSE ? false : true;
+        }
+        Logger::getInstance()->warning(__METHOD__.": 更新 WEBAP_JNDI_XALOCAL 失敗。($xalocal)");
+        return false;
+    }
+
+    public function getWebAPJndiXaLocal() {
+        return $this->get('WEBAP_JNDI_XALOCAL') ?? 990;
+    }
+
+    public function setWebAPJndiLocal($local) {
+        if ($stm = $this->sqlite3->prepare("
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ")) {
+            $stm->bindValue(':key', 'WEBAP_JNDI_LOCAL');
+            $stm->bindParam(':value', $local);
+            return $stm->execute() === FALSE ? false : true;
+        }
+        Logger::getInstance()->warning(__METHOD__.": 更新 WEBAP_JNDI_LOCAL 失敗。($local)");
+        return false;
+    }
+
+    public function getWebAPJndiLocal() {
+        return $this->get('WEBAP_JNDI_LOCAL') ?? 3000;
+    }
+
+    public function getWebAPIp() {
+        return $this->get('WEBAP_IP');
+    }
+
+    public function getWebAPPostfix() {
+        $str = $this->get('WEBAP_POSTFIXES') ?? '205,206,207,62,156,118,161,60';
+        return explode(',', preg_replace("/(\s+|[^0-9,])/", '', $str));
+    }
+
+    public function getSiteCode() {
+        return strtoupper($this->get('SITE'));
+    }
+
+    public function getSiteAlphabet() {
+        return $this->getSiteCode()[1];
+    }
+
+    public function getSiteNumber() {
+        $aplhabet = $this->getSiteAlphabet();
+        return ord($aplhabet) - ord('A');
+    }
+
+    public function getSiteName($code) {
+        switch ($code) {
+            case "HA": return "桃園";
+            case "HB": return "中壢";
+            case "HC": return "大溪";
+            case "HD": return "楊梅";
+            case "HE": return "蘆竹";
+            case "HF": return "八德";
+            case "HG": return "平鎮";
+            case "HH": return "龜山";
+        }
+        return "無定義($code)";
+    }
+
+    public function getWSDBPath() {
+        return strtoupper($this->get('WS_DB_PATH'));
+    }
+
+    public function getConfigs() {
+        $return = [];
+        if ($stmt = $this->sqlite3->prepare('SELECT * FROM config WHERE 1=1')) {
+            $result = $stmt->execute();
+            if ($result !== false) {
+                while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                    $return[$row['key']] = $row['value'];
+                }
+            }
+        } else {
+            Logger::getInstance()->error(__METHOD__.": 取得 system config 資料失敗！");
+            return false;
+        }
+
+        // 合併 .env 設定值（.env 優先覆蓋）
+        $env_configs = Env::load();
+        if (is_array($env_configs)) {
+            foreach ($env_configs as $key => $value) {
+                $return[$key] = $value;
+            }
+        }
+
+        return $return;
+    }
+
+    public function updateConfigs($configs) {
+        
+        $success = 0;
+        $error = 0;
+        foreach ($configs as $key => $value) {
+            // $stmt = $this->sqlite3->prepare('UPDATE config SET value = :value WHERE key = :key');
+            $stmt = $this->sqlite3->prepare("REPLACE INTO config ('key', 'value') VALUES (:key, :value)");
+            if($stmt) {
+                $stmt->bindParam(':key', $key);
+                $stmt->bindParam(':value', $value);
+                $result = $stmt->execute() === FALSE ? false : true;
+                if ($result) {
+                    $success++;
+                } else {
+                    $error++;
+                }
+            } else {
+                
+                Logger::getInstance()->error(__METHOD__.": 準備更新SQL失敗！ [ UPDATE config SET value = :value WHERE key = :key ] ".print_r($configs, true));
+            }
+        }
+        return $success;
+    }
+
+    public function get($key) {
+        $env_val = Env::get($key);
+        if ($env_val !== null) {
+            return $env_val;
+        }
+        return $this->sqlite3->querySingle("SELECT value from config WHERE key = '$key'");
+    }
+}
