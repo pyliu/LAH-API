@@ -119,7 +119,10 @@ LAH-API/
 │
 └── API/                    # [新軌] 現代化移植目錄 (PHP 8.5 FastCGI 服務)
     ├── README.md           # PHP 8.5 移植與雙軌架構技術手冊
-    ├── manual.html         # 離線可列印技術手冊 (含 Oracle 12c 升級備忘錄)
+    ├── migration.html      # 離線可列印移植技術手冊 (含 Oracle 12c 升級備忘錄)
+    ├── deploy_php85_guide.html # 離線可列印部署與 Apache 轉址指南
+    ├── DEPLOY_PHP85_APACHE_GUIDE.md # 伺服器部署與轉址維運手冊
+    ├── install_php85.ps1   # 一鍵自動化下載安裝與轉址設定腳本
     ├── AGENTS.md           # PHP 8.5 移植規範 (最小差異移植、P0/P1 修復與驗證清單)
     ├── ecosystem.config.js # PM2 FastCGI 行程守護設定檔 (lah-api-v85, 16 併發子程序)
     ├── composer.json       # PHP 8.5 依賴宣告 (PhpSpreadsheet ^2.0)
@@ -332,4 +335,4 @@ API 端點遵循標準 JSON 回應協定：
 - **不支援 Internet Explorer (NO IE support)**：系統採用現代標準規範（RFC 5987 UTF-8、Fetch/Axios 等），全面停止支援 IE。
 - **Windows 檔案編碼**：專案內部腳本全面採用 **UTF-8（無 BOM）** 編碼。
 - **環境變數安全性**：`www/.env` 包含資料庫密碼與 API 金鑰，已列入 `.gitignore`，切勿推播至公開儲存庫。
-- **雙軌遷移參考指引**：詳細 PHP 8.5 移植步驟、Oracle 9i 雙模連線與 Oracle 12c 升級備忘，請參閱 [`API/README.md`](API/README.md) 與 [`API/manual.html`](API/manual.html)。
+- **雙軌遷移參考指引**：詳細 PHP 8.5 移植步驟、Oracle 9i 雙模連線與 Oracle 12c 升級備忘，請參閱 [`API/README.md`](API/README.md) 與 [`API/migration.html`](API/migration.html)。伺服器環境建置與 Apache 轉址請參閱 [`API/DEPLOY_PHP85_APACHE_GUIDE.md`](API/DEPLOY_PHP85_APACHE_GUIDE.md)。
