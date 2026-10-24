@@ -192,9 +192,14 @@ Alias /lah-api "C:/AppServ/LAH-API"
 
 <Directory "C:/AppServ/LAH-API">
     Header set Access-Control-Allow-Origin "*"
-    Options Indexes FollowSymLinks
+    Options -Indexes +FollowSymLinks
     AllowOverride None
     Require all granted
+
+    # 安全防護：禁止直接存取機敏副檔名檔案 (設定檔、相依套件檔、測試腳本、文件等)
+    <FilesMatch "^\.|\.(json|lock|xml|bat|ps1|md|ini|config|yml|yaml)$">
+        Require all denied
+    </FilesMatch>
 
     <FilesMatch "\.php$">
         # 關鍵防護：檢查檔案存在才轉發，並剝除 Proxy 前綴以支援 Windows 路徑
@@ -203,6 +208,19 @@ Alias /lah-api "C:/AppServ/LAH-API"
             ProxyFCGISetEnvIf "reqenv('SCRIPT_FILENAME') =~ m#^proxy:fcgi://127\.0\.0\.1:8085/(.*)$#" SCRIPT_FILENAME "$1"
         </If>
     </FilesMatch>
+</Directory>
+
+# 安全防護：禁止外網直接存取內部核心目錄 (原始碼 include、單元測試 tests、套件庫 vendor)
+<Directory "C:/AppServ/LAH-API/include">
+    Require all denied
+</Directory>
+
+<Directory "C:/AppServ/LAH-API/tests">
+    Require all denied
+</Directory>
+
+<Directory "C:/AppServ/LAH-API/vendor">
+    Require all denied
 </Directory>
 
 # 建立 FastCGI 連線池，最大 16 併發，逾時 300 秒

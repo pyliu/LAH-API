@@ -226,9 +226,14 @@ LAH-API/
    Alias /LAH-API "C:/AppServ/LAH-API"
    <Directory "C:/AppServ/LAH-API">
        Header set Access-Control-Allow-Origin "*"
-       Options Indexes FollowSymLinks
+       Options -Indexes +FollowSymLinks
        AllowOverride None
        Require all granted
+
+       # 安全防護：禁止直接存取機敏副檔名檔案
+       <FilesMatch "^\.|\.(json|lock|xml|bat|ps1|md|ini|config|yml|yaml)$">
+           Require all denied
+       </FilesMatch>
 
        <FilesMatch "\.php$">
            <If "-f %{REQUEST_FILENAME}">
@@ -236,6 +241,19 @@ LAH-API/
                ProxyFCGISetEnvIf "reqenv('SCRIPT_FILENAME') =~ m#^proxy:fcgi://127\.0\.0\.1:8085/(.*)$#" SCRIPT_FILENAME "$1"
            </If>
        </FilesMatch>
+   </Directory>
+
+   # 安全防護：禁止直接存取內部核心目錄
+   <Directory "C:/AppServ/LAH-API/include">
+       Require all denied
+   </Directory>
+
+   <Directory "C:/AppServ/LAH-API/tests">
+       Require all denied
+   </Directory>
+
+   <Directory "C:/AppServ/LAH-API/vendor">
+       Require all denied
    </Directory>
 
    <Proxy "fcgi://127.0.0.1:8085/" enablereuse=on max=16>

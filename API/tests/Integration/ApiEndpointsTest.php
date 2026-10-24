@@ -15,7 +15,7 @@ class ApiEndpointsTest extends TestCase {
     }
 
     public function testAll37EndpointsRespondProperly(): void {
-        $files = glob($this->apiDir . DIRECTORY_SEPARATOR . '*.php');
+        $files = array_filter(glob($this->apiDir . DIRECTORY_SEPARATOR . '*.php'), fn($f) => basename($f) !== 'index.php');
         $this->assertNotEmpty($files, 'API directory should not be empty');
         $this->assertCount(37, $files, 'There should be exactly 37 API endpoints in v1');
 
@@ -56,5 +56,32 @@ class ApiEndpointsTest extends TestCase {
                 $this->assertArrayHasKey('status', $json, "API {$apiName} JSON response missing 'status' field");
             }
         }
+    }
+
+    public function testDirectoryListingIsBlocked(): void {
+        $opts = [
+            'http' => [
+                'method' => 'GET',
+                'ignore_errors' => true,
+                'timeout' => 5
+            ]
+        ];
+        $context = stream_context_create($opts);
+
+        // Test root /LAH-API/
+        $rootUrl = 'http://127.0.0.1/LAH-API/';
+        $response = @file_get_contents($rootUrl, false, $context);
+        $statusLine = $http_response_header[0] ?? '';
+        preg_match('{HTTP\/\S*\s(\d{3})}', $statusLine, $match);
+        $statusCode = isset($match[1]) ? (int)$match[1] : 200;
+        $this->assertEquals(403, $statusCode, "/LAH-API/ root directory listing must be blocked with HTTP 403");
+
+        // Test /LAH-API/v1/
+        $v1Url = 'http://127.0.0.1/LAH-API/v1/';
+        $response = @file_get_contents($v1Url, false, $context);
+        $statusLine = $http_response_header[0] ?? '';
+        preg_match('{HTTP\/\S*\s(\d{3})}', $statusLine, $match);
+        $statusCode = isset($match[1]) ? (int)$match[1] : 200;
+        $this->assertEquals(403, $statusCode, "/LAH-API/v1/ directory listing must be blocked with HTTP 403");
     }
 }

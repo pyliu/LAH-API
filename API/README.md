@@ -301,7 +301,7 @@ Alias /lah-api "C:/AppServ/LAH-API"
 
 <Directory "C:/AppServ/LAH-API">
     Header set Access-Control-Allow-Origin "*"
-    Options Indexes FollowSymLinks
+    Options -Indexes +FollowSymLinks
     AllowOverride None
     Require all granted
 

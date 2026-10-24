@@ -25,7 +25,8 @@ node_modules
 **/poster/*
 **/vendor/*
 **/log/*
-**/export/*
+www/export/*
+!API/tests/**
 **/bureau/*
 **/assets/*.txt
 **/assets/db/db.7z
