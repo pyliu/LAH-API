@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧控管與監控系統 (LAH) - PHP 8.5 與 Apache 雙軌轉發部署指南 (離線版)</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --primary-bg: #eff6ff;
+            --success: #059669;
+            --success-bg: #ecfdf5;
+            --warning: #d97706;
+            --warning-bg: #fffbeb;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --text-main: #1f2937;
+            --text-muted: #4b5563;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #0f172a;
+            --code-text: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei UI", "Microsoft JhengHei", Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.65;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1040px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
+            color: #ffffff;
+            padding: 36px 40px;
+        }
+
+        .header-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 9999px;
+            padding: 4px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 12px;
+        }
+
+        .header p {
+            font-size: 15px;
+            color: #e0e7ff;
+            max-width: 800px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            margin-top: 36px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2:first-of-type {
+            margin-top: 0;
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        p, ul, ol {
+            margin-bottom: 14px;
+            color: var(--text-muted);
+            font-size: 14.5px;
+        }
+
+        ul, ol {
+            padding-left: 24px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        strong {
+            color: var(--text-main);
+        }
+
+        /* 標籤與提示塊 */
+        .alert {
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 18px 0;
+            font-size: 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .alert-info {
+            background-color: var(--primary-bg);
+            border-left: 4px solid var(--primary-light);
+            color: #1e40af;
+        }
+
+        .alert-success {
+            background-color: var(--success-bg);
+            border-left: 4px solid var(--success);
+            color: #065f46;
+        }
+
+        .alert-warning {
+            background-color: var(--warning-bg);
+            border-left: 4px solid var(--warning);
+            color: #92400e;
+        }
+
+        .alert svg {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+        }
+
+        /* 程式碼與區塊 */
+        code {
+            font-family: Consolas, "Courier New", monospace;
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13.5px;
+            border: 1px solid #e2e8f0;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            border-radius: 8px;
+            padding: 18px 20px;
+            overflow-x: auto;
+            margin: 14px 0 20px 0;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 13.5px;
+            line-height: 1.55;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            border: none;
+            font-size: inherit;
+        }
+
+        .token-keyword { color: #f43f5e; font-weight: bold; }
+        .token-string { color: #38bdf8; }
+        .token-comment { color: #94a3b8; font-style: italic; }
+        .token-var { color: #f59e0b; }
+        .token-highlight { background-color: rgba(245, 158, 11, 0.2); display: block; margin: 0 -20px; padding: 0 20px; }
+
+        /* 表格樣式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0 24px 0;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #fdfdfe;
+        }
+
+        /* 拓撲流程卡片 (純 CSS 無需外部 Mermaid) */
+        .diagram-container {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .diagram-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .diagram-box {
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 14px;
+            text-align: center;
+            font-size: 13.5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .diagram-box.primary {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+
+        .diagram-box.success {
+            border-color: #10b981;
+            background: #ecfdf5;
+            font-weight: 600;
+            color: #065f46;
+        }
+
+        .diagram-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            padding: 8px;
+        }
+
+        .footer {
+            border-top: 1px solid var(--border-color);
+            padding: 24px 40px;
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+            background: #fafafa;
+        }
+
+        @media print {
+            body { background: #ffffff; padding: 0; }
+            .container { border: none; box-shadow: none; max-width: 100%; }
+            pre { background: #f8fafc; color: #000; border: 1px solid #ccc; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="header-badge">LAH 系統維運標準文件 • 100% 離線版</div>
+        <h1>智慧控管與監控系統 (LAH) - PHP 8.5 雙軌運行與 Apache 轉址部署指南</h1>
+        <p>提供在地政事務所現有 Apache 2.4 (PHP 7.4 mod_php7) 伺服器中，部署 PHP 8.5 FastCGI (lah-api-v85) 監聽 Port 8085 與反向代理完整轉址配置範例。</p>
+    </div>
+
+    <div class="content">
+
+        <h2>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            一、系統架構與拓撲分流原則
+        </h2>
+        <p>為達成<strong>線上業務零中斷、前後端平滑過渡</strong>，本架構維持單一 Apache 2.4 入口（Port 80），並依 URL 進行動態代理分流：</p>
+
+        <div class="diagram-container">
+            <div class="diagram-grid">
+                <div>
+                    <div class="diagram-box">
+                        <strong>客戶端層</strong><br>
+                        LAH-FE 網頁前端<br>
+                        lah-messenger 即時通
+                    </div>
+                </div>
+                <div>
+                    <div class="diagram-box primary">
+                        <strong>Apache 2.4 Web 閘道 (Port 80)</strong><br>
+                        <code>C:\AppServ\Apache24</code><br>
+                        <span style="font-size:12px; color:#475569;">mod_php7 + mod_proxy_fcgi</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="diagram-box" style="margin-bottom:10px;">
+                        <strong>線上舊軌 (PHP 7.4 TS)</strong><br>
+                        路徑：<code>/api/*.php</code><br>
+                        目錄：<code>C:\AppServ\www</code>
+                    </div>
+                    <div class="diagram-box success">
+                        <strong>新軌 FastCGI (Port 8085)</strong><br>
+                        路徑：<code>/LAH-API/v1/*.php</code><br>
+                        守護：PM2 (16 Workers)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            <div>
+                <strong>全域邊界標準定義：</strong><br>
+                • <strong>PHP 8.5 根目錄</strong>：<code>C:\AppServ\php85</code>（採用 64 位元 Non-Thread Safe / NTS 版本）<br>
+                • <strong>新軌 API 專案</strong>：<code>C:\AppServ\LAH-API</code>（核心端點位於 <code>v1/</code> 子目錄）<br>
+                • <strong>FastCGI 監聽埠</strong>：<code>127.0.0.1:8085</code>（由 PM2 守護單一父進程，底層自動衍生 16 個子進程）
+            </div>
+        </div>
+
+        <h2>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+            二、部署途徑 A：PowerShell 一鍵自動化腳本
+        </h2>
+        <p>LAH-API 專案內建全自動安裝工具 <code>install_php85.ps1</code>，能自動備份設定檔、解壓套件、修改 Apache 與啟動 PM2。</p>
+
+        <h3>1. 線上模式（伺服器具備外網連線）</h3>
+        <p>以「系統管理員身分」開啟 PowerShell 終端機執行：</p>
+        <pre><code><span class="token-comment"># 進入 LAH-API 專案目錄並放行執行原則</span>
+cd C:\AppServ\LAH-API
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+<span class="token-comment"># 執行一鍵安裝（並啟用智慧無感 Rewrite 分流）</span>
+.\install_php85.ps1 -EnableSmartRewrite</code></pre>
+
+        <h3>2. 離線模式（內網封閉環境）</h3>
+        <p>在有網路環境預先下載：</p>
+        <ul>
+            <li><strong>PHP 8.5.12 NTS x64 壓縮包</strong>：<code>php-8.5.12-nts-Win32-vs17-x64.zip</code></li>
+            <li><strong>VC++ 2015-2022 執行期套件</strong>：<code>vc_redist.x64.exe</code></li>
+        </ul>
+        <p>複製至伺服器 <code>D:\OfflinePkg\</code> 後執行：</p>
+        <pre><code>cd C:\AppServ\LAH-API
+Set-ExecutionPolicy Bypass -Scope Process -Force
+.\install_php85.ps1 -PhpZipPath "D:\OfflinePkg\php-8.5.12-nts-Win32-vs17-x64.zip" -EnableSmartRewrite</code></pre>
+
+        <h2>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            三、部署途徑 B：手動逐步配置 SOP
+        </h2>
+
+        <h3>步驟 1：安裝 Visual C++ 2015-2022 (VS17) 執行期庫</h3>
+        <p>PHP 8.5 依賴 Visual Studio 2022 執行期元件，請於伺服器執行靜默安裝：</p>
+        <pre><code>vc_redist.x64.exe /install /quiet /norestart</code></pre>
+
+        <h3>步驟 2：解壓縮 PHP 8.5 至 <code>C:\AppServ\php85</code></h3>
+        <p>確認目錄結構完整包含 <code>php.exe</code>、<code>php-cgi.exe</code> 與 <code>ext\</code> 子目錄：</p>
+        <pre><code>C:\AppServ\php85\
+├── php.exe
+├── php-cgi.exe         <span class="token-comment">&lt;-- FastCGI 核心進程</span>
+├── php8.dll
+├── php.ini-production
+└── ext\                <span class="token-comment">&lt;-- 擴充模組庫 (php_curl.dll, php_sqlite3.dll...)</span></code></pre>
+
+        <h3>步驟 3：配置 <code>C:\AppServ\php85\php.ini</code></h3>
+        <p>複製 <code>php.ini-production</code> 為 <code>php.ini</code>，並啟用下列模組：</p>
+        <pre><code><span class="token-comment">; 1. 啟用擴充模組相對路徑 (取消分號 ;)</span>
+extension_dir = "ext"
+
+<span class="token-comment">; 2. 啟用核心業務相依擴充套件</span>
+extension=curl
+extension=gd
+extension=intl
+extension=mbstring
+extension=openssl
+extension=pdo_sqlite
+extension=sqlite3
+extension=odbc
+
+<span class="token-comment">; 3. 系統資源與執行期限制</span>
+memory_limit = 512M
+max_execution_time = 300
+post_max_size = 100M
+upload_max_filesize = 100M
+
+<span class="token-comment">; 4. 設定本地時區</span>
+date.timezone = Asia/Taipei</code></pre>
+
+        <p>在命令提示字元輸入 <code>C:\AppServ\php85\php.exe -m</code> 檢視擴充模組清單，確認模組已正確載入。</p>
+
+        <h3>步驟 4：修改 Apache 設定檔 (<code>C:\AppServ\Apache24\conf\httpd.conf</code>)</h3>
+
+        <div class="alert alert-warning">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+            <div>
+                <strong>操作前提醒：</strong> 請先將 <code>httpd.conf</code> 複製為 <code>httpd.conf.bak</code> 進行備份。
+            </div>
+        </div>
+
+        <p><strong>4.1 確認啟用 4 大核心模組（取消前方 <code>#</code>）：</strong></p>
+        <pre><code>LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so
+LoadModule headers_module modules/mod_headers.so
+LoadModule rewrite_module modules/mod_rewrite.so</code></pre>
+
+        <p><strong>4.2 於 <code>httpd.conf</code> 最末端追加 LAH-API 轉發區塊：</strong></p>
+        <pre><code><span class="token-comment"># =====================================================================</span>
+<span class="token-comment"># LAH-API (PHP 8.5 FastCGI via PM2 on 127.0.0.1:8085)</span>
+<span class="token-comment"># =====================================================================</span>
+<span class="token-comment"># 1. 優先定義相容 Alias：將舊呼叫端之 /api/ 映射至實體 /v1/ 目錄</span>
+Alias /LAH-API/api "C:/AppServ/LAH-API/v1"
+Alias /lah-api/api "C:/AppServ/LAH-API/v1"
+
+<span class="token-comment"># 2. 服務根目錄映射</span>
+Alias /LAH-API "C:/AppServ/LAH-API"
+Alias /lah-api "C:/AppServ/LAH-API"
+
+&lt;Directory "C:/AppServ/LAH-API"&gt;
+    Header set Access-Control-Allow-Origin "*"
+    Options Indexes FollowSymLinks
+    AllowOverride None
+    Require all granted
+
+    &lt;FilesMatch "\.php$"&gt;
+        <span class="token-comment"># 安全防護：確認檔案存在才轉發，並剝除 Proxy 前綴以利 Windows 解析</span>
+        &lt;If "-f %{REQUEST_FILENAME}"&gt;
+            SetHandler "proxy:fcgi://127.0.0.1:8085/"
+            ProxyFCGISetEnvIf "reqenv('SCRIPT_FILENAME') =~ m#^proxy:fcgi://127\.0\.0\.1:8085/(.*)$#" SCRIPT_FILENAME "$1"
+        &lt;/If&gt;
+    &lt;/FilesMatch&gt;
+&lt;/Directory&gt;
+
+<span class="token-comment"># 設定 FastCGI 連線池 (16 併發、300 秒逾時)</span>
+&lt;Proxy "fcgi://127.0.0.1:8085/" enablereuse=on max=16&gt;
+    ProxySet timeout=300
+&lt;/Proxy&gt;</code></pre>
+
+        <p><strong>4.3 [進階選用] 舊路徑 <code>/api/*</code> 智慧無感轉發 (Smart Rewrite)：</strong></p>
+        <p>在原本的 <code>&lt;Directory "C:/AppServ/www"&gt;</code> 區塊內部加上以下條件重寫規則：</p>
+        <pre><code>    <span class="token-comment"># -------------------------------------------------------------</span>
+    <span class="token-comment"># LAH-API 舊路徑漸進智慧分流：</span>
+    <span class="token-comment"># 當請求 /api/*.php 時，若新軌 v1/ 存在該檔案，自動由 PHP 8.5 執行</span>
+    <span class="token-comment"># 若新軌尚未移植，則無縫由原本的 PHP 7 mod_php7 執行！</span>
+    <span class="token-comment"># -------------------------------------------------------------</span>
+    &lt;IfModule mod_rewrite.c&gt;
+        RewriteEngine On
+        RewriteCond "C:/AppServ/LAH-API/v1/$1" -f
+        RewriteRule ^api/(.*\.php)$ "fcgi://127.0.0.1:8085/C:/AppServ/LAH-API/v1/$1" [P,L]
+    &lt;/IfModule&gt;</code></pre>
+
+        <p><strong>4.4 測試 Apache 語法：</strong></p>
+        <pre><code>C:\AppServ\Apache24\bin\httpd.exe -t</code></pre>
+        <p>確認輸出為 <code>Syntax OK</code>。</p>
+
+        <h3>步驟 5：配置 PM2 守護進程 (<code>ecosystem.config.js</code>)</h3>
+        <p>於 <code>C:\AppServ\LAH-API\ecosystem.config.js</code> 配置守護參數：</p>
+        <pre><code>module.exports = {
+  apps: [
+    {
+      name: "lah-api-v85",
+      script: "C:\\AppServ\\php85\\php-cgi.exe",
+      args: "-b 127.0.0.1:8085 -c C:\\AppServ\\php85\\php.ini",
+      cwd: __dirname,
+      interpreter: "none",          <span class="token-comment">// 告知 PM2 為原生 EXE</span>
+      exec_mode: "fork",            <span class="token-comment">// 原生 EXE 必須使用 fork 模式避免埠衝突</span>
+      instances: 1,                 <span class="token-comment">// 父進程 1 個，子進程由 PHP_FCGI_CHILDREN 接管</span>
+      autorestart: true,
+      watch: false,
+      max_memory_restart: "1G",
+      env: {
+        PATH: "C:\\Tools\\instantclient_11_2;C:\\AppServ\\php85;" + process.env.PATH,
+        NLS_LANG: "American_America.US7ASCII",
+        PHP_FCGI_CHILDREN: "16",     <span class="token-comment">// 自動在 Windows 底層衍生 16 個 worker</span>
+        PHP_FCGI_MAX_REQUESTS: "10000" <span class="token-comment">// 滿萬次請求平滑重啟，防止記憶體洩漏</span>
+      }
+    }
+  ]
+};</code></pre>
+
+        <p>啟動 PM2 進程並儲存自啟動清單：</p>
+        <pre><code>$env:PATH = "C:\AppServ\node;" + $env:PATH
+cd C:\AppServ\LAH-API
+pm2 start ecosystem.config.js
+pm2 save</code></pre>
+
+        <h3>步驟 6：重啟 Apache 與驗收檢查</h3>
+        <pre><code><span class="token-comment"># 重啟服務</span>
+Restart-Service -Name "Apache2.4" -Force
+
+<span class="token-comment"># 確認 Port 8085 正在監聽中</span>
+Get-NetTCPConnection -LocalPort 8085 -State Listen</code></pre>
+
+        <h2>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            四、驗收檢查清單 (Acceptance Matrix)
+        </h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 28%;">驗收端點</th>
+                    <th style="width: 22%;">預期 HTTP 狀態</th>
+                    <th>驗收內容與驗證重點</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>http://127.0.0.1/LAH-API/ver.php</code></td>
+                    <td><span style="color:#059669; font-weight:600;">200 OK</span></td>
+                    <td>回傳 JSON，確認 <code>php_version</code> 為 8.5.x，<code>sapi</code> 為 cgi-fcgi。</td>
+                </tr>
+                <tr>
+                    <td><code>http://127.0.0.1/LAH-API/v1/system_json_api.php</code></td>
+                    <td><span style="color:#059669; font-weight:600;">200 OK</span></td>
+                    <td>新版標準 API 轉發成功，正確返回業務 JSON 資料。</td>
+                </tr>
+                <tr>
+                    <td><code>http://127.0.0.1/LAH-API/api/system_json_api.php</code></td>
+                    <td><span style="color:#059669; font-weight:600;">200 OK</span></td>
+                    <td>新版相容 API 轉發成功，舊呼叫端無縫相容。</td>
+                </tr>
+                <tr>
+                    <td><code>http://127.0.0.1/ver.php</code></td>
+                    <td><span style="color:#059669; font-weight:600;">200 OK</span></td>
+                    <td>回傳 PHP 7.4.x 頁面，確認線上原有 <code>mod_php7</code> 舊軌零干擾。</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            五、故障排查指南 (Troubleshooting)
+        </h2>
+        <ul>
+            <li><strong>出現 503 Service Unavailable</strong>：代表 Apache 無法連線至 <code>127.0.0.1:8085</code>。請執行 <code>pm2 status</code> 確認 <code>lah-api-v85</code> 為 online 狀態，或透過 <code>pm2 logs lah-api-v85</code> 檢查是否有缺少 VC++ 執行庫或 DLL 載入失敗問題。</li>
+            <li><strong>出現 404 Not Found</strong>：確認 <code>httpd.conf</code> 中 Alias 是否正確指向 <code>C:/AppServ/LAH-API</code> 與 <code>v1/</code> 子目錄，且路徑請統一使用正斜線 <code>/</code>。</li>
+            <li><strong>Apache 無法啟動 (Syntax Error)</strong>：請檢查 <code>mod_proxy.so</code> 是否在 <code>mod_proxy_fcgi.so</code> 之前載入。</li>
+        </ul>
+
+    </div>
+
+    <div class="footer">
+        智慧控管與監控系統 (LAH) • 系統維運標準作業程序 (SOP) • 本頁面為獨立離線檔案，無外部 CDN 依賴
+    </div>
+</div>
+
+</body>
+</html>
