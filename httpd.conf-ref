@@ -558,7 +558,7 @@ PHPIniDir "C:/AppServ/php7"
 </FilesMatch>
 
 # =====================================================================
-# LAH-API (PHP 8.5 FastCGI via PM2 on 127.0.0.1:9085)
+# LAH-API (PHP 8.5 FastCGI via PM2 on 127.0.0.1:8085)
 # =====================================================================
 # 優先定義相容 Alias：將舊呼叫端之 /api/ 映射至實體 /v1/ 目錄
 Alias /LAH-API/api "C:/AppServ/LAH-API/v1"
@@ -576,12 +576,12 @@ Alias /lah-api "C:/AppServ/LAH-API"
 
     <FilesMatch "\.php$">
         <If "-f %{REQUEST_FILENAME}">
-            SetHandler "proxy:fcgi://127.0.0.1:9085/"
-            ProxyFCGISetEnvIf "reqenv('SCRIPT_FILENAME') =~ m#^proxy:fcgi://127\.0\.0\.1:9085/(.*)$#" SCRIPT_FILENAME "$1"
+            SetHandler "proxy:fcgi://127.0.0.1:8085/"
+            ProxyFCGISetEnvIf "reqenv('SCRIPT_FILENAME') =~ m#^proxy:fcgi://127\.0\.0\.1:8085/(.*)$#" SCRIPT_FILENAME "$1"
         </If>
     </FilesMatch>
 </Directory>
 
-<Proxy "fcgi://127.0.0.1:9085/" enablereuse=on max=16>
+<Proxy "fcgi://127.0.0.1:8085/" enablereuse=on max=16>
     ProxySet timeout=300
 </Proxy>

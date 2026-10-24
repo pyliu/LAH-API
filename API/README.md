@@ -16,7 +16,7 @@
    * 於 [`LAH-API/API/`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API) 建立全新 PHP 8.5 專屬目錄，逐支檢視、修正並移植 API。
 2. **伺服器雙軌分流（方案 B：保留 Apache 2.4 ＋ `mod_proxy_fcgi`）**：
    * **不替換現有 Apache 2.4 服務**，因此各地所現有的防火牆規則、SSL 憑證與自動更新部署工具 [`LAH-Updater/updater.py`](file:///c:/Temp/DEV/LAH-Workspace/LAH-Updater/updater.py) 均無需大幅改動。
-   * Apache 2.4 繼續以 `mod_php7` 處理舊版 `/` 請求；同時啟用 Apache 內建的 `mod_proxy_fcgi` 模組，將 `/v85/`（或已移植之 API）透過本機迴路轉發至 `127.0.0.1:9085` 的 **PHP 8.5 FastCGI** 服務。
+   * Apache 2.4 繼續以 `mod_php7` 處理舊版 `/` 請求；同時啟用 Apache 內建的 `mod_proxy_fcgi` 模組，將 `/LAH-API/`（或已移植之 API）透過本機迴路轉發至 `127.0.0.1:8085` 的 **PHP 8.5 FastCGI** 服務。
 3. **進程高可用守護（PM2 託管 `php-cgi.exe`）**：
    * 由於 Windows 版 PHP 無原生 `php-fpm`，直接使用各所伺服器已安裝之 **PM2** 守護 `C:\AppServ\php85\php-cgi.exe`，解決 Windows 下 `php-cgi.exe` 滿載自動退出造成的 `502 Bad Gateway` 問題。
 
@@ -32,13 +32,13 @@ flowchart TD
     subgraph Apache["Apache 2.4 伺服器 (Port 80)"]
         ROUTER{"URL 路由判斷"}
         MODPHP["mod_php7 (內嵌模組)<br/>PHP 7.3 / 7.4 TS"]
-        MODFCGI["mod_proxy_fcgi<br/>轉發 fcgi://127.0.0.1:9085"]
+        MODFCGI["mod_proxy_fcgi<br/>轉發 fcgi://127.0.0.1:8085"]
     end
 
     subgraph PM2Daemon["PM2 進程守護層 (同台伺服器)"]
         PM2_FE["PM2: LAH-FE<br/>(Node.js v16)"]
         PM2_WS["PM2: lah-messenger-server<br/>(Node.js v16)"]
-        PM2_PHP85["PM2: lah-api-v85<br/>(php-cgi.exe PHP 8.5 NTS :9085)"]
+        PM2_PHP85["PM2: lah-api-v85<br/>(php-cgi.exe PHP 8.5 NTS :8085)"]
     end
 
     subgraph Codebase["LAH-API 程式碼與共用資料層"]
@@ -92,7 +92,7 @@ module.exports = {
     {
       name: "lah-api-v85",
       script: "C:\\AppServ\\php85\\php-cgi.exe",
-      args: "-b 127.0.0.1:9085 -c C:\\AppServ\\php85\\php.ini",
+      args: "-b 127.0.0.1:8085 -c C:\\AppServ\\php85\\php.ini",
       cwd: __dirname,               // 自動取得目錄（各所伺服器與開發筆電 Junction 皆為 C:\\AppServ\\LAH-API）,
       interpreter: "none",          // 關鍵：告知 PM2 這是原生 .exe，不透過 node 執行
       exec_mode: "fork",            // 關鍵限制：PM2 cluster 僅支援 Node.js；原生 .exe 設 cluster 會因監聽同 Port 衝突 (EADDRINUSE) 崩潰，故必須使用 fork 模式
@@ -105,7 +105,7 @@ module.exports = {
         PATH: "C:\\Tools\\instantclient_11_2;C:\\AppServ\\php85;" + process.env.PATH,
         NLS_LANG: "American_America.US7ASCII",
         // FastCGI 核心併發參數：
-        // 1. PHP_FCGI_CHILDREN: 父程序會在 Windows 底層衍生 16 個 worker 子程序共享 Port 9085（實測共 17 個 php-cgi.exe，約佔 400MB RAM）
+        // 1. PHP_FCGI_CHILDREN: 父程序會在 Windows 底層衍生 16 個 worker 子程序共享 Port 8085（實測共 17 個 php-cgi.exe，約佔 400MB RAM）
         // 2. PHP_FCGI_MAX_REQUESTS: 每個 worker 滿 10000 次請求自動平滑退出並由父程序重建，消除記憶體洩漏
         PHP_FCGI_CHILDREN: "16",
         PHP_FCGI_MAX_REQUESTS: "10000"
@@ -133,7 +133,7 @@ module.exports = {
 
 1. **為什麼 PM2 `cluster` 模式無法用於 `php-cgi.exe`？**
    * **Node.js 專屬機制**：PM2 的 Cluster Mode 是基於 Node.js 核心的 `cluster` 模組（以 IPC channel 共享 Server Handle）。當指定 `interpreter: "none"` 執行原生 Windows 二進位檔時，PM2 無法注入 Node.js 的 Cluster 機制。
-   * **Port 衝突崩潰 (EADDRINUSE)**：若在 PM2 強制設定 `instances: 2` 以上，PM2 會啟動兩個獨立的 `php-cgi.exe` 同時嘗試 `bind()` 監聽 `127.0.0.1:9085`，第二個程序會立即觸發 Windows 網路錯誤 `WSAEADDRINUSE (Error 10048: 通訊端位址已被佔用)` 而陷入不斷重啟崩潰迴圈。
+   * **Port 衝突崩潰 (EADDRINUSE)**：若在 PM2 強制設定 `instances: 2` 以上，PM2 會啟動兩個獨立的 `php-cgi.exe` 同時嘗試 `bind()` 監聽 `127.0.0.1:8085`，第二個程序會立即觸發 Windows 網路錯誤 `WSAEADDRINUSE (Error 10048: 通訊端位址已被佔用)` 而陷入不斷重啟崩潰迴圈。
 
 2. **FastCGI 在 Windows 上的真正併發機制：`PHP_FCGI_CHILDREN`**
    * 由 PM2 守護 1 個 `php-cgi.exe` 主父程序（負責 PID 監控與崩潰自動恢復）。
@@ -274,7 +274,7 @@ define('DEF_SQLITE_DB', DB_DIR . DIRECTORY_SEPARATOR . 'LAH.db');
 
 ## 第六章：Apache 2.4 (`httpd.conf`) `mod_proxy_fcgi` 雙軌設定詳解
 
-在保留現有 Apache 2.4 (`mod_php7`) 的前提下，只需在 `httpd.conf` 進行以下 2 步微調，即可將 `/v85` 流量導向 PM2 管理的 PHP 8.5 FastCGI (`127.0.0.1:9085`)：
+在保留現有 Apache 2.4 (`mod_php7`) 的前提下，只需在 `httpd.conf` 進行以下 2 步微調，即可將 `/v85` 流量導向 PM2 管理的 PHP 8.5 FastCGI (`127.0.0.1:8085`)：
 
 ### 6.1 步驟 1：取消註解啟用 Proxy 與 FastCGI 模組
 打開 Apache 的 `conf/httpd.conf`（參考 [`LAH-API/httpd.conf-ref`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/httpd.conf-ref#L148-L166) 第 148~166 行），確認以下三個模組前方的 `#` 已移除：
@@ -290,7 +290,7 @@ LoadModule rewrite_module modules/mod_rewrite.so
 
 ```apache
 # =====================================================================
-# LAH-API v85 (PHP 8.5 FastCGI via PM2 on 127.0.0.1:9085) 雙軌設定
+# LAH-API v85 (PHP 8.5 FastCGI via PM2 on 127.0.0.1:8085) 雙軌設定
 # =====================================================================
 
 # 1. 將 /v85 虛擬路徑映射至實體 LAH-API/API 目錄
@@ -305,18 +305,18 @@ Alias /lah-api "C:/AppServ/LAH-API"
     AllowOverride None
     Require all granted
 
-    # 關鍵：在 v85 目錄下，攔截所有 .php 請求，改由 PHP 8.5 FastCGI (9085) 處理，不走 mod_php7！
+    # 關鍵：在 v85 目錄下，攔截所有 .php 請求，改由 PHP 8.5 FastCGI (8085) 處理，不走 mod_php7！
     <FilesMatch "\.php$">
         # 安全防護：確認實體 .php 檔案存在才轉發，徹底阻絕 CGI 路徑注入 (CVE-2024-4577 等)
         <If "-f %{REQUEST_FILENAME}">
-            SetHandler "proxy:fcgi://127.0.0.1:9085/"
-            ProxyFCGISetEnvIf "reqenv('SCRIPT_FILENAME') =~ m#^proxy:fcgi://127\.0\.0\.1:9085/(.*)$#" SCRIPT_FILENAME "$1"
+            SetHandler "proxy:fcgi://127.0.0.1:8085/"
+            ProxyFCGISetEnvIf "reqenv('SCRIPT_FILENAME') =~ m#^proxy:fcgi://127\.0\.0\.1:8085/(.*)$#" SCRIPT_FILENAME "$1"
         </If>
     </FilesMatch>
 </Directory>
 
 # 設定 FastCGI 逾時時間為 300 秒（避免跨所大筆地籍查詢 Timeout）
-<Proxy "fcgi://127.0.0.1:9085/" enablereuse=on max=16>
+<Proxy "fcgi://127.0.0.1:8085/" enablereuse=on max=16>
     ProxySet timeout=300
 </Proxy>
 ```
@@ -327,7 +327,7 @@ Alias /lah-api "C:/AppServ/LAH-API"
 > ```apache
 > RewriteEngine On
 > RewriteCond "c:/Temp/DEV/LAH-Workspace/LAH-API/API%{REQUEST_URI}" -f
-> RewriteRule ^/(.*\.php)$ "fcgi://127.0.0.1:9085/c:/Temp/DEV/LAH-Workspace/LAH-API/API/$1" [P,L]
+> RewriteRule ^/(.*\.php)$ "fcgi://127.0.0.1:8085/c:/Temp/DEV/LAH-Workspace/LAH-API/API/$1" [P,L]
 > ```
 
 ---
@@ -395,7 +395,7 @@ Alias /lah-api "C:/AppServ/LAH-API"
    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
    ```
 
-### Step 3：使用 PM2 啟動 PHP 8.5 FastCGI 服務 (`127.0.0.1:9085`)
+### Step 3：使用 PM2 啟動 PHP 8.5 FastCGI 服務 (`127.0.0.1:8085`)
 1. 將第二章的 `ecosystem.config.js` 存放在 `c:\Temp\DEV\LAH-Workspace\LAH-API\API\ecosystem.config.js`。
 2. 在 PowerShell 啟動 PM2 服務（直接使用您現有的 Node v16 環境即可）：
    ```powershell
@@ -403,9 +403,9 @@ Alias /lah-api "C:/AppServ/LAH-API"
    pm2 start ecosystem.config.js
    pm2 status
    ```
-3. 確認 Port `9085` 已開始監聽：
+3. 確認 Port `8085` 已開始監聽：
    ```powershell
-   Get-NetTCPConnection -LocalPort 9085 -State Listen
+   Get-NetTCPConnection -LocalPort 8085 -State Listen
    ```
 
 ### Step 4：在 Apache 2.4（或筆電獨立測試埠）驗收雙軌分流

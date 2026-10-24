@@ -12,7 +12,7 @@
 | 目錄 | 軌道角色 | 執行環境與技術棧 | 路由與監聽埠 | 適用 Agent 規範 |
 |---|---|---|---|---|
 | `./www/` | **線上生產軌道 (Legacy Production)** | PHP 7.3 / 7.4、Apache `mod_php7`、Oracle 9i (OCI8)、SQLite 3 | `http://127.0.0.1/api/*.php` (Port 80) | 參閱 [`www/AGENTS.md`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/www/AGENTS.md) |
-| `./API/` | **現代化移植軌道 (PHP 8.5 Migration)** | PHP 8.5.12 NTS、PM2 FastCGI 守護 (`php-cgi.exe`)、智慧雙模連線 | `http://127.0.0.1/LAH-API/v1/*.php` (Port 9085 轉發，相容 `/api/`) | 參閱 [`API/AGENTS.md`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/API/AGENTS.md) |
+| `./API/` | **現代化移植軌道 (PHP 8.5 Migration)** | PHP 8.5.12 NTS、PM2 FastCGI 守護 (`php-cgi.exe`)、智慧雙模連線 | `http://127.0.0.1/LAH-API/v1/*.php` (Port 8085 轉發，相容 `/api/`) | 參閱 [`API/AGENTS.md`](file:///c:/Temp/DEV/LAH-Workspace/LAH-API/API/AGENTS.md) |
 
 ### 1.1 架構資料流向
 
@@ -29,7 +29,7 @@ flowchart TD
 
     subgraph Runtimes["執行期層 (Runtime Layer)"]
         PHP7["mod_php7 (C:\\AppServ\\php7)<br/>執行 LAH-API/www/"]
-        PHP85["PM2 FastCGI lah-api-v85 (127.0.0.1:9085)<br/>C:\\AppServ\\php85\\php-cgi.exe 執行 LAH-API/API/"]
+        PHP85["PM2 FastCGI lah-api-v85 (127.0.0.1:8085)<br/>C:\\AppServ\\php85\\php-cgi.exe 執行 LAH-API/API/"]
     end
 
     subgraph Storage["共用資料持久層 (Shared Single Source of Truth)"]

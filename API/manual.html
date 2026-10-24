@@ -166,7 +166,7 @@
 <div class="meta-box">
   <strong>文件版本：</strong>v1.1（2026-10-23）<br>
   <strong>目標目錄：</strong><code>C:\AppServ\LAH-API\</code>（開發環境映射至 <code>c:\Temp\DEV\LAH-Workspace\LAH-API\API\</code>）<br>
-  <strong>採用架構：</strong>保留 Apache 2.4 (<code>mod_php7</code> + <code>mod_proxy_fcgi</code>) ＋ PM2 託管 PHP 8.5 FastCGI (<code>127.0.0.1:9085</code>，16 子程序併發)<br>
+  <strong>採用架構：</strong>保留 Apache 2.4 (<code>mod_php7</code> + <code>mod_proxy_fcgi</code>) ＋ PM2 託管 PHP 8.5 FastCGI (<code>127.0.0.1:8085</code>，16 子程序併發)<br>
   <strong>資料庫環境：</strong>後端地政核心 Oracle 9i（搭配 <code>instantclient_11_2</code> 智慧雙模）＋ 本地快取 SQLite 3 ＋ 舊公文 MS SQL Server
 </div>
 
@@ -175,7 +175,7 @@
 <h3>1.1 核心設計決策</h3>
 <ol>
   <li><strong>新舊目錄並存（<code>www/</code> 與 <code>v85/</code>）</strong>：既有 <code>LAH-API/www/</code> 維持 PHP 7.3/7.4 穩定運作；新建 <code>LAH-API/API/</code> 作為 PHP 8.5 專屬目錄，逐支檢視、修正並遷移 API。</li>
-  <li><strong>保留 Apache 2.4 並啟用 <code>mod_proxy_fcgi</code> 分流</strong>：不替換現有 Apache 2.4 服務，各所防火牆與自動更新工具 <code>LAH-Updater</code> 無需大幅變動。Apache 以原本的 <code>mod_php7</code> 服務 <code>/</code>，同時將 <code>/v85/</code> 轉發給本機 Port <code>9085</code> 的 PHP 8.5 FastCGI。</li>
+  <li><strong>保留 Apache 2.4 並啟用 <code>mod_proxy_fcgi</code> 分流</strong>：不替換現有 Apache 2.4 服務，各所防火牆與自動更新工具 <code>LAH-Updater</code> 無需大幅變動。Apache 以原本的 <code>mod_php7</code> 服務 <code>/</code>，同時將 <code>/v85/</code> 轉發給本機 Port <code>8085</code> 的 PHP 8.5 FastCGI。</li>
   <li><strong>PM2 進程守護與 FastCGI 原生多程序併發</strong>：利用各所伺服器既有的 PM2 守護 <code>C:\AppServ\php85\php-cgi.exe</code>（設定 <code>exec_mode: "fork"</code>），並藉由 FastCGI 內部環境變數 <code>PHP_FCGI_CHILDREN: "16"</code> 由 Windows 核心自動衍生 16 個 Worker 程序，徹底解決 Windows 下 FastCGI 請求併發與崩潰重啟問題。</li>
 </ol>
 
@@ -193,7 +193,7 @@ flowchart TD
 
     subgraph ServiceLayer["雙軌執行期 (Runtime Layer)"]
         PHP7["舊軌 mod_php7 (C:\\AppServ\\php7)<br/>執行 www/ 原始碼"]
-        PHP85["新軌 PM2 FastCGI lah-api-v85 (127.0.0.1:9085)<br/>C:\\AppServ\\php85\\php-cgi.exe 執行 v85/ 原始碼"]
+        PHP85["新軌 PM2 FastCGI lah-api-v85 (127.0.0.1:8085)<br/>C:\\AppServ\\php85\\php-cgi.exe 執行 v85/ 原始碼"]
     end
 
     subgraph PersistenceLayer["資料持久層 (Shared Single Source of Truth)"]
@@ -257,7 +257,7 @@ flowchart TD
     {
       name: "lah-api-v85",
       script: "C:/AppServ/php85/php-cgi.exe",
-      args: "-b 127.0.0.1:9085",
+      args: "-b 127.0.0.1:8085",
       instances: 1,
       exec_mode: "fork",
       autorestart: true,
@@ -424,13 +424,13 @@ Alias /lah-api "C:/AppServ/LAH-API"
     &lt;FilesMatch "\.php$"&gt;
         &lt;If "-f %{REQUEST_FILENAME}"&gt;
             # Windows 下結尾務必帶斜線 /，並以 ProxyFCGISetEnvIf 剝除 proxy:fcgi:// 前綴供 php-cgi.exe 讀取
-            SetHandler "proxy:fcgi://127.0.0.1:9085/"
-            ProxyFCGISetEnvIf "reqenv('SCRIPT_FILENAME') =~ m#^proxy:fcgi://127\.0\.0\.1:9085/(.*)$#" SCRIPT_FILENAME "$1"
+            SetHandler "proxy:fcgi://127.0.0.1:8085/"
+            ProxyFCGISetEnvIf "reqenv('SCRIPT_FILENAME') =~ m#^proxy:fcgi://127\.0\.0\.1:8085/(.*)$#" SCRIPT_FILENAME "$1"
         &lt;/If&gt;
     &lt;/FilesMatch&gt;
 &lt;/Directory&gt;
 
-&lt;Proxy "fcgi://127.0.0.1:9085/" enablereuse=on max=16&gt;
+&lt;Proxy "fcgi://127.0.0.1:8085/" enablereuse=on max=16&gt;
     ProxySet timeout=300
 &lt;/Proxy&gt;</code></pre>
 

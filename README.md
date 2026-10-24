@@ -43,7 +43,7 @@
 | 軌道 | 目錄 | 執行期與處理器 | 監聽埠 / 路由 | 主要職責與特點 |
 | :--- | :--- | :--- | :--- | :--- |
 | **線上生產軌道<br>(Legacy)** | `www/` | Apache `mod_php7`<br>(PHP 7.4.33 ZTS) | `http://127.0.0.1/api/*`<br>(Port 80) | 承擔現行線上穩定生產流量，嚴格遵守 PHP 7.3 保守相容性。詳見 [`www/AGENTS.md`](www/AGENTS.md)。 |
-| **現代化移植軌道<br>(Migration)** | `API/` | PM2 FastCGI 守護<br>(PHP 8.5.12 NTS) | `http://127.0.0.1/LAH-API/v1/*`<br>(Port 9085 轉發，相容 `/api/*`) | 漸進式移植核心 API，修正 P0/P1 相容性，具備 FastCGI 16 程序併發與 Oracle 9i 雙模連線。詳見 [`API/README.md`](API/README.md)。 |
+| **現代化移植軌道<br>(Migration)** | `API/` | PM2 FastCGI 守護<br>(PHP 8.5.12 NTS) | `http://127.0.0.1/LAH-API/v1/*`<br>(Port 8085 轉發，相容 `/api/*`) | 漸進式移植核心 API，修正 P0/P1 相容性，具備 FastCGI 16 程序併發與 Oracle 9i 雙模連線。詳見 [`API/README.md`](API/README.md)。 |
 
 ```mermaid
 flowchart TD
@@ -58,7 +58,7 @@ flowchart TD
 
     subgraph ServiceLayer["雙軌執行期 (Runtime Layer)"]
         PHP7["舊軌 mod_php7 (C:\\AppServ\\php7)<br/>執行 www/ 原始碼"]
-        PHP85["新軌 PM2 FastCGI lah-api-v85 (127.0.0.1:9085)<br/>C:\\AppServ\\php85\\php-cgi.exe 執行 API/ 原始碼"]
+        PHP85["新軌 PM2 FastCGI lah-api-v85 (127.0.0.1:8085)<br/>C:\\AppServ\\php85\\php-cgi.exe 執行 API/ 原始碼"]
     end
 
     subgraph PersistenceLayer["資料持久層 (Shared Single Source of Truth)"]
@@ -148,7 +148,7 @@ LAH-API/
 3. **Configure Apache (`httpd.conf`)**:
    - Point `DocumentRoot` to `C:/AppServ/www`.
    - Enable `mod_proxy` & `mod_proxy_fcgi` and set `Alias /LAH-API "C:/AppServ/LAH-API"`.
-   - Forward `/v85/*.php` to `fcgi://127.0.0.1:9085/`.
+   - Forward `/LAH-API/*.php` to `fcgi://127.0.0.1:8085/`.
 4. **Start Services**:
    - Start Apache: `httpd.exe -k start`.
    - Start PM2 FastCGI: `cd C:\AppServ\LAH-API && pm2 start ecosystem.config.js && pm2 save`.
@@ -229,13 +229,13 @@ LAH-API/
 
        <FilesMatch "\.php$">
            <If "-f %{REQUEST_FILENAME}">
-               SetHandler "proxy:fcgi://127.0.0.1:9085/"
-               ProxyFCGISetEnvIf "reqenv('SCRIPT_FILENAME') =~ m#^proxy:fcgi://127\.0\.0\.1:9085/(.*)$#" SCRIPT_FILENAME "$1"
+               SetHandler "proxy:fcgi://127.0.0.1:8085/"
+               ProxyFCGISetEnvIf "reqenv('SCRIPT_FILENAME') =~ m#^proxy:fcgi://127\.0\.0\.1:8085/(.*)$#" SCRIPT_FILENAME "$1"
            </If>
        </FilesMatch>
    </Directory>
 
-   <Proxy "fcgi://127.0.0.1:9085/" enablereuse=on max=16>
+   <Proxy "fcgi://127.0.0.1:8085/" enablereuse=on max=16>
        ProxySet timeout=300
    </Proxy>
    ```
@@ -309,7 +309,7 @@ API 端點遵循標準 JSON 回應協定：
 ```powershell
 .\start_dev.bat
 ```
-腳本會自動檢查並啟動 Apache（Port 80）、前端 `LAH-FE`（Port 8080）與即時通推播伺服器 `lah-messenger-server`（Port 8081/8082），並於背景保持 PM2 託管之 `lah-api-v85`（Port 9085）。
+腳本會自動檢查並啟動 Apache（Port 80）、前端 `LAH-FE`（Port 8080）與即時通推播伺服器 `lah-messenger-server`（Port 8081/8082），並於背景保持 PM2 託管之 `lah-api-v85`（Port 8085）。
 
 ### 方式 B：雙軌獨立啟動與驗證
 
