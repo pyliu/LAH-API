@@ -112,7 +112,7 @@ class SQLiteRKEYN {
      * 取得本所收件跨所登記收件字
      */
     public function getRegCrossHostCode() {
-        $site = System::getInstance()->getSiteCode();   // HA
+        $site = System::getInstance()->getSiteCode() ?: 'HA';   // HA
         $postfix = $site[1];    // A
         if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '04' AND KRMK = 'R' AND KCDE_2 LIKE '%".$postfix."1'")) {
             return $this->prepareArray($stmt);
@@ -123,7 +123,7 @@ class SQLiteRKEYN {
      * 取得他所收件跨所登記收件字
      */
     public function getRegCrossOtherCode() {
-        $site = System::getInstance()->getSiteCode();   // HA
+        $site = System::getInstance()->getSiteCode() ?: 'HA';   // HA
         if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '04' AND KRMK = 'T' AND KCDE_2 LIKE '".$site."%'")) {
             return $this->prepareArray($stmt);
         }
@@ -133,7 +133,7 @@ class SQLiteRKEYN {
      * 取得他所收件跨縣市登記收件字
      */
     public function getRegCrossCountyOtherCode() {
-        $site = System::getInstance()->getSiteCode();   // HA
+        $site = System::getInstance()->getSiteCode() ?: 'HA';   // HA
         if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '04' AND KRMK = 'T' AND KCDE_2 LIKE '%".$site."'")) {
             return $this->prepareArray($stmt);
         }
@@ -143,7 +143,7 @@ class SQLiteRKEYN {
      * 取得本所收件跨縣市登記收件字
      */
     public function getRegCrossCountyHostCode() {
-        $site = System::getInstance()->getSiteCode();   // HA
+        $site = System::getInstance()->getSiteCode() ?: 'HA';   // HA
         $prefix = $site[0];    // H
         $postfix = $site[1];    // A
         $site_idx = ord($postfix) - ord('A') + 1;  // 1
@@ -156,7 +156,7 @@ class SQLiteRKEYN {
      * 取得本所其他登記收件字
      */
     public function getRegOtherCode() {
-        $site = System::getInstance()->getSiteCode();   // HA
+        $site = System::getInstance()->getSiteCode() ?: 'HA';   // HA
         $postfix = $site[1];    // A
         if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '04' AND KRMK = 'R' AND KCDE_2 NOT LIKE '%".$postfix."1' AND KCDE_2 NOT LIKE '".$site."%'")) {
             return $this->prepareArray($stmt);

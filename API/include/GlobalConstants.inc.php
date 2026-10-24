@@ -159,9 +159,9 @@ if ($codes) {
 }
 
 require_once('System.class.php');
-$site_code = System::getInstance()->getSiteCode() ?? 'HA';  // HA
+$site_code = System::getInstance()->getSiteCode() ?: 'HA';  // HA
 define('WEB_XAP', System::getInstance()->getWebAPIp() ?? "220.1.34.161");
-$site_code_tail = $site_code[1];    // A
+$site_code_tail = $site_code[1] ?? 'A';    // A
 $site_short_name = '？';
 switch ($site_code) {
     case 'HA': $site_short_name = '桃'; break;
@@ -173,8 +173,8 @@ switch ($site_code) {
     case 'HG': $site_short_name = '平'; break;
     case 'HH': $site_short_name = '山'; break;
 }
-$site_name = mb_substr(OFFICE[$site_code], 0, 2);    // 桃園
-$site_idx = ord($site_code_tail) - ord('A') + 1;  // 1
+$site_name = mb_substr(OFFICE[$site_code] ?? '桃園', 0, 2);    // 桃園
+$site_idx = ord($site_code_tail ?: 'A') - ord('A') + 1;  // 1
 
 define('REG_CODE', [
     "本所" => $altered,

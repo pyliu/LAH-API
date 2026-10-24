@@ -3,7 +3,7 @@ $api_inc = __DIR__;
 $legacy_inc = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'www' . DIRECTORY_SEPARATOR . 'include';
 set_include_path($api_inc . PATH_SEPARATOR . $legacy_inc . PATH_SEPARATOR . get_include_path());
 
-error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
+error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE & ~E_DEPRECATED & ~E_USER_DEPRECATED);
 date_default_timezone_set("ASIA/TAIPEI");
 
 header("Cache-Control: no-cache, no-store, must-revalidate");

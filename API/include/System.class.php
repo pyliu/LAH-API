@@ -725,11 +725,11 @@ class System {
     }
 
     public function getSiteCode() {
-        return strtoupper($this->get('SITE'));
+        return strtoupper($this->get('SITE') ?: 'HA');
     }
 
     public function getSiteAlphabet() {
-        return $this->getSiteCode()[1];
+        return $this->getSiteCode()[1] ?? 'A';
     }
 
     public function getSiteNumber() {
