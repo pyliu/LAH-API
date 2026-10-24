@@ -1,7 +1,7 @@
 <?php
 require_once("init.php");
 require_once("System.class.php");
-require_once(ROOT_DIR.'/vendor/autoload.php');
+require_once(VENDOR_DIR.DIRECTORY_SEPARATOR.'autoload.php');
 
 use PhpImap\Mailbox;
 use PhpImap\Exceptions\ConnectionException;
