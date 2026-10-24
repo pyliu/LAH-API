@@ -41,4 +41,5 @@ if !EXIT_CODE! equ 0 (
     echo [FAILED] Tests failed with exit code: !EXIT_CODE!
 )
 
+pause
 exit /b !EXIT_CODE!
