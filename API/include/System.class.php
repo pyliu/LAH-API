@@ -5,7 +5,9 @@ require_once('DynamicSQLite.class.php');
 require_once('Ping.class.php');
 require_once('SQLiteUser.class.php');
 
-define('DIMENSION_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."dimension.db");
+if (!defined('DIMENSION_SQLITE_DB')) {
+    define('DIMENSION_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."dimension.db");
+}
 
 abstract class ROLE {
     const NORMAL = 1;

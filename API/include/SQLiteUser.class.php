@@ -381,29 +381,44 @@ class SQLiteUser {
      */
     public function addUser($data) {
         if (empty($data['id'])) return false;
+        $id = $data['id'];
+        $name = $data['name'] ?? '';
         $sex = ($data['sex'] ?? 0) != 1 ? 0 : 1;
+        $addr = $data['addr'] ?? '';
+        $tel = $data['tel'] ?? '';
+        $ext = $data['ext'] ?? 153;
+        $cell = $data['cell'] ?? '';
+        $unit = $data['unit'] ?? '未分配';
+        $title = $data['title'] ?? '';
+        $work = $data['work'] ?? '';
+        $exam = $data['exam'] ?? '';
+        $education = $data['education'] ?? '';
+        $onboard_date = $data['onboard_date'] ?? '';
+        $ip = $data['ip'] ?? '';
+        $authority = $data['authority'] ?? 0;
+        $birthday = $data['birthday'] ?? '';
         
         if($stmt = $this->db->prepare("
           INSERT INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
           VALUES (:id, :name, :sex, :addr, :tel, :ext, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday)
         ")) {
-            $stmt->bindParam(':id', $data['id']);
-            $stmt->bindParam(':name', $data['name']);
+            $stmt->bindParam(':id', $id);
+            $stmt->bindParam(':name', $name);
             $stmt->bindParam(':sex', $sex);
-            $stmt->bindParam(':addr', $data['addr']);
-            $stmt->bindParam(':tel', $data['tel']);
-            $stmt->bindParam(':ext', $data['ext']);
-            $stmt->bindParam(':cell', $data['cell']);
-            $stmt->bindParam(':unit', $data['unit']);
-            $stmt->bindParam(':title', $data['title']);
-            $stmt->bindParam(':work', $data['work']);
-            $stmt->bindParam(':exam', $data['exam']);
-            $stmt->bindParam(':education', $data['education']);
-            $stmt->bindParam(':onboard_date', $data['onboard_date']);
+            $stmt->bindParam(':addr', $addr);
+            $stmt->bindParam(':tel', $tel);
+            $stmt->bindParam(':ext', $ext);
+            $stmt->bindParam(':cell', $cell);
+            $stmt->bindParam(':unit', $unit);
+            $stmt->bindParam(':title', $title);
+            $stmt->bindParam(':work', $work);
+            $stmt->bindParam(':exam', $exam);
+            $stmt->bindParam(':education', $education);
+            $stmt->bindParam(':onboard_date', $onboard_date);
             $stmt->bindValue(':offboard_date', '');
-            $stmt->bindParam(':ip', $data['ip']);
-            $stmt->bindValue(':authority', $data['authority']);
-            $stmt->bindParam(':birthday', $data['birthday']);
+            $stmt->bindParam(':ip', $ip);
+            $stmt->bindValue(':authority', $authority);
+            $stmt->bindParam(':birthday', $birthday);
             return $stmt->execute() === FALSE ? false : true;
         }
         return false;

@@ -250,7 +250,8 @@ class IPResolver {
     public static function parseUnit($note) {
         $unit = '未分配';
         if (!empty($note)) {
-            $key = explode(' ', $note)[1];
+            $parts = explode(' ', $note);
+            $key = $parts[1] ?? $parts[0] ?? '';
             switch ($key) {
                 case 'inf':
                     $unit = '資訊課';
