@@ -400,39 +400,128 @@ define('IMPORT_DIR', ROOT_DIR . DIRECTORY_SEPARATOR . 'import');       // 共用
   </tbody>
 </table>
 
-<h2>第六章：Apache 2.4 (<code>httpd.conf</code>) <code>mod_proxy_fcgi</code> 雙軌設定</h2>
-<p><strong>1. 於 <code>httpd.conf</code> 取消註解啟用模組：</strong></p>
+<h2>第六章：Apache 2.4 (<code>httpd.conf</code>) <code>mod_proxy_fcgi</code> 雙軌與安全防護設定</h2>
+<p>為支援 PHP 8.5 FastCGI 雙軌運行，同時<strong>防範 Web 伺服器目錄瀏覽（Index of /... 資訊洩漏）</strong>與機敏原始碼窺探，必須於 <code>C:\AppServ\Apache24\conf\httpd.conf</code> 進行以下設定：</p>
+
+<h3>6.1 啟用 Apache 必要模組</h3>
+<p>在 <code>httpd.conf</code> 中搜尋並取消註解（移除行首 <code>#</code>）以下核心模組：</p>
 <pre><code>LoadModule proxy_module modules/mod_proxy.so
 LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so
-LoadModule rewrite_module modules/mod_rewrite.so</code></pre>
+LoadModule rewrite_module modules/mod_rewrite.so
+LoadModule headers_module modules/mod_headers.so</code></pre>
 
-<p><strong>2. 於 <code>httpd.conf</code> 最下方加入 <code>/v85</code> 路由轉發區塊：</strong></p>
-<pre><code># 優先相容舊呼叫端
+<h3>6.2 既有全站與 DocumentRoot 目錄清單瀏覽關閉</h3>
+<p>預設 AppServ 安裝時會開啟 <code>Indexes</code>，導致若目錄無首頁檔案時將列出伺服器磁區全部內容。請在 <code>httpd.conf</code> 中找到 <code>&lt;Directory "C:/AppServ/www"&gt;</code> 區塊，將 <code>Options Indexes FollowSymLinks</code> 調整為 <code>-Indexes</code>：</p>
+<pre><code>&lt;Directory "C:/AppServ/www"&gt;
+    Header set Access-Control-Allow-Origin "*"
+    # 關鍵防護：將 Indexes 改為 -Indexes，徹底阻絕 /export/、/include/ 等目錄清單洩漏
+    Options -Indexes +FollowSymLinks
+    AllowOverride All
+    Require all granted
+&lt;/Directory&gt;</code></pre>
+
+<h3>6.3 LAH-API 雙軌轉發與安全沙盒設定（加入 httpd.conf 最末端）</h3>
+<p>於 <code>httpd.conf</code> 檔案最下方加入以下完整設定區塊：</p>
+<pre><code># =====================================================================
+# LAH-API (PHP 8.5 FastCGI via PM2 on 127.0.0.1:8085)
+# =====================================================================
+# 1. 優先定義相容 Alias：將舊呼叫端之 /api/ 映射至實體 /v1/ 目錄
 Alias /LAH-API/api "C:/AppServ/LAH-API/v1"
 Alias /lah-api/api "C:/AppServ/LAH-API/v1"
 
-# 服務根目錄映射
+# 2. 服務根目錄映射
 Alias /LAH-API "C:/AppServ/LAH-API"
 Alias /lah-api "C:/AppServ/LAH-API"
 
 &lt;Directory "C:/AppServ/LAH-API"&gt;
     Header set Access-Control-Allow-Origin "*"
+    # 關鍵防護：關閉目錄自動索引 (禁止 Index of /LAH-API 瀏覽)
     Options -Indexes +FollowSymLinks
     AllowOverride None
     Require all granted
 
+    # 關鍵防護：禁止外網直接下載機敏副檔名檔案 (設定檔、套件鎖定檔、測試腳本、文件等)
+    &lt;FilesMatch "^\.|\.(json|lock|xml|bat|ps1|md|ini|config|yml|yaml)$"&gt;
+        Require all denied
+    &lt;/FilesMatch&gt;
+
     &lt;FilesMatch "\.php$"&gt;
+        # 關鍵防護：確認實體 .php 檔案存在才轉發，避免路徑穿透
         &lt;If "-f %{REQUEST_FILENAME}"&gt;
-            # Windows 下結尾務必帶斜線 /，並以 ProxyFCGISetEnvIf 剝除 proxy:fcgi:// 前綴供 php-cgi.exe 讀取
+            # Windows 下結尾務必帶斜線 /，並以 ProxyFCGISetEnvIf 剝除 proxy:fcgi:// 前綴供 php-cgi.exe 讀取實體路徑
             SetHandler "proxy:fcgi://127.0.0.1:8085/"
             ProxyFCGISetEnvIf "reqenv('SCRIPT_FILENAME') =~ m#^proxy:fcgi://127\.0\.0\.1:8085/(.*)$#" SCRIPT_FILENAME "$1"
         &lt;/If&gt;
     &lt;/FilesMatch&gt;
 &lt;/Directory&gt;
 
+# 關鍵防護：禁止外網直接存取內部核心目錄 (原始碼 include、單元測試 tests、套件庫 vendor)
+&lt;Directory "C:/AppServ/LAH-API/include"&gt;
+    Require all denied
+&lt;/Directory&gt;
+
+&lt;Directory "C:/AppServ/LAH-API/tests"&gt;
+    Require all denied
+&lt;/Directory&gt;
+
+&lt;Directory "C:/AppServ/LAH-API/vendor"&gt;
+    Require all denied
+&lt;/Directory&gt;
+
+# 建立 FastCGI 連線池，最大 16 併發，逾時 300 秒（避免跨所大筆地籍查詢 Timeout）
 &lt;Proxy "fcgi://127.0.0.1:8085/" enablereuse=on max=16&gt;
     ProxySet timeout=300
 &lt;/Proxy&gt;</code></pre>
+
+<div class="callout-warn">
+  <strong>⚠️ 重要指令解析與設定原則：</strong>
+  <ul>
+    <li><code>Options -Indexes +FollowSymLinks</code>：移除 <code>Indexes</code>，當存取目錄（如 <code>http://127.0.0.1/LAH-API/</code>）時，伺服器不再生成目錄清單，直接返回 <code>403 Forbidden</code>。</li>
+    <li><code>&lt;FilesMatch&gt;</code> 機敏檔案阻擋：阻擋 <code>composer.json</code>、<code>composer.lock</code>、<code>phpunit.xml</code>、<code>ecosystem.config.js</code>、<code>*.bat</code>、<code>*.md</code> 等檔案被直接存取或下載。</li>
+    <li><code>&lt;Directory ...&gt; Require all denied</code>：Apache 規則中 <code>&lt;Directory&gt;</code> <strong>不可巢狀置於另一個 <code>&lt;Directory&gt;</code> 內</strong>，必須各自獨立宣告，將 <code>include/</code>（類別庫）、<code>tests/</code>（單元測試）、<code>vendor/</code>（Composer 相依）對外網路完全封閉。</li>
+    <li><code>ProxyFCGISetEnvIf ... SCRIPT_FILENAME "$1"</code>：Windows 環境下 <code>mod_proxy_fcgi</code> 預設會將 SCRIPT_FILENAME 帶上 <code>proxy:fcgi://127.0.0.1:8085/</code> 前綴，導致 Windows 上的 <code>php-cgi.exe</code> 無法正確辨識磁區實體路徑（回傳 404 Primary script unknown），此指令能將前綴剝除，精確還原實體路徑。</li>
+  </ul>
+</div>
+
+<h3>6.4 雙層縱深防禦：應用層守門員腳本 (index.php Guards)</h3>
+<p>除 Web 伺服器層配置外，於 <code>API/index.php</code>、<code>API/v1/index.php</code>、<code>API/include/index.php</code> 與 <code>API/tests/index.php</code> 皆配置有守門員腳本。當訪客直接存取資料夾路徑時，由 PHP 8.5 FastCGI 即時攔截並返回標準 JSON 阻擋訊息，兼具即時生效與多層防禦優點：</p>
+<pre><code>&lt;?php
+http_response_code(403);
+header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-cache, no-store, must-revalidate');
+
+echo json_encode([
+    'status' => 403,
+    'message' => 'Forbidden: Directory listing is disabled.'
+], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+exit;</code></pre>
+
+<h3>6.5 設定檢查與服務重啟流程</h3>
+<ol>
+  <li><strong>語法測試（必做）</strong>：
+    <pre><code>C:\AppServ\Apache24\bin\httpd.exe -t</code></pre>
+    確認輸出為 <code>Syntax OK</code> 方可重啟，避免 Apache 因語法錯誤停止服務。
+  </li>
+  <li><strong>重啟 Apache 服務</strong>：
+    <ul>
+      <li>以<strong>系統管理員身分 (Run as Administrator)</strong> 開啟命令提示字元執行：
+        <pre><code>net stop Apache2.4 &amp;&amp; net start Apache2.4</code></pre>
+      </li>
+      <li>或執行：
+        <pre><code>C:\AppServ\Apache24\bin\httpd.exe -k restart</code></pre>
+      </li>
+    </ul>
+  </li>
+  <li><strong>端點防護測試</strong>：
+    <pre><code># 1. 驗證目錄瀏覽已成功阻擋 (應回傳 HTTP 403)
+curl -i http://127.0.0.1/LAH-API/
+curl -i http://127.0.0.1/LAH-API/v1/
+
+# 2. 驗證 API 服務正常運作 (應回傳正常 JSON)
+curl -s -d "type=test" http://127.0.0.1/LAH-API/v1/system_json_api.php
+curl -s http://127.0.0.1/LAH-API/ver.php</code></pre>
+  </li>
+</ol>
 
 <h2>第七章：開發筆電（<code>c:\Temp\DEV\LAH-Workspace</code>）實驗步驟</h2>
 <ol>

@@ -452,6 +452,11 @@ Alias /lah-api "C:/AppServ/LAH-API"
     AllowOverride None
     Require all granted
 
+    <span class="token-comment"># 安全防護：禁止直接存取機敏副檔名檔案 (設定檔、相依套件檔、測試腳本、文件等)</span>
+    &lt;FilesMatch "^\.|\.(json|lock|xml|bat|ps1|md|ini|config|yml|yaml)$"&gt;
+        Require all denied
+    &lt;/FilesMatch&gt;
+
     &lt;FilesMatch "\.php$"&gt;
         <span class="token-comment"># 安全防護：確認檔案存在才轉發，並剝除 Proxy 前綴以利 Windows 解析</span>
         &lt;If "-f %{REQUEST_FILENAME}"&gt;
@@ -459,6 +464,19 @@ Alias /lah-api "C:/AppServ/LAH-API"
             ProxyFCGISetEnvIf "reqenv('SCRIPT_FILENAME') =~ m#^proxy:fcgi://127\.0\.0\.1:8085/(.*)$#" SCRIPT_FILENAME "$1"
         &lt;/If&gt;
     &lt;/FilesMatch&gt;
+&lt;/Directory&gt;
+
+<span class="token-comment"># 安全防護：禁止外網直接存取內部核心目錄 (原始碼 include、單元測試 tests、套件庫 vendor)</span>
+&lt;Directory "C:/AppServ/LAH-API/include"&gt;
+    Require all denied
+&lt;/Directory&gt;
+
+&lt;Directory "C:/AppServ/LAH-API/tests"&gt;
+    Require all denied
+&lt;/Directory&gt;
+
+&lt;Directory "C:/AppServ/LAH-API/vendor"&gt;
+    Require all denied
 &lt;/Directory&gt;
 
 <span class="token-comment"># 設定 FastCGI 連線池 (16 併發、300 秒逾時)</span>
