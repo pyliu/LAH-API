@@ -5,7 +5,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR.'System.class.php');
 class SQLiteAPConnectionHistory {
     public static function removeDBFiles() {
         Logger::getInstance()->info(__METHOD__.": 清除 AP Connection History DB 檔案 ... ");
-        $dir = DB_DIR . DIRECTORY_SEPARATOR;
+        $dir = (class_exists("SQLiteDBFactory") ? SQLiteDBFactory::getDbFolder() : DB_DIR) . DIRECTORY_SEPARATOR;
         $pattern = 'stats_ap_conn_AP*';
         $files = glob($dir . $pattern);
         foreach ($files as $file) {

@@ -4,13 +4,13 @@ require_once("DynamicSQLite.class.php");
 require_once("System.class.php");
 
 class Checklist {
-    private const CHECKLIST_SQLITE_DB = DB_DIR.DIRECTORY_SEPARATOR."checklist.db";
+    private function getDbPath() { return (class_exists("SQLiteDBFactory") ? SQLiteDBFactory::getDbFolder() : DB_DIR).DIRECTORY_SEPARATOR."checklist.db"; }
 
     private $db = null;
 
     private function getDB() {
         if ($this->db === null) {
-            $dsl = new DynamicSQLite(self::CHECKLIST_SQLITE_DB);
+            $dsl = new DynamicSQLite($this->getDbPath());
             $dsl->initDB();
             $dsl->createTableBySQL('
                 CREATE TABLE IF NOT EXISTS "daily" (
@@ -29,7 +29,7 @@ class Checklist {
                     PRIMARY KEY("id" AUTOINCREMENT)
                 )
             ');
-            $this->db = new SQLite3(self::CHECKLIST_SQLITE_DB);
+            $this->db = new SQLite3($this->getDbPath());
             $this->db->busyTimeout(5000);
             $this->db->exec("PRAGMA journal_mode = WAL");
         }

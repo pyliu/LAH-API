@@ -179,6 +179,10 @@ class SQLSRV_DataBase {
 	 * @return bool
 	 */
 	public function db_connect() {
+		if (!function_exists('sqlsrv_connect')) {
+			$this->is_connected = false;
+			return false;
+		}
 		$serverName = "tcp:" . $this->dbhost . ", " . $this->dbport;
 		$connectionOptions = array(
 			"Database" => $this->dbname,

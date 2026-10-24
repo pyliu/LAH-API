@@ -9,8 +9,44 @@ putenv("MOCK=true");
 $_ENV['MOCK'] = 'true';
 $_SERVER['MOCK'] = 'true';
 
-// Isolated test SQLite database
-define('DIMENSION_SQLITE_DB', sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'lah_test_dimension.db');
+// Isolated test SQLite database directory
+$test_sqlite_dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'lah_test_db';
+if (!is_dir($test_sqlite_dir)) {
+    @mkdir($test_sqlite_dir, 0777, true);
+}
+define('DIMENSION_SQLITE_DB', $test_sqlite_dir . DIRECTORY_SEPARATOR . 'lah_test_dimension.db');
+define('TEMPERATURE_SQLITE_DB', $test_sqlite_dir . DIRECTORY_SEPARATOR . 'Temperature.db');
+
+// IMAP extension fallback constants for PHP 8.5
+$imap_constants = [
+    'OP_DEBUG' => 1,
+    'OP_READONLY' => 2,
+    'OP_ANONYMOUS' => 4,
+    'OP_SHORTCACHE' => 8,
+    'OP_SILENT' => 16,
+    'OP_PROTOTYPE' => 32,
+    'OP_HALFOPEN' => 64,
+    'OP_SECURE' => 256,
+    'CL_EXPUNGE' => 32768,
+    'CP_UID' => 1,
+    'CP_MOVE' => 2,
+    'SE_UID' => 1,
+    'SE_FREE' => 2,
+    'SE_NOPREFETCH' => 4,
+    'SO_FREE' => 8,
+    'SO_NOSERVER' => 16,
+    'SA_MESSAGES' => 1,
+    'SA_RECENT' => 2,
+    'SA_UNSEEN' => 4,
+    'SA_UIDNEXT' => 8,
+    'SA_UIDVALIDITY' => 16,
+    'SA_ALL' => 31,
+];
+foreach ($imap_constants as $name => $val) {
+    if (!defined($name)) {
+        define($name, $val);
+    }
+}
 
 $api_dir = dirname(__DIR__);
 $inc_dir = $api_dir . DIRECTORY_SEPARATOR . 'include';
@@ -33,6 +69,8 @@ if (file_exists($vendor_autoload)) {
 // Core constants and functions
 require_once $inc_dir . DIRECTORY_SEPARATOR . 'GlobalConstants.inc.php';
 require_once $inc_dir . DIRECTORY_SEPARATOR . 'GlobalFunctions.inc.php';
+require_once $inc_dir . DIRECTORY_SEPARATOR . 'SQLiteDBFactory.class.php';
+SQLiteDBFactory::setDbFolder($test_sqlite_dir);
 
 // Class autoloader for include/ and include/api/
 spl_autoload_register(function (string $class_name) use ($inc_dir, $api_cmd_dir, $legacy_inc) {

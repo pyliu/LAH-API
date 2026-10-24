@@ -50,6 +50,24 @@ class SQLiteOFFICES {
     }
 
     public function importFromOraDB() {
+        if (System::getInstance()->isMockMode()) {
+            $mock_offices = [
+                ['IID' => 'HA', 'INAME' => '桃園地政事務所', 'IP' => '220.1.34.1', 'WEB_IP' => '220.1.34.161'],
+                ['IID' => 'HB', 'INAME' => '中壢地政事務所', 'IP' => '220.1.35.1', 'WEB_IP' => '220.1.35.161'],
+                ['IID' => 'HC', 'INAME' => '大溪地政事務所', 'IP' => '220.1.36.1', 'WEB_IP' => '220.1.36.161'],
+                ['IID' => 'HD', 'INAME' => '楊梅地政事務所', 'IP' => '220.1.37.1', 'WEB_IP' => '220.1.37.161'],
+                ['IID' => 'HE', 'INAME' => '蘆竹地政事務所', 'IP' => '220.1.38.1', 'WEB_IP' => '220.1.38.161'],
+                ['IID' => 'HF', 'INAME' => '八德地政事務所', 'IP' => '220.1.39.1', 'WEB_IP' => '220.1.39.161'],
+                ['IID' => 'HG', 'INAME' => '平鎮地政事務所', 'IP' => '220.1.40.1', 'WEB_IP' => '220.1.40.161'],
+                ['IID' => 'HH', 'INAME' => '龜山地政事務所', 'IP' => '220.1.41.1', 'WEB_IP' => '220.1.41.161']
+            ];
+            $this->clean();
+            foreach ($mock_offices as $row) {
+                $this->replace($row);
+            }
+            return true;
+        }
+
         // check if l3hweb is reachable
         $main_db_ip = System::getInstance()->get('ORA_DB_HXWEB_IP');
         $main_db_port = System::getInstance()->get('ORA_DB_HXWEB_PORT');

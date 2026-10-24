@@ -5,6 +5,14 @@ require_once('DynamicSQLite.class.php');
 class SQLiteDBFactory {
     private static $db_folder = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db";
 
+    public static function setDbFolder(string $folder): void {
+        self::$db_folder = $folder;
+    }
+
+    public static function getDbFolder(): string {
+        return self::$db_folder;
+    }
+
     public static function getPrefetchDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."prefetch.db";
         $sqlite = new DynamicSQLite($path);
@@ -309,7 +317,7 @@ class SQLiteDBFactory {
     }
 
     public static function getRegUntakenStoreDB() {
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'reg_untaken_store.db';
+        $db_path = self::$db_folder.DIRECTORY_SEPARATOR.'reg_untaken_store.db';
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -328,7 +336,7 @@ class SQLiteDBFactory {
     }
 
     public static function getValRealpriceMemoStoreDB() {
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'val_realprice_memo_store.db';
+        $db_path = self::$db_folder.DIRECTORY_SEPARATOR.'val_realprice_memo_store.db';
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -345,7 +353,7 @@ class SQLiteDBFactory {
     }
 
     public static function getRegAuthChecksStoreDB() {
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'reg_auth_checks_store.db';
+        $db_path = self::$db_folder.DIRECTORY_SEPARATOR.'reg_auth_checks_store.db';
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -360,7 +368,7 @@ class SQLiteDBFactory {
     }
 
     public static function getRegFixCaseStoreDB() {
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'reg_fix_case_store.db';
+        $db_path = self::$db_folder.DIRECTORY_SEPARATOR.'reg_fix_case_store.db';
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -439,7 +447,7 @@ class SQLiteDBFactory {
     }
 
     public static function getAPConnStatsDB($ip_end) {
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.$ip_end.'.db';
+        $db_path = self::$db_folder.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.$ip_end.'.db';
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -456,7 +464,7 @@ class SQLiteDBFactory {
     }
     
     public static function getConnectivityDB() {
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR."connectivity.db";
+        $db_path = self::$db_folder.DIRECTORY_SEPARATOR."connectivity.db";
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -486,7 +494,7 @@ class SQLiteDBFactory {
         if (stripos($ip, '.') !== false) {
             $postfix = explode('.', $ip)[3];
         }
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR."stats_ap_conn_AP".$postfix.".db";
+        $db_path = self::$db_folder.DIRECTORY_SEPARATOR."stats_ap_conn_AP".$postfix.".db";
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -503,7 +511,7 @@ class SQLiteDBFactory {
     }
 
     public static function getAdminActionLogDB() {
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR."admin_action_log.db";
+        $db_path = self::$db_folder.DIRECTORY_SEPARATOR."admin_action_log.db";
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -521,7 +529,7 @@ class SQLiteDBFactory {
     }
 
     public static function getNotificationLogDB() {
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR."notification_log.db";
+        $db_path = self::$db_folder.DIRECTORY_SEPARATOR."notification_log.db";
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -543,7 +551,7 @@ class SQLiteDBFactory {
     }
 
     public static function getSMSLogDB() {
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR."sms_moicas_ma05_log.db";
+        $db_path = self::$db_folder.DIRECTORY_SEPARATOR."sms_moicas_ma05_log.db";
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
