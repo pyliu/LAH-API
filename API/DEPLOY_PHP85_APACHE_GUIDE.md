@@ -274,7 +274,7 @@ module.exports = {
       watch: false,
       max_memory_restart: "1G",
       env: {
-        PATH: "C:\\Tools\\instantclient_11_2;C:\\AppServ\\php85;" + process.env.PATH,
+        PATH: "C:\\AppServ\\instantclient_11_2;C:\\Tools\\instantclient_11_2;C:\\AppServ\\php85;" + process.env.PATH,
         NLS_LANG: "American_America.US7ASCII",
         // 核心併發參數：底層衍生 16 個子進程共享 Port 8085
         PHP_FCGI_CHILDREN: "16",
