@@ -163,7 +163,7 @@ LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so
 #LoadModule remoteip_module modules/mod_remoteip.so
 #LoadModule request_module modules/mod_request.so
 #LoadModule reqtimeout_module modules/mod_reqtimeout.so
-#LoadModule rewrite_module modules/mod_rewrite.so
+LoadModule rewrite_module modules/mod_rewrite.so
 #LoadModule sed_module modules/mod_sed.so
 #LoadModule session_module modules/mod_session.so
 #LoadModule session_cookie_module modules/mod_session_cookie.so
@@ -372,7 +372,7 @@ LogLevel warn
     # client.  The same rules about trailing "/" apply to ScriptAlias
     # directives as to Alias.
     #
-    ScriptAlias /cgi-bin/ "${SRVROOT}/cgi-bin/"
+    # [PHP2Shell 資安防護停用] ScriptAlias /cgi-bin/ "${SRVROOT}/cgi-bin/"
 
 </IfModule>
 
@@ -551,6 +551,7 @@ LoadFile "C:/AppServ/php7/libssh2.dll"
 LoadFile "C:/AppServ/php7/nghttp2.dll"
 LoadFile "C:/AppServ/php7/libsqlite3.dll"
 LoadFile "C:/AppServ/php7/libsodium.dll"
+LoadFile "C:/AppServ/php7/libsasl.dll"
 LoadModule php7_module "C:/AppServ/php7/php7apache2_4.dll"
 PHPIniDir "C:/AppServ/php7"
 <FilesMatch \.php$>
@@ -603,3 +604,29 @@ Alias /lah-api "C:/AppServ/LAH-API"
 <Proxy "fcgi://127.0.0.1:8085/" enablereuse=on max=16>
     ProxySet timeout=300
 </Proxy>
+
+# 資安弱點防護：隱藏 Apache 版本與錯誤頁面簽名
+ServerTokens Prod
+ServerSignature Off
+
+# =====================================================================
+# PHP2Shell (CVE-2024-4577 PHP-CGI Argument Injection & WebShell) Mitigation
+# =====================================================================
+<IfModule rewrite_module>
+    RewriteEngine On
+    RewriteCond %{QUERY_STRING} (?:^|&)%ad [NC,OR]
+    RewriteCond %{THE_REQUEST} \s/+(?:cgi-bin|php-cgi)/ [NC]
+    RewriteRule ^ - [F,L]
+</IfModule>
+
+<Directory "C:/AppServ/www/assets">
+    <FilesMatch "\.(php|php5|php7|php8|phtml|phar|cgi|pl|asp|aspx|jsp)$">
+        Require all denied
+    </FilesMatch>
+</Directory>
+
+<Directory "C:/AppServ/www/export">
+    <FilesMatch "\.(php|php5|php7|php8|phtml|phar|cgi|pl|asp|aspx|jsp)$">
+        Require all denied
+    </FilesMatch>
+</Directory>
