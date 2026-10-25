@@ -59,11 +59,18 @@ flowchart TD
 
 Agent 在進行開發、修復或移植工作時，必須嚴格遵守以下系統邊界：
 
-### 2.1 單向移植隔離（One-way Migration Boundary）
-- **進行 `API/` 任務時**：
-  - 只能從 `www/`「單向讀取」原始碼，並複製到 `API/` 進行 PHP 8.5 相容性修正。
+### 2.1 單向移植隔離與雙向業務同步（Migration & API Synchronization Rule）
+- **純 `API/` 專案移植任務時**：
+  - 僅從 `www/`「單向讀取」原始碼，並複製到 `API/` 進行 PHP 8.5 相容性修正。
   - **嚴格禁止修改 `www/` 內的任何檔案**，確保線上現有 PHP 7.3/7.4 服務 100% 零風險、零變更。
-- **進行 `www/` 任務時**：
+- **全域業務功能新增或 API 修改任務時（雙軌同步鐵律）**：
+  - **凡修改 `www/api/*.php` 或 `www/include/*.class.php`（例如新增 API 端點動作、擴充 Request/Response 結構、修改業務邏輯或修復缺陷）時，必須同步更新 `API/`（`lah-api-v85` 現代化移植軌道）之相對應檔案**：
+    - 例如 `www/api/user_json_api.php` ↔ `API/v1/user_json_api.php`
+    - 例如 `www/api/auth_json_api.php` ↔ `API/v1/auth_json_api.php`
+    - 例如 `www/include/ADService.class.php` ↔ `API/include/ADService.class.php`
+  - **失敗模式（Failure Mode）警告**：若僅修改 `www/` 而遺漏 `API/`，會導致 `lah-api-v85`（PM2 FastCGI 服務，監聽 Port 8085，提供 `/LAH-API/v1/*`）回傳過期舊結構或缺少 API 動作路由，造成前端切換新軌道時呼叫失敗。
+  - **語法適配注意**：同步至 `API/` 時，必須確認程式碼相容於 PHP 8.5（例如注意 `bindParam` 傳址、避免使用 PHP 8.5 棄用語法），並執行 `php -l` 驗證。
+- **進行 `www/` 傳統維護時**：
   - 專注於修復既有問題，嚴格遵守 PHP 7.3 語法限制，不得引入 PHP 7.4+ / 8.x 新語法。
 
 ### 2.2 共用資源單一真實來源（Single Source of Truth）
@@ -97,6 +104,7 @@ Agent 在進行開發、修復或移植工作時，必須嚴格遵守以下系�
 
 開始任何程式碼修改前：
 - [ ] 確認目前修改目標路徑屬於 `www/` 還是 `API/`。
-- [ ] 若為 `API/` 任務，確認不會修改到 `www/` 的任何既有檔案。
+- [ ] 若修改了 `www/api/*.php` 或 `www/include/*.class.php`，確認是否已同步更新 `API/v1/*.php` 與 `API/include/*.class.php`（`lah-api-v85`）。
+- [ ] 若為純 `API/` 移植任務，確認不會修改到 `www/` 的任何既有檔案。
 - [ ] 確認 `www/.env` 中 `MOCK=true` 依然維持開啟。
 - [ ] 遵循台灣繁體中文撰寫技術報告與 Conventional Commits。

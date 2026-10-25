@@ -39,6 +39,7 @@ switch ($_POST["type"]) {
 				'mssql' => $system->isMSSQLEnable(),
 				'avatar' => $system->isAvatarEnable(),
 				'officehours' => $system->isOfficeHoursEnable(),
+				'ad_available' => AdService::isAvailable()['available'],
 				'authority' => $system->getAuthority($_POST['req_ip']),
 				'master_password' => $system->get('MASTER_PASSWORD'),
 				'site' => strtoupper($system->get('SITE')),

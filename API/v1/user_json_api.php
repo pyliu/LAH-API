@@ -394,7 +394,8 @@ switch ($_POST["type"]) {
             echoJSONResponse("查無 ".$query_ip." 資料/授權。", STATUS_CODE::FAIL_NOT_FOUND, array(
 				"data_count" => 0,
 				"info" => false,
-				"authority" => System::getInstance()->calcEffectiveAuthority(0, $query_ip)
+				"authority" => System::getInstance()->calcEffectiveAuthority(0, $query_ip),
+				"ad_available" => AdService::isAvailable()['available']
 			));
 		} else {
 			$_SESSION["myinfo"] = $results[0];
@@ -402,7 +403,8 @@ switch ($_POST["type"]) {
             echoJSONResponse("查詢 ".$query_ip." 成功。 (".$results[0]["id"].":".$results[0]["name"].")", STATUS_CODE::SUCCESS_NORMAL, array(
 				"data_count" => count($results),
 				"info" => $results[0],
-				"authority" => System::getInstance()->calcEffectiveAuthority($_SESSION["myinfo"]['authority'], $query_ip, $_SESSION["myinfo"]['unit'] ?? '')
+				"authority" => System::getInstance()->calcEffectiveAuthority($_SESSION["myinfo"]['authority'], $query_ip, $_SESSION["myinfo"]['unit'] ?? ''),
+				"ad_available" => AdService::isAvailable()['available']
 			));
 		}
         break;
@@ -514,6 +516,15 @@ switch ($_POST["type"]) {
             Logger::getInstance()->error("XHR [ad_update_config] 更新AD設定失敗。");
             echoJSONResponse("更新AD設定失敗。");
         }
+        break;
+    case "ad_status":
+        $force = !empty($_POST["refresh"]) && ($_POST["refresh"] === 'true' || $_POST["refresh"] === true);
+        Logger::getInstance()->info("XHR [ad_status] 取得 AD 伺服器狀態請求" . ($force ? " (強制重整)" : ""));
+        $status = AdService::isAvailable($force);
+        echoJSONResponse($status['message'], STATUS_CODE::SUCCESS_NORMAL, array(
+            "ad_available" => $status['available'],
+            "raw" => $status
+        ));
         break;
     case "ad_test_connection":
         Logger::getInstance()->info("XHR [ad_test_connection] 測試AD連線請求");

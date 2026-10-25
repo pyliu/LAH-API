@@ -150,6 +150,139 @@ class AdService
     }
 
     /**
+     * 靜態檢查 AD 服務是否可用 (包含設定檔驗證、TCP 快速探針與快取)
+     * @param bool $forceRefresh 是否強制略過快取重新探測
+     * @return array [
+     *     'available' => bool,
+     *     'configured' => bool,
+     *     'reachable' => bool,
+     *     'host' => string,
+     *     'port' => int,
+     *     'message' => string,
+     *     'checked_at' => string
+     * ]
+     */
+    public static function isAvailable($forceRefresh = false)
+    {
+        $logger = Logger::getInstance();
+
+        if (!extension_loaded('ldap')) {
+            return [
+                'available' => false,
+                'configured' => false,
+                'reachable' => false,
+                'host' => '',
+                'port' => 389,
+                'message' => 'PHP LDAP 擴充套件未啟用',
+                'checked_at' => date('Y-m-d H:i:s')
+            ];
+        }
+
+        // 檢查快取
+        if (!$forceRefresh && class_exists('Cache')) {
+            $cached = Cache::getInstance()->get('ad_availability_status');
+            if (is_array($cached) && !empty($cached['checked_at'])) {
+                return $cached;
+            }
+        }
+
+        $configPath = __DIR__ . '/config/AD.php';
+        if (!file_exists($configPath)) {
+            $configPath = __DIR__ . '/../../config/AD.php';
+        }
+
+        if (!file_exists($configPath)) {
+            $status = [
+                'available' => false,
+                'configured' => false,
+                'reachable' => false,
+                'host' => '',
+                'port' => 389,
+                'message' => 'AD 設定檔 (config/AD.php) 不存在',
+                'checked_at' => date('Y-m-d H:i:s')
+            ];
+            if (class_exists('Cache')) {
+                Cache::getInstance()->set('ad_availability_status', $status, 300);
+            }
+            return $status;
+        }
+
+        $config = @include $configPath;
+        if (!is_array($config) || empty($config['AD_HOST'])) {
+            $status = [
+                'available' => false,
+                'configured' => false,
+                'reachable' => false,
+                'host' => '',
+                'port' => 389,
+                'message' => 'AD 設定檔內容格式無效或未設定主機',
+                'checked_at' => date('Y-m-d H:i:s')
+            ];
+            if (class_exists('Cache')) {
+                Cache::getInstance()->set('ad_availability_status', $status, 300);
+            }
+            return $status;
+        }
+
+        $host = trim($config['AD_HOST']);
+        $port = isset($config['AD_PORT']) ? (int)$config['AD_PORT'] : 389;
+
+        // 檢查是否為預設範例值
+        if (stripos($host, 'XXX.XXX') !== false || stripos($host, 'example.com') !== false || $host === '') {
+            $status = [
+                'available' => false,
+                'configured' => false,
+                'reachable' => false,
+                'host' => $host,
+                'port' => $port,
+                'message' => 'AD 尚未配置主機 IP (使用範例設定檔)',
+                'checked_at' => date('Y-m-d H:i:s')
+            ];
+            if (class_exists('Cache')) {
+                Cache::getInstance()->set('ad_availability_status', $status, 300);
+            }
+            return $status;
+        }
+
+        // 移除協定前綴進行 Socket 探針
+        $probeHost = preg_replace('#^ldaps?://#i', '', $host);
+
+        // TCP 快速 Socket 探針 (1.2 秒逾時)
+        $errno = 0;
+        $errstr = '';
+        $fp = @fsockopen($probeHost, $port, $errno, $errstr, 1.2);
+        if ($fp) {
+            @fclose($fp);
+            $status = [
+                'available' => true,
+                'configured' => true,
+                'reachable' => true,
+                'host' => $host,
+                'port' => $port,
+                'message' => 'AD 主機連線正常',
+                'checked_at' => date('Y-m-d H:i:s')
+            ];
+            $logger->info("[AdService] isAvailable: AD 主機 ($probeHost:$port) 探測連線成功");
+        } else {
+            $status = [
+                'available' => false,
+                'configured' => true,
+                'reachable' => false,
+                'host' => $host,
+                'port' => $port,
+                'message' => "無法連線至 AD 主機 ($probeHost:$port)" . ($errstr ? ": $errstr" : ""),
+                'checked_at' => date('Y-m-d H:i:s')
+            ];
+            $logger->warning("[AdService] isAvailable: AD 主機 ($probeHost:$port) 探測連線失敗: $errstr");
+        }
+
+        if (class_exists('Cache')) {
+            Cache::getInstance()->set('ad_availability_status', $status, 300);
+        }
+        return $status;
+    }
+
+    /**
      * [Feature 10] 測試 AD 連線狀態
      * 嘗試使用當前設定或傳入的設定進行一次 Bind 操作
      * @param array $testConfig (Optional) 若提供，則使用此設定進行測試，格式需與 AD.php 相同
@@ -262,6 +395,9 @@ class AdService
             }
 
             $this->logger->info("[AdService] 設定檔已更新: {$this->configPath}");
+            if (class_exists('Cache')) {
+                Cache::getInstance()->del('ad_availability_status');
+            }
 
             // 4. 重新載入設定到當前實例 (這會驗證必要欄位是否遺失或是否與範例檔相同)
             $this->validateAndLoadConfig($finalConfig);
