@@ -72,6 +72,18 @@ require_once $inc_dir . DIRECTORY_SEPARATOR . 'GlobalFunctions.inc.php';
 require_once $inc_dir . DIRECTORY_SEPARATOR . 'SQLiteDBFactory.class.php';
 SQLiteDBFactory::setDbFolder($test_sqlite_dir);
 
+// Class autoloader for Tests\ namespace
+spl_autoload_register(function (string $class_name) {
+    if (str_starts_with($class_name, 'Tests\\')) {
+        $rel = str_replace('\\', DIRECTORY_SEPARATOR, substr($class_name, 6));
+        $file = __DIR__ . DIRECTORY_SEPARATOR . $rel . '.php';
+        if (file_exists($file)) {
+            require_once $file;
+            return;
+        }
+    }
+});
+
 // Class autoloader for include/ and include/api/
 spl_autoload_register(function (string $class_name) use ($inc_dir, $api_cmd_dir, $legacy_inc) {
     $paths = [

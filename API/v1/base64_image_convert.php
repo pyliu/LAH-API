@@ -20,9 +20,9 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
         $h = $_POST['height'] ?? 1080;
         $q = $_POST['quality'] ?? 80;
 
-        $resized = resizeImage($tmp_file, $w, $h, $extension);
+        $resized = resizeImage($tmp_file, (int)$w, (int)$h, $extension);
 
-        switch ($type) {
+        switch (strtolower($extension)) {
             case 'png':
             case 'PNG':
                 $result = @imagepng($resized, $to_file);
@@ -52,6 +52,6 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
 echo json_encode(array(
     'status' => $status,
     'message'  => $message,
-    'uri' => $converted['uri'],
-    'encoded' => $converted['encoded']
+    'uri' => $converted['uri'] ?? null,
+    'encoded' => $converted['encoded'] ?? null
 ));

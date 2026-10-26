@@ -4,7 +4,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteAdmReserveFilePDF.class.php");
 
 $reservePDF = new SQLiteAdmReserveFilePDF();
 
-switch ($_POST["type"]) {
+switch ($_POST["type"] ?? '') {
     case "get_reserve_pdf_latest_number":
         Logger::getInstance()->info("XHR [get_reserve_pdf_latest_number] get reserve pdf latest number request.");
         $latest_number = $reservePDF->getLatestNumber();
@@ -16,7 +16,7 @@ switch ($_POST["type"]) {
     case "reserve_pdf_list":
         Logger::getInstance()->info("XHR [reserve_pdf_list] get reserve pdf list request.");
         $count = 0;
-        $result = $reservePDF->search($_POST['start_ts'], $_POST['end_ts'], $_POST['keyword']);
+        $result = $reservePDF->search($_POST['start_ts'] ?? 0, $_POST['end_ts'] ?? time(), $_POST['keyword'] ?? '');
 		$count = count($result);
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "取得 $count 筆檔案應用預約資料" : "無法取得檔案預約資料";
@@ -132,7 +132,7 @@ switch ($_POST["type"]) {
         break;
     case "remove_reserve_pdf":
         Logger::getInstance()->info("XHR [remove_reserve_pdf] remove reserve pdf request.");
-        $id = $_POST['id'];
+        $id = $_POST['id'] ?? 0;
         $result = $reservePDF->removeReservePDF($id);
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已刪除檔案預約PDF資料 ($id)" : "無法刪除檔案預約PDF資料 ($id)";
@@ -140,7 +140,8 @@ switch ($_POST["type"]) {
         echoJSONResponse($message, $response_code);
         break;
     default:
-        Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
-        echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
+        $req_type = $_POST["type"] ?? '';
+        Logger::getInstance()->error("不支援的查詢型態【".$req_type."】");
+        echoJSONResponse("不支援的查詢型態【".$req_type."】", STATUS_CODE::UNSUPPORT_FAIL);
         break;
 }

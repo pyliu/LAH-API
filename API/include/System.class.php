@@ -493,7 +493,7 @@ class System {
     public function getAuthority($ip) {
         $sqlite_user = new SQLiteUser();
 		$queried_user = $sqlite_user->getUserByIP($ip);
-		$found_count = count($queried_user);
+		$found_count = is_array($queried_user) ? count($queried_user) : 0;
 		if (empty($found_count)) {
             return $this->calcEffectiveAuthority(0, $ip);
         } else {
