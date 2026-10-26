@@ -22,9 +22,11 @@ abstract class BaseIntegrationTestCase extends TestCase {
     }
 
     /**
-     * 發送 HTTP POST 請求並回傳解析後之 JSON 陣列
+     * 發送 HTTP POST 請求並回傳原始回應字串與標頭資訊
+     *
+     * @return array{body: string, http_code: int, content_type: string}
      */
-    protected function post(string $endpoint, array $data = [], array $files = [], array $headers = []): array {
+    protected function postRaw(string $endpoint, array $data = [], array $files = [], array $headers = []): array {
         $url = $this->baseUrl . ltrim($endpoint, '/');
         $ch = curl_init();
 
@@ -54,6 +56,7 @@ abstract class BaseIntegrationTestCase extends TestCase {
 
         $rawResponse = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $contentType = (string)curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
         $this->lastHttpCode = $httpCode;
         $error = curl_error($ch);
         unset($ch);
@@ -64,9 +67,21 @@ abstract class BaseIntegrationTestCase extends TestCase {
         $this->assertStringNotContainsString('Fatal error', $rawResponse, "Endpoint {$endpoint} output contains Fatal error");
         $this->assertStringNotContainsString('Parse error', $rawResponse, "Endpoint {$endpoint} output contains Parse error");
 
-        $json = json_decode($rawResponse, true);
-        $this->assertIsArray($json, "Response from {$endpoint} is not valid JSON. Raw output: {$rawResponse}");
-        $this->assertArrayHasKey('status', $json, "Response missing 'status' field: {$rawResponse}");
+        return [
+            'body' => $rawResponse,
+            'http_code' => $httpCode,
+            'content_type' => $contentType
+        ];
+    }
+
+    /**
+     * 發送 HTTP POST 請求並回傳解析後之 JSON 陣列
+     */
+    protected function post(string $endpoint, array $data = [], array $files = [], array $headers = []): array {
+        $raw = $this->postRaw($endpoint, $data, $files, $headers);
+        $json = json_decode($raw['body'], true);
+        $this->assertIsArray($json, "Response from {$endpoint} is not valid JSON. Raw output: {$raw['body']}");
+        $this->assertArrayHasKey('status', $json, "Response missing 'status' field: {$raw['body']}");
 
         return $json;
     }

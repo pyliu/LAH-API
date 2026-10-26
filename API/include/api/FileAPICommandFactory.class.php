@@ -15,16 +15,20 @@ abstract class FileAPICommandFactory {
         switch ($type) {
             case "file_sql_csv":
                 Logger::getInstance()->info("輸出CSV檔案");
-                Logger::getInstance()->info($_POST["sql"]);
-                return new FileAPISQLCsvCommand($_POST["sql"]);
+                $sql = $_POST["sql"] ?? '';
+                Logger::getInstance()->info($sql);
+                return new FileAPISQLCsvCommand($sql);
             case "file_sql_txt":
                 Logger::getInstance()->info("輸出TXT檔案");
-                Logger::getInstance()->info($_POST["sql"]);
+                $sql = $_POST["sql"] ?? '';
+                Logger::getInstance()->info($sql);
                 $_SESSION['export_tmp_txt_filename'] = $_POST["filename"] ?? 'tmp';
-                return new FileAPISQLTxtCommand($_POST["sql"]);
+                return new FileAPISQLTxtCommand($sql);
             case "file_data_export":
-                Logger::getInstance()->info("輸出 ".$_POST["code"]." TXT 檔案");
-                return new FileAPIDataExportCommand($_POST["code"], $_POST['section']);
+                $code = $_POST["code"] ?? '';
+                Logger::getInstance()->info("輸出 ".$code." TXT 檔案");
+                $section = $_POST['section'] ?? '';
+                return new FileAPIDataExportCommand($code, $section);
             case "file_data_clean":
                 Logger::getInstance()->info("清理已匯出地籍資料檔案");
                 return new FileAPIDataCleanCommand();
@@ -33,8 +37,9 @@ abstract class FileAPICommandFactory {
                 return new FileAPIDataCleanCommand();
             case "file_log":
                 Logger::getInstance()->info("輸出LOG檔案");
-                Logger::getInstance()->info($_POST["date"]);
-                return new FileAPILogExportCommand($_POST["date"]);
+                $date = $_POST["date"] ?? '';
+                Logger::getInstance()->info($date);
+                return new FileAPILogExportCommand($date);
             case "file_xlsx":
                 Logger::getInstance()->info("輸出XLSX檔案");
                 return new FileAPIExcelExportCommand();

@@ -271,13 +271,14 @@ class FileAPIInheritanceRestrictionXlsxExportCommand extends FileAPICommand {
 
     public function execute() {
         // title
-        $title = $_POST['is17'] === 'true' ? '土地法第17條第1項規定管制清冊' : '土地法第17條第1項各款以外規定管制清冊';
+        $is17 = ($_POST['is17'] ?? '') === 'true';
+        $title = $is17 ? '土地法第17條第1項規定管制清冊' : '土地法第17條第1項各款以外規定管制清冊';
         Logger::getInstance()->info($title);
         // Logger::getInstance()->info(print_r($_POST, true));
         $params = array(
-            "rows" => $_POST['jsons'],
-            "site" => $_POST['site'],
-            "is17" => $_POST['is17'] === 'true'
+            "rows" => is_array($_POST['jsons'] ?? null) ? $_POST['jsons'] : (is_string($_POST['jsons'] ?? null) ? (json_decode($_POST['jsons'], true) ?: []) : []),
+            "site" => $_POST['site'] ?? 'HA',
+            "is17" => $is17
         );
         // execute command here
         $this->write_foreigner_restriction_xlsx($params, $title);
