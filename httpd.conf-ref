@@ -630,3 +630,20 @@ ServerSignature Off
         Require all denied
     </FilesMatch>
 </Directory>
+
+<Directory "C:/AppServ/www/import">
+    <FilesMatch "\.(php|php5|php7|php8|phtml|phar|cgi|pl|asp|aspx|jsp)$">
+        Require all denied
+    </FilesMatch>
+</Directory>
+
+<Directory "C:/AppServ/www/uploads">
+    <FilesMatch "\.(php|php5|php7|php8|phtml|phar|cgi|pl|asp|aspx|jsp)$">
+        Require all denied
+    </FilesMatch>
+</Directory>
+
+<Directory "C:/AppServ/www/log">
+    Require all denied
+</Directory>
+# === End PHP2Shell Mitigation ===
