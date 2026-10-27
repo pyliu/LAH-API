@@ -8,7 +8,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."Ping.class.php");
 $system = System::getInstance();
 $ipr = new IPResolver();
 
-switch ($_POST["type"]) {
+switch ($_POST["type"] ?? '') {
     case "add_user_ip_entry":
         $data = array(
             'ip' => $_POST['ip'],
@@ -151,7 +151,8 @@ switch ($_POST["type"]) {
         ), 0);
         break;
     default:
-        Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
-        echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
+        $unsupportedType = $_POST["type"] ?? '';
+        Logger::getInstance()->error("不支援的查詢型態【".$unsupportedType."】");
+        echoJSONResponse("不支援的查詢型態【".$unsupportedType."】", STATUS_CODE::UNSUPPORT_FAIL);
         break;
 }
