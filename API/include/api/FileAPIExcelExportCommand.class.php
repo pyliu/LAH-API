@@ -404,7 +404,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         global $log, $today;
 
         if ($this->mock_mode) Logger::getInstance()->warning("現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！【cert_log】");
-        $query_result = $this->mock_mode ? $this->cache->get('cert_log') : $this->query->getCertLog($_SESSION['section_code'], $_SESSION['numbers']);
+        $query_result = $this->mock_mode ? $this->cache->get('cert_log') : $this->query->getCertLog($_SESSION['section_code'] ?? $_REQUEST['section_code'] ?? '', $_SESSION['numbers'] ?? $_REQUEST['numbers'] ?? []);
         if (!$this->mock_mode) $this->cache->set('cert_log', $query_result);
 
         $spreadsheet = IOFactory::load(XLSX_TPL_DIR.DIRECTORY_SEPARATOR.'cert_log.tpl.xlsx');
@@ -412,7 +412,12 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         $worksheet = $spreadsheet->getActiveSheet();
 
         $this->write_col_data($worksheet, $query_result);
-        $filename = $today.'_'.$_SESSION['section_code'].'_'.implode('_', $_SESSION['numbers']).'.xlsx';
+        $section_code = $_SESSION['section_code'] ?? $_REQUEST['section_code'] ?? '';
+        $numbers = $_SESSION['numbers'] ?? $_REQUEST['numbers'] ?? [];
+        if (!is_array($numbers)) {
+            $numbers = !empty($numbers) ? explode(',', (string)$numbers) : [];
+        }
+        $filename = $today.'_'.$section_code.'_'.implode('_', $numbers).'.xlsx';
         $xlsx_item = array('text' => '謄本LOG檔');
         $this->write_meta_output($spreadsheet, $xlsx_item, "謄本LOG檔", $filename);
     }
