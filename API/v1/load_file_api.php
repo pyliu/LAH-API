@@ -9,17 +9,28 @@ function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 	), 0);
 }
 
-switch ($_POST["type"]) {
+if (!function_exists('removeLoadLog')) {
+    function removeLoadLog($item) {
+        if (empty($item)) {
+            return false;
+        }
+        return !stristr($item, "load_log");
+    }
+}
+
+$reqType = $_POST["type"] ?? '';
+
+switch ($reqType) {
     case "load_select_sql":
         $file_name = $_POST["file_name"] ?? '';
         Logger::getInstance()->info("XHR [load_select_sql] 查詢請求【".$file_name."】");
         $path = ROOT_DIR."/assets/files/".$file_name;
-        if (file_exists($path)) {
+        if (!empty($file_name) && file_exists($path)) {
             $content = file_get_contents($path);
             $result = array(
                 "status" => STATUS_CODE::SUCCESS_NORMAL,
                 "data" => $content,
-                "query_string" => "file_name=".$_POST["file_name"]."&type=".$_POST["type"]
+                "query_string" => "file_name=".$file_name."&type=".$reqType
             );
             Logger::getInstance()->info("XHR [load_select_sql] 讀取成功【".$path."】");
             echo json_encode($result, 0);
@@ -29,25 +40,19 @@ switch ($_POST["type"]) {
         }
         break;
     case "load_log":
-        //Logger::getInstance()->info("XHR [load_log] 查詢請求【".$_POST["log_filename"]."】");
-        $path = LOG_DIR.DIRECTORY_SEPARATOR.$_POST["log_filename"];
-        if (file_exists($path)) {
-            function removeLoadLog($item) {
-                if (empty($item)) {
-                    return false;
-                }
-                return !stristr($item, "load_log");
-            }
+        $log_filename = $_POST["log_filename"] ?? '';
+        $path = !empty($log_filename) ? LOG_DIR.DIRECTORY_SEPARATOR.$log_filename : '';
+        if (!empty($path) && file_exists($path)) {
             $all = array_filter(explode("\n", file_get_contents($path)), "removeLoadLog");  // line by line
-            $data = $_POST["slice_offset"] ? array_slice($all, $_POST["slice_offset"]) : $all;
+            $slice_offset = isset($_POST["slice_offset"]) ? intval($_POST["slice_offset"]) : null;
+            $data = $slice_offset !== null ? array_slice($all, $slice_offset) : $all;
             $result = array(
                 "status" => STATUS_CODE::SUCCESS_NORMAL,
                 "data_count" => count($data),
                 "total_count" => count($all),
-                "data" => $data,
-                "query_string" => "log_filename=".$_POST["log_filename"]."&type=".$_POST["type"]."&slice_offset=".$_POST["slice_offset"]
+                "data" => array_values($data),
+                "query_string" => "log_filename=".$log_filename."&type=".$reqType."&slice_offset=".($slice_offset ?? '')
             );
-            //Logger::getInstance()->info("XHR [load_log] 讀取成功【".$path."】");
             echo json_encode($result, 0);
         } else {
             Logger::getInstance()->error("XHR [load_log] 找不到檔案【".$path."】");
@@ -55,7 +60,7 @@ switch ($_POST["type"]) {
         }
         break;
     default:
-        Logger::getInstance()->error("XHR [".$_POST["type"]."] 不支援的讀取型態");
-        echoErrorJSONString("不支援的讀取型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
+        Logger::getInstance()->error("XHR [".$reqType."] 不支援的讀取型態");
+        echoErrorJSONString("不支援的讀取型態【".$reqType."】", STATUS_CODE::UNSUPPORT_FAIL);
         break;
 }
