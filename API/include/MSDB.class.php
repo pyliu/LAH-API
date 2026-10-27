@@ -168,7 +168,7 @@ class MSDB {
      * @return null/array
      */
     public function getLastError() {
-        return sqlsrv_errors();
+        return function_exists('sqlsrv_errors') ? sqlsrv_errors() : null;
     }
     /**
      * Return last row number affected
