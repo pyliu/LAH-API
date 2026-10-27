@@ -7,7 +7,10 @@ require_once(INC_DIR."/LXHWEB.class.php");
 $system = System::getInstance();
 $cache = Cache::getInstance();
 $lxhweb = null;
-switch($_POST["site"]) {
+
+$reqSite = $_POST["site"] ?? '';
+
+switch ($reqSite) {
 	case 'L1HWEB':
 		$lxhweb = new LXHWEB(CONNECTION_TYPE::L1HWEB);
 		break;
@@ -22,8 +25,9 @@ switch($_POST["site"]) {
 }
 
 $mock = $system->isMockMode();
+$reqType = $_POST["type"] ?? '';
 
-switch ($_POST["type"]) {
+switch ($reqType) {
 	case "lxhweb_config":
 		/*
 			'ORA_DB_L1HWEB_IP' => $configs['ORA_DB_L1HWEB_IP'],
@@ -40,12 +44,12 @@ switch ($_POST["type"]) {
 		));
 		break;
 	case "lxhweb_site_update_time":
-		// Logger::getInstance()->info("XHR [lxhweb_site_update_time] 查詢各所同步異動更新時間 請求 ".$_POST["site"]);
-		$rows = $mock ? $cache->get('lxhweb_site_update_time') : $lxhweb->querySiteUpdateTime($_POST["site"]);
+		// Logger::getInstance()->info("XHR [lxhweb_site_update_time] 查詢各所同步異動更新時間 請求 ".$reqSite);
+		$rows = $mock ? $cache->get('lxhweb_site_update_time') : $lxhweb->querySiteUpdateTime($reqSite);
 		if (!$mock) $cache->set('lxhweb_site_update_time', $rows);
 		$count = $rows === false ? 0 : count($rows);
 		if (empty($count)) {
-			echoJSONResponse('查無同步異動資料庫更新時間資料 '.$_POST["site"]);
+			echoJSONResponse('查無同步異動資料庫更新時間資料 '.$reqSite);
 		} else {
 			echoJSONResponse('共查詢到'.$count.'筆資料', STATUS_CODE::SUCCESS_NORMAL, array(
 				'data_count' => $count,
@@ -59,7 +63,7 @@ switch ($_POST["type"]) {
 		if (!$mock) $cache->set('lxhweb_broken_table', $rows);
 		$count = $rows === false ? 0 : count($rows);
 		if (empty($count)) {
-			echoJSONResponse('查無已損毀的同步異動表格 '.$_POST["site"], STATUS_CODE::SUCCESS_WITH_NO_RECORD);
+			echoJSONResponse('查無已損毀的同步異動表格 '.$reqSite, STATUS_CODE::SUCCESS_WITH_NO_RECORD);
 		} else {
 			echoJSONResponse('共查詢到'.$count.'筆資料', STATUS_CODE::SUCCESS_NORMAL, array(
 				'data_count' => $count,
@@ -68,14 +72,15 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "lxhweb_tbl_update_time":
-        Logger::getInstance()->info("XHR [lxhweb_tbl_update_time] 查詢同步異動更新時間 請求 ".$_POST["site"].(!empty($_POST["office"]) ? " 所別: ".$_POST["office"] : ""));
-		$target_office = !empty($_POST["office"]) ? $_POST["office"] : (strlen($_POST["site"]) == 2 ? $_POST["site"] : '');
-		$cache_key = 'lxhweb_tbl_update_time_'.$_POST["site"].'_'.$target_office;
+        $office = $_POST["office"] ?? '';
+        Logger::getInstance()->info("XHR [lxhweb_tbl_update_time] 查詢同步異動更新時間 請求 ".$reqSite.(!empty($office) ? " 所別: ".$office : ""));
+		$target_office = !empty($office) ? $office : (strlen($reqSite) == 2 ? $reqSite : '');
+		$cache_key = 'lxhweb_tbl_update_time_'.$reqSite.'_'.$target_office;
 		$rows = $mock ? $cache->get($cache_key) : $lxhweb->queryTableUpdateTime($target_office);
 		if (!$mock) $cache->set($cache_key, $rows);
 		$count = $rows === false ? 0 : count($rows);
 		if (empty($count)) {
-			echoJSONResponse('查無 '.(!empty($_POST["office"]) ? $_POST["office"] : '').' 同步異動表格'.$_POST["site"].'更新時間資料');
+			echoJSONResponse('查無 '.(!empty($office) ? $office : '').' 同步異動表格'.$reqSite.'更新時間資料');
 		} else {
 			echoJSONResponse('共查詢到'.$count.'筆資料', STATUS_CODE::SUCCESS_NORMAL, array(
 				'data_count' => $count,
@@ -84,12 +89,13 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "l3hweb_pscrn_check":
-		Logger::getInstance()->info("XHR [l3hweb_pscrn_check] 檢查地價案件跨所註記 請求 " . ($_POST["site"] ?? 'L3HWEB'));
-		$rows = $mock ? $cache->get('l3hweb_pscrn_check') : $lxhweb->getMissingXNoteXValCases($_POST["office"]);
+        $office = $_POST["office"] ?? '';
+		Logger::getInstance()->info("XHR [l3hweb_pscrn_check] 檢查地價案件跨所註記 請求 " . (!empty($reqSite) ? $reqSite : 'L3HWEB'));
+		$rows = $mock ? $cache->get('l3hweb_pscrn_check') : $lxhweb->getMissingXNoteXValCases($office);
 		if (!$mock) $cache->set('l3hweb_pscrn_check', $rows);
 		$count = $rows === false ? 0 : count($rows);
 		if (empty($count)) {
-			echoJSONResponse('查無 '.$_POST["office"].' 地價案件遺失跨所註記。');
+			echoJSONResponse('查無 '.$office.' 地價案件遺失跨所註記。');
 		} else {
 			echoJSONResponse('共查詢到'.$count.'筆資料', STATUS_CODE::SUCCESS_NORMAL, array(
 				'data_count' => $count,
@@ -98,7 +104,7 @@ switch ($_POST["type"]) {
 		}
 		break;
     default:
-        Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
-        echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
+        Logger::getInstance()->error("不支援的查詢型態【".$reqType."】");
+        echoJSONResponse("不支援的查詢型態【".$reqType."】", STATUS_CODE::UNSUPPORT_FAIL);
         break;
 }

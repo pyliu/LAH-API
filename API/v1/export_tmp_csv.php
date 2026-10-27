@@ -3,7 +3,10 @@ require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."include".DIRECTORY_
 
 $tmp_file = ROOT_DIR.DIRECTORY_SEPARATOR.'export'.DIRECTORY_SEPARATOR.'tmp.csv';
 
-header("Content-Length: " . filesize($tmp_file));
+$size = @filesize($tmp_file);
+if ($size !== false) {
+    header("Content-Length: " . $size);
+}
 // header('Content-Type: text/csv');
 header('Content-Disposition: attachment; filename='.($_GET['filename'] ?? 'tmp').'.csv');
 

@@ -20,7 +20,9 @@ class LXHWEB {
     }
 
     function __destruct() {
-        $this->getDB()->close();
+        if ($this->db !== null) {
+            $this->db->close();
+        }
         $this->db = null;
     }
     /**

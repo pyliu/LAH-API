@@ -15,7 +15,10 @@ if (isset($_SESSION['export_tmp_txt_filename']) && $_SESSION['export_tmp_txt_fil
     }
 }
 
-header("Content-Length: " . filesize($tmp_file));
+$size = @filesize($tmp_file);
+if ($size !== false) {
+    header("Content-Length: " . $size);
+}
 // header('Content-Type: text/plain');
 header('Content-Disposition: attachment; filename='.($_GET['filename'] ?? 'tmp').'.txt');
 
