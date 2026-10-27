@@ -24,7 +24,7 @@ abstract class BaseIntegrationTestCase extends TestCase {
     /**
      * 發送 HTTP POST 請求並回傳原始回應字串與標頭資訊
      *
-     * @return array{body: string, http_code: int, content_type: string}
+     * @return array{body: string, http_code: int, content_type: string, headers: array<string, string>}
      */
     protected function postRaw(string $endpoint, array $data = [], array $files = [], array $headers = []): array {
         $url = $this->baseUrl . ltrim($endpoint, '/');
@@ -34,6 +34,16 @@ abstract class BaseIntegrationTestCase extends TestCase {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
+
+        $responseHeaders = [];
+        curl_setopt($ch, CURLOPT_HEADERFUNCTION, function($curl, $header) use (&$responseHeaders) {
+            $len = strlen($header);
+            $parts = explode(':', $header, 2);
+            if (count($parts) === 2) {
+                $responseHeaders[strtolower(trim($parts[0]))] = trim($parts[1]);
+            }
+            return $len;
+        });
 
         if (!empty($files)) {
             $postFields = $data;
@@ -70,7 +80,8 @@ abstract class BaseIntegrationTestCase extends TestCase {
         return [
             'body' => $rawResponse,
             'http_code' => $httpCode,
-            'content_type' => $contentType
+            'content_type' => $contentType,
+            'headers' => $responseHeaders
         ];
     }
 
@@ -87,9 +98,11 @@ abstract class BaseIntegrationTestCase extends TestCase {
     }
 
     /**
-     * 發送 HTTP GET 請求並回傳解析後之 JSON 陣列
+     * 發送 HTTP GET 請求並回傳原始回應字串與標頭資訊
+     *
+     * @return array{body: string, http_code: int, content_type: string, headers: array<string, string>}
      */
-    protected function get(string $endpoint, array $queryParams = [], array $headers = []): array {
+    protected function getRaw(string $endpoint, array $queryParams = [], array $headers = []): array {
         $url = $this->baseUrl . ltrim($endpoint, '/');
         if (!empty($queryParams)) {
             $url .= '?' . http_build_query($queryParams);
@@ -100,25 +113,52 @@ abstract class BaseIntegrationTestCase extends TestCase {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
 
+        $responseHeaders = [];
+        curl_setopt($ch, CURLOPT_HEADERFUNCTION, function($curl, $header) use (&$responseHeaders) {
+            $len = strlen($header);
+            $parts = explode(':', $header, 2);
+            if (count($parts) === 2) {
+                $responseHeaders[strtolower(trim($parts[0]))] = trim($parts[1]);
+            }
+            return $len;
+        });
+
         if (!empty($headers)) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         }
 
         $rawResponse = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $contentType = (string)curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
         $this->lastHttpCode = $httpCode;
         $error = curl_error($ch);
         unset($ch);
 
         $this->assertEmpty($error, "cURL error when calling {$endpoint}: {$error}");
         $this->assertNotEquals(500, $httpCode, "Endpoint {$endpoint} returned HTTP 500 Internal Server Error");
+        $this->assertIsString($rawResponse, "Empty response from {$endpoint}");
+        $this->assertStringNotContainsString('Fatal error', $rawResponse, "Endpoint {$endpoint} output contains Fatal error");
+        $this->assertStringNotContainsString('Parse error', $rawResponse, "Endpoint {$endpoint} output contains Parse error");
 
-        $json = json_decode((string)$rawResponse, true);
+        return [
+            'body' => $rawResponse,
+            'http_code' => $httpCode,
+            'content_type' => $contentType,
+            'headers' => $responseHeaders
+        ];
+    }
+
+    /**
+     * 發送 HTTP GET 請求並回傳解析後之 JSON 陣列
+     */
+    protected function get(string $endpoint, array $queryParams = [], array $headers = []): array {
+        $raw = $this->getRaw($endpoint, $queryParams, $headers);
+        $json = json_decode($raw['body'], true);
         if (is_array($json)) {
             return $json;
         }
 
-        return ['raw' => $rawResponse, 'http_code' => $httpCode];
+        return ['raw' => $raw['body'], 'http_code' => $raw['http_code'], 'headers' => $raw['headers']];
     }
 
     protected function assertResponseSuccess(array $json, ?string $messageSubstring = null): void {
