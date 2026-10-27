@@ -10,13 +10,30 @@ abstract class BaseIntegrationTestCase extends TestCase {
     protected string $baseUrl;
     protected int $timeout = 10;
     protected int $lastHttpCode = 0;
+    protected ?string $sessionId = null;
 
     public function getLastHttpCode(): int {
         return $this->lastHttpCode;
     }
 
+    /**
+     * 指派或重設 Session ID（用於跨請求維護 Session 狀態）
+     */
+    protected function useNewSession(?string $id = null): string {
+        $this->sessionId = $id ?: bin2hex(random_bytes(16));
+        return $this->sessionId;
+    }
+
+    /**
+     * 清除當前 Session ID
+     */
+    protected function clearSession(): void {
+        $this->sessionId = null;
+    }
+
     protected function setUp(): void {
         parent::setUp();
+        $this->sessionId = null;
         $envBase = getenv('LAH_API_BASE_URL');
         $this->baseUrl = $envBase ? rtrim($envBase, '/') . '/' : 'http://127.0.0.1/LAH-API/v1/';
     }
@@ -58,6 +75,10 @@ abstract class BaseIntegrationTestCase extends TestCase {
         } else {
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
             $headers[] = 'Content-Type: application/x-www-form-urlencoded';
+        }
+
+        if ($this->sessionId !== null) {
+            $headers[] = 'Cookie: PHPSESSID=' . $this->sessionId;
         }
 
         if (!empty($headers)) {
@@ -122,6 +143,10 @@ abstract class BaseIntegrationTestCase extends TestCase {
             }
             return $len;
         });
+
+        if ($this->sessionId !== null) {
+            $headers[] = 'Cookie: PHPSESSID=' . $this->sessionId;
+        }
 
         if (!empty($headers)) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
