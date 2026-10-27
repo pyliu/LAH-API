@@ -8,7 +8,8 @@ $system = System::getInstance();
 $moicad = new MOICAD();
 $mock = $system->isMockMode();
 
-switch ($_POST["type"]) {
+$reqType = $_POST["type"] ?? "";
+switch ($reqType) {
 	case "rcoda":
 		Logger::getInstance()->info("XHR [rcoda] get RCODA record request.");
 		$rows = $mock ? $cache->get('moicad_rcoda') : $moicad->getRCODA();
@@ -22,9 +23,9 @@ switch ($_POST["type"]) {
 		break;
 	case "rega":
 		Logger::getInstance()->info("XHR [rega] get REGA record request.");
-		$st = $_POST['st'];
-		$ed = $_POST['ed'];
-		$reload = $_POST['reload'] === 'true';
+		$st = $_POST['st'] ?? '';
+		$ed = $_POST['ed'] ?? '';
+		$reload = ($_POST['reload'] ?? '') === 'true';
 		// Logger::getInstance()->info("XHR [rega] reload flag $reload");
 		$cache_key = 'moicad_rega'.$st.$ed;
 		if ($reload && !$mock) {
@@ -74,7 +75,7 @@ switch ($_POST["type"]) {
 		// ));
 		break;
 	default:
-		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
-		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
+		Logger::getInstance()->error("不支援的查詢型態【".$reqType."】");
+		echoJSONResponse("不支援的查詢型態【".$reqType."】", STATUS_CODE::UNSUPPORT_FAIL);
 		break;
 }
