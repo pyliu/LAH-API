@@ -9,13 +9,14 @@ $cache = Cache::getInstance();
 $system = System::getInstance();
 $mock = $system->isMockMode();
 
-switch ($_POST["type"]) {
+$reqType = $_POST["type"] ?? "";
+switch ($reqType) {
 	case "val_realprice_caseno_map":
-		$st = $_POST["st_date"];
-		$ed = $_POST["ed_date"];
+		$st = $_POST["st_date"] ?? "";
+		$ed = $_POST["ed_date"] ?? "";
 		Logger::getInstance()->info("XHR [val_realprice_caseno_map] 查詢實價登錄申報序號資料請求【{\$st} ~ {\$ed}】");
 		if (empty($st) || empty($ed) || $ed < $st) {
-			$message = "時間區間資料不正確【$st ~ $ed】";
+			$message = "時間區間資料不正確【{$st} ~ {$ed}】";
 			Logger::getInstance()->info("XHR [val_realprice_caseno_map] $message");
 			echoJSONResponse($message, STATUS_CODE::DEFAULT_FAIL);
 		} else {
@@ -34,7 +35,7 @@ switch ($_POST["type"]) {
 	case "val_realprice_memo":
 		require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteValRealpriceMemoStore.class.php');
 		$sqlite_db = new SQLiteValRealpriceMemoStore();
-		$case_no = $_POST["case_no"];
+		$case_no = $_POST["case_no"] ?? "";
 		Logger::getInstance()->info("XHR [val_realprice_memo] 查詢實價登錄備註資料【".$case_no."】請求");
 
 		// this query goes to SQLite DB, it does not need cache result
@@ -56,9 +57,9 @@ switch ($_POST["type"]) {
 	case "upd_val_realprice_memo":
 		require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteValRealpriceMemoStore.class.php');
 		$sqlite_db = new SQLiteValRealpriceMemoStore();
-		$case_no = $_POST["case_no"];
-		$declare_date = $_POST["declare_date"];
-		$declare_note = $_POST['declare_note'];
+		$case_no = $_POST["case_no"] ?? "";
+		$declare_date = $_POST["declare_date"] ?? "";
+		$declare_note = $_POST['declare_note'] ?? "";
 		if (empty($case_no)) {
 			$message = "更新 $case_no 實價登錄備註資料失敗";
 			Logger::getInstance()->info("XHR [upd_val_realprice_memo] $message (無申報序號)");
@@ -75,7 +76,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	default:
-		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
-		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
+		Logger::getInstance()->error("不支援的查詢型態【".$reqType."】");
+		echoJSONResponse("不支援的查詢型態【".$reqType."】", STATUS_CODE::UNSUPPORT_FAIL);
 		break;
 }
