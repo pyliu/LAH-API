@@ -6,19 +6,23 @@ $system = System::getInstance();
 $moicas = new MOICAS();
 $mock = $system->isMockMode();
 
-switch ($_POST["type"]) {
+$reqType = $_POST["type"] ?? "";
+switch ($reqType) {
 	case "crsms_records_by_clock":
 		Logger::getInstance()->info("XHR [crsms_records_by_clock] check CMCRD empty temp record request.");
-		$rows = $mock ? $cache->get('crsms_records_by_clock') : $moicas->getCRSMSRecordsByClock($_POST['st'], $_POST['ed'], $_POST['clock']);
+		$st = $_POST['st'] ?? ''; $ed = $_POST['ed'] ?? ''; $clock = $_POST['clock'] ?? '';
+		$rows = $mock ? $cache->get('crsms_records_by_clock') : $moicas->getCRSMSRecordsByClock($st, $ed, $clock);
 		$cache->set('crsms_records_by_clock', $rows);
 		$message = is_array($rows) ? "目前查到 CRSMS 裡有 ".count($rows)." 筆資料" : '查詢 CRSMS 失敗';
 		$status_code = is_array($rows) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
 		Logger::getInstance()->info("XHR [crsms_records_by_clock] $message");
 
 		$baked = array();
-		foreach ($rows as $row) {
+		if (is_array($rows)) {
+			foreach ($rows as $row) {
 			$data = new RegCaseData($row);
 			$baked[] = $data->getBakedData();
+			}
 		}
 
 		echoJSONResponse($message, $status_code, array(
@@ -28,7 +32,7 @@ switch ($_POST["type"]) {
 		break;
 	case "sur_notify_application_tmp_check":
 		Logger::getInstance()->info("XHR [sur_notify_application_tmp_check] check CMCRD empty temp record request.");
-		$rows = $mock ? $cache->get('sur_notify_application_tmp_check') : $moicas->getCMCRDTempRecords($_POST['year']);
+		$rows = $mock ? $cache->get('sur_notify_application_tmp_check') : $moicas->getCMCRDTempRecords(($_POST['year'] ?? ''));
 		$cache->set('sur_notify_application_tmp_check', $rows);
 		$message = is_array($rows) ? "目前查到CMCRD裡有 ".count($rows)." 筆暫存('Y%')資料" : '查詢CMCRD失敗';
 		$status_code = is_array($rows) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
@@ -40,7 +44,7 @@ switch ($_POST["type"]) {
 	case "remove_dangling_sur_notify_application_tmp_record":
 		Logger::getInstance()->info("XHR [remove_dangling_sur_notify_application_tmp_record] remove CMCRD temp record request.");
 		//removeDanglingCMCRDRecords
-		$result = $mock ? $cache->get('remove_dangling_sur_notify_application_tmp_record') : $moicas->removeDanglingCMCRDRecords($_POST['year']);
+		$result = $mock ? $cache->get('remove_dangling_sur_notify_application_tmp_record') : $moicas->removeDanglingCMCRDRecords(($_POST['year'] ?? ''));
 		$cache->set('remove_dangling_sur_notify_application_tmp_record', $result);
 		$message = "清除CMCRD裡懸浮的暫存('Y%')資料".($result ? '成功' : '失敗');
 		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
@@ -52,8 +56,8 @@ switch ($_POST["type"]) {
 	case "remove_sur_notify_application_tmp_record":
 		Logger::getInstance()->info("XHR [remove_sur_notify_application_tmp_record] remove CMCRD temp record request.");
 
-		$year = $_POST['MC01'];
-		$no = $_POST['MC02'];
+		$year = $_POST['MC01'] ?? '';
+		$no = $_POST['MC02'] ?? '';
 
 		$result = $mock ? $cache->get('remove_cmcrd_tmp_record') : $moicas->removeCMCRDRecords($year, $no);
 		$cache->set('remove_cmcrd_tmp_record', $result);
@@ -85,7 +89,7 @@ switch ($_POST["type"]) {
 		break;
 	case "fix_rm38_rm39_problem":
 		Logger::getInstance()->info("XHR [fix_reg_wrong_change] fix CRSMS RM38、RM39 wrong change case request.");
-		$year = $_POST['year'];
+		$year = ($_POST['year'] ?? '');
 		$code = $_POST['code'];
 		$num = $_POST['number'];
 		$trindx_fix = true;
@@ -101,10 +105,10 @@ switch ($_POST["type"]) {
 		break;
 	case "crsms_update_by_date":
 			Logger::getInstance()->info("XHR [crsms_update_by_date] get CRSMS update by date request.");
-			$rows = $mock ? $cache->get('crsms_update_by_date') : $moicas->getCRSMSUpdateCase($_POST['qday']);
+			$rows = $mock ? $cache->get('crsms_update_by_date') : $moicas->getCRSMSUpdateCase(($_POST['qday'] ?? ''));
 			$cache->set('crsms_update_by_date', $rows);
 			$response_code = STATUS_CODE::SUCCESS_NORMAL;
-			$message = $_POST['qday'].'已找到'.count($rows).'件CRSMS案件時間異動更新紀錄';
+			$message = ($_POST['qday'] ?? '').'已找到'.count($rows).'件CRSMS案件時間異動更新紀錄';
 			$baked = array();
 			foreach ($rows as $key => $row) {
 					$data = new RegCaseData($row);
@@ -115,10 +119,10 @@ switch ($_POST["type"]) {
 		break;
 	case "crsmslog":
 			Logger::getInstance()->info("XHR [crsmslog] get CRSMSLog request.");
-			$rows = $mock ? $cache->get('crsmslog') : $moicas->getConcernCRSMSLog($_POST['qday'], $_POST['qtime'] ?? '000000');
+			$rows = $mock ? $cache->get('crsmslog') : $moicas->getConcernCRSMSLog(($_POST['qday'] ?? ''), $_POST['qtime'] ?? '000000');
 			$cache->set('crsmslog', $rows);
 			$response_code = STATUS_CODE::SUCCESS_NORMAL;
-			$message = $_POST['qday'].'已找到'.count($rows).'異動更新紀錄';
+			$message = ($_POST['qday'] ?? '').'已找到'.count($rows).'異動更新紀錄';
 			$baked = array();
 			foreach ($rows as $key => $row) {
 					$data = new RegCaseData($row);
@@ -129,43 +133,43 @@ switch ($_POST["type"]) {
 			break;
 	case "cusmm_by_date":
 			Logger::getInstance()->info("XHR [cusmm_by_date] get CUSMM by date request.");
-			$rows = $mock ? $cache->get('cusmm_by_date') : $moicas->getCUSMMByDate($_POST['begin'], $_POST['end']);
+			$rows = $mock ? $cache->get('cusmm_by_date') : $moicas->getCUSMMByDate(($_POST['begin'] ?? ''), ($_POST['end'] ?? ''));
 			if (!is_array($rows)) {
 				$rows = array();
 			}
 			$cache->set('cusmm_by_date', $rows);
 			$response_code = count($rows) > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
-			$message = $_POST['begin'].' ~ '.$_POST['end'].' 已找到'.count($rows).'筆謄本調閱紀錄';
+			$message = ($_POST['begin'] ?? '').' ~ '.($_POST['end'] ?? '').' 已找到'.count($rows).'筆謄本調閱紀錄';
 			Logger::getInstance()->info("XHR [cusmm_by_date] $message");
 			echoJSONResponse($message, $response_code, array( "raw" => $rows ));
 			break;
 	case "cusmm_by_pid":
 			Logger::getInstance()->info("XHR [cusmm_by_pid] get CUSMM by PID request.");
-			$rows = $mock ? $cache->get('cusmm_by_pid') : $moicas->getCUSMMByQuery($_POST['pid']);
+			$rows = $mock ? $cache->get('cusmm_by_pid') : $moicas->getCUSMMByQuery(($_POST['pid'] ?? ''));
 			if (!is_array($rows)) {
 				$rows = array();
 			}
 			$cache->set('cusmm_by_pid', $rows);
 			$response_code = count($rows) > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
-			$message = '已找到'.count($rows).'筆 '.$_POST['pid'].' 有關的謄本調閱紀錄';
+			$message = '已找到'.count($rows).'筆 '.($_POST['pid'] ?? '').' 有關的謄本調閱紀錄';
 			Logger::getInstance()->info("XHR [cusmm_by_pid] $message");
 			echoJSONResponse($message, $response_code, array( "raw" => $rows ));
 			break;
 	case "workdays":
 			Logger::getInstance()->info("XHR [workdays] get workdays request.");
-			$rows = $mock ? $cache->get('workdays') : $moicas->getWorkdays($_POST['year']);
+			$rows = $mock ? $cache->get('workdays') : $moicas->getWorkdays(($_POST['year'] ?? ''));
 			if (!is_array($rows)) {
 				$rows = array();
 			}
 			$cache->set('workdays', $rows);
 			$response_code = count($rows) > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
-			$message = $_POST['year'].' 已找到'.count($rows).'筆 '.$_POST['pid'].' 工作天紀錄';
+			$message = ($_POST['year'] ?? '').' 已找到'.count($rows).'筆 '.($_POST['pid'] ?? '').' 工作天紀錄';
 			Logger::getInstance()->info("XHR [workdays] $message");
 			echoJSONResponse($message, $response_code, array( "raw" => $rows ));
 			break;
 	case "crsms_rm45_case":
 		Logger::getInstance()->info("XHR [crsms_rm45_case] get initial review case request.");
-		$rows = $mock ? $cache->get('crsms_rm45_case') : $moicas->getInitialReviewCase($_POST['st'], $_POST['ed'], $_POST['user_id']);
+		$rows = $mock ? $cache->get('crsms_rm45_case') : $moicas->getInitialReviewCase(($_POST['st'] ?? ''), ($_POST['ed'] ?? ''), ($_POST['user_id'] ?? ''));
 		if (!is_array($rows)) {
 			$rows = array();
 		}
@@ -179,13 +183,13 @@ switch ($_POST["type"]) {
 		$count = count($baked);
 
 		$response_code = $count > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
-		$message = $_POST['st'].' ~ '.$_POST['ed'].' 已找到'.$count.'筆 '.$_POST['user_id'].' 初審案件紀錄';
+		$message = ($_POST['st'] ?? '').' ~ '.($_POST['ed'] ?? '').' 已找到'.$count.'筆 '.($_POST['user_id'] ?? '').' 初審案件紀錄';
 		Logger::getInstance()->info("XHR [crsms_rm45_case] $message");
 		echoJSONResponse($message, $response_code, array( "baked" => $baked ));
 		break;
 	case "crsms_rm47_case":
 		Logger::getInstance()->info("XHR [crsms_rm47_case] get final review case request.");
-		$rows = $mock ? $cache->get('crsms_rm47_case') : $moicas->getFinalReviewCase($_POST['st'], $_POST['ed'], $_POST['user_id']);
+		$rows = $mock ? $cache->get('crsms_rm47_case') : $moicas->getFinalReviewCase(($_POST['st'] ?? ''), ($_POST['ed'] ?? ''), ($_POST['user_id'] ?? ''));
 		if (!is_array($rows)) {
 			$rows = array();
 		}
@@ -199,13 +203,13 @@ switch ($_POST["type"]) {
 		$count = count($baked);
 
 		$response_code = $count > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
-		$message = $_POST['st'].' ~ '.$_POST['ed'].' 已找到'.$count.'筆 '.$_POST['user_id'].' 複審案件紀錄';
+		$message = ($_POST['st'] ?? '').' ~ '.($_POST['ed'] ?? '').' 已找到'.$count.'筆 '.($_POST['user_id'] ?? '').' 複審案件紀錄';
 		Logger::getInstance()->info("XHR [crsms_rm47_case] $message");
 		echoJSONResponse($message, $response_code, array( "baked" => $baked ));
 		break;
 	case "crsms_rm106_case":
 			Logger::getInstance()->info("XHR [crsms_rm106_case] get chief review case request.");
-			$rows = $mock ? $cache->get('crsms_rm106_case') : $moicas->getChiefReviewCase($_POST['st'], $_POST['ed'], $_POST['user_id']);
+			$rows = $mock ? $cache->get('crsms_rm106_case') : $moicas->getChiefReviewCase(($_POST['st'] ?? ''), ($_POST['ed'] ?? ''), ($_POST['user_id'] ?? ''));
 			if (!is_array($rows)) {
 				$rows = array();
 			}
@@ -219,7 +223,7 @@ switch ($_POST["type"]) {
 			$count = count($baked);
 
 			$response_code = $count > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
-			$message = $_POST['st'].' ~ '.$_POST['ed'].' 已找到'.$count.'筆 '.$_POST['user_id'].' 課長案件紀錄';
+			$message = ($_POST['st'] ?? '').' ~ '.($_POST['ed'] ?? '').' 已找到'.$count.'筆 '.($_POST['user_id'] ?? '').' 課長案件紀錄';
 			Logger::getInstance()->info("XHR [crsms_rm106_case] $message");
 			echoJSONResponse($message, $response_code, array( "baked" => $baked ));
 			break;
@@ -237,7 +241,7 @@ switch ($_POST["type"]) {
 			break;
 	case "most_popular_rm02":
 			Logger::getInstance()->info("XHR [most_popular_rm02] get most popular RM02 request.");
-			$rows = $mock ? $cache->get('most_popular_rm02') : $moicas->getMostPopularRM02($_POST['filter']);
+			$rows = $mock ? $cache->get('most_popular_rm02') : $moicas->getMostPopularRM02(($_POST['filter'] ?? ''));
 			if (!is_array($rows)) {
 				$rows = array();
 			}
@@ -248,7 +252,7 @@ switch ($_POST["type"]) {
 			echoJSONResponse($message, $response_code, array( "raw" => $rows ));
 			break;
 	default:
-		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
-		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
+		Logger::getInstance()->error("不支援的查詢型態【".$reqType."】");
+		echoJSONResponse("不支援的查詢型態【".$reqType."】", STATUS_CODE::UNSUPPORT_FAIL);
 		break;
 }
