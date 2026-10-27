@@ -32,7 +32,8 @@ class RegCaseData {
         return $due_in_secs;
         */
         // RM29_1 - 限辦日
-        $Y = substr($this->row["RM29_1"], 0, 3) + 1911;
+        if (empty($this->row["RM29_1"])) { return 0; }
+        $Y = intval(substr($this->row["RM29_1"], 0, 3)) + 1911;
         $M = substr($this->row["RM29_1"], 3, 2);
         $D = substr($this->row["RM29_1"], 5, 2);
         // RM29_2 - 限辦時間
@@ -355,7 +356,8 @@ class RegCaseData {
     public function getDueDate() {
         /*
         // RM07_1 - 收件日
-        $Y = substr($this->row["RM07_1"], 0, 3) + 1911;
+        if (empty($this->row["RM07_1"])) { return ""; }
+        $Y = intval(substr($this->row["RM07_1"], 0, 3)) + 1911;
         $M = substr($this->row["RM07_1"], 3, 2);
         $D = substr($this->row["RM07_1"], 5, 2);
         // RM07_2 - 收件時間
@@ -393,7 +395,8 @@ class RegCaseData {
         }
         
         // RM07_1 - 收件日
-        $Y = substr($this->row["RM07_1"], 0, 3) + 1911;
+        if (empty($this->row["RM07_1"])) { return ""; }
+        $Y = intval(substr($this->row["RM07_1"], 0, 3)) + 1911;
         $M = substr($this->row["RM07_1"], 3, 2);
         $D = substr($this->row["RM07_1"], 5, 2);
         // RM07_2 - 收件時間
@@ -426,7 +429,8 @@ class RegCaseData {
         }
         
         // RM50 - 公告到期日
-        $Y = substr($this->row["RM50"], 0, 3) + 1911;
+        if (empty($this->row["RM50"])) { return "light"; }
+        $Y = intval(substr($this->row["RM50"], 0, 3)) + 1911;
         $M = substr($this->row["RM50"], 3, 2);
         $D = substr($this->row["RM50"], 5, 2);
         
@@ -582,7 +586,8 @@ class RegCaseData {
         }
         
         // RM29_1 - 預定結案日期
-        $Y = substr($this->row["RM29_1"], 0, 3) + 1911;
+        if (empty($this->row["RM29_1"])) { return "light"; }
+        $Y = intval(substr($this->row["RM29_1"], 0, 3)) + 1911;
         $M = substr($this->row["RM29_1"], 3, 2);
         $D = substr($this->row["RM29_1"], 5, 2);
         
@@ -631,7 +636,8 @@ class RegCaseData {
         }
         
         // RM07_1 - 收件日
-        $Y = substr($this->row["RM07_1"], 0, 3) + 1911;
+        if (empty($this->row["RM07_1"])) { return ""; }
+        $Y = intval(substr($this->row["RM07_1"], 0, 3)) + 1911;
         $M = substr($this->row["RM07_1"], 3, 2);
         $D = substr($this->row["RM07_1"], 5, 2);
         // RM07_2 - 收件時間

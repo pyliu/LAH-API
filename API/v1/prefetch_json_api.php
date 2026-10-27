@@ -1,6 +1,7 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
 
+if (!function_exists("getExpireCaseData")) {
 function getExpireCaseData (&$regdata) {
 	return array(
 		"收件字號" => $regdata->getReceiveSerial(),
@@ -13,6 +14,9 @@ function getExpireCaseData (&$regdata) {
 	);
 }
 
+}
+
+if (!function_exists("findMaxScheduledCloseDatetime")) {
 function findMaxScheduledCloseDatetime(&$rows, $st_index) {
 	$row = $rows[$st_index];
 	$max = $row['RM29_1'].$row['RM29_2'];
@@ -41,12 +45,15 @@ function findMaxScheduledCloseDatetime(&$rows, $st_index) {
 	}
 	return $max;
 }
+}
 
 $prefetch = new Prefetch();
-switch ($_POST["type"]) {
+$reqType = $_POST["type"] ?? "";
+$reload = ($_POST["reload"] ?? "") === "true";
+switch ($reqType) {
 	case "overdue_reg_cases_filtered":
 		Logger::getInstance()->info("XHR [overdue_reg_cases_filtered] 逾期案件查詢請求");
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadOverdueCaseIn15Days() : $prefetch->getOverdueCaseIn15Days();
+		$rows = $reload ? $prefetch->reloadOverdueCaseIn15Days() : $prefetch->getOverdueCaseIn15Days();
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [overdue_reg_cases_filtered] 查無逾期資料");
 			echoJSONResponse("查無逾期資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD, array(
@@ -122,7 +129,7 @@ switch ($_POST["type"]) {
 		break;
 	case "overdue_reg_cases":
 		Logger::getInstance()->info("XHR [overdue_reg_cases] 近15天逾期案件查詢請求");
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadOverdueCaseIn15Days() : $prefetch->getOverdueCaseIn15Days();
+		$rows = $reload ? $prefetch->reloadOverdueCaseIn15Days() : $prefetch->getOverdueCaseIn15Days();
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [overdue_reg_cases] 近15天查無逾期資料");
 			echoJSONResponse("15天內查無逾期資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD, array(
@@ -153,7 +160,7 @@ switch ($_POST["type"]) {
 		break;
 	case "almost_overdue_reg_cases":
 		Logger::getInstance()->info("XHR [almost_overdue_reg_cases] 即將逾期案件查詢請求");
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadAlmostOverdueCase() : $prefetch->getAlmostOverdueCase();
+		$rows = $reload ? $prefetch->reloadAlmostOverdueCase() : $prefetch->getAlmostOverdueCase();
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [almost_overdue_reg_cases] 近4小時內查無即將逾期資料");
 			echoJSONResponse("近4小時內查無即將逾期資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD, array(
@@ -184,7 +191,7 @@ switch ($_POST["type"]) {
 		break;
 	case "reg_rm30_H_case":
 		Logger::getInstance()->info("XHR [reg_rm30_H_case] 查詢登記公告中案件請求");
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadRM30HCase() : $prefetch->getRM30HCase();
+		$rows = $reload ? $prefetch->reloadRM30HCase() : $prefetch->getRM30HCase();
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [reg_rm30_H_case] 查無資料");
 			echoJSONResponse('查無公告中案件');
@@ -205,11 +212,11 @@ switch ($_POST["type"]) {
 		break;
 	case "reg_cancel_ask_case":
 		Logger::getInstance()->info("XHR [reg_cancel_ask_case] 查詢請示(取消)案件請求");
-		$begin = $_POST['begin'];
-		$end = $_POST['end'];
+		$begin = $_POST['begin'] ?? '';
+		$end = $_POST['end'] ?? '';
 		$by = $_POST['by'] ?? 'receive_date';
 		$include_pending = isset($_POST['include_pending']) ? ($_POST['include_pending'] === 'true' || $_POST['include_pending'] === true) : true;
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadAskCase($begin, $end, $by, $include_pending) : $prefetch->getAskCase($begin, $end, 3600, $by, $include_pending);
+		$rows = $reload ? $prefetch->reloadAskCase($begin, $end, $by, $include_pending) : $prefetch->getAskCase($begin, $end, 3600, $by, $include_pending);
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [reg_cancel_ask_case] 查無請示(取消)案件資料");
 			echoJSONResponse('查無請示(取消)案件');
@@ -230,22 +237,24 @@ switch ($_POST["type"]) {
 		break;
 	case "reg_trust_case":
 		Logger::getInstance()->info("XHR [reg_trust_case] 查詢請示(取消)案件請求");
-		if ($_POST['query'] === 'E') {
+		$query = $_POST['query'] ?? '';
+		$year = $_POST['year'] ?? '';
+		if ($query === 'E') {
 			// 建物所有權部資料
-			$rows = $_POST['reload'] === 'true' ? $prefetch->reloadTrustRebow($_POST['year']) : $prefetch->getTrustRebow($_POST['year']);
-			$cache_remaining = $prefetch->getTrustRebowCacheRemainingTime($_POST['year']);
-		} else if ($_POST['query'] === 'B') {
+			$rows = $reload ? $prefetch->reloadTrustRebow($year) : $prefetch->getTrustRebow($year);
+			$cache_remaining = $prefetch->getTrustRebowCacheRemainingTime($year);
+		} else if ($query === 'B') {
 			// 土地所有權部資料
-			$rows = $_POST['reload'] === 'true' ? $prefetch->reloadTrustRblow($_POST['year']) : $prefetch->getTrustRblow($_POST['year']);
-			$cache_remaining = $prefetch->getTrustRblowCacheRemainingTime($_POST['year']);
-		} else if ($_POST['query'] === 'TE') {
+			$rows = $reload ? $prefetch->reloadTrustRblow($year) : $prefetch->getTrustRblow($year);
+			$cache_remaining = $prefetch->getTrustRblowCacheRemainingTime($year);
+		} else if ($query === 'TE') {
 			// 建物所有權部例外資料
-			$rows = $_POST['reload'] === 'true' ? $prefetch->reloadTrustRebowException($_POST['year']) : $prefetch->getTrustRebowException($_POST['year']);
-			$cache_remaining = $prefetch->getTrustRebowExceptionCacheRemainingTime($_POST['year']);
-		} else if ($_POST['query'] === 'TB') {
+			$rows = $reload ? $prefetch->reloadTrustRebowException($year) : $prefetch->getTrustRebowException($year);
+			$cache_remaining = $prefetch->getTrustRebowExceptionCacheRemainingTime($year);
+		} else if ($query === 'TB') {
 			// 土地所有權部例外資料
-			$rows = $_POST['reload'] === 'true' ? $prefetch->reloadTrustRblowException($_POST['year']) : $prefetch->getTrustRblowException($_POST['year']);
-			$cache_remaining = $prefetch->getTrustRblowExceptionCacheRemainingTime($_POST['year']);
+			$rows = $reload ? $prefetch->reloadTrustRblowException($year) : $prefetch->getTrustRblowException($year);
+			$cache_remaining = $prefetch->getTrustRblowExceptionCacheRemainingTime($year);
 		}
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [reg_trust_case] 查無資料");
@@ -262,9 +271,9 @@ switch ($_POST["type"]) {
 		break;
 	case "reg_non_scrivener_case":
 		Logger::getInstance()->info("XHR [reg_non_scrivener_case] 查詢非專代案件請求");
-		$st = $_POST['start_date'];
-		$ed = $_POST['end_date'];
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadNonScrivenerCase($st, $ed) : $prefetch->getNonScrivenerCase($st, $ed);
+		$st = $_POST['start_date'] ?? '';
+		$ed = $_POST['end_date'] ?? '';
+		$rows = $reload ? $prefetch->reloadNonScrivenerCase($st, $ed) : $prefetch->getNonScrivenerCase($st, $ed);
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [reg_non_scrivener_case] 查無資料");
 			echoJSONResponse('查無非專代案件');
@@ -285,9 +294,9 @@ switch ($_POST["type"]) {
 		break;
 	case "reg_non_scrivener_reg_case":
 		Logger::getInstance()->info("XHR [reg_non_scrivener_reg_case] 查詢非專代案件請求");
-		$st = $_POST['start_date'];
-		$ed = $_POST['end_date'];
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadNonScrivenerRegCase($st, $ed, $_POST['ignore']) : $prefetch->getNonScrivenerRegCase($st, $ed, $_POST['ignore']);
+		$st = $_POST['start_date'] ?? '';
+		$ed = $_POST['end_date'] ?? '';
+		$rows = $reload ? $prefetch->reloadNonScrivenerRegCase($st, $ed, ($_POST['ignore'] ?? false)) : $prefetch->getNonScrivenerRegCase($st, $ed, ($_POST['ignore'] ?? false));
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [reg_non_scrivener_reg_case] 查無資料");
 			echoJSONResponse('查無非專代案件');
@@ -302,15 +311,15 @@ switch ($_POST["type"]) {
 			echoJSONResponse("查詢成功，找到 $total 筆非專代案件。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"baked" => $baked,
-				'cache_remaining_time' => $prefetch->getNonScrivenerRegCaseCacheRemainingTime($st, $ed, $_POST['ignore'])
+				'cache_remaining_time' => $prefetch->getNonScrivenerRegCaseCacheRemainingTime($st, $ed, ($_POST['ignore'] ?? false))
 			));
 		}
 		break;
 	case "reg_non_scrivener_sur_case":
 		Logger::getInstance()->info("XHR [reg_non_scrivener_sur_case] 查詢非專代測量案件請求");
-		$st = $_POST['start_date'];
-		$ed = $_POST['end_date'];
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadNonScrivenerSurCase($st, $ed, $_POST['ignore']) : $prefetch->getNonScrivenerSurCase($st, $ed, $_POST['ignore']);
+		$st = $_POST['start_date'] ?? '';
+		$ed = $_POST['end_date'] ?? '';
+		$rows = $reload ? $prefetch->reloadNonScrivenerSurCase($st, $ed, ($_POST['ignore'] ?? false)) : $prefetch->getNonScrivenerSurCase($st, $ed, ($_POST['ignore'] ?? false));
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [reg_non_scrivener_sur_case] 查無資料");
 			echoJSONResponse('查無非專代測量案件');
@@ -325,13 +334,13 @@ switch ($_POST["type"]) {
 			echoJSONResponse("查詢成功，找到 $total 筆非專代測量案件。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"baked" => $baked,
-				'cache_remaining_time' => $prefetch->getNonScrivenerSurCaseCacheRemainingTime($st, $ed, $_POST['ignore'])
+				'cache_remaining_time' => $prefetch->getNonScrivenerSurCaseCacheRemainingTime($st, $ed, ($_POST['ignore'] ?? false))
 			));
 		}
 		break;
 	case "reg_foreigner_case":
 		Logger::getInstance()->info("XHR [reg_foreigner_case] 查詢外國人地權案件請求");
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadForeignerCase($_POST['begin'], $_POST['end']) : $prefetch->getForeignerCase($_POST['begin'], $_POST['end']);
+		$rows = $reload ? $prefetch->reloadForeignerCase($begin, $end) : $prefetch->getForeignerCase($begin, $end);
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [reg_foreigner_case] 查無資料");
 			echoJSONResponse('查無外國人地權案件');
@@ -346,28 +355,31 @@ switch ($_POST["type"]) {
 			echoJSONResponse("查詢成功，找到 $total 筆外國人地權案件。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"rows" => $rows,
-				'cache_remaining_time' => $prefetch->getForeignerCaseCacheRemainingTime($_POST['begin'], $_POST['end'])
+				'cache_remaining_time' => $prefetch->getForeignerCaseCacheRemainingTime($begin, $end)
 			));
 		}
 		break;
 	case "trust_query":
 		Logger::getInstance()->info("XHR [trust_query] 查詢信託相關資料請求");
 		$type_msg = "信託相關資料";
-		if ($_POST['query'] === 'land') {
+		$query = $_POST['query'] ?? '';
+		$start = $_POST['start'] ?? '';
+		$end = $_POST['end'] ?? '';
+		if ($query === 'land') {
 			// 土地註記塗銷
 			$type_msg = "土地註記塗銷查詢";
-			$rows = $_POST['reload'] === 'true' ? $prefetch->reloadTrustObliterateLand($_POST['start'], $_POST['end']) : $prefetch->getTrustObliterateLand($_POST['start'], $_POST['end']);
-			$cache_remaining = $prefetch->getTrustObliterateLandCacheRemainingTime($_POST['start'], $_POST['end']);
-		} else if ($_POST['query'] === 'building') {
+			$rows = $reload ? $prefetch->reloadTrustObliterateLand($start, $end) : $prefetch->getTrustObliterateLand($start, $end);
+			$cache_remaining = $prefetch->getTrustObliterateLandCacheRemainingTime($start, $end);
+		} else if ($query === 'building') {
 			// 建物註記塗銷
 			$type_msg = "建物註記塗銷查詢";
-			$rows = $_POST['reload'] === 'true' ? $prefetch->reloadTrustObliterateBuilding($_POST['start'], $_POST['end']) : $prefetch->getTrustObliterateBuilding($_POST['start'], $_POST['end']);
-			$cache_remaining = $prefetch->getTrustObliterateBuildingCacheRemainingTime($_POST['start'], $_POST['end']);
-		} else if ($_POST['query'] === 'reg_reason') {
+			$rows = $reload ? $prefetch->reloadTrustObliterateBuilding($start, $end) : $prefetch->getTrustObliterateBuilding($start, $end);
+			$cache_remaining = $prefetch->getTrustObliterateBuildingCacheRemainingTime($start, $end);
+		} else if ($query === 'reg_reason') {
 			// 信託案件資料查詢
 			$type_msg = "信託案件資料查詢";
-			$rows = $_POST['reload'] === 'true' ? $prefetch->reloadTrustQuery($_POST['start'], $_POST['end']) : $prefetch->getTrustRegQuery($_POST['start'], $_POST['end']);
-			$cache_remaining = $prefetch->getTrustRegQueryCacheRemainingTime($_POST['start'], $_POST['end']);
+			$rows = $reload ? $prefetch->reloadTrustQuery($start, $end) : $prefetch->getTrustRegQuery($start, $end);
+			$cache_remaining = $prefetch->getTrustRegQueryCacheRemainingTime($start, $end);
 			foreach ($rows as $idx => $row) {
 				$regdata = new RegCaseData($row);
 				$rows[$idx] = $regdata->getBakedData();
@@ -389,11 +401,15 @@ switch ($_POST["type"]) {
 	case "375_land_change":
 		Logger::getInstance()->info("XHR [375_lang_change] 查詢375租約土標部異動資料請求");
 		$message = "375租約土地標示部異動查詢";
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadLand375Change($_POST['start'], $_POST['end']) : $prefetch->getLand375Change($_POST['start'], $_POST['end']);
-		$cache_remaining = $prefetch->getLand375ChangeCacheRemainingTime($_POST['start'], $_POST['end']);
+		$start = $_POST['start'] ?? '';
+		$end = $_POST['end'] ?? '';
+		$rows = $reload ? $prefetch->reloadLand375Change($start, $end) : $prefetch->getLand375Change($start, $end);
+		$cache_remaining = $prefetch->getLand375ChangeCacheRemainingTime($start, $end);
+		if (is_array($rows)) {
 		foreach ($rows as $idx => $row) {
 			$regdata = new RegCaseData($row);
 			$rows[$idx] = $regdata->getBakedData();
+		}
 		}
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [375_lang_change] 查無 {\$message} 資料");
@@ -411,11 +427,15 @@ switch ($_POST["type"]) {
 	case "375_owner_change":
 		Logger::getInstance()->info("XHR [375_owner_change] 查詢375租約土所部異動資料請求");
 		$message = "375租約土地所有權部異動查詢";
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadOwner375Change($_POST['start'], $_POST['end']) : $prefetch->getOwner375Change($_POST['start'], $_POST['end']);
-		$cache_remaining = $prefetch->getOwner375ChangeCacheRemainingTime($_POST['start'], $_POST['end']);
+		$start = $_POST['start'] ?? '';
+		$end = $_POST['end'] ?? '';
+		$rows = $reload ? $prefetch->reloadOwner375Change($start, $end) : $prefetch->getOwner375Change($start, $end);
+		$cache_remaining = $prefetch->getOwner375ChangeCacheRemainingTime($start, $end);
+		if (is_array($rows)) {
 		foreach ($rows as $idx => $row) {
 			$regdata = new RegCaseData($row);
 			$rows[$idx] = $regdata->getBakedData();
+		}
 		}
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [375_owner_change] 查無 {\$message} 資料");
@@ -433,8 +453,10 @@ switch ($_POST["type"]) {
 	case "not_done_change":
 		Logger::getInstance()->info("XHR [not_done_change] 查詢未辦標的註記異動資料請求");
 		$message = "未辦標的註記異動查詢";
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadNotDoneChange($_POST['start'], $_POST['end']) : $prefetch->getNotDoneChange($_POST['start'], $_POST['end']);
-		$cache_remaining = $prefetch->getNotDoneChangeCacheRemainingTime($_POST['start'], $_POST['end']);
+		$start = $_POST['start'] ?? '';
+		$end = $_POST['end'] ?? '';
+		$rows = $reload ? $prefetch->reloadNotDoneChange($start, $end) : $prefetch->getNotDoneChange($start, $end);
+		$cache_remaining = $prefetch->getNotDoneChangeCacheRemainingTime($start, $end);
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [not_done_change] 查無 {\$message} 資料");
 			echoJSONResponse("查無 {\$message} 資料");
@@ -451,8 +473,10 @@ switch ($_POST["type"]) {
 	case "land_ref_change":
 		Logger::getInstance()->info("XHR [land_ref_change] 查詢土地參考資訊異動資料請求");
 		$message = "土地參考資訊異動查詢";
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadLandRefChange($_POST['start'], $_POST['end']) : $prefetch->getLandRefChange($_POST['start'], $_POST['end']);
-		$cache_remaining = $prefetch->getLandRefChangeCacheRemainingTime($_POST['start'], $_POST['end']);
+		$start = $_POST['start'] ?? '';
+		$end = $_POST['end'] ?? '';
+		$rows = $reload ? $prefetch->reloadLandRefChange($start, $end) : $prefetch->getLandRefChange($start, $end);
+		$cache_remaining = $prefetch->getLandRefChangeCacheRemainingTime($start, $end);
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [land_ref_change] 查無 {\$message} 資料");
 			echoJSONResponse("查無 {\$message} 資料");
@@ -469,7 +493,7 @@ switch ($_POST["type"]) {
 	case "reg_fix_case":
 		Logger::getInstance()->info("XHR [reg_fix_case] 查詢補正案件查詢請求");
 		$message = "補正案件查詢";
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadRegFixCase() : $prefetch->getRegFixCase();
+		$rows = $reload ? $prefetch->reloadRegFixCase() : $prefetch->getRegFixCase();
 		$cache_remaining = $prefetch->getRegFixCaseCacheRemainingTime();
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [reg_fix_case] 查無 {\$message} 資料");
@@ -501,9 +525,9 @@ switch ($_POST["type"]) {
 	case "reg_not_done_case":
 		Logger::getInstance()->info("XHR [reg_not_done_case] 查詢已結案未歸檔登記案件請求");
 		$message = "已結案未歸檔登記案件查詢";
-		$st = $_POST['start'];
-		$ed = $_POST['end'];
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadRegNotDoneCase($st, $ed) : $prefetch->getRegNotDoneCase($st, $ed);
+		$st = $_POST['start'] ?? '';
+		$ed = $_POST['end'] ?? '';
+		$rows = $reload ? $prefetch->reloadRegNotDoneCase($st, $ed) : $prefetch->getRegNotDoneCase($st, $ed);
 		$cache_remaining = $prefetch->getRegNotDoneCaseCacheRemainingTime($st, $ed);
 
 		if (empty($rows)) {
@@ -547,9 +571,9 @@ switch ($_POST["type"]) {
 	case "reg_untaken_case":
 		Logger::getInstance()->info("XHR [reg_untaken_case] 查詢結案登記案件請求");
 		$message = "結案登記案件查詢";
-		$st = $_POST['start'];
-		$ed = $_POST['end'];
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadRegUntakenCase($st, $ed) : $prefetch->getRegUntakenCase($st, $ed);
+		$st = $_POST['start'] ?? '';
+		$ed = $_POST['end'] ?? '';
+		$rows = $reload ? $prefetch->reloadRegUntakenCase($st, $ed) : $prefetch->getRegUntakenCase($st, $ed);
 		$cache_remaining = $prefetch->getRegUntakenCaseCacheRemainingTime($st, $ed);
 		
 		if (empty($rows)) {
@@ -591,7 +615,7 @@ switch ($_POST["type"]) {
 	case "sur_overdue_case":
 		Logger::getInstance()->info("XHR [sur_overdue_case] 查詢測量逾期案件請求");
 		$message = "逾期測量案件";
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadSurOverdueCase() : $prefetch->getSurOverdueCase();
+		$rows = $reload ? $prefetch->reloadSurOverdueCase() : $prefetch->getSurOverdueCase();
 		$cache_remaining = $prefetch->getSurOverdueCaseCacheRemainingTime();
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [sur_overdue_case] 查無 {\$message} 資料");
@@ -610,7 +634,7 @@ switch ($_POST["type"]) {
 	case "sur_not_close_case":
 		Logger::getInstance()->info("XHR [sur_not_close_case] 查詢未結案測量案件請求");
 		$message = "未結案測量案件";
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadSurNotCloseCase() : $prefetch->getSurNotCloseCase();
+		$rows = $reload ? $prefetch->reloadSurNotCloseCase() : $prefetch->getSurNotCloseCase();
 		$cache_remaining = $prefetch->getSurNotCloseCaseCacheRemainingTime();
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [sur_not_close_case] 查無 {\$message} 資料");
@@ -629,7 +653,7 @@ switch ($_POST["type"]) {
 	case "sur_near_case":
 		Logger::getInstance()->info("XHR [sur_near_case] 查詢即將到期測量案件請求");
 		$message = "即將到期測量案件";
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadSurNearCase() : $prefetch->getSurNearCase();
+		$rows = $reload ? $prefetch->reloadSurNearCase() : $prefetch->getSurNearCase();
 		$cache_remaining = $prefetch->getSurNearCaseCacheRemainingTime();
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [sur_near_case] 查無 {\$message} 資料");
@@ -648,9 +672,9 @@ switch ($_POST["type"]) {
 	case "val_realprice_map":
 		Logger::getInstance()->info("XHR [val_realprice_map] 查詢實價登錄申報對應請求");
 		$message = "實價登錄申報案件";
-		$st = $_POST["start_date"];
-		$ed = $_POST["end_date"];
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadValRealPriceMap($st, $ed) : $prefetch->getValRealPriceMap($st, $ed);
+		$st = $_POST["start_date"] ?? '';
+		$ed = $_POST["end_date"] ?? '';
+		$rows = $reload ? $prefetch->reloadValRealPriceMap($st, $ed) : $prefetch->getValRealPriceMap($st, $ed);
 		$cache_remaining = $prefetch->getValRealPriceMapCacheRemainingTime($st, $ed);
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [val_realprice_map] 查無 {\$message} 資料");
@@ -701,7 +725,7 @@ switch ($_POST["type"]) {
 	case "reg_inheritance_restriction":
 		Logger::getInstance()->info("XHR [reg_inheritance_restriction] 查詢外人管制清冊資料請求");
 		$message = "外人管制清冊";
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadRegInheritanceRestriction() : $prefetch->getRegInheritanceRestriction();
+		$rows = $reload ? $prefetch->reloadRegInheritanceRestriction() : $prefetch->getRegInheritanceRestriction();
 		$cache_remaining = $prefetch->getRegInheritanceRestrictionCacheRemainingTime();
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [reg_inheritance_restriction] 查無 $message 資料");
@@ -733,7 +757,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	default:
-		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
-		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
+		Logger::getInstance()->error("不支援的查詢型態【".$reqType."】");
+		echoJSONResponse("不支援的查詢型態【".$reqType."】", STATUS_CODE::UNSUPPORT_FAIL);
 		break;
 }
