@@ -10,7 +10,8 @@ $system = System::getInstance();
 $moiadm = new MOIADM();
 $mock = $system->isMockMode();
 
-switch ($_POST["type"]) {
+$reqType = $_POST["type"] ?? '';
+switch ($reqType) {
 	case "moiadm_publication_history":
 		Logger::getInstance()->info("XHR [moiadm_publication_history] get publication_history record request.");
 		$date = $_POST['date'] ?? date('Y/m/d');
@@ -26,8 +27,8 @@ switch ($_POST["type"]) {
 		break;
 	case "moiadm_smslog":
 		Logger::getInstance()->info("XHR [moiadm_smslog] get sms log record request.");
-		$keyword = $_POST['keyword'];
-		$type = $_POST['searchType'];
+		$keyword = $_POST['keyword'] ?? '';
+		$type = $_POST['searchType'] ?? '';
 		switch ($type) {
 			case 'date':
 				$rows = $mock ? $cache->get('moiadm_smslog') : $moiadm->getSMSLogRecordsByDate($keyword);
@@ -59,13 +60,15 @@ switch ($_POST["type"]) {
 		$cache->set('host_sections', $rows);
 		$result = [];
 		$site = System::getInstance()->getSiteCode();
-		foreach ($rows as $row) {
-			// filter by site code
-			if ($row['KRMK'] === $site) {
-				$result[] = array(
-					'code' => $row['KCDE_4'],
-					'name' => $row['KNAME']
-				);
+		if (is_array($rows)) {
+			foreach ($rows as $row) {
+				// filter by site code
+				if (isset($row['KRMK']) && $row['KRMK'] === $site) {
+					$result[] = array(
+						'code' => $row['KCDE_4'] ?? '',
+						'name' => $row['KNAME'] ?? ''
+					);
+				}
 			}
 		}
 		$message = $rows !== false ? "目前查到快取的 RKEYN_ALL 裡有 ".count($result)." 筆本所管轄地段資料" : '查詢快取的 RKEYN_ALL 失敗';
@@ -76,7 +79,7 @@ switch ($_POST["type"]) {
 		));
 		break;
 	default:
-		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
-		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
+		Logger::getInstance()->error("不支援的查詢型態【".$reqType."】");
+		echoJSONResponse("不支援的查詢型態【".$reqType."】", STATUS_CODE::UNSUPPORT_FAIL);
 		break;
 }
