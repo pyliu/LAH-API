@@ -6,18 +6,21 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 
 $sqlite_monitor_mail = new SQLiteMonitorMail();
 
-switch ($_POST["type"]) {
+$reqType = $_POST["type"] ?? "";
+switch ($reqType) {
     case "imap_open":
         Logger::getInstance()->info("XHR [check_connectivity] 檢查監控伺服器連線狀態請求");
-        $url = "{".$_POST['host'].($_POST['ssl'] === 'true' ? ':993/imap/ssl/novalidate-cert' : ':143/notls')."}INBOX";
-        $id = $_POST['account'];
-        $pwd = $_POST['password'];
+        $host = $_POST['host'] ?? '';
+        $ssl = ($_POST['ssl'] ?? '') === 'true';
+        $url = "{".$host.($ssl ? ':993/imap/ssl/novalidate-cert' : ':143/notls')."}INBOX";
+        $id = $_POST['account'] ?? '';
+        $pwd = $_POST['password'] ?? '';
         //Optional parameters
-        $options = OP_READONLY;
+        $options = defined('OP_READONLY') ? OP_READONLY : 2;
         $retries = 3;
-        $mailbox = System::getInstance()->isMockMode() ? true : imap_open($url, $id, $pwd, $options, $retries);
+        $mailbox = System::getInstance()->isMockMode() ? true : (function_exists('imap_open') ? imap_open($url, $id, $pwd, $options, $retries) : false);
         if($mailbox) {
-            echoJSONResponse('郵件伺服器('.$_POST['host'].')可正常連線', STATUS_CODE::SUCCESS_NORMAL);
+            echoJSONResponse('郵件伺服器('.$host.')可正常連線', STATUS_CODE::SUCCESS_NORMAL);
         } else {
             echoJSONResponse('無法連線伺服器 - '.$url);
         }
@@ -41,7 +44,7 @@ switch ($_POST["type"]) {
         }
         break;
     case "latest":
-        $convert = $_POST['convert'] === 'true' ? true : false;
+        $convert = ($_POST['convert'] ?? '') === 'true';
         Logger::getInstance()->info("XHR [latest] 查詢最新監控郵件請求");
         $mail = $sqlite_monitor_mail->getLatestMail($convert);
         if (empty($mail)) {
@@ -54,16 +57,16 @@ switch ($_POST["type"]) {
         }
         break;
     case "subject":
-        $keyword = $_POST["keyword"];
-        $convert = $_POST['convert'] === 'true' ? true : false;
+        $keyword = $_POST["keyword"] ?? '';
+        $convert = ($_POST['convert'] ?? '') === 'true';
         // 搜尋 via subject
         Logger::getInstance()->info("XHR [subject] 查詢監控郵件 BY '%$keyword%' IN SUBJECT 請求");
-        $days_before = $_POST["days"] ?? 1;
-        $mails = $sqlite_monitor_mail->getMailsBySubject($_POST["keyword"], $days_before * 24 * 60 * 60, $convert);
+        $days_before = isset($_POST["days"]) && is_numeric($_POST["days"]) ? (int)$_POST["days"] : 1;
+        $mails = $sqlite_monitor_mail->getMailsBySubject($keyword, $days_before * 24 * 60 * 60, $convert);
         if (empty($mails)) {
             echoJSONResponse("'%$keyword%' IN SUBJECT 沒有找到郵件");
         } else {
-            $count = count($mails);
+            $count = is_countable($mails) ? count($mails) : 0;
             echoJSONResponse("查詢到 $count 封郵件", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				'data_count' => $count,
 				'raw' => $mails
@@ -71,16 +74,16 @@ switch ($_POST["type"]) {
         }
         break;
     case "sender":
-        $keyword = $_POST["keyword"];
-        $convert = $_POST['convert'] === 'true' ? true : false;
-        // 搜尋 via subject
-        Logger::getInstance()->info("XHR [sender] 查詢監控郵件 BY sender: {\$keyword}  請求");
-        $days_before = $_POST["days"] ?? 1;
+        $keyword = $_POST["keyword"] ?? '';
+        $convert = ($_POST['convert'] ?? '') === 'true';
+        // 搜尋 via sender
+        Logger::getInstance()->info("XHR [sender] 查詢監控郵件 BY sender: {$keyword}  請求");
+        $days_before = isset($_POST["days"]) && is_numeric($_POST["days"]) ? (int)$_POST["days"] : 1;
         $mails = $sqlite_monitor_mail->getMailsBySender($keyword, $days_before * 24 * 60 * 60, $convert);
         if (empty($mails)) {
-            echoJSONResponse("sender: {\$keyword} 沒有找到郵件");
+            echoJSONResponse("sender: {$keyword} 沒有找到郵件");
         } else {
-            $count = count($mails);
+            $count = is_countable($mails) ? count($mails) : 0;
             echoJSONResponse("查詢到 $count 封郵件", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				'data_count' => $count,
 				'raw' => $mails
@@ -88,89 +91,104 @@ switch ($_POST["type"]) {
         }
         break;
     case "monitor_targets":
-        $active = $_POST["all"] !== "true";
+        $active = ($_POST["all"] ?? '') !== "true";
         Logger::getInstance()->info("XHR [monitor_targets] 查詢監控系統標的請求 (active = $active)");
         $conn = new SQLiteConnectivity();
         if ($arr = $conn->getTargets($active)) {
-            $count = count($arr);
+            $count = is_countable($arr) ? count($arr) : 0;
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => $count,
                 "raw" => $arr
             ));
         } else {
             $error = "取得監控系統標的失敗。";
-            Logger::getInstance()->error("XHR [monitor_targets] {\$error}");
+            Logger::getInstance()->error("XHR [monitor_targets] {$error}");
             echoJSONResponse($error);
         }
         break;
     case "monitor_targets_history":
         Logger::getInstance()->info("XHR [monitor_targets_history] 查詢全監控系統標的歷史資料請求");
         $conn = new SQLiteConnectivity();
-        if ($arr = $conn->getStatus($_POST["force"])) {
-            $count = count($arr);
+        $force = $_POST["force"] ?? 'false';
+        if ($arr = $conn->getStatus($force)) {
+            $count = is_countable($arr) ? count($arr) : 0;
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => $count,
                 "raw" => $arr
             ));
         } else {
             $error = "取得全監控系統標的歷史資料失敗。";
-            Logger::getInstance()->error("XHR [monitor_targets_history] {\$error}");
+            Logger::getInstance()->error("XHR [monitor_targets_history] {$error}");
             echoJSONResponse($error);
         }
         break;
     case "monitor_target_history":
         Logger::getInstance()->info("XHR [monitor_target_history] 查詢監控系統標的歷史資料請求");
         $conn = new SQLiteConnectivity();
-        if ($arr = $conn->getIPStatus($_POST["ip"], $_POST["force"], $_POST['port'])) {
+        $ip = $_POST["ip"] ?? '';
+        $force = $_POST["force"] ?? 'false';
+        $port = $_POST['port'] ?? '';
+        if ($arr = $conn->getIPStatus($ip, $force, $port)) {
             echoJSONResponse("取得 1 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => 1,
                 "raw" => $arr
             ));
         } else {
-            $error = "取得 ".$_POST["ip"]." 監控系統標的歷史資料失敗。";
-            Logger::getInstance()->error("XHR [monitor_target_history] {\$error}");
+            $error = "取得 ".$ip." 監控系統標的歷史資料失敗。";
+            Logger::getInstance()->error("XHR [monitor_target_history] {$error}");
             echoJSONResponse($error);
         }
         break;
     case "replace_connectivity_target":
         Logger::getInstance()->info("XHR [replace_connectivity_target] 取代監控系統標的請求");
         $conn = new SQLiteConnectivity();
+        $name = $_POST["name"] ?? '';
+        $ip = $_POST["ip"] ?? '';
+        $port = $_POST["port"] ?? '';
         if ($arr = $conn->replaceTarget($_POST)) {
-            echoJSONResponse("已取代 ".$_POST["name"]." ".$_POST["ip"].":".$_POST["port"]." 監控標的資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+            echoJSONResponse("已取代 ".$name." ".$ip.":".$port." 監控標的資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => 1,
                 "raw" => $arr
             ));
         } else {
-            $error = "取代 ".$_POST["ip"]." 監控系統標的失敗。";
-            Logger::getInstance()->error("XHR [replace_connectivity_target] {\$error}");
+            $error = "取代 ".$ip." 監控系統標的失敗。";
+            Logger::getInstance()->error("XHR [replace_connectivity_target] {$error}");
             echoJSONResponse($error);
         }
         break;
     case "edit_connectivity_target":
         Logger::getInstance()->info("XHR [edit_connectivity_target] 更新監控系統標的請求");
         $conn = new SQLiteConnectivity();
-        if ($arr = $conn->editTarget($_POST, $_POST['editIp'], $_POST['editPort'])) {
-            echoJSONResponse("已更新 ".$_POST["name"]." ".$_POST["ip"].":".$_POST["port"]." 監控標的資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+        $name = $_POST["name"] ?? '';
+        $ip = $_POST["ip"] ?? '';
+        $port = $_POST["port"] ?? '';
+        $editIp = $_POST['editIp'] ?? '';
+        $editPort = $_POST['editPort'] ?? '';
+        if ($arr = $conn->editTarget($_POST, $editIp, $editPort)) {
+            echoJSONResponse("已更新 ".$name." ".$ip.":".$port." 監控標的資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => 1,
                 "raw" => $arr
             ));
         } else {
-            $error = "更新 ".$_POST["ip"]." 監控系統標的失敗。";
-            Logger::getInstance()->error("XHR [edit_connectivity_target] {\$error}");
+            $error = "更新 ".$ip." 監控系統標的失敗。";
+            Logger::getInstance()->error("XHR [edit_connectivity_target] {$error}");
             echoJSONResponse($error);
         }
         break;
     case "remove_connectivity_target":
         Logger::getInstance()->info("XHR [remove_connectivity_target] 刪除監控系統標的請求");
         $conn = new SQLiteConnectivity();
+        $name = $_POST["name"] ?? '';
+        $ip = $_POST["ip"] ?? '';
+        $port = $_POST["port"] ?? '';
         if ($arr = $conn->removeTarget($_POST)) {
-            echoJSONResponse("已刪除 ".$_POST["name"]." ".$_POST["ip"].":".$_POST["port"]." 監控標的資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+            echoJSONResponse("已刪除 ".$name." ".$ip.":".$port." 監控標的資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => 1,
                 "raw" => $arr
             ));
         } else {
-            $error = "刪除 ".$_POST["name"]." 監控系統標的失敗。";
-            Logger::getInstance()->error("XHR [remove_connectivity_target] {\$error}");
+            $error = "刪除 ".$name." 監控系統標的失敗。";
+            Logger::getInstance()->error("XHR [remove_connectivity_target] {$error}");
             echoJSONResponse($error);
         }
         break;
@@ -181,24 +199,26 @@ switch ($_POST["type"]) {
         Logger::getInstance()->info("XHR [add_mail_entry] NEXT ID: $next_id");
         $site_code = System::getInstance()->getSiteCode();
         // Logger::getInstance()->info("XHR [add_mail_entry] SITE CODE: $site_code");
+        $subject = $_POST['SUBJECT'] ?? '';
+        $message_body = $_POST['MESSAGE'] ?? '';
         $params = array(
             'id' => $next_id,
             'from' => $_POST['FROM'] ?? 'add_mail_entry@API',
             'to' => strtolower($site_code.'monitor@mail.'.$site_code.'.cenweb.land.moi'),
-            'subject' => $_POST['SUBJECT'],
-            'message' => $_POST['MESSAGE'],
+            'subject' => $subject,
+            'message' => $message_body,
             'timestamp' => time(),
             'mailbox' => $_POST['MAILBOX'] ?? 'INBOX'
         );
         $result = $sqlite_monitor_mail->replace($params);
         if ($result) {
-            $message = "已新增 ".$_POST['SUBJECT']." 監控MAIL";
+            $message = "已新增 ".$subject." 監控MAIL";
             Logger::getInstance()->info("XHR [add_mail_entry] $message");
             echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL, array(
                 'raw' => $result
             ));
         } else {
-            $message = $_POST['SUBJECT']." 監控MAIL新增失敗";
+            $message = $subject." 監控MAIL新增失敗";
             Logger::getInstance()->info("XHR [add_mail_entry] $message");
             echoJSONResponse($message, STATUS_CODE::DEFAULT_FAIL, array(
                 'raw' => $_POST
@@ -206,7 +226,7 @@ switch ($_POST["type"]) {
         }
         break;
     default:
-        Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
-        echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
+        Logger::getInstance()->error("不支援的查詢型態【".$reqType."】");
+        echoJSONResponse("不支援的查詢型態【".$reqType."】", STATUS_CODE::UNSUPPORT_FAIL);
         break;
 }
