@@ -8,14 +8,14 @@ $mock = $system->isMockMode();
 
 switch ($_POST["type"] ?? '') {
 	case "ping":
-		Logger::getInstance()->info("XHR [ping] Ping ".$_POST["ip"]." request.");
-		$ip = $_POST["ip"];
+		$ip = $_POST["ip"] ?? '';
+		Logger::getInstance()->info("XHR [ping] Ping ".$ip." request.");
 		$latency = 0;
 		if ($mock) {
 			$latency = 87;
 		} else {
 			$ping = new Ping($ip, 1, 255);	// ip, timeout, ttl
-			if ($_POST['port']) {
+			if (!empty($_POST['port'])) {
 				$ping->setPort($_POST['port']);
 				$latency = $ping->ping('fsockopen');
 			} else {
@@ -58,7 +58,7 @@ switch ($_POST["type"] ?? '') {
 		$sqlite_user = new SQLiteUser();
 		$client_ip = array_key_exists('client_ip', $_POST) ? $_POST['client_ip'] : '';
 		$queried_user = $sqlite_user->getUserByIP($client_ip);
-		$found_count = count($queried_user);
+		$found_count = is_countable($queried_user) ? count($queried_user) : 0;
 		if ($found_count > 1) {
 			$queried_user = array($queried_user[$found_count - 1]);
 		}
@@ -97,7 +97,8 @@ switch ($_POST["type"] ?? '') {
 	case "configs":
 		Logger::getInstance()->info("XHR [configs] 查詢系統設定資料請求。");
 		$configs = $system->getConfigs();
-		$message = '查詢到'.count($configs).'筆資料';
+		$configs_count = is_countable($configs) ? count($configs) : 0;
+		$message = '查詢到'.$configs_count.'筆資料';
 		Logger::getInstance()->info("XHR [configs] {$message}。");
 		echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL, array(
 			'raw' => $configs
@@ -105,8 +106,10 @@ switch ($_POST["type"] ?? '') {
 		break;
 	case "update_configs":
 		Logger::getInstance()->info("XHR [configs] 更新系統設定資料請求。");
-		$success = $system->updateConfigs($_POST['configs']);
-		$message = '成功更新 '.$success.' / '.count($_POST['configs']).'筆系統設定。';
+		$post_configs = $_POST['configs'] ?? [];
+		$post_configs_count = is_countable($post_configs) ? count($post_configs) : 0;
+		$success = $system->updateConfigs($post_configs);
+		$message = '成功更新 '.$success.' / '.$post_configs_count.'筆系統設定。';
 		$status = $success > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
 		Logger::getInstance()->info("XHR [configs] {$message}。");
 		echoJSONResponse($message, $status, array(
@@ -390,8 +393,10 @@ switch ($_POST["type"] ?? '') {
 		}
 		break;
 	case "cert_log":
-		Logger::getInstance()->info("XHR [cert_log] 查詢謄本紀錄資料【".$_POST["section_code"].", ".implode(',', $_POST["numbers"])."】請求");
-		$query_result = $mock ? $cache->get('cert_log') : $query->getCertLog($_POST["section_code"], $_POST["numbers"]);
+		$numbers_str = is_array($_POST["numbers"] ?? null) ? implode(',', $_POST["numbers"]) : ($_POST["numbers"] ?? '');
+		$section_code = $_POST["section_code"] ?? '';
+		Logger::getInstance()->info("XHR [cert_log] 查詢謄本紀錄資料【{$section_code}, {$numbers_str}】請求");
+		$query_result = $mock ? $cache->get('cert_log') : $query->getCertLog($section_code, $_POST["numbers"] ?? []);
 		$cache->set('cert_log', $query_result);
 		if (empty($query_result)) {
 			Logger::getInstance()->info("XHR [cert_log] 查無資料");
@@ -747,7 +752,7 @@ switch ($_POST["type"] ?? '') {
 			$_POST["query_month"] = substr($today, 0, 5);
 		}
 		$query_month = $_POST['query_month'];
-		Logger::getInstance()->info("XHR [reg_court_cases_by_month] 查詢登記法院囑託案件 BY MONTH【{$reason_code}, {$query_month}】請求");
+		Logger::getInstance()->info("XHR [reg_court_cases_by_month] 查詢登記法院囑託案件 BY MONTH【{$query_month}】請求");
 		$rows = $mock ? $cache->get('reg_court_cases_by_month') : $query->queryCourtCasesByMonth($query_month);
 		$cache->set('reg_court_cases_by_month', $rows);
 		if (empty($rows)) {
@@ -1161,7 +1166,8 @@ switch ($_POST["type"] ?? '') {
 	case "xlsx_params":
 		$params = json_encode($_POST);
 		Logger::getInstance()->info("XHR [xlsx_params] 設定xlsx查詢參數【{$params}】請求");
-		function setSessions($params) {
+		if (!function_exists('setSessions')) {
+			function setSessions($params) {
 			if (empty($_POST) || session_status() === PHP_SESSION_DISABLED) return false;
 			foreach($_POST as $key => $value) {
 				if ($value !== NULL) {
@@ -1169,7 +1175,8 @@ switch ($_POST["type"] ?? '') {
 					$_SESSION[$key] = $value;
 				}
 			}
-			return true;
+				return true;
+			}
 		}
 		$flag = setSessions($_POST);
 		if ($flag) {
@@ -1271,7 +1278,7 @@ switch ($_POST["type"] ?? '') {
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [expaa] 查無資料。【".$_POST["qday"].", ".$_POST["num"]."】");
 			echoJSONResponse("查無資料。【".$_POST["qday"].", ".$_POST["num"]."】");
-		} else if (count($rows) == 1 && $_POST["list_mode"] === "false") {
+		} else if (is_countable($rows) && count($rows) == 1 && ($_POST["list_mode"] ?? '') === "false") {
 			$mapping = array();
 			// AA39 is 承辦人員, AA89 is 修改人員代碼
 			$users = $cache->getUserNames();
@@ -1331,38 +1338,44 @@ switch ($_POST["type"] ?? '') {
 		Logger::getInstance()->info("XHR [get_dummy_ob_fees] 查詢作廢規費假資料 請求");
 		$rows = $mock ? $cache->get('get_dummy_ob_fees') : $query->getDummyObFees();
 		$cache->set('get_dummy_ob_fees', $rows);
-		$len = count($rows);
+		$len = is_countable($rows) ? count($rows) : 0;
 		if ($len > 0) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => $len,
 				"raw" => $rows,
-				"message" => "更新 {$column} 成功"
+				"message" => "取得作廢規費假資料成功"
 			);
 			Logger::getInstance()->info("XHR [get_dummy_ob_fees] 取得 {$len} 件假資料");
 			echo json_encode($result, 0);
 		} else {
+			$this_year = $this_year ?? (date('Y') - 1911);
 			Logger::getInstance()->error("XHR [get_dummy_ob_fees] 本年度({$this_year})查無作廢規費假資料");
 			echoJSONResponse("本年度({$this_year})查無作廢規費假資料");
 		}
 		break;
 	case "add_dummy_ob_fees":
+		$p_today = $_POST["today"] ?? '';
+		$p_pc_number = $_POST["pc_number"] ?? '';
+		$p_operator = $_POST["operator"] ?? '';
+		$p_fee_number = $_POST["fee_number"] ?? '';
+		$p_reason = $_POST["reason"] ?? '';
 		Logger::getInstance()->info("XHR [add_dummy_ob_fees] 新增作廢規費假資料 請求");
-		$result_flag = $mock ? $cache->get('add_dummy_ob_fees') : $query->addDummyObFees($_POST["today"], $_POST["pc_number"], $_POST["operator"], $_POST["fee_number"], $_POST["reason"]);
+		$result_flag = $mock ? $cache->get('add_dummy_ob_fees') : $query->addDummyObFees($p_today, $p_pc_number, $p_operator, $p_fee_number, $p_reason);
 		$cache->set('add_dummy_ob_fees', $result_flag);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => "0",
-				"pc_number" => $_POST["pc_number"],
+				"pc_number" => $p_pc_number,
 				"raw" => $result_flag,
-				"message" => "新增假資料成功【".$_POST["today"].", ".$_POST["pc_number"]."】"
+				"message" => "新增假資料成功【".$p_today.", ".$p_pc_number."】"
 			);
 			Logger::getInstance()->info("XHR [add_dummy_ob_fees] 新增假資料成功");
 			echo json_encode($result, 0);
 		} else {
-			Logger::getInstance()->error("XHR [add_dummy_ob_fees] 新增假資料失敗【".$_POST["today"].", ".$_POST["pc_number"].", ".$_POST["operator"].", ".$_POST["fee_number"].", ".$_POST["reason"]."】");
-			echoJSONResponse("新增假資料失敗【".$_POST["today"].", ".$_POST["pc_number"].", ".$_POST["operator"].", ".$_POST["fee_number"].", ".$_POST["reason"]."】");
+			Logger::getInstance()->error("XHR [add_dummy_ob_fees] 新增假資料失敗【".$p_today.", ".$p_pc_number.", ".$p_operator.", ".$p_fee_number.", ".$p_reason."】");
+			echoJSONResponse("新增假資料失敗【".$p_today.", ".$p_pc_number.", ".$p_operator.", ".$p_fee_number.", ".$p_reason."】");
 		}
 		break;
 	default:
