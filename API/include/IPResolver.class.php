@@ -299,7 +299,7 @@ class IPResolver {
             // find user by ip address via previous user table in dimension.db
             $sqlite_user = new SQLiteUser();
             $user_data = $sqlite_user->getUserByIP($ip);
-            if (array_key_exists(0, $user_data)) {
+            if (is_array($user_data) && array_key_exists(0, $user_data)) {
                 return $user_data[0]['name'];
             } else {
                 // Logger::getInstance()->warning(__METHOD__.": 找不到 $ip 對應資料。(user table, dimension.db)");

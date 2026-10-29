@@ -7,9 +7,11 @@ $cache = Cache::getInstance();
 $system = System::getInstance();
 
 $this_month = (date("Y") - 1911)."".date("m");
+$this_year = date("Y") - 1911;
 
 $mock = $system->isMockMode();
 
+if (!function_exists('queryStats')) {
 function queryStats($type, $date, $error_msg) {
     global $stats_sqlite3, $mock, $cache, $this_month, $log;
     $key = $type.'_'.$date;
@@ -80,13 +82,16 @@ function queryStats($type, $date, $error_msg) {
     echoJSONResponse("取得 ".count($result)." 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
         "data_count" => count($result),
         "raw" => $result,
-        "text" => $result[0]['text'],
+        "text" => $result[0]['text'] ?? '',
         "count" => $result[0]['count'] ?? 0
     ));
     return true;
 }
+}
 
-switch ($_POST["type"]) {
+$type = $_POST["type"] ?? '';
+
+switch ($type) {
     case "stats_refresh_month":
         $result = $stats_sqlite3->removeAllStatsRawData($_POST['date']);
         if ($result === false) {
