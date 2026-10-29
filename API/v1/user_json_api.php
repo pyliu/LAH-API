@@ -4,12 +4,14 @@ require_once(INC_DIR."/SQLiteUser.class.php");
 require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/System.class.php");
 require_once(INC_DIR."/LXHWEB.class.php");
+require_once(INC_DIR."/ADService.class.php");
 
 $cache = Cache::getInstance();
 $system = System::getInstance();
 $mock = $system->isMockMode();
+$type = $_POST["type"] ?? '';
 
-switch ($_POST["type"]) {
+switch ($type) {
     case "import_l3hweb_users":
         $lxhweb = new LXHWEB(CONNECTION_TYPE::L3HWEB);
         $mappings = $mock ? $cache->get('l3hweb_user_mappings') : $lxhweb->querySYSAUTH1UserNames();
@@ -42,7 +44,7 @@ switch ($_POST["type"]) {
             $result = $sqlite_user->addUser($def);
             if ($result === true) {
                 $msg = "新增 ".($def['id'].', '.$def['name'])." 成功";
-                Logger::getInstance()->info("XHR [import_l3hweb_users] {\$msg}。");
+                Logger::getInstance()->info("XHR [import_l3hweb_users] " . $msg . "。");
                 $succeed++;
             } else {
                 Logger::getInstance()->error("XHR [import_l3hweb_users] 新增 ".($def['id'].', '.$def['name'])." 失敗 (已存在)");
@@ -68,32 +70,34 @@ switch ($_POST["type"]) {
         ));
         break;
     case "search_user":
-        Logger::getInstance()->info("XHR [search_user] 查詢使用者資料【".$_POST["keyword"]."】請求");
+        $keyword = $_POST["keyword"] ?? '';
+        Logger::getInstance()->info("XHR [search_user] 查詢使用者資料【".$keyword."】請求");
         $sqlite_user = new SQLiteUser();
         $results = false;
-        if (filter_var($_POST["keyword"], FILTER_VALIDATE_IP)) {
-            $results = $sqlite_user->getUserByIP($_POST["keyword"]);
+        if (!empty($keyword) && filter_var($keyword, FILTER_VALIDATE_IP)) {
+            $results = $sqlite_user->getUserByIP($keyword);
         }
-        if (empty($results)) {
-            $results = $sqlite_user->getUser($_POST["keyword"]);
+        if (empty($results) && !empty($keyword)) {
+            $results = $sqlite_user->getUser($keyword);
             if (empty($results)) {
-                $results = $sqlite_user->getUserByName($_POST["keyword"]);
+                $results = $sqlite_user->getUserByName($keyword);
             }
         }
         if (empty($results)) {
-            echoJSONResponse("查無 ".$_POST["keyword"]." 資料。");
-            Logger::getInstance()->info("XHR [search_user] 查無 ".$_POST["keyword"]." 資料。");
+            echoJSONResponse("查無 ".$keyword." 資料。");
+            Logger::getInstance()->info("XHR [search_user] 查無 ".$keyword." 資料。");
         } else {
-            Logger::getInstance()->info("XHR [search_user] 查詢 ".$_POST["keyword"]." 成功。");
-            echoJSONResponse("查詢 ".$_POST["keyword"]." 成功", STATUS_CODE::SUCCESS_NORMAL, array(
-                "data_count" => count($results),
+            Logger::getInstance()->info("XHR [search_user] 查詢 ".$keyword." 成功。");
+            echoJSONResponse("查詢 ".$keyword." 成功", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => is_array($results) ? count($results) : 0,
                 "raw" => $results,
-                "query_string" => "keyword=".$_POST["keyword"]
+                "query_string" => "keyword=".$keyword
             ));
         }
         break;
 	case "user_mapping":
 		$operators = $cache->getUserNames();
+        if (!is_array($operators)) $operators = array();
 		$count = count($operators);
         Logger::getInstance()->info("XHR [user_mapping] 取得使用者對應表($count)。");
         echoJSONResponse("取得 $count 筆使用者資料。", STATUS_CODE::SUCCESS_NORMAL, array(
@@ -118,92 +122,104 @@ switch ($_POST["type"]) {
         }
         break;
     case "user_offboard":
+        $id = $_POST["id"] ?? '';
         Logger::getInstance()->info("XHR [user_offboard] 設定使用者離職請求");
         $sqlite_user = new SQLiteUser();
-        $result = $sqlite_user->offboardUser($_POST["id"]);
+        $result = $sqlite_user->offboardUser($id);
         if ($result === true) {
-            $msg = $_POST['id'].' 設定離職成功';
-            Logger::getInstance()->info("XHR [user_offboard] {\$msg}。");
+            $msg = $id.' 設定離職成功';
+            Logger::getInstance()->info("XHR [user_offboard] " . $msg . "。");
             echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
         } else {
-            Logger::getInstance()->error("XHR [user_offboard] set user ".$_POST['id']." offboard failed.");
-            echoJSONResponse($_POST['id'].' 設定離職失敗');
+            Logger::getInstance()->error("XHR [user_offboard] set user ".$id." offboard failed.");
+            echoJSONResponse($id.' 設定離職失敗');
         }
         break;
     case "user_onboard":
+        $id = $_POST["id"] ?? '';
         Logger::getInstance()->info("XHR [user_onboard] 設定使用者復職請求");
         $sqlite_user = new SQLiteUser();
-        $result = $sqlite_user->onboardUser($_POST["id"]);
+        $result = $sqlite_user->onboardUser($id);
         if ($result === true) {
-            $msg = $_POST['id'].' 設定復職成功';
-            Logger::getInstance()->info("XHR [user_onboard] {\$msg}。");
+            $msg = $id.' 設定復職成功';
+            Logger::getInstance()->info("XHR [user_onboard] " . $msg . "。");
             echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
         } else {
-            Logger::getInstance()->error("XHR [user_onboard] set user ".$_POST['id']." onboard failed.");
-            echoJSONResponse($_POST['id'].' 設定復職失敗');
+            Logger::getInstance()->error("XHR [user_onboard] set user ".$id." onboard failed.");
+            echoJSONResponse($id.' 設定復職失敗');
         }
         break;
     case "user_info":
-        Logger::getInstance()->info("XHR [user_info] 查詢使用者資料【".$_POST["id"].", ".$_POST["name"].", ".$_POST["ip"]."】請求");
+        $id = $_POST["id"] ?? '';
+        $name = $_POST["name"] ?? '';
+        $ip = $_POST["ip"] ?? '';
+        Logger::getInstance()->info("XHR [user_info] 查詢使用者資料【".$id.", ".$name.", ".$ip."】請求");
         $sqlite_user = new SQLiteUser();
-        $results = $sqlite_user->getUser($_POST["id"]);
-        if (empty($results)) {
-            Logger::getInstance()->info("XHR [user_info] user id (".$_POST["id"].") not found ... try to use name (".$_POST["name"].") for searching.");
-            $results = $sqlite_user->getUserByName($_POST["name"]);
+        $results = !empty($id) ? $sqlite_user->getUser($id) : false;
+        if (empty($results) && !empty($name)) {
+            Logger::getInstance()->info("XHR [user_info] user id (".$id.") not found ... try to use name (".$name.") for searching.");
+            $results = $sqlite_user->getUserByName($name);
         }
-        if (empty($results)) {
-            Logger::getInstance()->info("XHR [user_info] user name (".$_POST["name"].") not found ... try to use ip (".$_POST["ip"].") for searching.");
-            $results = $sqlite_user->getUserByIP($_POST["ip"]);
+        if (empty($results) && !empty($ip)) {
+            Logger::getInstance()->info("XHR [user_info] user name (".$name.") not found ... try to use ip (".$ip.") for searching.");
+            $results = $sqlite_user->getUserByIP($ip);
             $len = is_array($results) ? count($results) : 0;
             if ($len > 1) {
                 $last = $results[$len - 1];
                 $results = array($last);
             }
         }
+        $target = !empty($name) ? $name : (!empty($id) ? $id : (!empty($ip) ? $ip : ''));
         if (empty($results)) {
-            $target = $_POST["name"] ?? $_POST["id"] ?? $_POST["ip"] ?? '';
             Logger::getInstance()->info("XHR [user_info] 查無 " . $target . " 資料。");
-            echoJSONResponse("查無 " . ($_POST["name"] ?? $target) . " 資料。");
+            echoJSONResponse("查無 " . $target . " 資料。");
         } else {
-            $target = $_POST["name"] ?? $_POST["id"] ?? $_POST["ip"] ?? '';
             Logger::getInstance()->info("XHR [user_info] 查詢 " . $target . " 成功。");
             echoJSONResponse("查詢 " . $target . " 成功", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => is_array($results) ? count($results) : 0,
                 "raw" => $results,
-                "query_string" => "id=".($_POST["id"] ?? '')."&name=".($_POST["name"] ?? '')."&ip=".($_POST["ip"] ?? '')
+                "query_string" => "id=".$id."&name=".$name."&ip=".$ip
             ));
         }
         break;
     case "save_user_info":
-        Logger::getInstance()->info("XHR [save_user_info] 儲存使用者資料【".print_r($_POST["data"], true)."】請求");
+        $user_data = $_POST["data"] ?? [];
+        if (!is_array($user_data)) $user_data = [];
+        $uid = $user_data['id'] ?? '';
+        $uname = $user_data['name'] ?? '';
+        Logger::getInstance()->info("XHR [save_user_info] 儲存使用者資料【".print_r($user_data, true)."】請求");
         $sqlite_user = new SQLiteUser();
-        $result = $sqlite_user->saveUser($_POST["data"]);
+        $result = !empty($user_data) ? $sqlite_user->saveUser($user_data) : false;
         if ($result === true) {
-            $msg = "儲存 ".($_POST['data']['id'].', '.$_POST['data']['name'])." 成功";
-            Logger::getInstance()->info("XHR [save_user_info] {\$msg}。");
+            $msg = "儲存 ".($uid.', '.$uname)." 成功";
+            Logger::getInstance()->info("XHR [save_user_info] " . $msg . "。");
             echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
         } else {
             Logger::getInstance()->error("XHR [save_user_info] save user info failed.");
-            echoJSONResponse("儲存 ".($_POST['data']['id'].', '.$_POST['data']['name'])." 失敗");
+            echoJSONResponse("儲存 ".($uid.', '.$uname)." 失敗");
         }
         break;
     case "add_user":
-        Logger::getInstance()->info("XHR [add_user] 新增使用者資料【".print_r($_POST["data"], true)."】請求");
+        $user_data = $_POST["data"] ?? [];
+        if (!is_array($user_data)) $user_data = [];
+        $uid = $user_data['id'] ?? '';
+        $uname = $user_data['name'] ?? '';
+        Logger::getInstance()->info("XHR [add_user] 新增使用者資料【".print_r($user_data, true)."】請求");
         $sqlite_user = new SQLiteUser();
-        $result = $sqlite_user->addUser($_POST["data"]);
+        $result = !empty($user_data) ? $sqlite_user->addUser($user_data) : false;
         if ($result === true) {
-            $msg = "新增 ".($_POST['data']['id'].', '.$_POST['data']['name'])." 成功";
-            Logger::getInstance()->info("XHR [add_user] {\$msg}。");
+            $msg = "新增 ".($uid.', '.$uname)." 成功";
+            Logger::getInstance()->info("XHR [add_user] " . $msg . "。");
             echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
         } else {
             Logger::getInstance()->error("XHR [add_user] add user failed.");
-            echoJSONResponse("新增 ".($_POST['data']['id'].', '.$_POST['data']['name'])." 失敗");
+            echoJSONResponse("新增 ".($uid.', '.$uname)." 失敗");
         }
         break;
     case "org_data":
         $user_info = new SQLiteUser();
         $tree_data = $user_info->getTopTreeData();
-        Logger::getInstance()->info($json["message"]);
+        Logger::getInstance()->info("XHR [org_data] 查詢組織資料成功。");
         echoJSONResponse("XHR [org_data] 查詢組織資料成功。", STATUS_CODE::SUCCESS_NORMAL, array(
             "data_count" => 1,
             "raw" => $tree_data
@@ -256,8 +272,8 @@ switch ($_POST["type"]) {
         break;
     case "department_users":
         Logger::getInstance()->info("XHR [department_users] 取得所有使用者資料請求");
-        $dept = $_POST['department'];
-        $valid = $_POST['valid'];
+        $dept = $_POST['department'] ?? '';
+        $valid = $_POST['valid'] ?? 'on_board_users';
         $sqlite_user = new SQLiteUser();
         $results = $sqlite_user->getDepartmentUsers($dept, $valid);
         if (empty($results)) {
@@ -288,85 +304,99 @@ switch ($_POST["type"]) {
         break;
     case "remove_authority":
         Logger::getInstance()->info("XHR [remove_authority] 移除使用者授權請求");
-        $result = $system->removeAuthority($_POST['user']);
+        $user = $_POST['user'] ?? [];
+        $role_name = is_array($user) ? ($user['role_name'] ?? '') : '';
+        $role_ip = is_array($user) ? ($user['role_ip'] ?? '') : '';
+        $result = is_array($user) ? $system->removeAuthority($user) : false;
         if ($result === true) {
-            $message = "移除使用者授權 ".$_POST['user']['role_name']." ".$_POST['user']['role_ip']." 成功";
-            Logger::getInstance()->info("XHR [remove_authority] {\$message}。");
+            $message = "移除使用者授權 " . $role_name . " " . $role_ip . " 成功";
+            Logger::getInstance()->info("XHR [remove_authority] " . $message . "。");
             echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL);
         } else {
-            $message = '移除使用者授權 '.$_POST['user']['role_name']." ".$_POST['user']['role_ip'].' 失敗';
-            Logger::getInstance()->info("XHR [remove_authority] {\$message}。");
+            $message = '移除使用者授權 ' . $role_name . " " . $role_ip . ' 失敗';
+            Logger::getInstance()->info("XHR [remove_authority] " . $message . "。");
             echoJSONResponse($message);
         }
         break;
     case "add_authority":
+        $role_id = $_POST['role_id'] ?? '';
+        $ip = $_POST['ip'] ?? '';
         Logger::getInstance()->info("XHR [add_authority] 增加使用者授權請求");
-        $result = $system->addAuthority($_POST['role_id'], $_POST['ip']);
+        $result = $system->addAuthority($role_id, $ip);
         if ($result === true) {
-            $message = "增加使用者授權 ".$_POST['role_id']." ".$_POST['ip']." 成功";
-            Logger::getInstance()->info("XHR [add_authority] {\$message}。");
+            $message = "增加使用者授權 " . $role_id . " " . $ip . " 成功";
+            Logger::getInstance()->info("XHR [add_authority] " . $message . "。");
             echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL);
         } else {
             $message = '增加使用者授權失敗';
-            Logger::getInstance()->info("XHR [add_authority] {\$message}。");
+            Logger::getInstance()->info("XHR [add_authority] " . $message . "。");
             echoJSONResponse($message);
         }
         break;
     case "update_authority":
+        $old_role_id = $_POST['old_role_id'] ?? '';
+        $role_id = $_POST['role_id'] ?? '';
+        $ip = $_POST['ip'] ?? '';
         Logger::getInstance()->info("XHR [update_authority] 變更使用者授權請求");
-        $result = $system->updateAuthority($_POST['old_role_id'], $_POST['role_id'], $_POST['ip']);
+        $result = $system->updateAuthority($old_role_id, $role_id, $ip);
         if ($result === true) {
-            $message = "變更使用者授權 ".$_POST['ip']." 成功";
-            Logger::getInstance()->info("XHR [update_authority] {\$message}。");
+            $message = "變更使用者授權 " . $ip . " 成功";
+            Logger::getInstance()->info("XHR [update_authority] " . $message . "。");
             echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL);
         } else {
             $message = '變更使用者授權失敗';
-            Logger::getInstance()->info("XHR [update_authority] {\$message}。");
+            Logger::getInstance()->info("XHR [update_authority] " . $message . "。");
             echoJSONResponse($message);
         }
         break;
     case "upd_ext":
-        Logger::getInstance()->info("XHR [upd_ext] 更新分機號碼【".$_POST["id"].", ".$_POST["ext"]."】請求");
+        $id = $_POST["id"] ?? '';
+        $ext = $_POST["ext"] ?? '';
+        Logger::getInstance()->info("XHR [upd_ext] 更新分機號碼【".$id.", ".$ext."】請求");
         $sqlite_user = new SQLiteUser();
-        $result = $sqlite_user->updateExt($_POST["id"], $_POST["ext"]);
+        $result = $sqlite_user->updateExt($id, $ext);
         if ($result) {
-            $msg = "更新分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 成功。";
+            $msg = "更新分機號碼 ".$id.", ".$ext." 成功。";
             Logger::getInstance()->info("XHR [upd_ext] ".$msg);
             echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
         } else {
-            Logger::getInstance()->info("XHR [upd_ext] 更新分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 失敗。");
-            echoJSONResponse("更新分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 失敗。");
+            Logger::getInstance()->info("XHR [upd_ext] 更新分機號碼 ".$id.", ".$ext." 失敗。");
+            echoJSONResponse("更新分機號碼 ".$id.", ".$ext." 失敗。");
         }
         break;
     case "upd_dept":
-        Logger::getInstance()->info("XHR [upd_dept] 更新部門【".$_POST["id"].", ".$_POST["dept"]."】請求");
+        $id = $_POST["id"] ?? '';
+        $dept = $_POST["dept"] ?? '';
+        Logger::getInstance()->info("XHR [upd_dept] 更新部門【".$id.", ".$dept."】請求");
         $sqlite_user = new SQLiteUser();
-        $result = $sqlite_user->updateDept($_POST["id"], $_POST["dept"]);
+        $result = $sqlite_user->updateDept($id, $dept);
         if ($result) {
-            $msg = "更新部門 ".$_POST["id"].", ".$_POST["dept"]." 成功。";
+            $msg = "更新部門 ".$id.", ".$dept." 成功。";
             Logger::getInstance()->info("XHR [upd_dept] ".$msg);
             echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
         } else {
-            Logger::getInstance()->info("XHR [upd_dept] 更新部門 ".$_POST["id"].", ".$_POST["dept"]." 失敗。");
-            echoJSONResponse("更新部門 ".$_POST["id"].", ".$_POST["dept"]." 失敗。");
+            Logger::getInstance()->info("XHR [upd_dept] 更新部門 ".$id.", ".$dept." 失敗。");
+            echoJSONResponse("更新部門 ".$id.", ".$dept." 失敗。");
         }
         break;
     case "upd_ip":
-        Logger::getInstance()->info("XHR [upd_ip] 更新IP位址【".$_POST["id"].", ".$_POST["ip"]."】請求");
+        $id = $_POST["id"] ?? '';
+        $ip = $_POST["ip"] ?? '';
+        Logger::getInstance()->info("XHR [upd_ip] 更新IP位址【".$id.", ".$ip."】請求");
         $sqlite_user = new SQLiteUser();
-        $result = $sqlite_user->updateIP($_POST["id"], $_POST["ip"]);
+        $result = $sqlite_user->updateIP($id, $ip);
         if ($result) {
-            $msg = "更新IP位址 ".$_POST["id"].", ".$_POST["ip"]." 成功。";
+            $msg = "更新IP位址 ".$id.", ".$ip." 成功。";
             Logger::getInstance()->info("XHR [upd_ip] ".$msg);
             echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
         } else {
-            Logger::getInstance()->info("XHR [upd_ip] 更新IP位址 ".$_POST["id"].", ".$_POST["ip"]." 失敗。");
-            echoJSONResponse("更新IP位址 ".$_POST["id"].", ".$_POST["ip"]." 失敗。");
+            Logger::getInstance()->info("XHR [upd_ip] 更新IP位址 ".$id.", ".$ip." 失敗。");
+            echoJSONResponse("更新IP位址 ".$id.", ".$ip." 失敗。");
         }
         break;
 	case "my_info":
 	case "authentication":
-        $query_ip = empty($_POST['ip']) ? $client_ip : $_POST['ip'];
+        $query_ip = empty($_POST['ip']) ? ($client_ip ?? $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1') : $_POST['ip'];
 		Logger::getInstance()->info("XHR [my_info/authentication] 查詢 $query_ip 請求");
         $sqlite_user = new SQLiteUser();
         
@@ -377,7 +407,7 @@ switch ($_POST["type"]) {
 		if ($len > 1) {
             // find the one that is not disabled
             for ($i = 0; $i < $len; $i++) {
-                if (!$results[$i]['authority'] & AUTHORITY::DISABLED) {
+                if (!($results[$i]['authority'] & AUTHORITY::DISABLED)) {
                     $results = array($results[$i]);
                     break;
                 }
@@ -403,118 +433,147 @@ switch ($_POST["type"]) {
             echoJSONResponse("查詢 ".$query_ip." 成功。 (".$results[0]["id"].":".$results[0]["name"].")", STATUS_CODE::SUCCESS_NORMAL, array(
 				"data_count" => count($results),
 				"info" => $results[0],
-				"authority" => System::getInstance()->calcEffectiveAuthority($_SESSION["myinfo"]['authority'], $query_ip, $_SESSION["myinfo"]['unit'] ?? ''),
+				"authority" => System::getInstance()->calcEffectiveAuthority($_SESSION["myinfo"]['authority'] ?? 0, $query_ip, $_SESSION["myinfo"]['unit'] ?? ''),
 				"ad_available" => AdService::isAvailable()['available']
 			));
 		}
         break;
 	case "ad_authentication":
+        $id = $_POST["id"] ?? '';
+        $password = $_POST["password"] ?? '';
         Logger::getInstance()->info("XHR [ad_authentication] AD 認證請求");
-        $ad = new AdService();
-        $result = $mock ? $cache->get('ad_authentication') : $ad->authenticate($_POST["id"], $_POST["password"]);
-        $cache->set('ad_authentication', $result);
-        if ($result === true || is_array($result)) {
-            Logger::getInstance()->info("XHR [ad_authentication] AD 認證成功。");
-            echoJSONResponse("AD 認證成功。", STATUS_CODE::SUCCESS_NORMAL, array(
-                "raw" => $result
-            ));
-        } else {
-            Logger::getInstance()->info("XHR [ad_authentication] AD 認證失敗。");
-            echoJSONResponse("AD 認證失敗。");
+        try {
+            $result = $mock ? ($cache->get('ad_authentication') ?? true) : (new AdService())->authenticate($id, $password);
+            $cache->set('ad_authentication', $result);
+            if ($result === true || is_array($result)) {
+                Logger::getInstance()->info("XHR [ad_authentication] AD 認證成功。");
+                echoJSONResponse("AD 認證成功。", STATUS_CODE::SUCCESS_NORMAL, array(
+                    "raw" => $result
+                ));
+            } else {
+                Logger::getInstance()->info("XHR [ad_authentication] AD 認證失敗。");
+                echoJSONResponse("AD 認證失敗。");
+            }
+        } catch (\Throwable $e) {
+            Logger::getInstance()->error("XHR [ad_authentication] 失敗: " . $e->getMessage());
+            echoJSONResponse("AD 認證失敗: " . $e->getMessage(), STATUS_CODE::DEFAULT_FAIL);
         }
         break;
     case "ad_users_valid":
         Logger::getInstance()->info("XHR [ad_users_valid] 取得所有AD有效使用者資料請求");
-        $ad = new AdService();
-        $users = $ad->getValidUsers();
-        if ($mock && empty($users)) {
-            $users = $cache->get('ad_users_valid') ?: [];
-        }
-        $cache->set('ad_users_valid', $users);
-        if (empty($users)) {
-            Logger::getInstance()->info("XHR [ad_users_valid] 查無AD有效使用者資料。");
-            echoJSONResponse("查無AD有效使用者資料。");
-        } else {
-            Logger::getInstance()->info("XHR [ad_users_valid] 查詢AD有效使用者資料成功。");
-            echoJSONResponse('查詢AD有效使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
-                "data_count" => count($users),
-                "raw" => $users
-            ));
+        try {
+            $users = $mock ? ($cache->get('ad_users_valid') ?: [['id' => 'MOCK_USER', 'name' => '測試人員']]) : (new AdService())->getValidUsers();
+            $cache->set('ad_users_valid', $users);
+            if (empty($users)) {
+                Logger::getInstance()->info("XHR [ad_users_valid] 查無AD有效使用者資料。");
+                echoJSONResponse("查無AD有效使用者資料。");
+            } else {
+                Logger::getInstance()->info("XHR [ad_users_valid] 查詢AD有效使用者資料成功。");
+                echoJSONResponse('查詢AD有效使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
+                    "data_count" => count($users),
+                    "raw" => $users
+                ));
+            }
+        } catch (\Throwable $e) {
+            Logger::getInstance()->error("XHR [ad_users_valid] 失敗: " . $e->getMessage());
+            echoJSONResponse("查詢AD有效使用者資料失敗: " . $e->getMessage(), STATUS_CODE::DEFAULT_FAIL);
         }
         break;
     case "ad_users_locked":
         Logger::getInstance()->info("XHR [ad_users_locked] 查詢鎖定使用者資料請求");
-        $ad = new AdService();
-        $users = $ad->getLockedUsers();
-        if ($mock && empty($users)) {
-            $users = $cache->get('ad_users_locked') ?: [];
-        }
-        $cache->set('ad_users_locked', $users);
-        if (empty($users)) {
-            Logger::getInstance()->info("XHR [ad_users_locked] 查無鎖定使用者資料。");
-            echoJSONResponse("查無鎖定使用者資料。");
-        } else {
-            Logger::getInstance()->info("XHR [ad_users_locked] 查詢鎖定使用者資料成功。");
-            echoJSONResponse('查詢鎖定使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
-                "data_count" => count($users),
-                "raw" => $users
-            ));
+        try {
+            $users = $mock ? ($cache->get('ad_users_locked') ?: []) : (new AdService())->getLockedUsers();
+            $cache->set('ad_users_locked', $users);
+            if (empty($users)) {
+                Logger::getInstance()->info("XHR [ad_users_locked] 查無鎖定使用者資料。");
+                echoJSONResponse("查無鎖定使用者資料。");
+            } else {
+                Logger::getInstance()->info("XHR [ad_users_locked] 查詢鎖定使用者資料成功。");
+                echoJSONResponse('查詢鎖定使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
+                    "data_count" => count($users),
+                    "raw" => $users
+                ));
+            }
+        } catch (\Throwable $e) {
+            Logger::getInstance()->error("XHR [ad_users_locked] 失敗: " . $e->getMessage());
+            echoJSONResponse("查詢鎖定使用者資料失敗: " . $e->getMessage(), STATUS_CODE::DEFAULT_FAIL);
         }
         break;
     case "ad_pw_reset":
     case "ad_user_unlock":
-        $type = $_POST["type"];
-        Logger::getInstance()->info("XHR [$type] 解鎖使用者資料請求");
-        $ad = new AdService();
-        $result = $mock ? $cache->get('ad_user_unlock') : $ad->unlockUser($_POST["id"], $_POST["password"]);
-        $cache->set('ad_user_unlock', $result);
-        if ($result === true) {
-            $msg = empty($_POST["password"]) ? "解鎖使用者資料成功" : "解鎖並重設使用者密碼成功";
-            Logger::getInstance()->info("XHR [$type] $msg 。");
-            echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
-                "raw" => $result
-            ));
-        } else {
-            $msg = empty($_POST["password"]) ? "解鎖使用者資料失敗。" : "解鎖並重設使用者密碼失敗";
-            Logger::getInstance()->error("XHR [$type] $msg");
-            echoJSONResponse($msg);
+        $req_type = $type;
+        $id = $_POST["id"] ?? '';
+        $password = $_POST["password"] ?? '';
+        Logger::getInstance()->info("XHR [$req_type] 解鎖使用者資料請求");
+        try {
+            $result = $mock ? ($cache->get('ad_user_unlock') ?? true) : (new AdService())->unlockUser($id, $password);
+            $cache->set('ad_user_unlock', $result);
+            if ($result === true) {
+                $msg = empty($password) ? "解鎖使用者資料成功" : "解鎖並重設使用者密碼成功";
+                Logger::getInstance()->info("XHR [$req_type] $msg 。");
+                echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
+                    "raw" => $result
+                ));
+            } else {
+                $msg = empty($password) ? "解鎖使用者資料失敗。" : "解鎖並重設使用者密碼失敗";
+                Logger::getInstance()->error("XHR [$req_type] $msg");
+                echoJSONResponse($msg);
+            }
+        } catch (\Throwable $e) {
+            Logger::getInstance()->error("XHR [$req_type] 失敗: " . $e->getMessage());
+            echoJSONResponse("解鎖處理失敗: " . $e->getMessage(), STATUS_CODE::DEFAULT_FAIL);
         }
         break;
     case "ad_user_info":
-        Logger::getInstance()->info("XHR [ad_user_info] 查詢使用者資料【".$_POST["id"]."】請求");
-        $ad = new AdService();
-        $result = $mock ? $cache->get('ad_user_info') : $ad->getUser($_POST["id"]);
-        $cache->set('ad_user_info', $result);
-        if (empty($result)) {
-            Logger::getInstance()->info("XHR [ad_user_info] 查無 ".$_POST["id"]." 資料。");
-            echoJSONResponse("查無 ".$_POST["id"]." 資料。");
-        } else {
-            Logger::getInstance()->info("XHR [ad_user_info] 查詢 ".$_POST["id"]." 成功。");
-            echoJSONResponse("查詢 ".$_POST["id"]." 成功", STATUS_CODE::SUCCESS_NORMAL, array(
-                "data_count" => count($result),
-                "raw" => $result
-            ));
+        $id = $_POST["id"] ?? '';
+        Logger::getInstance()->info("XHR [ad_user_info] 查詢使用者資料【".$id."】請求");
+        try {
+            $result = $mock ? ($cache->get('ad_user_info') ?: [['id' => $id, 'name' => 'AD測試人員']]) : (new AdService())->getUser($id);
+            $cache->set('ad_user_info', $result);
+            if (empty($result)) {
+                Logger::getInstance()->info("XHR [ad_user_info] 查無 ".$id." 資料。");
+                echoJSONResponse("查無 ".$id." 資料。");
+            } else {
+                Logger::getInstance()->info("XHR [ad_user_info] 查詢 ".$id." 成功。");
+                echoJSONResponse("查詢 ".$id." 成功", STATUS_CODE::SUCCESS_NORMAL, array(
+                    "data_count" => is_countable($result) ? count($result) : (is_array($result) ? count($result) : 1),
+                    "raw" => $result
+                ));
+            }
+        } catch (\Throwable $e) {
+            Logger::getInstance()->error("XHR [ad_user_info] 失敗: " . $e->getMessage());
+            echoJSONResponse("查詢使用者資料失敗: " . $e->getMessage(), STATUS_CODE::DEFAULT_FAIL);
         }
         break;
     case "ad_config":
         Logger::getInstance()->info("XHR [ad_config] 取得AD設定請求");
-        $ad = new AdService();
-        $result = $ad->getConfig();
-        Logger::getInstance()->info("XHR [ad_config] 取得AD設定成功");
-        echoJSONResponse("取得AD設定成功", STATUS_CODE::SUCCESS_NORMAL, array(
-            "raw" => $result
-        ));
+        try {
+            $result = (new AdService())->getConfig();
+            Logger::getInstance()->info("XHR [ad_config] 取得AD設定成功");
+            echoJSONResponse("取得AD設定成功", STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $result
+            ));
+        } catch (\Throwable $e) {
+            Logger::getInstance()->error("XHR [ad_config] 失敗: " . $e->getMessage());
+            echoJSONResponse("取得AD設定失敗: " . $e->getMessage(), STATUS_CODE::DEFAULT_FAIL);
+        }
         break;
     case "ad_update_config":
+        $config = $_POST["config"] ?? [];
         Logger::getInstance()->info("XHR [ad_update_config] 更新AD設定請求");
-        $ad = new AdService();
-        $result = $ad->updateConfig($_POST["config"]);
-        if ($result === true) {
-            Logger::getInstance()->info("XHR [ad_update_config] 更新AD設定成功。");
-            echoJSONResponse("更新AD設定成功。", STATUS_CODE::SUCCESS_NORMAL);
-        } else {
-            Logger::getInstance()->error("XHR [ad_update_config] 更新AD設定失敗。");
-            echoJSONResponse("更新AD設定失敗。");
+        try {
+            $ad = new AdService();
+            $result = is_array($config) && !empty($config) ? $ad->updateConfig($config) : false;
+            if ($result === true) {
+                Logger::getInstance()->info("XHR [ad_update_config] 更新AD設定成功。");
+                echoJSONResponse("更新AD設定成功。", STATUS_CODE::SUCCESS_NORMAL);
+            } else {
+                Logger::getInstance()->error("XHR [ad_update_config] 更新AD設定失敗。");
+                echoJSONResponse("更新AD設定失敗。");
+            }
+        } catch (\Throwable $e) {
+            Logger::getInstance()->error("XHR [ad_update_config] 失敗: " . $e->getMessage());
+            echoJSONResponse("更新AD設定失敗: " . $e->getMessage(), STATUS_CODE::DEFAULT_FAIL);
         }
         break;
     case "ad_status":
@@ -527,46 +586,59 @@ switch ($_POST["type"]) {
         ));
         break;
     case "ad_test_connection":
+        $config = $_POST["config"] ?? [];
         Logger::getInstance()->info("XHR [ad_test_connection] 測試AD連線請求");
-        $ad = new AdService();
-        $arr = $mock ? $cache->get('ad_test_connection') : $ad->testConnection($_POST["config"]);
-        $cache->set('ad_test_connection', $arr);
-        if (!is_array($arr)) {
-            $arr = array('status' => (bool)$mock, 'message' => $mock ? 'AD 連線與認證成功 (Mock)' : 'AD 連線失敗');
-        }
-        Logger::getInstance()->info("XHR [ad_test_connection] ".$arr['message']);
-        if ($arr['status'] === true) {
-            echoJSONResponse($arr['message'], STATUS_CODE::SUCCESS_NORMAL, array(
-                "raw" => $arr
-            ));
-        } else {
-            echoJSONResponse($arr['message'], STATUS_CODE::DEFAULT_FAIL, array(
-                "raw" => $arr
-            ));
+        try {
+            $arr = $mock ? ($cache->get('ad_test_connection') ?: ['status' => true, 'message' => 'AD 連線與認證成功 (Mock)']) : ((is_array($config) && !empty($config)) ? (new AdService())->testConnection($config) : null);
+            $cache->set('ad_test_connection', $arr);
+            if (!is_array($arr)) {
+                $arr = array('status' => (bool)$mock, 'message' => $mock ? 'AD 連線與認證成功 (Mock)' : 'AD 連線失敗');
+            }
+            Logger::getInstance()->info("XHR [ad_test_connection] ".$arr['message']);
+            if ($arr['status'] === true) {
+                echoJSONResponse($arr['message'], STATUS_CODE::SUCCESS_NORMAL, array(
+                    "raw" => $arr
+                ));
+            } else {
+                echoJSONResponse($arr['message'], STATUS_CODE::DEFAULT_FAIL, array(
+                    "raw" => $arr
+                ));
+            }
+        } catch (\Throwable $e) {
+            Logger::getInstance()->error("XHR [ad_test_connection] 失敗: " . $e->getMessage());
+            echoJSONResponse("測試連線失敗: " . $e->getMessage(), STATUS_CODE::DEFAULT_FAIL);
         }
         break;
     case "ad_sync_users":
         Logger::getInstance()->info("XHR [ad_sync_users] 同步AD使用者請求");
-        $sqlite_user = new SQLiteUser();
-        // syncAdUsers() 不帶參數時，內部會自動 new AdService() 去抓取資料
-        // $stats = ['added' => 0, 'updated' => 0, 'skipped' => 0, 'failed' => 0, 'offboarded' => 0];
-        $stats = $sqlite_user->syncAdUsers();
-        // 組合訊息
-        $message = sprintf(
-            "同步完成：新增 %d 位、更新 %d 位、略過 %d 位、失敗 %d 位、離職 %d 位。",
-            $stats['added'],
-            $stats['updated'],
-            $stats['skipped'],
-            $stats['failed'],
-            $stats['offboarded']
-        );
-        Logger::getInstance()->info("XHR [ad_sync_users] $message");
-        echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL, array(
-            "raw" => $stats
-        ));
+        try {
+            $sqlite_user = new SQLiteUser();
+            // syncAdUsers() 不帶參數時，內部會自動 new AdService() 去抓取資料
+            $stats = $sqlite_user->syncAdUsers();
+            if (!is_array($stats)) {
+                $stats = ['added' => 0, 'updated' => 0, 'skipped' => 0, 'failed' => 0, 'offboarded' => 0];
+            }
+            // 組合訊息
+            $message = sprintf(
+                "同步完成：新增 %d 位、更新 %d 位、略過 %d 位、失敗 %d 位、離職 %d 位。",
+                $stats['added'] ?? 0,
+                $stats['updated'] ?? 0,
+                $stats['skipped'] ?? 0,
+                $stats['failed'] ?? 0,
+                $stats['offboarded'] ?? 0
+            );
+            Logger::getInstance()->info("XHR [ad_sync_users] $message");
+            echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $stats
+            ));
+        } catch (\Throwable $e) {
+            Logger::getInstance()->error("XHR [ad_sync_users] 失敗: " . $e->getMessage());
+            echoJSONResponse("同步AD使用者失敗: " . $e->getMessage(), STATUS_CODE::DEFAULT_FAIL);
+        }
         break;
     default:
-		Logger::getInstance()->warning("不支援的查詢型態【".$_POST["type"]."】");
-		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
+        $type_str = $_POST["type"] ?? '';
+		Logger::getInstance()->warning("不支援的查詢型態【".$type_str."】");
+		echoJSONResponse("不支援的查詢型態【".$type_str."】", STATUS_CODE::UNSUPPORT_FAIL);
 		break;
 }

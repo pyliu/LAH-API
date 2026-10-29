@@ -432,7 +432,20 @@ class SQLiteUser {
             Logger::getInstance()->warning(__METHOD__.': id is a required param, it\'s empty.');
             return false;
         }
+        $id = $data['id'];
+        $name = $data['name'] ?? '';
         $sex = (($data['sex'] ?? 0) != 1) ? 0 : 1;
+        $ext = $data['ext'] ?? 153;
+        $cell = $data['cell'] ?? '';
+        $unit = $data['unit'] ?? '行政課';
+        $title = $data['title'] ?? '';
+        $work = $data['work'] ?? '';
+        $exam = $data['exam'] ?? '';
+        $education = $data['education'] ?? '';
+        $ip = $data['ip'] ?? '192.168.xx.xx';
+        $authority = $data['authority'] ?? ($this->getAuthority($id) ?? 0);
+        $onboard_date = $data['onboard_date'] ?? '';
+        $birthday = $data['birthday'] ?? '';
         
         if($stmt = $this->db->prepare("
             UPDATE user SET
@@ -451,20 +464,20 @@ class SQLiteUser {
                 birthday = :birthday
             WHERE id = :id
         ")) {
-            $stmt->bindParam(':id', $data['id']);
-            $stmt->bindParam(':name', $data['name']);
-            $stmt->bindParam(':sex', $sex);
-            $stmt->bindParam(':ext', $data['ext']);
-            $stmt->bindParam(':cell', $data['cell']);
-            $stmt->bindParam(':unit', $data['unit']);
-            $stmt->bindParam(':title', $data['title']);
-            $stmt->bindParam(':work', $data['work']);
-            $stmt->bindParam(':exam', $data['exam']);
-            $stmt->bindParam(':education', $data['education']);
-            $stmt->bindParam(':ip', $data['ip']);
-            $stmt->bindValue(':authority', $data['authority']);
-            $stmt->bindParam(':onboard_date', $data['onboard_date']);
-            $stmt->bindParam(':birthday', $data['birthday']);
+            $stmt->bindValue(':id', $id);
+            $stmt->bindValue(':name', $name);
+            $stmt->bindValue(':sex', $sex);
+            $stmt->bindValue(':ext', $ext);
+            $stmt->bindValue(':cell', $cell);
+            $stmt->bindValue(':unit', $unit);
+            $stmt->bindValue(':title', $title);
+            $stmt->bindValue(':work', $work);
+            $stmt->bindValue(':exam', $exam);
+            $stmt->bindValue(':education', $education);
+            $stmt->bindValue(':ip', $ip);
+            $stmt->bindValue(':authority', $authority);
+            $stmt->bindValue(':onboard_date', $onboard_date);
+            $stmt->bindValue(':birthday', $birthday);
             return $stmt->execute() === FALSE ? false : true;
         }
         return false;
