@@ -7,6 +7,7 @@ $message = '已上傳';
 $filename = '';
 $tmp_file = '';
 $base64 = '';
+$converted = ['uri' => '', 'encoded' => ''];
 
 if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
     $filename = $_FILES['file']['name'];
@@ -16,14 +17,19 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
 
         $tmp_file = $_FILES['file']['tmp_name'];
         $timestamp = time();
+
+        if (!file_exists(UPLOAD_IMG_DIR) || !is_dir(UPLOAD_IMG_DIR)) {
+            @mkdir(UPLOAD_IMG_DIR, 0777, true);
+        }
+
         $to_file = UPLOAD_IMG_DIR.DIRECTORY_SEPARATOR.$filename;
-        $w = $_POST['width'] ?? 960;
-        $h = $_POST['height'] ?? 540;
-        $q = $_POST['quality'] ?? 75;
+        $w = isset($_POST['width']) ? (int)$_POST['width'] : 960;
+        $h = isset($_POST['height']) ? (int)$_POST['height'] : 540;
+        $q = isset($_POST['quality']) ? (int)$_POST['quality'] : 75;
 
         $resized = resizeImage($tmp_file, $w, $h);
 
-        if (imagejpeg($resized, $to_file, $q)) {
+        if ($resized && imagejpeg($resized, $to_file, $q)) {
             $status = STATUS_CODE::SUCCESS_NORMAL;
             $message = '影像已儲存 '.$to_file;
 
@@ -33,7 +39,7 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
             $inserted_id = $sqlite_image->addImage(array(
                 "name" => $filename,
                 "path" => $to_file,
-                "note" => $_POST["note"]
+                "note" => $_POST["note"] ?? ''
             ));
             
             if ($inserted_id === false) {
@@ -51,9 +57,13 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
     }
 }
 
+if (!headers_sent()) {
+    header('Content-Type: application/json; charset=utf-8');
+}
+
 echo json_encode(array(
     'status' => $status,
     'message'  => $message,
-    'uri' => $converted['uri'],
-    'encoded' => $converted['encoded']
+    'uri' => $converted['uri'] ?? '',
+    'encoded' => $converted['encoded'] ?? ''
 ));
