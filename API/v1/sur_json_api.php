@@ -4,16 +4,18 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSurDestructionTracking.class.php
 
 $destructionTracking = new SQLiteSurDestructionTracking();
 
-switch ($_POST["type"]) {
+$type = $_POST["type"] ?? '';
+
+switch ($type) {
     case "destruction_tracking_number_list":
         Logger::getInstance()->info("XHR [destruction_tracking_number_list] get tracking number list request.");
         $rows = $destructionTracking->getAllNumbers();
-        $count = count($rows);
+        $count = is_countable($rows) ? count($rows) : 0;
         $response_code = $rows === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "取得 $count 筆建物滅失追蹤發文字號資料" : "無法取得建物滅失追蹤發文字號資料";
         
         $result = array();
-        if ($rows !== false) {
+        if ($rows !== false && is_iterable($rows)) {
             foreach ($rows as $row) {
                 $result[] = $row['number'];
             }
@@ -23,18 +25,21 @@ switch ($_POST["type"]) {
         echoJSONResponse($message, $response_code, array( "raw" => $result ));
         break;
     case "destruction_tracking_number_exist":
-        Logger::getInstance()->info("XHR [destruction_tracking_number_exist] get tracking number list request.");
-        $existed = $destructionTracking->exists($_POST['number']);
+        $number = $_POST['number'] ?? '';
+        Logger::getInstance()->info("XHR [destruction_tracking_number_exist] get tracking number list request. ($number)");
+        $existed = $destructionTracking->exists($number);
         $response_code = $existed === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
-        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? $_POST['number'].'已建立' : $_POST['number'].'查無資料';
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? $number.'已建立' : $number.'查無資料';
         Logger::getInstance()->info("XHR [destruction_tracking_number_exist] $message");
         echoJSONResponse($message, $response_code, array( "raw" => $existed ));
         break;
     case "destruction_tracking_list":
         Logger::getInstance()->info("XHR [destruction_tracking_list] get tracking list request.");
         $count = 0;
-        $result = $destructionTracking->searchByApplyDate($_POST['tw_start'], $_POST['tw_end']);
-		$count = count($result);
+        $tw_start = $_POST['tw_start'] ?? '';
+        $tw_end = $_POST['tw_end'] ?? '';
+        $result = $destructionTracking->searchByApplyDate($tw_start, $tw_end);
+		$count = is_countable($result) ? count($result) : 0;
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "取得 $count 筆建物滅失追蹤資料" : "無法取得建物滅失追蹤資料";
         Logger::getInstance()->info("XHR [destruction_tracking_list] $message");
@@ -48,18 +53,13 @@ switch ($_POST["type"]) {
         $tmp_file = '';
         $payload = $_POST;
 
-        // $payload['debug'] = array(
-        //     'done_is_bool' => is_bool($_POST['done']),
-        //     'done_val' => $_POST['done'],
-        // );
-
         if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
             $filename = $_FILES['file']['name'];
             $extension = pathinfo($filename, PATHINFO_EXTENSION);
             if (strtoupper($extension) === 'PDF') {
                 $tmp_file = $_FILES['file']['tmp_name'];
         
-                $payload['filename'] = $_POST['apply_date'].'_'.$_POST['section_code'].'_'.$_POST['land_number'].'_'.$_POST['building_number'];
+                $payload['filename'] = ($_POST['apply_date'] ?? '').'_'.($_POST['section_code'] ?? '').'_'.($_POST['land_number'] ?? '').'_'.($_POST['building_number'] ?? '');
         
                 // make sure the parent dir has been created
                 $parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.'sur_destruction_tracking';
@@ -100,7 +100,7 @@ switch ($_POST["type"]) {
 
         $payload = array();
         // primary key in DB
-        $id = $_POST['id'];
+        $id = $_POST['id'] ?? 0;
 
         $orig = $destructionTracking->getOne($id);
 
@@ -143,7 +143,7 @@ switch ($_POST["type"]) {
         break;
     case "remove_destruction_tracking":
         Logger::getInstance()->info("XHR [remove_destruction_tracking] remove tracking data request.");
-        $id = $_POST['id'];
+        $id = $_POST['id'] ?? 0;
         $result = $destructionTracking->removePDF($id);
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已刪除建物滅失追蹤PDF資料 ($id)" : "無法刪除建物滅失追蹤PDF資料 ($id)";
@@ -152,8 +152,8 @@ switch ($_POST["type"]) {
         break;
     case "switch_done_destruction_tracking":
         Logger::getInstance()->info("XHR [switch_done_destruction_tracking] switch done tracking data request.");
-        $id = $_POST['id'];
-        $done = $_POST['done'];
+        $id = $_POST['id'] ?? 0;
+        $done = $_POST['done'] ?? '';
         $result = $destructionTracking->setDone($id, $done);
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $success_message = $done === 'true' ? "已設定解除列管 ($id)" : "已設定管制 ($id)";
@@ -162,7 +162,7 @@ switch ($_POST["type"]) {
         echoJSONResponse($message, $response_code);
         break;
     default:
-        Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
-        echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
+        Logger::getInstance()->error("不支援的查詢型態【".$type."】");
+        echoJSONResponse("不支援的查詢型態【".$type."】", STATUS_CODE::UNSUPPORT_FAIL);
         break;
 }
