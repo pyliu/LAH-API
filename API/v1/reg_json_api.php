@@ -14,14 +14,16 @@ $cache = Cache::getInstance();
 $system = System::getInstance();
 $mock = $system->isMockMode();
 
-switch ($_POST["type"]) {
+$reqType = $_POST["type"] ?? "";
+switch ($reqType) {
     case "foreigner_pdf_list":
         Logger::getInstance()->info("XHR [foreigner_pdf_list] get pdf list request.");
         $count = 0;
-        $result = $query->getRegForeignerPDF($_POST['start_ts'], $_POST['end_ts'], $_POST['keyword']);
-				// $result = $mock ? $cache->get('foreigner_pdf_list') : $query->getRegForeignerPDF($_POST['start_ts'], $_POST['end_ts'], $_POST['keyword']);
-        // $cache->set('foreigner_pdf_list', $result);
-				$count = count($result);
+        $start_ts = $_POST['start_ts'] ?? 0;
+        $end_ts = $_POST['end_ts'] ?? 0;
+        $keyword = $_POST['keyword'] ?? '';
+        $result = $query->getRegForeignerPDF($start_ts, $end_ts, $keyword);
+				$count = is_countable($result) ? count($result) : 0;
 				$response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "取得 $count 筆外國人PDF資料" : "無法取得外國人PDF資料";
         Logger::getInstance()->info("XHR [foreigner_pdf_list] $message");
@@ -40,11 +42,11 @@ switch ($_POST["type"]) {
             if (strtoupper($extension) === 'PDF') {
                 $tmp_file = $_FILES['file']['tmp_name'];
         
-                $payload['year'] = $year = $_POST['year'];
-                $payload['number'] = $number = str_pad($_POST['number'], 6, '0', STR_PAD_LEFT);;
-                $payload['fid'] = $fid = $_POST['fid'];
-                $payload['fname'] = $fname = $_POST['fname'];
-                $payload['note'] = $note = $_POST['note'];
+                $payload['year'] = $year = $_POST['year'] ?? '';
+                $payload['number'] = $number = str_pad($_POST['number'] ?? '', 6, '0', STR_PAD_LEFT);
+                $payload['fid'] = $fid = $_POST['fid'] ?? '';
+                $payload['fname'] = $fname = $_POST['fname'] ?? '';
+                $payload['note'] = $note = $_POST['note'] ?? '';
         
                 // make sure the parent dir has been created
                 $parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.$year;
@@ -86,13 +88,13 @@ switch ($_POST["type"]) {
 
         $payload = array();
         // primary key in DB
-        $payload['id'] = $id = $_POST['id'];
-        $payload['year'] = $year = $_POST['year'];
-        $payload['old_year'] = $old_year = $_POST['old_year'];
-        $payload['number'] = $number = str_pad($_POST['number'], 6, '0', STR_PAD_LEFT);;
-        $payload['fid'] = $fid = $_POST['fid'];
-        $payload['fname'] = $fname = $_POST['fname'];
-        $payload['note'] = $note = $_POST['note'];
+        $payload['id'] = $id = $_POST['id'] ?? '';
+        $payload['year'] = $year = $_POST['year'] ?? '';
+        $payload['old_year'] = $old_year = $_POST['old_year'] ?? '';
+        $payload['number'] = $number = str_pad($_POST['number'] ?? '', 6, '0', STR_PAD_LEFT);
+        $payload['fid'] = $fid = $_POST['fid'] ?? '';
+        $payload['fname'] = $fname = $_POST['fname'] ?? '';
+        $payload['note'] = $note = $_POST['note'] ?? '';
         $payload['modifytime'] = $modifytime = time();
 
         $rfpdf = new SQLiteRegForeignerPDF();
@@ -145,7 +147,7 @@ switch ($_POST["type"]) {
                     $extension = pathinfo($filename, PATHINFO_EXTENSION);
                     if (strtoupper($extension) === 'PDF') {
                         $tmp_file = $_FILES['file']['tmp_name'];
-                        $to_file = $parent_dir.DIRECTORY_SEPARATOR.$number."_".$fid."_".$fname.".".$extension;
+                        $to_file = $new_parent_dir.DIRECTORY_SEPARATOR.$number."_".$fid."_".$fname.".".$extension;
                         $moved = move_uploaded_file($tmp_file, $to_file);
                         $message .= $moved ? '-(PDF檔案置換成功)' : '-(PDF檔置換失敗)';
                     }
@@ -162,7 +164,7 @@ switch ($_POST["type"]) {
         break;
     case "remove_foreigner_pdf":
         Logger::getInstance()->info("XHR [remove_foreigner_pdf] remove foreigner pdf request.");
-        $id = $_POST['id'];
+        $id = $_POST['id'] ?? '';
         $result = $query->removeRegForeignerPDF($id);
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已刪除外國人PDF資料 ($id)" : "無法刪除外國人PDF資料 ($id)";
@@ -172,8 +174,8 @@ switch ($_POST["type"]) {
     case "add_foreigner_data":
     case "edit_foreigner_data":
         Logger::getInstance()->info("XHR [edit_foreigner_data] edit foreigner data request.");
-        $data = $_POST['data'];
-        $pkey = $data['pkey'];
+        $data = $_POST['data'] ?? [];
+        $pkey = $data['pkey'] ?? '';
         $srfr = new SQLiteRegForeignerRestriction();
         $result = $srfr->add($data);
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
@@ -183,7 +185,7 @@ switch ($_POST["type"]) {
         break;
     case "remove_foreigner_data":
         Logger::getInstance()->info("XHR [remove_foreigner_data] remove foreigner data request.");
-        $pkey = $_POST['pkey'];
+        $pkey = $_POST['pkey'] ?? '';
         $srfr = new SQLiteRegForeignerRestriction();
         $result = $srfr->delete($pkey);
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
@@ -193,7 +195,7 @@ switch ($_POST["type"]) {
         break;
     case "address_undisclosed_list":
         Logger::getInstance()->info("XHR [address_undisclosed_list] get address undisclosed list request.");
-        $result = $query->getRegAddressUndisclosed($_POST['start_ts'], $_POST['end_ts'], $_POST['keyword']);
+        $result = $query->getRegAddressUndisclosed($_POST['start_ts'] ?? 0, $_POST['end_ts'] ?? 0, $_POST['keyword'] ?? '');
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已取得住址隱匿資料" : "無法取得住址隱匿資料";
         Logger::getInstance()->info("XHR [address_undisclosed_list] $message");
@@ -201,7 +203,7 @@ switch ($_POST["type"]) {
         break;
     case "add_address_undisclosed":
         Logger::getInstance()->info("XHR [add_address_undisclosed] add address undisclosed request.");
-        $data = $_POST['data'];
+        $data = $_POST['data'] ?? [];
         $srau = new SQLiteRegAddressUndisclosed();
         $result = $srau->add($data);
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
@@ -214,7 +216,7 @@ switch ($_POST["type"]) {
         $status = STATUS_CODE::DEFAULT_FAIL;
         $message = '未知的失敗';
         $payload = array();
-        $id = $_POST['id'];
+        $id = $_POST['id'] ?? '';
         $payload['id'] = $id;
         $srau = new SQLiteRegAddressUndisclosed();
         $record = $srau->getOne($id);
@@ -238,7 +240,7 @@ switch ($_POST["type"]) {
         break;
     case "remove_address_undisclosed":
         Logger::getInstance()->info("XHR [remove_address_undisclosed] remove address undisclosed request.");
-        $id = $_POST['id'];
+        $id = $_POST['id'] ?? '';
         $srau = new SQLiteRegAddressUndisclosed();
         $result = $srau->delete($id);
         $response_code = $result === false ? STATUS_CODE::FAIL_DB_ERROR : STATUS_CODE::SUCCESS_NORMAL;
@@ -289,7 +291,7 @@ switch ($_POST["type"]) {
         break;
     case "property_alert_list":
         Logger::getInstance()->info("XHR [property_alert_list] get property alert list request.");
-        $result = $query->getRegPropertyAlert($_POST['start_ts'], $_POST['end_ts'], $_POST['keyword']);
+        $result = $query->getRegPropertyAlert($_POST['start_ts'] ?? 0, $_POST['end_ts'] ?? 0, $_POST['keyword'] ?? '');
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已取得地籍異動即時通資料" : "無法取得地籍異動即時通資料";
         Logger::getInstance()->info("XHR [property_alert_list] $message");
@@ -297,7 +299,7 @@ switch ($_POST["type"]) {
         break;
     case "add_property_alert":
         Logger::getInstance()->info("XHR [add_property_alert] add property alert request.");
-        $data = $_POST['data'];
+        $data = $_POST['data'] ?? [];
         $srpa = new SQLiteRegPropertyAlert();
         $result = $srpa->add($data);
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
@@ -310,7 +312,7 @@ switch ($_POST["type"]) {
         $status = STATUS_CODE::DEFAULT_FAIL;
         $message = '未知的失敗';
         $payload = array();
-        $id = $_POST['id'];
+        $id = $_POST['id'] ?? '';
         $payload['id'] = $id;
         $srpa = new SQLiteRegPropertyAlert();
         $record = $srpa->getOne($id);
@@ -334,7 +336,7 @@ switch ($_POST["type"]) {
         break;
     case "remove_property_alert":
         Logger::getInstance()->info("XHR [remove_property_alert] remove property alert request.");
-        $id = $_POST['id'];
+        $id = $_POST['id'] ?? '';
         $srpa = new SQLiteRegPropertyAlert();
         $result = $srpa->delete($id);
         $response_code = $result === false ? STATUS_CODE::FAIL_DB_ERROR : STATUS_CODE::SUCCESS_NORMAL;
@@ -351,8 +353,8 @@ switch ($_POST["type"]) {
         echoJSONResponse($res['message'], $res['status'], array('payload' => $res['payload']));
         break;
     default:
-        Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
-        echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
+        Logger::getInstance()->error("不支援的查詢型態【".$reqType."】");
+        echoJSONResponse("不支援的查詢型態【".$reqType."】", STATUS_CODE::UNSUPPORT_FAIL);
         break;
 }
 

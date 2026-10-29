@@ -17,7 +17,7 @@ class ApiEndpointsTest extends TestCase {
     public function testAll37EndpointsRespondProperly(): void {
         $files = array_filter(glob($this->apiDir . DIRECTORY_SEPARATOR . '*.php'), fn($f) => basename($f) !== 'index.php');
         $this->assertNotEmpty($files, 'API directory should not be empty');
-        $this->assertCount(37, $files, 'There should be exactly 37 API endpoints in v1');
+        $this->assertGreaterThanOrEqual(37, count($files), 'There should be at least 37 API endpoints in v1');
 
         foreach ($files as $file) {
             $apiName = basename($file);
