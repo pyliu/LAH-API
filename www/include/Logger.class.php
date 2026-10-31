@@ -55,13 +55,17 @@ class Logger {
     * @param array $params
     */
     private function __construct($log_file = '', $params = array()){
-        $this->log_dir = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."log";
+        $this->log_dir = defined('LOG_DIR') ? LOG_DIR : dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."log";
         if (empty($log_file)) {
             // ex: log-2019-09-16.log
             $log_file = $this->log_dir.DIRECTORY_SEPARATOR.'log-'.date('Y-m-d').'.log';
         }
         $this->log_file = $log_file;
         $this->options = array_merge($this->options, $params);
+
+        if (!is_dir($this->log_dir)) {
+            @mkdir($this->log_dir, 0777, true);
+        }
 
         //Create log file if it doesn't exist.
         if(!file_exists($log_file)){               

@@ -21,7 +21,22 @@ define('ROOT_DIR', dirname(dirname(__FILE__)));
 define('ASSETS_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'assets');
 define('EXPORT_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'export');
 define('IMPORT_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'import');
-define('LOG_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'log');
+if (!defined('LOG_DIR')) {
+    $env_log_dir = '';
+    if (class_exists('Env', false)) {
+        $env_log_dir = Env::get('LOG_DIR', '');
+    }
+    if (empty($env_log_dir)) {
+        $env_log_dir = getenv('LOG_DIR') ?: ($_ENV['LOG_DIR'] ?? '');
+    }
+    if (!empty($env_log_dir)) {
+        define('LOG_DIR', rtrim($env_log_dir, "\\/"));
+    } else {
+        $parent_dir = dirname(ROOT_DIR);
+        $install_root = (basename($parent_dir) === 'LAH-API') ? dirname($parent_dir) : $parent_dir;
+        define('LOG_DIR', $install_root . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . 'api');
+    }
+}
 define('INC_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."include");
 define('USER_IMG_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."img".DIRECTORY_SEPARATOR."users");
 define('UPLOAD_IMG_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."img".DIRECTORY_SEPARATOR."upload");

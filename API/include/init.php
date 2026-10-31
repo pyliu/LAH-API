@@ -75,7 +75,27 @@ if (!file_exists(IMPORT_DIR) && !is_dir(IMPORT_DIR)) {
 
 // to ensure log dir exists
 if (!file_exists(LOG_DIR) && !is_dir(LOG_DIR)) {
-    mkdir(LOG_DIR);       
+    @mkdir(LOG_DIR, 0777, true);
+}
+$old_log_dir = ROOT_DIR . DIRECTORY_SEPARATOR . 'log';
+if (is_dir($old_log_dir) && realpath($old_log_dir) !== realpath(LOG_DIR)) {
+    $old_files = @scandir($old_log_dir);
+    if ($old_files !== false) {
+        foreach ($old_files as $file) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+            $src_file = $old_log_dir . DIRECTORY_SEPARATOR . $file;
+            $dst_file = LOG_DIR . DIRECTORY_SEPARATOR . $file;
+            if (is_file($src_file) && !file_exists($dst_file)) {
+                @rename($src_file, $dst_file);
+            }
+        }
+        $remaining = @array_diff(@scandir($old_log_dir) ?: [], ['.', '..']);
+        if (empty($remaining)) {
+            @rmdir($old_log_dir);
+        }
+    }
 }
 
 // to ensure upload image dir exists

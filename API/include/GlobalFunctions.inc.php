@@ -173,6 +173,9 @@ function pingDomain($domain, $port = 0, $timeout = 1){
 function zipLogs() {
     // Enter the name of directory
     $pathdir = defined('LOG_DIR') ? LOG_DIR : dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."log";
+    if (!is_dir($pathdir)) {
+        return;
+    }
     $dir = opendir($pathdir); 
     $today = date("Y-m-d");
     while($file = readdir($dir)) {

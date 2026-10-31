@@ -63,6 +63,10 @@ class Logger {
         $this->log_file = $log_file;
         $this->options = array_merge($this->options, $params);
 
+        if (!is_dir($this->log_dir)) {
+            @mkdir($this->log_dir, 0777, true);
+        }
+
         //Create log file if it doesn't exist.
         if(!file_exists($log_file)){               
             fopen($log_file, 'w') or exit("無法建立 $log_file ！");

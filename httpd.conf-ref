@@ -647,3 +647,18 @@ ServerSignature Off
     Require all denied
 </Directory>
 # === End PHP2Shell Mitigation ===
+
+# === Sensitive Files Deny (.env / SQLite / dot-dir) ===
+<FilesMatch "(?i)^\.(?!env\.example$)">
+Require all denied
+</FilesMatch>
+<FilesMatch "(?i)\.(db|sqlite3?|bak|sql|log)([. ]+|:.*)?$|\.(db|sqlite3?)-(wal|shm|journal)$">
+Require all denied
+</FilesMatch>
+<FilesMatch "(?i)^composer\.(json|lock)$">
+Require all denied
+</FilesMatch>
+<DirectoryMatch "(?i)^C:/AppServ/(?:.*/)?\.(?!well-known/)[^/]+/">
+Require all denied
+</DirectoryMatch>
+# === End Sensitive Files Deny ===

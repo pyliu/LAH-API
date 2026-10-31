@@ -223,6 +223,35 @@ if ($EnableSmartRewrite) {
     }
 }
 
+# 敏感檔案拒絕 (.env / SQLite / dot 目錄)，與 LAH-Updater 產生之規則一致，.env.example 放行
+$denyBegin = '# === Sensitive Files Deny (.env / SQLite / dot-dir) ==='
+$denyEnd = '# === End Sensitive Files Deny ==='
+$rootFwd = ((Split-Path $ApacheDir -Parent) -replace '\\', '/').TrimEnd('/')
+$denyBlock = @'
+@@BEGIN@@
+<FilesMatch "(?i)^\.(?!env\.example$)">
+Require all denied
+</FilesMatch>
+<FilesMatch "(?i)\.(db|sqlite3?|bak|sql|log)([. ]+|:.*)?$|\.(db|sqlite3?)-(wal|shm|journal)$">
+Require all denied
+</FilesMatch>
+<FilesMatch "(?i)^composer\.(json|lock)$">
+Require all denied
+</FilesMatch>
+<DirectoryMatch "(?i)^@@ROOT@@/(?:.*/)?\.(?!well-known/)[^/]+/">
+Require all denied
+</DirectoryMatch>
+@@END@@
+'@
+$denyBlock = $denyBlock.Replace('@@BEGIN@@', $denyBegin).Replace('@@END@@', $denyEnd).Replace('@@ROOT@@', [regex]::Escape($rootFwd)).Trim()
+$denyPattern = "(?s)" + [regex]::Escape($denyBegin) + ".*?" + [regex]::Escape($denyEnd)
+if ($confContent -match $denyPattern) {
+    $confContent = [System.Text.RegularExpressions.Regex]::Replace($confContent, $denyPattern, { param($m) $denyBlock })
+} else {
+    $confContent += "`n" + $denyBlock + "`n"
+}
+Write-Host "  [防護] 已套用敏感檔案拒絕規則 (.env / *.db / dot 目錄)。" -ForegroundColor Cyan
+
 Set-Content -Path $httpdConf -Value $confContent -Encoding UTF8
 
 # 測試 Apache 語法

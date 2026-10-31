@@ -21,8 +21,7 @@ class LoadFileApiTest extends BaseIntegrationTestCase {
 
     private function createTempLogFile(string $filename, string $content): string {
         $dirs = [
-            LOG_DIR,
-            'C:\\AppServ\\www\\log'
+            LOG_DIR
         ];
         $written = [];
         foreach ($dirs as $dir) {
