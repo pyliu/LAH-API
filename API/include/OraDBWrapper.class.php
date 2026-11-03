@@ -13,7 +13,7 @@ class OraDBWrapper {
 
 	private function isDBReachable($txt = __METHOD__)
 	{
-		if (!function_exists('oci_connect')) {
+		if (!OraDB::isDriverOrBridgeAvailable()) {
 			$this->db_ok = false;
 			return false;
 		}
@@ -74,6 +74,6 @@ class OraDBWrapper {
 	 * ) OR false
 	 */
 	public function getError() {
-		return $this->db->getError();
+		return $this->db ? $this->db->getError() : false;
 	}
 }
