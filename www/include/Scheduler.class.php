@@ -604,7 +604,7 @@ class Scheduler
                 foreach ($sites as $site) {
                     if ($site['ID'] === 'CB' || $site['ID'] === 'CC') continue;
                     $url = "http://$xap_ip/Land" . strtoupper($site['ID']) . "/";
-                    $headers = httpHeader($url);
+                    $headers = httpHeader($url, 3);
                     $response = trim($headers[0] ?? '');
                     $state = ($response === 'HTTP/1.1 401 Unauthorized') ? 'UP' : 'DOWN';
                     $sqlite_sos->replace(array(

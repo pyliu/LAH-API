@@ -371,18 +371,20 @@ function echoJSONResponse($msg, $status = STATUS_CODE::DEFAULT_FAIL, $in_array =
 /**
  * get http headers
  */
-function httpHeader($url, $timeout = false) {
+function httpHeader($url, $timeout = 3) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_HEADER, 1);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     if ($timeout !== false) {
-        curl_setopt($ch, CURLOPT_TIMEOUT, intval($timeout) ?? 5);
+        $sec = intval($timeout) > 0 ? intval($timeout) : 3;
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, min(2, $sec));
+        curl_setopt($ch, CURLOPT_TIMEOUT, $sec);
     }
     $header = curl_exec($ch);
     curl_close($ch);
 
-    $headers = explode("\r\n", $header);
+    $headers = is_string($header) ? explode("\r\n", $header) : array();
     return $headers;
 }
 
