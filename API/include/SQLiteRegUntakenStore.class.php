@@ -52,6 +52,17 @@ class SQLiteRegUntakenStore {
         $this->db->close();
     }
 
+    public function getAllRecordsMap() {
+        $result = $this->db->query("SELECT * FROM ".$this->tbl_name);
+        $map = array();
+        if ($result) {
+            while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                $map[$row['case_no']] = $row;
+            }
+        }
+        return $map;
+    }
+
     public function exists($case_no) {
         $ret = $this->db->querySingle("SELECT case_no from ".$this->tbl_name." WHERE case_no = '".trim($case_no)."'");
         return !empty($ret);

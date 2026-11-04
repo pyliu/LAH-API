@@ -188,6 +188,7 @@ class System {
 
     private function getDimensionDB() {
         $db_path = DIMENSION_SQLITE_DB;
+        if (!file_exists($db_path) || filesize($db_path) === 0) {
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -243,6 +244,7 @@ class System {
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');
+        }
         return $db_path;
     }
 

@@ -7,6 +7,7 @@ class SQLiteDBFactory {
 
     public static function getPrefetchDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."prefetch.db";
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -17,11 +18,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("key")
             )
         ');
+        }
         return $path;
     }
 
     public static function getMonitorMailDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."monitor_mail.db";
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -36,11 +39,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("id")
             )
         ');
+        }
         return $path;
     }
 
     public static function getRegForeignerRestrictionDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."reg_foreigner_restriction.db";
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -61,11 +66,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("pkey")
             )
         ');
+        }
         return $path;
     }
 
     public static function getRegForeignerPDFDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."reg_foreigner_pdf.db";
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -81,11 +88,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');
+        }
         return $path;
     }
 
     public static function getRegAddressUndisclosedDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."reg_address_undisclosed.db";
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -101,11 +110,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');
+        }
         return $path;
     }
 
     public static function getRegPropertyAlertDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."reg_property_alert.db";
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -121,11 +132,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');
+        }
         return $path;
     }
 
     public static function getAdmReserveFilePDFDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."adm_reserve_file_pdf.db";
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -140,11 +153,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');
+        }
         return $path;
     }
     
     public static function getSurDestructionTrackingDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."sur_destruction_tracking.db";
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -165,11 +180,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');
+        }
         return $path;
     }
     
     public static function getImageDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."image.db";
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -185,10 +202,12 @@ class SQLiteDBFactory {
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');
+        }
         return $path;
     }
 
     public static function getMessageDB($path) {
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -205,11 +224,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');
+        }
         return $path;
     }
 
     public static function getIPResolverDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."IPResolver.db";
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -224,11 +245,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("ip", "added_type", "entry_type")
             )
         ');
+        }
         return $path;
     }
 
     public static function getRKEYNALLDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."RKEYN_ALL.db";
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -241,11 +264,13 @@ class SQLiteDBFactory {
                 "KRMK"	TEXT
             )
         ');
+        }
         return $path;
     }
 
     public static function getRKEYNDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."RKEYN.db";
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -257,11 +282,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("KCDE_1", "KCDE_2")
             )
         ');
+        }
         return $path;
     }
 
     public static function getOFFICESDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."OFFICES.db";
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -272,11 +299,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("ID")
             )
         ');
+        }
         return $path;
     }
 
     public static function getOFFICESSTATSDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."OFFICES_STATS.db";
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -290,11 +319,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("serial" AUTOINCREMENT)
             )
         ');
+        }
         return $path;
     }
 
     public static function getCaseCodeDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."CaseCode.db";
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -305,11 +336,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("KCDE_2")
             )
         ');
+        }
         return $path;
     }
 
     public static function getRegUntakenStoreDB() {
         $db_path = DB_DIR.DIRECTORY_SEPARATOR.'reg_untaken_store.db';
+        if (!file_exists($db_path) || filesize($db_path) === 0) {
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -324,11 +357,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("case_no")
             )
         ');
+        }
         return $db_path;
     }
 
     public static function getValRealpriceMemoStoreDB() {
         $db_path = DB_DIR.DIRECTORY_SEPARATOR.'val_realprice_memo_store.db';
+        if (!file_exists($db_path) || filesize($db_path) === 0) {
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -341,11 +376,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');
+        }
         return $db_path;
     }
 
     public static function getRegAuthChecksStoreDB() {
         $db_path = DB_DIR.DIRECTORY_SEPARATOR.'reg_auth_checks_store.db';
+        if (!file_exists($db_path) || filesize($db_path) === 0) {
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -356,11 +393,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("case_no")
             )
         ');
+        }
         return $db_path;
     }
 
     public static function getRegFixCaseStoreDB() {
         $db_path = DB_DIR.DIRECTORY_SEPARATOR.'reg_fix_case_store.db';
+        if (!file_exists($db_path) || filesize($db_path) === 0) {
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -372,11 +411,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("case_no")
             )
         ');
+        }
         return $db_path;
     }
 
     public static function getSYSAUTH1DB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."SYSAUTH1.db";
+        if (!file_exists($path) || filesize($path) === 0) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -396,11 +437,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("USER_ID")
             )
         ');
+        }
         return $path;
     }
 
     public static function getLAHDB() {
         $db_path = DEF_SQLITE_DB;
+        if (!file_exists($db_path) || filesize($db_path) === 0) {
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -435,11 +478,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("datetime")
             )
         ');
+        }
         return $db_path;
     }
 
     public static function getAPConnStatsDB($ip_end) {
         $db_path = DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.$ip_end.'.db';
+        if (!file_exists($db_path) || filesize($db_path) === 0) {
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -452,11 +497,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("log_time","ap_ip","est_ip")
             )
         ');
+        }
         return $db_path;
     }
     
     public static function getConnectivityDB() {
         $db_path = DB_DIR.DIRECTORY_SEPARATOR."connectivity.db";
+        if (!file_exists($db_path) || filesize($db_path) === 0) {
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -478,6 +525,7 @@ class SQLiteDBFactory {
                 PRIMARY KEY("ip")
             )
         ');
+        }
         return $db_path;
     }
 
@@ -487,23 +535,28 @@ class SQLiteDBFactory {
             $postfix = explode('.', $ip)[3];
         }
         $db_path = DB_DIR.DIRECTORY_SEPARATOR."stats_ap_conn_AP".$postfix.".db";
-        $sqlite = new DynamicSQLite($db_path);
-        $sqlite->initDB();
-        $sqlite->createTableBySQL('
-            CREATE TABLE IF NOT EXISTS "ap_conn_history" (
-                "log_time"	TEXT NOT NULL,
-                "ap_ip"	TEXT NOT NULL,
-                "est_ip"	TEXT NOT NULL,
-                "count"	INTEGER NOT NULL DEFAULT 0,
-                "batch"	INTEGER NOT NULL DEFAULT 0,
-                PRIMARY KEY("log_time","ap_ip","est_ip")
-            )
-        ');
+        if (!file_exists($db_path) || filesize($db_path) === 0) {
+        if (!file_exists($db_path) || filesize($db_path) === 0) {
+            $sqlite = new DynamicSQLite($db_path);
+            $sqlite->initDB();
+            $sqlite->createTableBySQL('
+                CREATE TABLE IF NOT EXISTS "ap_conn_history" (
+                    "log_time"	TEXT NOT NULL,
+                    "ap_ip"	TEXT NOT NULL,
+                    "est_ip"	TEXT NOT NULL,
+                    "count"	INTEGER NOT NULL DEFAULT 0,
+                    "batch"	INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY("log_time","ap_ip","est_ip")
+                )
+            ');
+        }
+        }
         return $db_path;
     }
 
     public static function getAdminActionLogDB() {
         $db_path = DB_DIR.DIRECTORY_SEPARATOR."admin_action_log.db";
+        if (!file_exists($db_path) || filesize($db_path) === 0) {
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -517,11 +570,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');
+        }
         return $db_path;
     }
 
     public static function getNotificationLogDB() {
         $db_path = DB_DIR.DIRECTORY_SEPARATOR."notification_log.db";
+        if (!file_exists($db_path) || filesize($db_path) === 0) {
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -539,11 +594,13 @@ class SQLiteDBFactory {
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');
+        }
         return $db_path;
     }
 
     public static function getSMSLogDB() {
         $db_path = DB_DIR.DIRECTORY_SEPARATOR."sms_moicas_ma05_log.db";
+        if (!file_exists($db_path) || filesize($db_path) === 0) {
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -558,6 +615,7 @@ class SQLiteDBFactory {
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');
+        }
         return $db_path;
     }
 

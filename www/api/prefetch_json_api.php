@@ -545,6 +545,7 @@ switch ($_POST["type"]) {
 
 		break;
 	case "reg_untaken_case":
+		@ini_set('memory_limit', '1024M');
 		Logger::getInstance()->info("XHR [reg_untaken_case] 查詢結案登記案件請求");
 		$message = "結案登記案件查詢";
 		$st = $_POST['start'];
@@ -559,6 +560,7 @@ switch ($_POST["type"]) {
 			// also get authority from sqlite db
 			require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteRegUntakenStore.class.php');
 			$sqlite_db = new SQLiteRegUntakenStore();
+			$untaken_map = $sqlite_db->getAllRecordsMap();
 
 			$total = count($rows);
 			$baked = array();
@@ -567,9 +569,8 @@ switch ($_POST["type"]) {
 				$this_baked = $data->getBakedData();
 
 				$id = $this_baked['ID'];
-				// this query goes to SQLite DB, return array of result
-				$result = $sqlite_db->getRegUntakenRecord($id);
-				$record = $result[0] ?? [];
+				// use memory map instead of per-row SQLite query
+				$record = $untaken_map[$id] ?? [];
 				$this_baked['UNTAKEN_TAKEN_DATE'] = $record['taken_date'] ?? '';
 				$this_baked['UNTAKEN_TAKEN_STATUS'] = $record['taken_status'] ?? '';
 				$this_baked['UNTAKEN_LENT_DATE'] = $record['lent_date'] ?? '';
