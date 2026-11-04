@@ -286,7 +286,7 @@ function prepareSessionMyInfo() {
     if (empty($_SESSION['myinfo'])) {
         $sqlite_user = new SQLiteUser();
         $queried_user = $sqlite_user->getUserByIP($client_ip);
-        $found_count = count($queried_user);
+        $found_count = is_array($queried_user) ? count($queried_user) : 0;
         if (empty($found_count)) {
             Logger::getInstance()->info(__FILE__."：找不到 ".$client_ip." 使用者。");
         } else {

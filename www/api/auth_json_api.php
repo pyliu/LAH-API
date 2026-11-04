@@ -10,7 +10,7 @@ switch ($_POST["type"]) {
 		// find current connected user
 		$sqlite_user = new SQLiteUser();
 		$queried_user = $sqlite_user->getUserByIP($_POST['req_ip']);
-		$found_count = count($queried_user);
+		$found_count = is_array($queried_user) ? count($queried_user) : 0;
 		if (empty($found_count)) {
 			Logger::getInstance()->info("XHR [login] 找不到 ".$_POST['req_ip']." 使用者。");
 		} else {

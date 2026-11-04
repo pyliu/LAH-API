@@ -58,7 +58,7 @@ switch ($_POST["type"]) {
 		$sqlite_user = new SQLiteUser();
 		$client_ip = array_key_exists('client_ip', $_POST) ? $_POST['client_ip'] : '';
 		$queried_user = $sqlite_user->getUserByIP($client_ip);
-		$found_count = count($queried_user);
+		$found_count = is_array($queried_user) ? count($queried_user) : 0;
 		if ($found_count > 1) {
 			$queried_user = array($queried_user[$found_count - 1]);
 		}

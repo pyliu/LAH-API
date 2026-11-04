@@ -250,7 +250,7 @@ class IPResolver {
     public static function parseUnit($note) {
         $unit = '未分配';
         if (!empty($note)) {
-            $parts = explode(' ', $note);
+            $parts = explode(' ', trim((string)$note));
             $key = $parts[1] ?? $parts[0] ?? '';
             switch ($key) {
                 case 'inf':

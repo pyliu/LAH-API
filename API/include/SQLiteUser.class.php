@@ -645,9 +645,13 @@ class SQLiteUser {
         if (count($parts) !== 4) return false;
         
         $third_octet = (int)$parts[2];
+        $fourth_octet = (int)$parts[3];
+        // 排除交換器閘道 (.254) 與常見虛擬網卡預設位址 (如 VMware .17.1/.86.1、VirtualBox .56.1)
+        if ($fourth_octet === 254) return false;
+        if ($fourth_octet === 1 && in_array($third_octet, [17, 56, 86, 122], true)) return false;
         if ($parts[0] === '192' && $parts[1] === '168') {
             $site_ranges = [
-                'HA' => [10, 19],
+                'HA' => [10, 15],
                 'HB' => [20, 29],
                 'HC' => [30, 39],
                 'HD' => [40, 49],
