@@ -1,4 +1,5 @@
 <?php
+define('LAH_FAST_PATH', true);
 require_once(__DIR__."/include/init.php");
 require_once(__DIR__."/include/System.class.php");
 

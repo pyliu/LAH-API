@@ -1,4 +1,5 @@
 <?php
+define('LAH_FAST_PATH', true);
 require_once("./include/init.php");
 
 $default_path = ROOT_DIR . DIRECTORY_SEPARATOR . "assets" . DIRECTORY_SEPARATOR . "img" . DIRECTORY_SEPARATOR . "users" . DIRECTORY_SEPARATOR;

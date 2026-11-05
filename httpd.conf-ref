@@ -175,9 +175,10 @@ LoadModule setenvif_module modules/mod_setenvif.so
 #LoadModule socache_dbm_module modules/mod_socache_dbm.so
 #LoadModule socache_memcache_module modules/mod_socache_memcache.so
 #LoadModule socache_redis_module modules/mod_socache_redis.so
-LoadModule socache_shmcb_module modules/mod_socache_shmcb.so
+#LoadModule socache_shmcb_module modules/mod_socache_shmcb.so
 #LoadModule speling_module modules/mod_speling.so
-LoadModule ssl_module modules/mod_ssl.so
+# 未監聽 443 端口時停用 ssl_module 以免產生 AH01873 SSLSessionCache 警告雜訊
+#LoadModule ssl_module modules/mod_ssl.so
 LoadModule status_module modules/mod_status.so
 #LoadModule substitute_module modules/mod_substitute.so
 #LoadModule unique_id_module modules/mod_unique_id.so
@@ -602,7 +603,8 @@ Alias /lah-api "C:/AppServ/LAH-API"
 </Directory>
 
 <Proxy "fcgi://127.0.0.1:8085/" enablereuse=on max=16>
-    ProxySet timeout=300
+    # PM2 重啟時提供自動重試機制，避免 503 錯誤
+    ProxySet timeout=300 retry=1
 </Proxy>
 
 # 資安弱點防護：隱藏 Apache 版本與錯誤頁面簽名
@@ -662,3 +664,15 @@ Require all denied
 Require all denied
 </DirectoryMatch>
 # === End Sensitive Files Deny ===
+
+# === LAH MPM WinNT Memory Governance & Connection Recycling ===
+KeepAlive On
+KeepAliveTimeout 2
+MaxKeepAliveRequests 500
+
+<IfModule mpm_winnt_module>
+    ThreadsPerChild        150
+    MaxConnectionsPerChild 10000
+    MaxMemFree             2048
+</IfModule>
+# === End LAH MPM WinNT Memory Governance ===

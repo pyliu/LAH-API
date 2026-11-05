@@ -1,4 +1,5 @@
 <?php
+define('LAH_FAST_PATH', true);
 require_once(dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'include' . DIRECTORY_SEPARATOR . 'init.php');
 
 if (session_status() === PHP_SESSION_ACTIVE) {

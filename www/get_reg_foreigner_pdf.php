@@ -1,4 +1,5 @@
 <?php
+define('LAH_FAST_PATH', true);
 require_once("./include/init.php");
 require_once("./include/SQLiteRegForeignerPDF.class.php");
 

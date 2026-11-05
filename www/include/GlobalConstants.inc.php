@@ -106,71 +106,124 @@ define('VAL_NOTE', [
 require_once('Logger.class.php');
 require_once("SQLiteAdminActionLog.class.php");
 
-require_once('SQLiteRKEYNALL.class.php');
-$srkeynall = new SQLiteRKEYNALL();
-$offices = $srkeynall->getOffices();
+// 檢查是否為靜態資源快速路徑（例如 get_user_img.php、get_carousel_img.php、get_blob_img.php 或 PDF 串流端點）
+$is_fast_path = defined('LAH_FAST_PATH') && LAH_FAST_PATH;
 
-// 準備辦公室對應表
-if ($offices) {
-    $altered = [];
-    foreach ($offices as $row) {
-        $altered[$row['KCDE_3']] = str_replace('地政事務所', '', $row['KNAME']);
+if ($is_fast_path) {
+    if (!defined('OFFICE')) {
+        define('OFFICE', [
+            'HA' => '桃園',
+            'HB' => '中壢',
+            'HC' => '大溪',
+            'HD' => '楊梅',
+            'HE' => '蘆竹',
+            'HF' => '八德',
+            'HG' => '平鎮',
+            'HH' => '龜山'
+        ]);
     }
-    define('OFFICE', $altered);
-} else {
-    Logger::getInstance()->warning('取得 OFFICE 資料失敗，請確認 RKEYN_ALL.db 中資料使否正確匯入。');
-}
-
-require_once('SQLiteRKEYN.class.php');
-$srkeyn = new SQLiteRKEYN();
-
-// 準備登記原因
-$reasons = $srkeyn->getRegReason();
-if ($reasons) {
-    $altered = [];
-    foreach ($reasons as $row) {
-        $altered[$row['KCDE_2']] = $row['KCNT'];
+    if (!defined('REG_REASON')) {
+        define('REG_REASON', []);
     }
-    define('REG_REASON', $altered);
-} else {
-    Logger::getInstance()->warning('取得 REG_REASON 資料失敗，請確認 RKEYN.db 中資料使否正確匯入。');
-}
-
-// 準備測量收件字
-$codes = $srkeyn->getSurCode();
-if ($codes) {
-    $altered = [];
-    foreach ($codes as $row) {
-        $altered[$row['KCDE_2']] = $row['KCNT'];
+    if (!defined('SUR_WORD')) {
+        define('SUR_WORD', []);
     }
-    define('SUR_WORD', $altered);
-} else {
-    Logger::getInstance()->warning('取得 SUR_WORD 資料失敗，請確認 RKEYN.db 中資料使否正確匯入。');
-}
-
-// 準備地價收件字
-$codes = $srkeyn->getValCode();
-if ($codes) {
-    $altered = [];
-    foreach ($codes as $row) {
-        $altered[$row['KCDE_2']] = $row['KCNT'];
-    }
-    define('PRC_WORD', $altered);
-} else {
-    Logger::getInstance()->warning('取得 PRC_WORD 資料失敗，請確認 RKEYN.db 中資料使否正確匯入。');
-}
-
-// 準備本所登記收件字
-$codes = $srkeyn->getRegHostCode();
-$altered = [];
-if ($codes) {
-    foreach ($codes as $row) {
-        $altered[$row['KCDE_2']] = $row['KCNT'];
+    if (!defined('PRC_WORD')) {
+        define('PRC_WORD', []);
     }
 } else {
-    Logger::getInstance()->warning('取得 本所收件字 資料失敗，請確認 RKEYN.db 中資料使否正確匯入。');
-}
+    // 準備辦公室對應表
+    try {
+        require_once('SQLiteRKEYNALL.class.php');
+        $srkeynall = new SQLiteRKEYNALL();
+        $offices = $srkeynall->getOffices();
+        if ($offices) {
+            $altered = [];
+            foreach ($offices as $row) {
+                $altered[$row['KCDE_3']] = str_replace('地政事務所', '', $row['KNAME']);
+            }
+            define('OFFICE', $altered);
+        } else {
+            Logger::getInstance()->warning('取得 OFFICE 資料失敗，請確認 RKEYN_ALL.db 中資料是否正確匯入。');
+        }
+    } catch (Throwable $e) {
+        if (class_exists('Logger')) {
+            Logger::getInstance()->warning('取得 OFFICE 資料發生例外: ' . $e->getMessage());
+        }
+    }
+    if (!defined('OFFICE')) {
+        define('OFFICE', [
+            'HA' => '桃園',
+            'HB' => '中壢',
+            'HC' => '大溪',
+            'HD' => '楊梅',
+            'HE' => '蘆竹',
+            'HF' => '八德',
+            'HG' => '平鎮',
+            'HH' => '龜山'
+        ]);
+    }
 
+    try {
+        require_once('SQLiteRKEYN.class.php');
+        $srkeyn = new SQLiteRKEYN();
+
+        // 準備登記原因
+        $reasons = $srkeyn->getRegReason();
+        if ($reasons) {
+            $altered = [];
+            foreach ($reasons as $row) {
+                $altered[$row['KCDE_2']] = $row['KCNT'];
+            }
+            define('REG_REASON', $altered);
+        } else {
+            Logger::getInstance()->warning('取得 REG_REASON 資料失敗，請確認 RKEYN.db 中資料是否正確匯入。');
+        }
+
+        // 準備測量收件字
+        $codes = $srkeyn->getSurCode();
+        if ($codes) {
+            $altered = [];
+            foreach ($codes as $row) {
+                $altered[$row['KCDE_2']] = $row['KCNT'];
+            }
+            define('SUR_WORD', $altered);
+        } else {
+            Logger::getInstance()->warning('取得 SUR_WORD 資料失敗，請確認 RKEYN.db 中資料是否正確匯入。');
+        }
+
+        // 準備地價收件字
+        $codes = $srkeyn->getValCode();
+        if ($codes) {
+            $altered = [];
+            foreach ($codes as $row) {
+                $altered[$row['KCDE_2']] = $row['KCNT'];
+            }
+            define('PRC_WORD', $altered);
+        } else {
+            Logger::getInstance()->warning('取得 PRC_WORD 資料失敗，請確認 RKEYN.db 中資料是否正確匯入。');
+        }
+
+        // 準備本所登記收件字
+        $codes = $srkeyn->getRegHostCode();
+        $altered = [];
+        if ($codes) {
+            foreach ($codes as $row) {
+                $altered[$row['KCDE_2']] = $row['KCNT'];
+            }
+        } else {
+            Logger::getInstance()->warning('取得 本所收件字 資料失敗，請確認 RKEYN.db 中資料是否正確匯入。');
+        }
+    } catch (Throwable $e) {
+        if (class_exists('Logger')) {
+            Logger::getInstance()->warning('取得 RKEYN 資料發生例外: ' . $e->getMessage());
+        }
+    }
+
+    if (!defined('REG_REASON')) define('REG_REASON', []);
+    if (!defined('SUR_WORD')) define('SUR_WORD', []);
+    if (!defined('PRC_WORD')) define('PRC_WORD', []);
+}
 require_once('System.class.php');
 $site_code = System::getInstance()->getSiteCode() ?? 'HA';  // HA
 define('WEB_XAP', System::getInstance()->getWebAPIp() ?? "220.1.34.161");

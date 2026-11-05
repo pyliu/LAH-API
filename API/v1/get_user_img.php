@@ -1,4 +1,5 @@
 <?php
+define('LAH_FAST_PATH', true);
 require_once(dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'include' . DIRECTORY_SEPARATOR . 'init.php');
 
 // 立即釋放 session 鎖，避免串流輸出阻塞同 session 之其他 HTTP 請求
