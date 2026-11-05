@@ -131,6 +131,9 @@ if ($is_fast_path) {
     if (!defined('PRC_WORD')) {
         define('PRC_WORD', []);
     }
+    if (!defined('REG_WORD')) {
+        define('REG_WORD', []);
+    }
 } else {
     // 準備辦公室對應表
     try {
@@ -539,17 +542,28 @@ define('REG_CODE', [
 ]);
 
 $altered2 = [];
-$cross_host = $srkeyn->getRegCrossHostCode();
-foreach ($cross_host as $row) { $altered2[$row['KCDE_2']] = $row['KCNT']; }
-$cross_other = $srkeyn->getRegCrossOtherCode();
-foreach ($cross_other as $row) { $altered2[$row['KCDE_2']] = $row['KCNT']; }
-$cross_county_other = $srkeyn->getRegCrossCountyOtherCode();
-foreach ($cross_county_other as $row) { $altered2[$row['KCDE_2']] = $row['KCNT']; }
-$cross_county_host = $srkeyn->getRegCrossCountyHostCode();
-foreach ($cross_county_host as $row) { $altered2[$row['KCDE_2']] = $row['KCNT']; }
+if (!empty($srkeyn)) {
+    try {
+        $cross_host = $srkeyn->getRegCrossHostCode() ?: [];
+        foreach ($cross_host as $row) { $altered2[$row['KCDE_2']] = $row['KCNT']; }
+        $cross_other = $srkeyn->getRegCrossOtherCode() ?: [];
+        foreach ($cross_other as $row) { $altered2[$row['KCDE_2']] = $row['KCNT']; }
+        $cross_county_other = $srkeyn->getRegCrossCountyOtherCode() ?: [];
+        foreach ($cross_county_other as $row) { $altered2[$row['KCDE_2']] = $row['KCNT']; }
+        $cross_county_host = $srkeyn->getRegCrossCountyHostCode() ?: [];
+        foreach ($cross_county_host as $row) { $altered2[$row['KCDE_2']] = $row['KCNT']; }
+    } catch (Throwable $e) {
+        if (class_exists('Logger')) {
+            Logger::getInstance()->warning('取得跨所收件字發生例外: ' . $e->getMessage());
+        }
+    }
+}
 
 // $altered is processed before
-define('REG_WORD', array_merge($altered, $altered2));
+if (!defined('REG_WORD')) {
+    $base_altered = isset($altered) && is_array($altered) ? $altered : [];
+    define('REG_WORD', array_merge($base_altered, $altered2));
+}
 
 unset($srkeyn);
 unset($reasons);
