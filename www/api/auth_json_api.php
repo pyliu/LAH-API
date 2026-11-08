@@ -8,17 +8,19 @@ $system = System::getInstance();
 switch ($_POST["type"]) {
 	case "login":
 		// find current connected user
+		$raw_req_ip = isset($_POST['req_ip']) ? trim($_POST['req_ip']) : '';
+		$req_ip = ($raw_req_ip === '' || $raw_req_ip === '0.0.0.0') ? $client_ip : $raw_req_ip;
 		$sqlite_user = new SQLiteUser();
-		$queried_user = $sqlite_user->getUserByIP($_POST['req_ip']);
+		$queried_user = $sqlite_user->getUserByIP($req_ip);
 		$found_count = is_array($queried_user) ? count($queried_user) : 0;
 		if (empty($found_count)) {
-			Logger::getInstance()->info("XHR [login] 找不到 ".$_POST['req_ip']." 使用者。");
+			Logger::getInstance()->info("XHR [login] 找不到 ".$req_ip." 使用者。");
 		} else {
 			if ($found_count > 1) {
 				$queried_user = array($queried_user[$found_count - 1]);
 			}
 			$_SESSION["myinfo"] = $queried_user[0];
-			Logger::getInstance()->info("XHR [login] 找到 ".$_POST['req_ip']." 使用者 ".$_SESSION["myinfo"]['id']." ".$_SESSION["myinfo"]['name']."。");
+			Logger::getInstance()->info("XHR [login] 找到 ".$req_ip." 使用者 ".$_SESSION["myinfo"]['id']." ".$_SESSION["myinfo"]['name']."。");
 		}
 
 		// $ips = getLocalhostIPs();
@@ -26,6 +28,7 @@ switch ($_POST["type"]) {
 		// Logger::getInstance()->info("XHR [login] $message");
 		// Logger::getInstance()->info("XHR [login] APACHE API 伺服器端點資訊： ".$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']);
 		$configs = array(
+			"ip" => $req_ip,
 			"server" => $_SERVER,
 			"ips" => getLocalhostIPs(),
 			"user" => $_SESSION["myinfo"],
@@ -40,7 +43,7 @@ switch ($_POST["type"]) {
 				'avatar' => $system->isAvatarEnable(),
 				'officehours' => $system->isOfficeHoursEnable(),
 				'ad_available' => AdService::isAvailable()['available'],
-				'authority' => $system->getAuthority($_POST['req_ip']),
+				'authority' => $system->getAuthority($req_ip),
 				'master_password' => $system->get('MASTER_PASSWORD'),
 				'site' => strtoupper($system->get('SITE')),
 				'monitor' => array(
@@ -58,7 +61,7 @@ switch ($_POST["type"]) {
 			)
 		);
 		// Logger::getInstance()->info("XHR [login] config 資訊：\n".print_r($configs, true));
-    echoJSONResponse('取得 '.$_POST['req_ip'].' 登入資訊', STATUS_CODE::SUCCESS_NORMAL, $configs);
+    echoJSONResponse('取得 '.$req_ip.' 登入資訊', STATUS_CODE::SUCCESS_NORMAL, $configs);
 		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");

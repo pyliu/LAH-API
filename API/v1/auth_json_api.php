@@ -8,7 +8,8 @@ $system = System::getInstance();
 switch ($_POST["type"] ?? '') {
 	case "login":
 		// find current connected user
-		$req_ip = $_POST['req_ip'] ?? $client_ip;
+		$raw_req_ip = isset($_POST['req_ip']) ? trim($_POST['req_ip']) : '';
+		$req_ip = ($raw_req_ip === '' || $raw_req_ip === '0.0.0.0') ? $client_ip : $raw_req_ip;
 		$sqlite_user = new SQLiteUser();
 		$queried_user = $sqlite_user->getUserByIP($req_ip);
 		$found_count = is_array($queried_user) ? count($queried_user) : 0;
@@ -27,6 +28,7 @@ switch ($_POST["type"] ?? '') {
 		// Logger::getInstance()->info("XHR [login] $message");
 		// Logger::getInstance()->info("XHR [login] APACHE API 伺服器端點資訊： ".$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']);
 		$configs = array(
+			"ip" => $req_ip,
 			"server" => $_SERVER,
 			"ips" => getLocalhostIPs(),
 			"user" => $_SESSION["myinfo"] ?? null,
