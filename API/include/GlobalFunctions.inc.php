@@ -363,6 +363,7 @@ function echoJSONResponse($msg, $status = STATUS_CODE::DEFAULT_FAIL, $in_array =
         Logger::getInstance()->warning(__METHOD__.":".print_r($in_array, true));
         echo json_encode(array( "status" => STATUS_CODE::FAIL_JSON_ENCODE, "message" => "無法轉換陣列資料到JSON物件。".json_last_error() ));
     } else {
+        unset($value, $in_array);
         if (!headers_sent()) {
             header('Content-Type: application/json; charset=utf-8');
         }

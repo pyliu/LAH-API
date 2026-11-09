@@ -647,6 +647,7 @@ switch ($_POST["type"]) {
 
 		break;
 	case "val_realprice_map":
+		@ini_set('memory_limit', '1024M');
 		Logger::getInstance()->info("XHR [val_realprice_map] 查詢實價登錄申報對應請求");
 		$message = "實價登錄申報案件";
 		$st = $_POST["start_date"];
@@ -663,7 +664,7 @@ switch ($_POST["type"]) {
 			require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteValRealpriceMemoStore.class.php');
 			$sqlite_db = new SQLiteValRealpriceMemoStore();
 
-			foreach ($rows as $row) {
+			foreach ($rows as $idx => $row) {
 				$data = new RegCaseData($row);
 				$this_baked = $data->getBakedData();
 
@@ -687,7 +688,9 @@ switch ($_POST["type"]) {
 					}
 				}
 				$baked[] = $this_baked;
+				unset($rows[$idx]);
 			}
+			unset($rows);
 			Logger::getInstance()->info("XHR [val_realprice_map] 查詢成功($total)");
 			echoJSONResponse("查詢成功，找到 $total 筆 ${message} 資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				// "data_count" => $total,

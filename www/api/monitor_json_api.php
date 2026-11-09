@@ -13,9 +13,9 @@ switch ($_POST["type"]) {
         $id = $_POST['account'];
         $pwd = $_POST['password'];
         //Optional parameters
-        $options = OP_READONLY;
+        $options = defined('OP_READONLY') ? OP_READONLY : 2;
         $retries = 3;
-        $mailbox = System::getInstance()->isMockMode() ? true : imap_open($url, $id, $pwd, $options, $retries);
+        $mailbox = System::getInstance()->isMockMode() ? true : (function_exists('imap_open') ? imap_open($url, $id, $pwd, $options, $retries) : false);
         if($mailbox) {
             echoJSONResponse('郵件伺服器('.$_POST['host'].')可正常連線', STATUS_CODE::SUCCESS_NORMAL);
         } else {

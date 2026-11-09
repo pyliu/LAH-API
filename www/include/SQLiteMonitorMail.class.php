@@ -75,6 +75,10 @@ class SQLiteMonitorMail {
             Logger::getInstance()->warning(__METHOD__.': 現在處於模擬模式(mock mode)，略過連線郵件伺服器擷取監控郵件。');
             return 0;
         }
+        if (!function_exists('imap_open')) {
+            Logger::getInstance()->warning(__METHOD__.': PHP imap 擴充模組未啟用，略過連線郵件伺服器擷取監控郵件。');
+            return 0;
+        }
         // check if mail server is reachable
         $mail_host = System::getInstance()->get('MONITOR_MAIL_HOST');
         $mail_ssl = System::getInstance()->get('MONITOR_MAIL_SSL') === 'true';

@@ -17,6 +17,49 @@ abstract class STATUS_CODE {
     const FAIL_DB_ERROR = -11;
 }
 
+$imap_constants = [
+    'OP_DEBUG' => 1,
+    'OP_READONLY' => 2,
+    'OP_ANONYMOUS' => 4,
+    'OP_SHORTCACHE' => 8,
+    'OP_SILENT' => 16,
+    'OP_PROTOTYPE' => 32,
+    'OP_HALFOPEN' => 64,
+    'OP_SECURE' => 256,
+    'CL_EXPUNGE' => 32768,
+    'CP_UID' => 1,
+    'CP_MOVE' => 2,
+    'SE_UID' => 1,
+    'SE_FREE' => 2,
+    'SE_NOPREFETCH' => 4,
+    'SO_FREE' => 8,
+    'SO_NOSERVER' => 16,
+    'SA_MESSAGES' => 1,
+    'SA_RECENT' => 2,
+    'SA_UNSEEN' => 4,
+    'SA_UIDNEXT' => 8,
+    'SA_UIDVALIDITY' => 16,
+    'SA_ALL' => 31,
+    'FT_UID' => 1,
+    'FT_PEEK' => 2,
+    'FT_PREFETCHTEXT' => 4,
+    'ST_UID' => 1,
+    'SORTARRIVAL' => 1,
+    'TYPETEXT' => 0,
+    'TYPEMULTIPART' => 1,
+    'TYPEMESSAGE' => 2,
+    'IMAP_OPENTIMEOUT' => 1,
+    'IMAP_READTIMEOUT' => 2,
+    'IMAP_WRITETIMEOUT' => 3,
+    'IMAP_CLOSETIMEOUT' => 4,
+];
+foreach ($imap_constants as $name => $val) {
+    if (!defined($name)) {
+        define($name, $val);
+    }
+}
+unset($imap_constants, $name, $val);
+
 define('API_ROOT_DIR', dirname(__DIR__));
 define('V85_ROOT_DIR', API_ROOT_DIR);
 define('ROOT_DIR', dirname(API_ROOT_DIR) . DIRECTORY_SEPARATOR . 'www');

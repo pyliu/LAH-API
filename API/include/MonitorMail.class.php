@@ -82,6 +82,10 @@ class MonitorMail {
         $this->method = System::getInstance()->get("MONITOR_MAIL_METHOD") || 'imap';
         $this->account = System::getInstance()->get("MONITOR_MAIL_ACCOUNT");
         $this->password = System::getInstance()->get("MONITOR_MAIL_PASSWORD");
+        if (!function_exists('imap_open')) {
+            Logger::getInstance()->warning(__METHOD__.': PHP imap 擴充模組未啟用，略過連線郵件伺服器。');
+            return;
+        }
         try {
             $conn = $this->getFullMailboxPath("INBOX");
             // $conn = $this->getConnectionString();
@@ -110,7 +114,9 @@ class MonitorMail {
     }
 
     function __destruct() {
-        $this->mailbox->disconnect();
+        if ($this->mailbox) {
+            $this->mailbox->disconnect();
+        }
         unset($this->mailbox);
     }
 
