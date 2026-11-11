@@ -1,6 +1,34 @@
 <?php
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."include".DIRECTORY_SEPARATOR."init.php");
 
+if (($_REQUEST['type'] ?? '') === 'tax') {
+    require_once INC_DIR . '/api/FileAPITaxExportCommand.class.php';
+    $file = null;
+    try {
+        if (!is_string($_GET['batch'] ?? null) || !is_string($_GET['item'] ?? null)) {
+            throw new InvalidArgumentException('稅務匯出下載參數錯誤。');
+        }
+        $file = FileAPITaxExportCommand::service()->download($_GET['batch'], $_GET['item']);
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+        header('Content-Type: ' . $file['content_type']);
+        header('Content-Disposition: attachment; filename="tax-export"; filename*=UTF-8\'\'' . rawurlencode($file['filename']));
+        header('Content-Length: ' . filesize($file['path']));
+        header('Cache-Control: private, no-store');
+        readfile($file['path']);
+    } catch (Throwable $error) {
+        http_response_code(404);
+        header('Content-Type: application/json; charset=utf-8');
+        echoJSONResponse('找不到可下載的批次成果，請確認登入及產製狀態。', STATUS_CODE::FAIL_NOT_FOUND);
+    } finally {
+        if ($file && !empty($file['temporary']) && is_file($file['path'])) {
+            unlink($file['path']);
+        }
+    }
+    exit;
+}
+
 $code = isset($_GET["code"]) ? trim($_GET["code"]) : '';
 $filename = isset($_GET["filename"]) ? basename(trim($_GET["filename"])) : '';
 $type = isset($_REQUEST["type"]) ? trim($_REQUEST["type"]) : '';
@@ -78,7 +106,7 @@ if ($is_zip) {
 
             header('Content-Description: File Transfer');
             header('Content-Type: application/zip');
-            header("Content-Disposition: attachment; filename=\"{$fallback_filename}\"; filename*=UTF-8''{$encoded_filename}");
+            header("Content-Disposition: attachment; filename=\"{$fallback_filename}\"; filename*=UTF-8\'\'{$encoded_filename}");
             header('Content-Length: ' . $filesize);
             header('Expires: 0');
             header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
@@ -126,7 +154,7 @@ if (!empty($target) && file_exists($target) && is_file($target)) {
 
     header('Content-Description: File Transfer');
     header('Content-Type: ' . ($is_pdf ? 'application/pdf' : 'application/octet-stream'));
-    header("Content-Disposition: attachment; filename=\"{$fallback_filename}\"; filename*=UTF-8''{$encoded_filename}");
+    header("Content-Disposition: attachment; filename=\"{$fallback_filename}\"; filename*=UTF-8\'\'{$encoded_filename}");
     header('Content-Length: ' . $filesize);
     header('Expires: 0');
     header('Cache-Control: must-revalidate, post-check=0, pre-check=0');

@@ -46,3 +46,4 @@ www/export/*
 **/project/novel/assets/txt_tw/*
 
 logs/*
+.tax-export/

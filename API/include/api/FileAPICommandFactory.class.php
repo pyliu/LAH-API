@@ -24,6 +24,9 @@ abstract class FileAPICommandFactory {
                 Logger::getInstance()->info($sql);
                 $_SESSION['export_tmp_txt_filename'] = $_POST["filename"] ?? 'tmp';
                 return new FileAPISQLTxtCommand($sql);
+            case "file_tax_export":
+                require_once __DIR__ . "/FileAPITaxExportCommand.class.php";
+                return new FileAPITaxExportCommand();
             case "file_data_export":
                 $code = $_POST["code"] ?? '';
                 Logger::getInstance()->info("輸出 ".$code." TXT 檔案");
