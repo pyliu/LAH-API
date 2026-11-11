@@ -59,6 +59,25 @@ class FileAPIDataExportCommand extends FileAPICommand {
     function __destruct() {}
 
     public function execute() {
+        if (in_array($this->code, ['RCD0901_B', 'RCD0901_E'], true)) {
+            require_once ROOT_DIR . '/include/api/Rcd0901PdfExport.class.php';
+            return Rcd0901PdfExport::execute($this->code, $this->sections);
+        }
+        if ($this->code === 'AI01901') {
+            require_once ROOT_DIR . '/include/api/AI01901Export.class.php';
+            require_once ROOT_DIR . '/include/api/CadastralTxtExport.class.php';
+            return CadastralTxtExport::execute('AI01901', '土地各部別', $this->sections, AI01901Export::class);
+        }
+        if ($this->code === 'AI02101') {
+            require_once ROOT_DIR . '/include/api/AI02101Export.class.php';
+            require_once ROOT_DIR . '/include/api/CadastralTxtExport.class.php';
+            return CadastralTxtExport::execute('AI02101', '土地他項權利部', $this->sections, AI02101Export::class);
+        }
+        if ($this->code === 'AI02201') {
+            require_once ROOT_DIR . '/include/api/AI02201Export.class.php';
+            require_once ROOT_DIR . '/include/api/CadastralTxtExport.class.php';
+            return CadastralTxtExport::execute('AI02201', '建物他項權利部', $this->sections, AI02201Export::class);
+        }
         $path = ROOT_DIR.DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'files'.DIRECTORY_SEPARATOR.$this->code.'_sql.tpl';
         $content = @file_get_contents($path);
         if (empty($content)) {

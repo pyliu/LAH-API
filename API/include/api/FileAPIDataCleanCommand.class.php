@@ -13,6 +13,11 @@ class FileAPIDataCleanCommand extends FileAPICommand {
         'AI00901',
         'AI01001',
         'AI01101',
+        'AI01901',
+        'AI02101',
+        'AI02201',
+        'RCD0901_B',
+        'RCD0901_E',
         'AI02901_B',
         'AI02901_E'
     );
@@ -45,8 +50,8 @@ class FileAPIDataCleanCommand extends FileAPICommand {
                 $clean = basename(trim($fname));
                 if (!empty($clean)) {
                     $ext = strtolower(pathinfo($clean, PATHINFO_EXTENSION));
-                    // 僅允許清理 txt 與 zip 檔案，避免誤刪其他資源
-                    if (in_array($ext, array('txt', 'zip'), true)) {
+                    // 僅允許清理 txt、pdf 與 zip 檔案，避免誤刪其他資源
+                    if (in_array($ext, array('txt', 'pdf', 'zip'), true)) {
                         $fpath = $exp_folder . $clean;
                         if (is_file($fpath) && file_exists($fpath)) {
                             $target_files[$clean] = $fpath;
@@ -58,7 +63,7 @@ class FileAPIDataCleanCommand extends FileAPICommand {
 
         // 2. 若為全部清理或未指定特定檔案
         if ($clean_all || empty($target_files)) {
-            $all_txt = glob($exp_folder . "*.txt");
+            $all_txt = array_merge(glob($exp_folder . "*.txt") ?: array(), glob($exp_folder . "*.pdf") ?: array());
             if (!empty($all_txt)) {
                 foreach ($all_txt as $fpath) {
                     $bname = basename($fpath);

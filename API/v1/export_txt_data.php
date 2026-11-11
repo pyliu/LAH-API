@@ -39,7 +39,7 @@ if ($is_zip) {
     if (empty($zip_files)) {
         $section = isset($_REQUEST['section']) ? trim($_REQUEST['section']) : '';
         if (!empty($section)) {
-            $matched = glob($exp_folder . "*_{$section}_*.txt");
+            $matched = array_merge(glob($exp_folder . "*_{$section}_*.txt") ?: array(), glob($exp_folder . "*_{$section}_*.pdf") ?: array());
             if (!empty($matched)) {
                 foreach ($matched as $fpath) {
                     $zip_files[basename($fpath)] = $fpath;
@@ -101,7 +101,8 @@ if (empty($filename) && !empty($code) && isset($_SESSION[$code])) {
 
 // 2. 若仍無 filename 但有 code，嘗試在 export 目錄尋找最新產製的對應代碼檔案
 if (empty($filename) && !empty($code)) {
-    $matched = glob($exp_folder . "*_{$code}_*.txt");
+    $extension = in_array($code, array('RCD0901_B', 'RCD0901_E'), true) ? 'pdf' : 'txt';
+    $matched = glob($exp_folder . "*_{$code}_*.{$extension}");
     if (!empty($matched)) {
         usort($matched, function($a, $b) {
             return filemtime($b) - filemtime($a);
@@ -115,14 +116,16 @@ $target = !empty($filename) ? $exp_folder . $filename : '';
 if (!empty($target) && file_exists($target) && is_file($target)) {
     $filesize = filesize($target);
     $encoded_filename = rawurlencode($filename);
-    $fallback_filename = !empty($code) ? "{$code}.txt" : "export.txt";
+    $is_pdf = strtolower(pathinfo($filename, PATHINFO_EXTENSION)) === 'pdf';
+    $extension = $is_pdf ? 'pdf' : 'txt';
+    $fallback_filename = !empty($code) ? "{$code}.{$extension}" : "export.{$extension}";
 
     if (ob_get_level()) {
         ob_end_clean();
     }
 
     header('Content-Description: File Transfer');
-    header('Content-Type: application/octet-stream');
+    header('Content-Type: ' . ($is_pdf ? 'application/pdf' : 'application/octet-stream'));
     header("Content-Disposition: attachment; filename=\"{$fallback_filename}\"; filename*=UTF-8''{$encoded_filename}");
     header('Content-Length: ' . $filesize);
     header('Expires: 0');
