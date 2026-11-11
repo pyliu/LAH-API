@@ -88,7 +88,41 @@ try {
     exit
 }
 
-# 2. 啟動 HTTP Listener
+# 2. 自動檢查並放行 Windows 防火牆規則 (Inbound TCP Port)
+function Ensure-FirewallRule {
+    param (
+        [string]$RuleName = "AD Password Agent",
+        [int]$Port = 8888
+    )
+    try {
+        $existingRule = Get-NetFirewallRule -DisplayName $RuleName -ErrorAction SilentlyContinue
+        if ($null -eq $existingRule) {
+            Write-Log "正在為 Windows 防火牆新增輸入規則: $RuleName (TCP Port $Port)..." -Color Yellow
+            New-NetFirewallRule -DisplayName $RuleName `
+                                -Direction Inbound `
+                                -LocalPort $Port `
+                                -Protocol TCP `
+                                -Action Allow `
+                                -Enabled True `
+                                -ErrorAction Stop | Out-Null
+            Write-Log "Windows 防火牆規則新增成功: $RuleName (TCP Port $Port)。" -Color Green
+        } else {
+            if ($existingRule.Enabled -ne "True") {
+                Write-Log "Windows 防火牆規則 $RuleName 存在但未啟用，正在啟用..." -Color Yellow
+                Enable-NetFirewallRule -DisplayName $RuleName -ErrorAction Stop
+                Write-Log "Windows 防火牆規則已成功啟用。" -Color Green
+            } else {
+                Write-Log "Windows 防火牆規則已存在且已啟用: $RuleName (TCP Port $Port)。" -Color Gray
+            }
+        }
+    } catch {
+        Write-Log "自動設定 Windows 防火牆規則失敗: $($_.Exception.Message)。若連線遭拒，請確認已手動放行 TCP Port $Port。" -IsError
+    }
+}
+
+Ensure-FirewallRule -RuleName "AD Password Agent" -Port $ListeningPort
+
+# 3. 啟動 HTTP Listener
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://*:${ListeningPort}/")
 
@@ -103,7 +137,7 @@ try {
     exit
 }
 
-# 3. 進入監聽迴圈
+# 4. 進入監聽迴圈
 while ($listener.IsListening) {
     try {
         $context = $listener.GetContext() # 這裡會阻塞直到收到請求

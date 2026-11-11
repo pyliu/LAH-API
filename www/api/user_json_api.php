@@ -463,19 +463,24 @@ switch ($_POST["type"]) {
     case "ad_user_unlock":
         $type = $_POST["type"];
         Logger::getInstance()->info("XHR [$type] 解鎖使用者資料請求");
-        $ad = new AdService();
-        $result = $mock ? $cache->get('ad_user_unlock') : $ad->unlockUser($_POST["id"], $_POST["password"]);
-        $cache->set('ad_user_unlock', $result);
-        if ($result === true) {
-            $msg = empty($_POST["password"]) ? "解鎖使用者資料成功" : "解鎖並重設使用者密碼成功";
-            Logger::getInstance()->info("XHR [$type] $msg 。");
-            echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
-                "raw" => $result
-            ));
-        } else {
-            $msg = empty($_POST["password"]) ? "解鎖使用者資料失敗。" : "解鎖並重設使用者密碼失敗";
-            Logger::getInstance()->error("XHR [$type] $msg");
-            echoJSONResponse($msg);
+        try {
+            $ad = new AdService();
+            $result = $mock ? $cache->get('ad_user_unlock') : $ad->unlockUser($_POST["id"], $_POST["password"]);
+            $cache->set('ad_user_unlock', $result);
+            if ($result === true) {
+                $msg = empty($_POST["password"]) ? "解鎖使用者資料成功" : "解鎖並重設使用者密碼成功";
+                Logger::getInstance()->info("XHR [$type] $msg 。");
+                echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
+                    "raw" => $result
+                ));
+            } else {
+                $msg = empty($_POST["password"]) ? "解鎖使用者資料失敗。" : "解鎖並重設使用者密碼失敗";
+                Logger::getInstance()->error("XHR [$type] $msg");
+                echoJSONResponse($msg);
+            }
+        } catch (Exception $e) {
+            Logger::getInstance()->error("XHR [$type] 失敗: " . $e->getMessage());
+            echoJSONResponse("解鎖處理失敗: " . $e->getMessage(), STATUS_CODE::DEFAULT_FAIL);
         }
         break;
     case "ad_user_info":
