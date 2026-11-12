@@ -19,8 +19,8 @@ final class TaxExportBatch {
 
     public static function reports(): array {
         return [
-            'RCD0101_LOCAL'  => ['name' => '地籍異動通知書（本所）', 'extension' => 'pdf', 'source' => '本所承辦案件', 'supported' => true, 'exporter' => 'TaxExportRcd0101'],
-            'RCD0101_REMOTE' => ['name' => '地籍異動通知書（他所）', 'extension' => 'pdf', 'source' => '他所承辦本所案件', 'supported' => true, 'exporter' => 'TaxExportRcd0101'],
+            'RCD0101_LOCAL'  => ['name' => '地籍異動通知書（本所）', 'extension' => 'pdf', 'source' => '本所承辦案件', 'supported' => true, 'exporter' => 'TaxExportRCD0101'],
+            'RCD0101_REMOTE' => ['name' => '地籍異動通知書（他所）', 'extension' => 'pdf', 'source' => '他所承辦本所案件', 'supported' => true, 'exporter' => 'TaxExportRCD0101'],
             'RCD0102_LOCAL'  => ['name' => '建物異動通知書（本所）', 'extension' => 'pdf', 'source' => '本所承辦案件', 'supported' => true, 'exporter' => 'TaxExportRcd0102'],
             'RCD0102_REMOTE' => ['name' => '建物異動通知書（他所）', 'extension' => 'pdf', 'source' => '他所承辦本所案件', 'supported' => true, 'exporter' => 'TaxExportRcd0102'],
             'AI001'          => ['name' => '地籍異動資料', 'extension' => 'txt', 'source' => '本所及他所承辦本所案件', 'supported' => true, 'exporter' => 'TaxExportAI001'],
