@@ -368,22 +368,26 @@ final class TaxExportRCD0101 {
                 ];
             }
 
-            // 查詢管理機關部異動
-            $sqlMngr = "SELECT MS05, MS09, MS07, MS_TYPE " .
+            // 查詢管理機關部異動 (WRMNGR, MM00='B')
+            $sqlMngr = "SELECT MM00, MS_TYPE, MM13, MM01 " .
                        "FROM WRMNGR " .
-                       "WHERE MS03=:rm01 AND MS04_1=:rm02 AND MS04_2=:rm03 " .
-                       "ORDER BY MS_TYPE";
+                       "WHERE MS03=:rm01 AND MS04_1=:rm02 AND MS04_2=:rm03 AND MM00='B' " .
+                       "ORDER BY MM48, MM49, MM01, MS_TYPE";
             $mngrRows = $this->query($sqlMngr, [':rm01' => $rm01, ':rm02' => $rm02, ':rm03' => $rm03]);
 
             $managers = [];
             $mIdx = 1;
             foreach ($mngrRows as $mr) {
+                $msType = trim($mr['MS_TYPE'] ?? '');
+                $typeStr = in_array($msType, ['M', 'D'], true) ? '原' : '現';
+                $mm13 = trim($mr['MM13'] ?? '');
+                $lnid = $this->queryLnid($mm13);
                 $managers[] = [
                     'item' => $mIdx++,
-                    'type' => trim((string)($mr['MS_TYPE'] ?? '')) === 'D' ? '原' : '現',
-                    'name' => trim((string)($mr['MS05'] ?? '')),
-                    'id' => trim((string)($mr['MS09'] ?? '')),
-                    'address' => trim((string)($mr['MS07'] ?? '')),
+                    'type' => $typeStr,
+                    'name' => $lnid['LNAM'] ?? '',
+                    'id' => $mm13,
+                    'address' => $lnid['LADR'] ?? '',
                 ];
             }
 
@@ -744,6 +748,24 @@ final class TaxExportRCD0101 {
             return trim($rows[0]['USER_NAME']);
         }
         return $userId;
+    }
+
+    /**
+     * 查詢所有權人/統編姓名與住址 (SRLNID)
+     */
+    private function queryLnid(string $lidn): array {
+        if ($lidn === '') {
+            return ['LNAM' => '', 'LADR' => ''];
+        }
+        $sql = "SELECT LIDN, LNAM, LADR FROM SRLNID WHERE LIDN = :lidn";
+        $rows = $this->query($sql, [':lidn' => $lidn]);
+        if (!empty($rows[0])) {
+            return [
+                'LNAM' => trim($rows[0]['LNAM'] ?? ''),
+                'LADR' => trim($rows[0]['LADR'] ?? '')
+            ];
+        }
+        return ['LNAM' => '', 'LADR' => ''];
     }
 
     private function getDbWrapper() {
