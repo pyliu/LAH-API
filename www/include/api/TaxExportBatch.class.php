@@ -152,7 +152,7 @@ final class TaxExportBatch {
                 }
             } catch (Throwable $error) {
                 $item['state'] = 'failed';
-                $item['message'] = '產製失敗，請檢查原系統連線與作業狀態後重試。';
+                $item['message'] = '產製失敗，請檢查資料庫連線或重試。';
                 if (class_exists('Logger', false)) {
                     Logger::getInstance()->error('Tax export ' . $id . ' ' . $code . ': ' . $error->getMessage());
                 }
@@ -202,11 +202,19 @@ final class TaxExportBatch {
                     '地方稅務局資料產製結果',
                     '日期：' . $batch['begin'] . ' ～ ' . $batch['end'],
                     '批次：' . $id,
-                    $batch['mock'] ? 'MOCK 模擬資料，非正式產製成果' : '原系統產製成果',
+                    $batch['mock'] ? 'MOCK 模擬資料，非正式產製成果' : '資料庫直連產製成果',
                     ''
                 ];
+                $stateLabels = [
+                    'success' => '成功',
+                    'empty'   => '無資料',
+                    'failed'  => '失敗',
+                    'queued'  => '等待產製',
+                    'pending' => '產製中'
+                ];
                 foreach ($batch['items'] as $item) {
-                    $lines[] = $item['name'] . ' | ' . $item['source'] . ' | ' . $item['state'] . ' | ' . $item['message'] . ' | ' . ($item['filename'] ?? '無檔案');
+                    $stateText = ($stateLabels[$item['state']] ?? $item['state']) . " ({$item['state']})";
+                    $lines[] = $item['code'] . ' | ' . $item['name'] . ' | ' . $item['source'] . ' | ' . $stateText . ' | ' . ($item['message'] !== '' ? $item['message'] : '-') . ' | ' . ($item['filename'] ?? '無檔案');
                     if ($item['filename'] && in_array($item['state'], ['success', 'empty'], true)) {
                         $file = $path . '/' . $item['filename'];
                         if (!is_file($file) || !$zip->addFile($file, $item['filename'])) {
