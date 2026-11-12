@@ -193,6 +193,37 @@ class TaxExportPdfWriter extends tFPDF {
     }
 
     /**
+     * 繪製自適應斷行文字單元格 (避免長地址/名稱溢出邊界)
+     */
+    public function drawWrappedCell(float $x, float $y, float $w, float $h, string $text, int $maxCharsPerLine = 14, float $fontSize = 7.5, string $align = 'L', int $border = 1): void {
+        if ($border) {
+            $this->Rect($x, $y, $w, $h, 'D');
+        }
+        $text = trim($text);
+        $len = mb_strlen($text, 'UTF-8');
+        if ($len === 0) {
+            return;
+        }
+        $this->SetFont($this->defaultFontFamily, '', $fontSize);
+        if ($len <= $maxCharsPerLine) {
+            $lineH = $fontSize + 2.5;
+            $this->SetXY($x + 2, $y + max(1.0, ($h - $lineH) / 2));
+            $this->cellZh($w - 4, $lineH, $text, 0, 0, $align);
+            return;
+        }
+
+        $line1 = mb_substr($text, 0, $maxCharsPerLine, 'UTF-8');
+        $line2 = mb_substr($text, $maxCharsPerLine, $maxCharsPerLine, 'UTF-8');
+        $lineH = $fontSize + 1.5;
+        $totalTextH = $lineH * 2 + 1.0;
+        $startY = $y + max(1.5, ($h - $totalTextH) / 2);
+        $this->SetXY($x + 2, $startY);
+        $this->cellZh($w - 4, $lineH, $line1, 0, 0, $align);
+        $this->SetXY($x + 2, $startY + $lineH + 1.0);
+        $this->cellZh($w - 4, $lineH, $line2, 0, 0, $align);
+    }
+
+    /**
      * 繪製矩形外框 (pt 單位)
      */
     public function drawRect(float $x, float $y, float $w, float $h): void {

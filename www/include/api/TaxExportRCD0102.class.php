@@ -650,145 +650,146 @@ final class TaxExportRCD0102 {
     public function drawOfficialNoticePage(TaxExportPdfWriter $pdf, array $data): void {
         $pdf->AddPage('L', 'A4');
 
-        $startX = 20;
-        $totalW = 802;
+        $startX = 30.0;
+        $totalW = 781.0;
 
         // 1. 頁首右上角頁碼
         $pageText = $data['page_text'] ?? '共 1 頁 第 1 頁';
-        $pdf->drawCell(720, 18, 102, 12, $pageText, 'R', 8, 0);
+        $pdf->drawCell(680, 31, 131, 14, $pageText, 'R', 8.5, 0);
 
-        // 2. 頂部大標題
-        $title = $data['title'] ?? '桃園市桃園地政事務所 建物異動通知書';
-        $pdf->drawCell($startX, 34, $totalW, 24, $title, 'C', 14, 0);
+        // 2. 頂部大標題與收件盒
+        $boxX = 541.0;
+        $boxTop = 51.0;
+        $pdf->drawCell($boxX, $boxTop, 61, 48, '收件', 'C', 9, 1);
+        $pdf->drawCell($boxX + 61, $boxTop, 69, 24, '日期', 'C', 9, 1);
+        $pdf->drawCell($boxX + 130, $boxTop, 140, 24, (string)($data['change_date'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($boxX + 61, $boxTop + 24, 69, 24, '字號', 'C', 9, 1);
+        $pdf->drawCell($boxX + 130, $boxTop + 24, 140, 24, (string)($data['rec_no'] ?? ''), 'C', 8.5, 1);
 
-        // 3. 右上角收件日期字號盒 (X=545, Y=38, W=277, H=36)
-        $boxX = 545;
-        $boxY = 38;
-        $boxW = 277;
-        $labelW = 55;
-        $valW = $boxW - $labelW * 2; // 167
+        // 大標題：在收件盒左方區域 (x=30 到 x=541，寬 511) 居中 (紅框 1 修正)
+        $title = $data['title'] ?? '桃園市桃園地政事務所  建物異動通知書';
+        $pdf->SetXY($startX, $boxTop + 14);
+        $pdf->SetFont('KaiU', '', 14);
+        $pdf->cellZh(511, 20, $title, 0, 0, 'C');
 
-        $pdf->drawCell($boxX, $boxY, $labelW, 36, '收件', 'C', 8.5, 1);
-        $pdf->drawCell($boxX + $labelW, $boxY, $labelW, 18, '日期', 'C', 8, 1);
-        $pdf->drawCell($boxX + $labelW * 2, $boxY, $valW, 18, $data['change_date'] ?? '', 'C', 8, 1);
-
-        $pdf->drawCell($boxX + $labelW, $boxY + 18, $labelW, 18, '字號', 'C', 8, 1);
-        $pdf->drawCell($boxX + $labelW * 2, $boxY + 18, $valW, 18, $data['rec_no'] ?? '', 'C', 8, 1);
-
-        // 4. 第一主區塊【建物標示及基地坐落情形】
-        $curY = 80;
+        // 3. 第一主區塊【建物標示及基地坐落情形】
+        $curY = 100.0;
+        $hHeader = 29.0;
         // 表頭第 1 列 (大類)
-        $pdf->drawCell($startX, $curY, 28 + 60, 16, '建物建號', 'C', 8, 1);
-        $pdf->drawCell($startX + 88, $curY, 55 + 95 + 82, 16, '基地坐落', 'C', 8.5, 1);
-        $pdf->drawCell($startX + 320, $curY, 242, 16, '建物門牌', 'C', 8.5, 1);
-        $pdf->drawCell($startX + 562, $curY, 240, 16, '登記原因及日期', 'C', 8.5, 1);
-        $curY += 16;
+        $pdf->drawCell($startX, $curY, 88, 22, '建物建號', 'C', 8.5, 1);
+        $pdf->drawCell($startX + 88, $curY, 232, 22, '基地坐落', 'C', 8.5, 1);
+        $pdf->drawCell($startX + 320, $curY, 242, 22, '建物門牌', 'C', 8.5, 1);
+        $pdf->drawCell($startX + 562, $curY, 219, 22, '登記原因及日期', 'C', 8.5, 1);
+        $curY += 22;
 
         // 表頭第 2 列 (明細欄位)
-        $pdf->drawCell($startX, $curY, 28, 18, '項次', 'C', 7.5, 1);
-        $pdf->drawCell($startX + 28, $curY, 60, 18, '建號', 'C', 7.5, 1);
-        $pdf->drawCell($startX + 88, $curY, 55, 18, '鄉鎮市區', 'C', 7.5, 1);
-        $pdf->drawCell($startX + 143, $curY, 95, 18, '段小段', 'C', 7.5, 1);
-        $pdf->drawCell($startX + 238, $curY, 82, 18, '地號', 'C', 7.5, 1);
-        $pdf->drawCell($startX + 320, $curY, 242, 18, '門牌', 'C', 7.5, 1);
-        $pdf->drawCell($startX + 562, $curY, 60, 18, '登記原因', 'C', 7.5, 1);
-        $pdf->drawCell($startX + 622, $curY, 60, 18, "原因發生\n日期", 'C', 6.5, 1);
-        $pdf->drawCell($startX + 682, $curY, 60, 18, '登記日期', 'C', 7.5, 1);
-        $pdf->drawCell($startX + 742, $curY, 60, 18, '備註', 'C', 7.5, 1);
-        $curY += 18;
+        $pdf->drawCell($startX, $curY, 28, $hHeader, '項次', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 28, $curY, 60, $hHeader, '建號', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 88, $curY, 55, $hHeader, '鄉鎮市區', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 143, $curY, 95, $hHeader, '段小段', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 238, $curY, 82, $hHeader, '地號', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 320, $curY, 242, $hHeader, '門牌', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 562, $curY, 55, $hHeader, '登記原因', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 617, $curY, 55, $hHeader, "原因發生\n日期", 'C', 6.5, 1);
+        $pdf->drawCell($startX + 672, $curY, 55, $hHeader, '登記日期', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 727, $curY, 54, $hHeader, '備註', 'C', 7.5, 1);
+        $curY += $hHeader;
 
         // 建物資料列
         $buildings = $data['buildings'] ?? [];
         if (empty($buildings)) {
-            $pdf->drawCell($startX, $curY, $totalW, 16, '（無建物標示及基地坐落異動資料）', 'C', 8, 1);
-            $curY += 16;
+            $pdf->drawCell($startX, $curY, $totalW, 29, '（無建物標示及基地坐落異動資料）', 'C', 8, 1);
+            $curY += 29;
         } else {
             foreach ($buildings as $bld) {
-                $bH = 16;
+                $bH = 29.0;
                 $pdf->drawCell($startX, $curY, 28, $bH, (string)($bld['item'] ?? 1), 'C', 7.5, 1);
                 $pdf->drawCell($startX + 28, $curY, 60, $bH, (string)($bld['build_no'] ?? ''), 'C', 7.5, 1);
                 $pdf->drawCell($startX + 88, $curY, 55, $bH, (string)($bld['town'] ?? ''), 'C', 7.5, 1);
                 $pdf->drawCell($startX + 143, $curY, 95, $bH, (string)($bld['section'] ?? ''), 'L', 7.5, 1);
                 $pdf->drawCell($startX + 238, $curY, 82, $bH, (string)($bld['land_no'] ?? ''), 'C', 7.5, 1);
-                $pdf->drawCell($startX + 320, $curY, 242, $bH, (string)($bld['addr'] ?? ''), 'L', 7, 1);
-                $pdf->drawCell($startX + 562, $curY, 60, $bH, (string)($bld['cause'] ?? ''), 'C', 7.5, 1);
-                $pdf->drawCell($startX + 622, $curY, 60, $bH, (string)($bld['cause_date'] ?? ''), 'C', 7, 1);
-                $pdf->drawCell($startX + 682, $curY, 60, $bH, (string)($bld['reg_date'] ?? ''), 'C', 7, 1);
-                $pdf->drawCell($startX + 742, $curY, 60, $bH, (string)($bld['remark'] ?? ''), 'C', 7, 1);
+                $pdf->drawWrappedCell($startX + 320, $curY, 242, $bH, (string)($bld['addr'] ?? ''), 28, 7.5, 'L', 1);
+                $pdf->drawCell($startX + 562, $curY, 55, $bH, (string)($bld['cause'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawCell($startX + 617, $curY, 55, $bH, (string)($bld['cause_date'] ?? ''), 'C', 7, 1);
+                $pdf->drawCell($startX + 672, $curY, 55, $bH, (string)($bld['reg_date'] ?? ''), 'C', 7, 1);
+                $pdf->drawCell($startX + 727, $curY, 54, $bH, (string)($bld['remark'] ?? ''), 'C', 7, 1);
                 $curY += $bH;
             }
         }
         $curY += 6;
 
-        // 5. 第二主區塊【所有權部異動情形】
-        $pdf->drawCell($startX, $curY, $totalW, 16, '所有權部異動情形', 'C', 9, 1);
-        $curY += 16;
+        // 4. 第二主區塊【所有權部異動情形】
+        $pdf->drawCell($startX, $curY, $totalW, 22, '所有權部異動情形', 'C', 9, 1);
+        $curY += 22;
 
-        // 表頭 (9 欄: 28, 25, 115, 80, 70, 210, 90, 92, 92 = 802)
-        $pdf->drawCell($startX, $curY, 28, 20, '項次', 'C', 8, 1);
-        $pdf->drawCell($startX + 28, $curY, 25, 20, '區分', 'C', 8, 1);
-        $pdf->drawCell($startX + 53, $curY, 115, 20, '姓名或名稱', 'C', 8, 1);
-        $pdf->drawCell($startX + 168, $curY, 80, 20, '統一編號', 'C', 8, 1);
-        $pdf->drawCell($startX + 248, $curY, 70, 20, '權利範圍', 'C', 8, 1);
-        $pdf->drawCell($startX + 318, $curY, 210, 20, '住址', 'C', 8, 1);
-        $pdf->drawCell($startX + 528, $curY, 90, 20, '登記原因', 'C', 8, 1);
-        $pdf->drawCell($startX + 618, $curY, 92, 20, '原因發生日期', 'C', 7.5, 1);
-        $pdf->drawCell($startX + 710, $curY, 92, 20, '登記日期', 'C', 7.5, 1);
-        $curY += 20;
+        // 表頭
+        $pdf->drawCell($startX, $curY, 28, $hHeader, '項次', 'C', 8, 1);
+        $pdf->drawCell($startX + 28, $curY, 30, $hHeader, '區分', 'C', 8, 1);
+        $pdf->drawCell($startX + 58, $curY, 90, $hHeader, '姓名或名稱', 'C', 8, 1);
+        $pdf->drawCell($startX + 148, $curY, 75, $hHeader, '統一編號', 'C', 8, 1);
+        $pdf->drawCell($startX + 223, $curY, 65, $hHeader, '權利範圍', 'C', 8, 1);
+        $pdf->drawCell($startX + 288, $curY, 215, $hHeader, '住址', 'C', 8, 1);
+        $pdf->drawCell($startX + 503, $curY, 70, $hHeader, '登記原因', 'C', 8, 1);
+        $pdf->drawCell($startX + 573, $curY, 104, $hHeader, '原因發生日期', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 677, $curY, 104, $hHeader, '登記日期', 'C', 7.5, 1);
+        $curY += $hHeader;
 
         $owners = $data['owners'] ?? [];
         if (empty($owners)) {
-            $pdf->drawCell($startX, $curY, $totalW, 16, '（無所有權部異動資料）', 'C', 8, 1);
-            $curY += 16;
+            $pdf->drawCell($startX, $curY, $totalW, 29, '（無所有權部異動資料）', 'C', 8, 1);
+            $curY += 29;
         } else {
             foreach ($owners as $ow) {
-                $oH = 16;
+                $oH = 29.0;
                 $pdf->drawCell($startX, $curY, 28, $oH, (string)($ow['item'] ?? 1), 'C', 8, 1);
-                $pdf->drawCell($startX + 28, $curY, 25, $oH, (string)($ow['type'] ?? ''), 'C', 8, 1);
-                $pdf->drawCell($startX + 53, $curY, 115, $oH, (string)($ow['name'] ?? ''), 'L', 7.5, 1);
-                $pdf->drawCell($startX + 168, $curY, 80, $oH, (string)($ow['id_no'] ?? ''), 'C', 7.5, 1);
-                $pdf->drawCell($startX + 248, $curY, 70, $oH, (string)($ow['scope'] ?? ''), 'C', 7.5, 1);
-                $pdf->drawCell($startX + 318, $curY, 210, $oH, (string)($ow['addr'] ?? ''), 'L', 7, 1);
-                $pdf->drawCell($startX + 528, $curY, 90, $oH, (string)($ow['cause'] ?? ''), 'C', 7.5, 1);
-                $pdf->drawCell($startX + 618, $curY, 92, $oH, (string)($ow['cause_date'] ?? ''), 'C', 7.5, 1);
-                $pdf->drawCell($startX + 710, $curY, 92, $oH, (string)($ow['reg_date'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawCell($startX + 28, $curY, 30, $oH, (string)($ow['type'] ?? ''), 'C', 8, 1);
+                $pdf->drawWrappedCell($startX + 58, $curY, 90, $oH, (string)($ow['name'] ?? ''), 10, 7.5, 'L', 1);
+                $pdf->drawCell($startX + 148, $curY, 75, $oH, (string)($ow['id_no'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawCell($startX + 223, $curY, 65, $oH, (string)($ow['scope'] ?? ''), 'C', 7.5, 1);
+
+                // 住址欄位自動折行 (紅框 2 修正)
+                $pdf->drawWrappedCell($startX + 288, $curY, 215, $oH, (string)($ow['addr'] ?? ''), 25, 7.5, 'L', 1);
+
+                $pdf->drawCell($startX + 503, $curY, 70, $oH, (string)($ow['cause'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawCell($startX + 573, $curY, 104, $oH, (string)($ow['cause_date'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawCell($startX + 677, $curY, 104, $oH, (string)($ow['reg_date'] ?? ''), 'C', 7.5, 1);
                 $curY += $oH;
             }
         }
         $curY += 6;
 
-        // 6. 第三主區塊【管理機關異動情形】
-        $pdf->drawCell($startX, $curY, $totalW, 16, '管理機關異動情形', 'C', 9, 1);
-        $curY += 16;
+        // 5. 第三主區塊【管理機關異動情形】 (紅框 3 修正: 寬度 513 pt，無資料不長多餘橫幅)
+        $curY += 4;
+        $mgtW = 513.0;
+        $pdf->drawCell($startX, $curY, $mgtW, 22, '管理機關異動情形', 'C', 9, 1);
+        $curY += 22;
 
-        $pdf->drawCell($startX, $curY, 28, 18, '項次', 'C', 8, 1);
-        $pdf->drawCell($startX + 28, $curY, 25, 18, '區分', 'C', 8, 1);
-        $pdf->drawCell($startX + 53, $curY, 180, 18, '姓名或名稱', 'C', 8, 1);
-        $pdf->drawCell($startX + 233, $curY, 100, 18, '統一編號', 'C', 8, 1);
-        $pdf->drawCell($startX + 333, $curY, 469, 18, '住址', 'C', 8, 1);
-        $curY += 18;
+        $pdf->drawCell($startX, $curY, 30, $hHeader, '項次', 'C', 8, 1);
+        $pdf->drawCell($startX + 30, $curY, 50, $hHeader, '區分', 'C', 8, 1);
+        $pdf->drawCell($startX + 80, $curY, 74, $hHeader, '姓名或名稱', 'C', 8, 1);
+        $pdf->drawCell($startX + 154, $curY, 74, $hHeader, '統一編號', 'C', 8, 1);
+        $pdf->drawCell($startX + 228, $curY, 285, $hHeader, '住址', 'C', 8, 1);
+
+        // 右側人員核章：平行放置於管理機關右側空白 (紅框 4 修正: 無框線，緊湊對齊)
+        $aud1 = !empty($data['auditor1']) ? $data['auditor1'] : ($data['officers']['issuer'] ?? '');
+        $aud2 = !empty($data['auditor2']) ? $data['auditor2'] : ($data['officers']['checker'] ?? '');
+        $audX = $startX + 535;
+        $pdf->drawCell($audX, $curY - 14, 220, 14, '登錄人員：' . $aud1, 'L', 8.5, 0);
+        $pdf->drawCell($audX, $curY, 220, 14, '校對人員：' . $aud2, 'L', 8.5, 0);
 
         $managers = $data['managers'] ?? [];
-        if (empty($managers)) {
-            $pdf->drawCell($startX, $curY, $totalW, 16, '（無管理機關異動資料）', 'C', 8, 1);
-            $curY += 16;
-        } else {
+        if (!empty($managers)) {
+            $curY += $hHeader;
             foreach ($managers as $mg) {
-                $mH = 16;
-                $pdf->drawCell($startX, $curY, 28, $mH, (string)($mg['item'] ?? 1), 'C', 8, 1);
-                $pdf->drawCell($startX + 28, $curY, 25, $mH, (string)($mg['type'] ?? ''), 'C', 8, 1);
-                $pdf->drawCell($startX + 53, $curY, 180, $mH, (string)($mg['name'] ?? ''), 'L', 7.5, 1);
-                $pdf->drawCell($startX + 233, $curY, 100, $mH, (string)($mg['id_no'] ?? ''), 'C', 7.5, 1);
-                $pdf->drawCell($startX + 333, $curY, 469, $mH, (string)($mg['addr'] ?? ''), 'L', 7.5, 1);
+                $mH = 29.0;
+                $pdf->drawCell($startX, $curY, 30, $mH, (string)($mg['item'] ?? 1), 'C', 8, 1);
+                $pdf->drawCell($startX + 30, $curY, 50, $mH, (string)($mg['type'] ?? ''), 'C', 8, 1);
+                $pdf->drawWrappedCell($startX + 80, $curY, 74, $mH, (string)($mg['name'] ?? ''), 8, 7.5, 'L', 1);
+                $pdf->drawCell($startX + 154, $curY, 74, $mH, (string)($mg['id_no'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawWrappedCell($startX + 228, $curY, 285, $mH, (string)($mg['addr'] ?? ''), 32, 7.5, 'L', 1);
                 $curY += $mH;
             }
         }
-
-        // 7. 頁尾核章欄 (固定於右下方)
-        $aud1 = !empty($data['auditor1']) ? $data['auditor1'] : '';
-        $aud2 = !empty($data['auditor2']) ? $data['auditor2'] : '';
-        $pdf->drawCell(620, 560, 202, 14, '發給人員：' . $aud1, 'L', 8.5, 0);
-        $pdf->drawCell(620, 574, 202, 14, '校對人員：' . $aud2, 'L', 8.5, 0);
     }
 
     /**

@@ -436,195 +436,208 @@ final class TaxExportRCD0101 {
     public function drawOfficialNoticePage(TaxExportPdfWriter $pdf, array $data): void {
         $pdf->AddPage('L', 'A4');
 
-        $startX = 20;
-        $totalW = 802;
+        $startX = 30.0;
+        $totalW = 781.0;
 
-        // 1. 頁次 (Y: 20)
-        $pdf->drawCell(680, 20, 142, 14, $data['page_str'] ?? '共 1 頁 第 1 頁', 'R', 8.5, 0);
+        // 1. 頁碼 (top = 31, h = 14)
+        $pageText = $data['page_str'] ?? '共 1 頁 第 1 頁';
+        $pdf->drawCell(680, 31, 131, 14, $pageText, 'R', 8.5, 0);
 
-        // 2. 標題 (Y: 34)
-        $pdf->SetXY($startX, 34);
-        $pdf->SetFont('KaiU', '', 15);
-        $pdf->cellZh($totalW, 24, $data['title'] ?? '桃園市桃園地政事務所 地籍異動通知書', 0, 0, 'C');
+        // 2. 標題與收件盒
+        // 收件盒: x=541, top=51, w=270, h=48
+        $boxX = 541.0;
+        $boxTop = 51.0;
+        $pdf->drawCell($boxX, $boxTop, 61, 48, '收件', 'C', 9, 1);
+        $pdf->drawCell($boxX + 61, $boxTop, 69, 24, '日期', 'C', 9, 1);
+        $pdf->drawCell($boxX + 130, $boxTop, 140, 24, (string)($data['rec_date'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($boxX + 61, $boxTop + 24, 69, 24, '字號', 'C', 9, 1);
+        $pdf->drawCell($boxX + 130, $boxTop + 24, 140, 24, (string)($data['rec_no'] ?? ''), 'C', 8.5, 1);
 
-        // 3. 右上角收件盒 (Y: 38, 高 36)
-        $pdf->drawCell(545, 38, 55, 36, '收件', 'C', 9, 1);
-        $pdf->drawCell(600, 38, 55, 18, '日期', 'C', 9, 1);
-        $pdf->drawCell(655, 38, 167, 18, (string)($data['rec_date'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell(600, 56, 55, 18, '字號', 'C', 9, 1);
-        $pdf->drawCell(655, 56, 167, 18, (string)($data['rec_no'] ?? ''), 'C', 8.5, 1);
+        // 大標題：在收件盒左方區域 (x=30 到 x=541，寬 511) 居中 (紅框 1 修正)
+        $title = $data['title'] ?? '桃園市桃園地政事務所  地籍異動通知書';
+        $pdf->SetXY($startX, $boxTop + 14);
+        $pdf->SetFont('KaiU', '', 14);
+        $pdf->cellZh(511, 20, $title, 0, 0, 'C');
 
-        // 4. 第一主區塊【土地標示異動情形】 (Y: 78)
-        $curY = 78;
+        // 3. 第一主區塊【土地標示異動情形】
+        $curY = 100.0;
+        $pdf->drawCell($startX, $curY, 204, 22, '土地坐落', 'C', 9, 1);
+        $pdf->drawCell($startX + 204, $curY, 159, 22, '異動記事', 'C', 9, 1);
+        $pdf->drawCell($startX + 363, $curY, 418, 22, '土地標示異動情形', 'C', 9, 1);
+        $curY += 22;
 
-        // 頂層表頭 (高 18)
-        $pdf->drawCell($startX, $curY, 235, 18, '土地坐落', 'C', 9, 1);
-        $pdf->drawCell($startX + 235, $curY, 165, 18, '異動記事', 'C', 9, 1);
-        $pdf->drawCell($startX + 400, $curY, 402, 18, '土地標示異動情形', 'C', 9, 1);
-        $curY += 18;
+        // 子欄位表頭 (h = 29)
+        $hHeader = 29.0;
+        $pdf->drawCell($startX, $curY, 30, $hHeader, '項次', 'C', 8, 1);
+        $pdf->drawCell($startX + 30, $curY, 50, $hHeader, '鄉鎮市區', 'C', 8, 1);
+        $pdf->drawCell($startX + 80, $curY, 74, $hHeader, '段小段', 'C', 8, 1);
+        $pdf->drawCell($startX + 154, $curY, 50, $hHeader, '地號', 'C', 8, 1);
 
-        // 子欄位表頭 (高 26)
-        $pdf->drawCell($startX, $curY, 28, 26, '項次', 'C', 8, 1);
-        $pdf->drawCell($startX + 28, $curY, 55, 26, '鄉鎮市區', 'C', 8, 1);
-        $pdf->drawCell($startX + 83, $curY, 76, 26, '段小段', 'C', 8, 1);
-        $pdf->drawCell($startX + 159, $curY, 76, 26, '地號', 'C', 8, 1);
+        $pdf->drawCell($startX + 204, $curY, 53, $hHeader, '原因', 'C', 8, 1);
+        $pdf->drawCell($startX + 257, $curY, 52, $hHeader, "原因發生\n日期", 'C', 7.5, 1);
+        $pdf->drawCell($startX + 309, $curY, 54, $hHeader, '登記日期', 'C', 8, 1);
 
-        $pdf->drawCell($startX + 235, $curY, 55, 26, '原因', 'C', 8, 1);
-        $pdf->drawCell($startX + 290, $curY, 55, 26, "原因發生\n日期", 'C', 7.5, 1);
-        $pdf->drawCell($startX + 345, $curY, 55, 26, '登記日期', 'C', 8, 1);
-
-        $pdf->drawCell($startX + 400, $curY, 25, 26, '區分', 'C', 8, 1);
-        $pdf->drawCell($startX + 425, $curY, 25, 26, '地目', 'C', 8, 1);
-        $pdf->drawCell($startX + 450, $curY, 25, 26, '等則', 'C', 8, 1);
-        $pdf->drawCell($startX + 475, $curY, 60, 26, "面積\n(平方公尺)", 'C', 7.5, 1);
-        $pdf->drawCell($startX + 535, $curY, 52, 26, '使用分區', 'C', 8, 1);
-        $pdf->drawCell($startX + 587, $curY, 55, 26, '使用地類別', 'C', 7.5, 1);
-        $pdf->drawCell($startX + 642, $curY, 80, 26, "公告現值\n(元/平方公尺)", 'C', 7.5, 1);
-        $pdf->drawCell($startX + 722, $curY, 80, 26, '備註', 'C', 8, 1);
-        $curY += 26;
+        $pdf->drawCell($startX + 363, $curY, 22, $hHeader, '區分', 'C', 8, 1);
+        $pdf->drawCell($startX + 385, $curY, 30, $hHeader, '地目', 'C', 8, 1);
+        $pdf->drawCell($startX + 415, $curY, 30, $hHeader, '等則', 'C', 8, 1);
+        $pdf->drawCell($startX + 445, $curY, 81, $hHeader, "面積\n(平方公尺)", 'C', 7.5, 1);
+        $pdf->drawCell($startX + 526, $curY, 50, $hHeader, '使用分區', 'C', 8, 1);
+        $pdf->drawCell($startX + 576, $curY, 50, $hHeader, "使用地\n類別", 'C', 7.5, 1);
+        $pdf->drawCell($startX + 626, $curY, 78, $hHeader, "公告現值\n(元/平方公尺)", 'C', 7.5, 1);
+        $pdf->drawCell($startX + 704, $curY, 77, $hHeader, '備註', 'C', 8, 1);
+        $curY += $hHeader;
 
         // 土地標示資料列 (兩列: 原、現，左側坐落與記事跨列)
-        $rowH = 18;
+        $rowH = 29.0;
         $situate = $data['land_situate'] ?? [];
         $note = $data['change_note'] ?? [];
         $secRows = $data['sections'] ?? [];
         $secOrig = $secRows[0] ?? ['type' => '原', 'category' => '**', 'grade' => '**', 'area' => '--------', 'zoning' => '空白', 'use_type' => '空白', 'price' => '--------', 'note' => ''];
         $secCurr = $secRows[1] ?? ['type' => '現', 'category' => '**', 'grade' => '**', 'area' => '--------', 'zoning' => '空白', 'use_type' => '空白', 'price' => '--------', 'note' => ''];
 
-        // 左半部跨列 (高 36)
-        $pdf->drawCell($startX, $curY, 28, $rowH * 2, (string)($situate['item'] ?? 1), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 28, $curY, 55, $rowH * 2, (string)($situate['town'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 83, $curY, 76, $rowH * 2, (string)($situate['section'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 159, $curY, 76, $rowH * 2, (string)($situate['land_no'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 235, $curY, 55, $rowH * 2, (string)($note['cause'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 290, $curY, 55, $rowH * 2, (string)($note['cause_date'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 345, $curY, 55, $rowH * 2, (string)($note['reg_date'] ?? ''), 'C', 8.5, 1);
+        // 左半部跨列 (高 58)
+        $pdf->drawCell($startX, $curY, 30, $rowH * 2, (string)($situate['item'] ?? 1), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 30, $curY, 50, $rowH * 2, (string)($situate['town'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 80, $curY, 74, $rowH * 2, (string)($situate['section'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 154, $curY, 50, $rowH * 2, (string)($situate['land_no'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 204, $curY, 53, $rowH * 2, (string)($note['cause'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 257, $curY, 52, $rowH * 2, (string)($note['cause_date'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 309, $curY, 54, $rowH * 2, (string)($note['reg_date'] ?? ''), 'C', 8.5, 1);
 
-        // 原列 (高 18)
-        $pdf->drawCell($startX + 400, $curY, 25, $rowH, '原', 'C', 8.5, 1);
-        $pdf->drawCell($startX + 425, $curY, 25, $rowH, (string)($secOrig['category'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 450, $curY, 25, $rowH, (string)($secOrig['grade'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 475, $curY, 60, $rowH, (string)($secOrig['area'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 535, $curY, 52, $rowH, (string)($secOrig['zoning'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 587, $curY, 55, $rowH, (string)($secOrig['use_type'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 642, $curY, 80, $rowH, (string)($secOrig['price'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 722, $curY, 80, $rowH, (string)($secOrig['note'] ?? ''), 'C', 8.5, 1);
+        // 原列 (高 29)
+        $pdf->drawCell($startX + 363, $curY, 22, $rowH, '原', 'C', 8.5, 1);
+        $pdf->drawCell($startX + 385, $curY, 30, $rowH, (string)($secOrig['category'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 415, $curY, 30, $rowH, (string)($secOrig['grade'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 445, $curY, 81, $rowH, (string)($secOrig['area'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 526, $curY, 50, $rowH, (string)($secOrig['zoning'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 576, $curY, 50, $rowH, (string)($secOrig['use_type'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 626, $curY, 78, $rowH, (string)($secOrig['price'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 704, $curY, 77, $rowH, (string)($secOrig['note'] ?? ''), 'C', 8.5, 1);
         $curY += $rowH;
 
-        // 現列 (高 18)
-        $pdf->drawCell($startX + 400, $curY, 25, $rowH, '現', 'C', 8.5, 1);
-        $pdf->drawCell($startX + 425, $curY, 25, $rowH, (string)($secCurr['category'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 450, $curY, 25, $rowH, (string)($secCurr['grade'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 475, $curY, 60, $rowH, (string)($secCurr['area'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 535, $curY, 52, $rowH, (string)($secCurr['zoning'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 587, $curY, 55, $rowH, (string)($secCurr['use_type'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 642, $curY, 80, $rowH, (string)($secCurr['price'] ?? ''), 'C', 8.5, 1);
-        $pdf->drawCell($startX + 722, $curY, 80, $rowH, (string)($secCurr['note'] ?? ''), 'C', 8.5, 1);
+        // 現列 (高 29)
+        $pdf->drawCell($startX + 363, $curY, 22, $rowH, '現', 'C', 8.5, 1);
+        $pdf->drawCell($startX + 385, $curY, 30, $rowH, (string)($secCurr['category'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 415, $curY, 30, $rowH, (string)($secCurr['grade'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 445, $curY, 81, $rowH, (string)($secCurr['area'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 526, $curY, 50, $rowH, (string)($secCurr['zoning'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 576, $curY, 50, $rowH, (string)($secCurr['use_type'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 626, $curY, 78, $rowH, (string)($secCurr['price'] ?? ''), 'C', 8.5, 1);
+        $pdf->drawCell($startX + 704, $curY, 77, $rowH, (string)($secCurr['note'] ?? ''), 'C', 8.5, 1);
         $curY += $rowH;
 
         // 附表 (稅地種類/減免/抵扣/其他)
-        $pdf->drawCell($startX, $curY, 75, 18, '稅地種類', 'C', 8, 1);
-        $pdf->drawCell($startX + 75, $curY, 65, 18, '減免期數', 'C', 8, 1);
-        $pdf->drawCell($startX + 140, $curY, 75, 18, '減免原因', 'C', 8, 1);
-        $pdf->drawCell($startX + 215, $curY, 80, 18, '減免面積', 'C', 8, 1);
-        $pdf->drawCell($startX + 295, $curY, 85, 18, '一般或三七五', 'C', 8, 1);
-        $pdf->drawCell($startX + 380, $curY, 80, 18, '抵扣賦額', 'C', 8, 1);
-        $pdf->drawCell($startX + 460, $curY, 342, 18, '其他', 'C', 8, 1);
-        $curY += 18;
+        $pdf->drawCell($startX, $curY, 92, 22, '稅地種類', 'C', 8, 1);
+        $pdf->drawCell($startX + 92, $curY, 51, 22, '減免期數', 'C', 8, 1);
+        $pdf->drawCell($startX + 143, $curY, 96, 22, '減免原因', 'C', 8, 1);
+        $pdf->drawCell($startX + 239, $curY, 82, 22, '減免面積', 'C', 8, 1);
+        $pdf->drawCell($startX + 321, $curY, 102, 22, '一般或三七五', 'C', 8, 1);
+        $pdf->drawCell($startX + 423, $curY, 129, 22, '抵扣賦額', 'C', 8, 1);
+        $pdf->drawCell($startX + 552, $curY, 229, 22, '其他', 'C', 8, 1);
+        $curY += 22;
 
-        $pdf->drawCell($startX, $curY, 75, 16, '', 'C', 8, 1);
-        $pdf->drawCell($startX + 75, $curY, 65, 16, '', 'C', 8, 1);
-        $pdf->drawCell($startX + 140, $curY, 75, 16, '', 'C', 8, 1);
-        $pdf->drawCell($startX + 215, $curY, 80, 16, '', 'C', 8, 1);
-        $pdf->drawCell($startX + 295, $curY, 85, 16, '', 'C', 8, 1);
-        $pdf->drawCell($startX + 380, $curY, 80, 16, '', 'C', 8, 1);
-        $pdf->drawCell($startX + 460, $curY, 342, 16, '', 'C', 8, 1);
-        $curY += 16 + 6;
+        $pdf->drawCell($startX, $curY, 92, 20, '', 'C', 8, 1);
+        $pdf->drawCell($startX + 92, $curY, 51, 20, '', 'C', 8, 1);
+        $pdf->drawCell($startX + 143, $curY, 96, 20, '', 'C', 8, 1);
+        $pdf->drawCell($startX + 239, $curY, 82, 20, '', 'C', 8, 1);
+        $pdf->drawCell($startX + 321, $curY, 102, 20, '', 'C', 8, 1);
+        $pdf->drawCell($startX + 423, $curY, 129, 20, '', 'C', 8, 1);
+        $pdf->drawCell($startX + 552, $curY, 229, 20, '', 'C', 8, 1);
+        $curY += 20 + 4;
 
-        // 5. 第二主區塊【所有權部異動情形】
-        $pdf->drawCell($startX, $curY, $totalW, 16, '所有權部異動情形', 'C', 9, 1);
-        $curY += 16;
+        // 4. 第二主區塊【所有權部異動情形】
+        $pdf->drawCell($startX, $curY, 513, 22, '所有權部異動情形', 'C', 9, 1);
+        $pdf->drawCell($startX + 513, $curY, 33, 51, "身分\n代號", 'C', 7.5, 1);
+        $pdf->drawCell($startX + 546, $curY, 235, 22, '稅籍', 'C', 7.5, 1);
+        $curY += 22;
 
         // 表頭
-        $pdf->drawCell($startX, $curY, 28, 20, '項次', 'C', 8, 1);
-        $pdf->drawCell($startX + 28, $curY, 25, 20, '區分', 'C', 8, 1);
-        $pdf->drawCell($startX + 53, $curY, 115, 20, '姓名或名稱', 'C', 8, 1);
-        $pdf->drawCell($startX + 168, $curY, 80, 20, '統一編號', 'C', 8, 1);
-        $pdf->drawCell($startX + 248, $curY, 180, 20, '住址', 'C', 8, 1);
-        $pdf->drawCell($startX + 428, $curY, 70, 20, '權利範圍', 'C', 8, 1);
-        $pdf->drawCell($startX + 498, $curY, 76, 20, "申報地價\n(元/平方公尺)", 'C', 7, 1);
-        $pdf->drawCell($startX + 574, $curY, 35, 20, "身分\n代號", 'C', 7, 1);
+        $pdf->drawCell($startX, $curY, 30, $hHeader, '項次', 'C', 8, 1);
+        $pdf->drawCell($startX + 30, $curY, 50, $hHeader, '區分', 'C', 8, 1);
+        $pdf->drawCell($startX + 80, $curY, 74, $hHeader, '姓名或名稱', 'C', 8, 1);
+        $pdf->drawCell($startX + 154, $curY, 74, $hHeader, '統一編號', 'C', 8, 1);
+        $pdf->drawCell($startX + 228, $curY, 122, $hHeader, '住址', 'C', 8, 1);
+        $pdf->drawCell($startX + 350, $curY, 74, $hHeader, '權利範圍', 'C', 8, 1);
+        $pdf->drawCell($startX + 424, $curY, 89, $hHeader, "申報地價\n(元/平方公尺)", 'C', 7, 1);
 
-        // 稅籍 (總寬 193)
-        $taxW = 193;
-        $pdf->drawCell($startX + 609, $curY, $taxW, 10, '稅籍', 'C', 7.5, 1);
-        $subTaxW = $taxW / 7;
-        $pdf->drawCell($startX + 609, $curY + 10, $subTaxW, 10, '縣市', 'C', 6.5, 1);
-        $pdf->drawCell($startX + 609 + $subTaxW, $curY + 10, $subTaxW, 10, '鄉鎮', 'C', 6.5, 1);
-        $pdf->drawCell($startX + 609 + $subTaxW * 2, $curY + 10, $subTaxW, 10, '冊號', 'C', 6.5, 1);
-        $pdf->drawCell($startX + 609 + $subTaxW * 3, $curY + 10, $subTaxW, 10, '戶號', 'C', 6.5, 1);
-        $pdf->drawCell($startX + 609 + $subTaxW * 4, $curY + 10, $subTaxW, 10, '分戶', 'C', 6.5, 1);
-        $pdf->drawCell($startX + 609 + $subTaxW * 5, $curY + 10, $subTaxW, 10, '分頁', 'C', 6.5, 1);
-        $pdf->drawCell($startX + 609 + $subTaxW * 6, $curY + 10, $subTaxW, 10, '項次', 'C', 6.5, 1);
-        $curY += 20;
+        // 稅籍 7 小格
+        $subTax = [
+            ['name' => '縣市', 'w' => 30.0],
+            ['name' => "鄉鎮\n市區", 'w' => 40.0],
+            ['name' => '冊號', 'w' => 31.0],
+            ['name' => '戶號', 'w' => 31.0],
+            ['name' => '分戶', 'w' => 29.0],
+            ['name' => '分頁', 'w' => 30.0],
+            ['name' => '項次', 'w' => 44.0],
+        ];
+        $txX = $startX + 546;
+        foreach ($subTax as $st) {
+            $pdf->drawCell($txX, $curY, $st['w'], $hHeader, $st['name'], 'C', 6.5, 1);
+            $txX += $st['w'];
+        }
+        $curY += $hHeader;
 
         $owners = $data['owners'] ?? [];
         if (empty($owners)) {
-            $pdf->drawCell($startX, $curY, $totalW, 16, '（無所有權部異動資料）', 'C', 8, 1);
-            $curY += 16;
+            $pdf->drawCell($startX, $curY, 513, 29, '（無所有權部異動資料）', 'C', 8, 1);
+            $curY += 29;
         } else {
             foreach ($owners as $ow) {
-                $oH = 16;
-                $pdf->drawCell($startX, $curY, 28, $oH, (string)($ow['item'] ?? 1), 'C', 8, 1);
-                $pdf->drawCell($startX + 28, $curY, 25, $oH, (string)($ow['type'] ?? ''), 'C', 8, 1);
-                $pdf->drawCell($startX + 53, $curY, 115, $oH, (string)($ow['name'] ?? ''), 'L', 7.5, 1);
-                $pdf->drawCell($startX + 168, $curY, 80, $oH, (string)($ow['id'] ?? ''), 'C', 7.5, 1);
-                $pdf->drawCell($startX + 248, $curY, 180, $oH, (string)($ow['address'] ?? ''), 'L', 7, 1);
-                $pdf->drawCell($startX + 428, $curY, 70, $oH, (string)($ow['holding'] ?? ''), 'C', 7.5, 1);
-                $pdf->drawCell($startX + 498, $curY, 76, $oH, (string)($ow['price'] ?? ''), 'R', 8, 1);
-                $pdf->drawCell($startX + 574, $curY, 35, $oH, (string)($ow['id_code'] ?? ''), 'C', 7.5, 1);
+                $oH = 29.0;
+                $pdf->drawCell($startX, $curY, 30, $oH, (string)($ow['item'] ?? 1), 'C', 8, 1);
+                $pdf->drawCell($startX + 30, $curY, 50, $oH, (string)($ow['type'] ?? ''), 'C', 8, 1);
+                $pdf->drawWrappedCell($startX + 80, $curY, 74, $oH, (string)($ow['name'] ?? ''), 8, 7.5, 'L', 1);
+                $pdf->drawCell($startX + 154, $curY, 74, $oH, (string)($ow['id'] ?? ''), 'C', 7.5, 1);
 
-                for ($ti = 0; $ti < 7; $ti++) {
-                    $pdf->drawCell($startX + 609 + $subTaxW * $ti, $curY, $subTaxW, $oH, '', 'C', 6.5, 1);
+                // 住址欄位自動折行 (紅框 2 修正)
+                $pdf->drawWrappedCell($startX + 228, $curY, 122, $oH, (string)($ow['address'] ?? ''), 14, 7.5, 'L', 1);
+
+                $pdf->drawCell($startX + 350, $curY, 74, $oH, (string)($ow['holding'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawCell($startX + 424, $curY, 89, $oH, (string)($ow['price'] ?? ''), 'R', 8, 1);
+                $pdf->drawCell($startX + 513, $curY, 33, $oH, (string)($ow['id_code'] ?? ''), 'C', 7.5, 1);
+
+                $txX = $startX + 546;
+                foreach ($subTax as $st) {
+                    $pdf->drawCell($txX, $curY, $st['w'], $oH, '', 'C', 6.5, 1);
+                    $txX += $st['w'];
                 }
                 $curY += $oH;
             }
         }
-        $curY += 6;
 
-        // 6. 第三主區塊【管理機關異動情形】
-        $pdf->drawCell($startX, $curY, $totalW, 16, '管理機關異動情形', 'C', 9, 1);
-        $curY += 16;
+        // 5. 第三主區塊【管理機關異動情形】 (紅框 3 修正: 僅寬 513 pt，且無資料時不長多餘橫幅)
+        $curY += 4;
+        $mgtW = 513.0;
+        $pdf->drawCell($startX, $curY, $mgtW, 22, '管理機關異動情形', 'C', 9, 1);
+        $curY += 22;
 
-        $pdf->drawCell($startX, $curY, 28, 18, '項次', 'C', 8, 1);
-        $pdf->drawCell($startX + 28, $curY, 25, 18, '區分', 'C', 8, 1);
-        $pdf->drawCell($startX + 53, $curY, 180, 18, '姓名或名稱', 'C', 8, 1);
-        $pdf->drawCell($startX + 233, $curY, 100, 18, '統一編號', 'C', 8, 1);
-        $pdf->drawCell($startX + 333, $curY, 469, 18, '住址', 'C', 8, 1);
-        $curY += 18;
+        $pdf->drawCell($startX, $curY, 30, $hHeader, '項次', 'C', 8, 1);
+        $pdf->drawCell($startX + 30, $curY, 50, $hHeader, '區分', 'C', 8, 1);
+        $pdf->drawCell($startX + 80, $curY, 74, $hHeader, '姓名或名稱', 'C', 8, 1);
+        $pdf->drawCell($startX + 154, $curY, 74, $hHeader, '統一編號', 'C', 8, 1);
+        $pdf->drawCell($startX + 228, $curY, 285, $hHeader, '住址', 'C', 8, 1);
+
+        // 右側人員核章：平行放置於管理機關右側空白 (紅框 4 修正: 無框線，頂部緊湊對齊)
+        $officers = $data['officers'] ?? [];
+        $issuer = !empty($officers['issuer']) ? $officers['issuer'] : ($officers['auditor1'] ?? '');
+        $checker = !empty($officers['checker']) ? $officers['checker'] : ($officers['auditor2'] ?? '');
+        $audX = $startX + 535;
+        $pdf->drawCell($audX, $curY - 14, 220, 14, '登錄人員：' . $issuer, 'L', 8.5, 0);
+        $pdf->drawCell($audX, $curY, 220, 14, '校對人員：' . $checker, 'L', 8.5, 0);
 
         $managers = $data['managers'] ?? [];
-        if (empty($managers)) {
-            $pdf->drawCell($startX, $curY, $totalW, 16, '（無管理機關異動資料）', 'C', 8, 1);
-            $curY += 16;
-        } else {
+        if (!empty($managers)) {
+            $curY += $hHeader;
             foreach ($managers as $mg) {
-                $mH = 16;
-                $pdf->drawCell($startX, $curY, 28, $mH, (string)($mg['item'] ?? 1), 'C', 8, 1);
-                $pdf->drawCell($startX + 28, $curY, 25, $mH, (string)($mg['type'] ?? ''), 'C', 8, 1);
-                $pdf->drawCell($startX + 53, $curY, 180, $mH, (string)($mg['name'] ?? ''), 'L', 7.5, 1);
-                $pdf->drawCell($startX + 233, $curY, 100, $mH, (string)($mg['id'] ?? ''), 'C', 7.5, 1);
-                $pdf->drawCell($startX + 333, $curY, 469, $mH, (string)($mg['address'] ?? ''), 'L', 7.5, 1);
+                $mH = 29.0;
+                $pdf->drawCell($startX, $curY, 30, $mH, (string)($mg['item'] ?? 1), 'C', 8, 1);
+                $pdf->drawCell($startX + 30, $curY, 50, $mH, (string)($mg['type'] ?? ''), 'C', 8, 1);
+                $pdf->drawWrappedCell($startX + 80, $curY, 74, $mH, (string)($mg['name'] ?? ''), 8, 7.5, 'L', 1);
+                $pdf->drawCell($startX + 154, $curY, 74, $mH, (string)($mg['id'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawWrappedCell($startX + 228, $curY, 285, $mH, (string)($mg['address'] ?? ''), 32, 7.5, 'L', 1);
                 $curY += $mH;
             }
         }
-
-        // 7. 頁尾核章列
-        $officers = $data['officers'] ?? [];
-        $issuer = !empty($officers['issuer']) ? $officers['issuer'] : '';
-        $checker = !empty($officers['checker']) ? $officers['checker'] : '';
-        $pdf->drawCell(620, 560, 202, 14, '發給人員：' . $issuer, 'L', 8.5, 0);
-        $pdf->drawCell(620, 574, 202, 14, '校對人員：' . $checker, 'L', 8.5, 0);
     }
 
     /**
