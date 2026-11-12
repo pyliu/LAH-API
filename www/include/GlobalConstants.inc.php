@@ -61,6 +61,7 @@ foreach ($imap_constants as $name => $val) {
 unset($imap_constants, $name, $val);
 
 define('ROOT_DIR', dirname(dirname(__FILE__)));
+define('VENDOR_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'vendor');
 define('ASSETS_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'assets');
 define('EXPORT_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'export');
 define('IMPORT_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'import');

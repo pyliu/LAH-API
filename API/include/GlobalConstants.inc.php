@@ -63,7 +63,7 @@ unset($imap_constants, $name, $val);
 define('API_ROOT_DIR', dirname(__DIR__));
 define('V85_ROOT_DIR', API_ROOT_DIR);
 define('ROOT_DIR', dirname(API_ROOT_DIR) . DIRECTORY_SEPARATOR . 'www');
-define('VENDOR_DIR', file_exists(API_ROOT_DIR.DIRECTORY_SEPARATOR.'vendor') ? API_ROOT_DIR.DIRECTORY_SEPARATOR.'vendor' : ROOT_DIR.DIRECTORY_SEPARATOR.'vendor');
+define('VENDOR_DIR', file_exists(API_ROOT_DIR.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'autoload.php') ? API_ROOT_DIR.DIRECTORY_SEPARATOR.'vendor' : ROOT_DIR.DIRECTORY_SEPARATOR.'vendor');
 define('ASSETS_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'assets');
 define('EXPORT_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'export');
 define('IMPORT_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'import');
