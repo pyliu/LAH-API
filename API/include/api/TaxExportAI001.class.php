@@ -413,23 +413,23 @@ final class TaxExportAI001 {
 
         $sql = "SELECT 'A' AS DEPT, '0' AS SEQ, AS_TYPE AS TYPE, AA48, AA49, AA45, AA46, '0000' AS BB01, '' AS BB09, AA05 AS RM34, '' AS BB05, AA06 AS RM09, AA08, AA09, TO_CHAR(AA10) AS AA10, AA11, AA12, TO_CHAR(AA16) AS AA16, TO_CHAR(AA17) AS AA17, '' AS BB15_1, '' AS BB15_2, '' AS BB15_3, '' AS BB21, '' AS GG01, '' AS GG30_1, '' AS GG30_2, '' AS LNAM, '' AS LCDE, '' AS LADR
                 FROM WRALID
-                WHERE (AI03='$rm01') AND (AI04_1='$rm02') AND (AI04_2='$rm03') AND (AS_TYPE IN ('A', 'D', 'M', 'N'))
+                WHERE (AS03='$rm01') AND (AS04_1='$rm02') AND (AS04_2='$rm03') AND (AS_TYPE IN ('A', 'D', 'M', 'N'))
                 UNION
                 SELECT 'G' AS DEPT, '1' AS SEQ, GS_TYPE AS TYPE, GG48 AS AA48, GG49 AS AA49, '' AS AA45, '' AS AA46, GG01 AS BB01, '' AS BB09, '' AS RM34, '' AS BB05, '' AS RM09, '' AS AA08, '' AS AA09, '' AS AA10, '' AS AA11, '' AS AA12, '' AS AA16, '' AS AA17, '' AS BB15_1, '' AS BB15_2, '' AS BB15_3, '' AS BB21, GG01, GG30_1, GG30_2, '' AS LNAM, '' AS LCDE, '' AS LADR
                 FROM WRGALL
-                WHERE (GI03='$rm01') AND (GI04_1='$rm02') AND (GI04_2='$rm03') AND (GG00='A') AND (GS_TYPE IN ('A', 'D', 'M', 'N'))
+                WHERE (GS03='$rm01') AND (GS04_1='$rm02') AND (GS04_2='$rm03') AND (GG00='A') AND (GS_TYPE IN ('A', 'D', 'M', 'N'))
                 UNION
                 SELECT 'B' AS DEPT, '2' AS SEQ, BS_TYPE AS TYPE, BA48 AS AA48, BA49 AS AA49, '' AS AA45, '' AS AA46, BB01, BB09, BB07 AS RM34, BB05, BB06 AS RM09, '' AS AA08, '' AS AA09, '' AS AA10, '' AS AA11, '' AS AA12, '' AS AA16, '' AS AA17, BB15_1, TO_CHAR(BB15_2) AS BB15_2, TO_CHAR(BB15_3) AS BB15_3, TO_CHAR(BB21) AS BB21, '' AS GG01, '' AS GG30_1, '' AS GG30_2, '' AS LNAM, '' AS LCDE, '' AS LADR
                 FROM WRBLOW
-                WHERE (BI03='$rm01') AND (BI04_1='$rm02') AND (BI04_2='$rm03') AND (BS_TYPE IN ('A', 'D', 'M', 'N'))
+                WHERE (BS03='$rm01') AND (BS04_1='$rm02') AND (BS04_2='$rm03') AND (BS_TYPE IN ('A', 'D', 'M', 'N'))
                 UNION
                 SELECT 'G' AS DEPT, '3' AS SEQ, GS_TYPE AS TYPE, GG48 AS AA48, GG49 AS AA49, '' AS AA45, '' AS AA46, GG01 AS BB01, '' AS BB09, '' AS RM34, '' AS BB05, '' AS RM09, '' AS AA08, '' AS AA09, '' AS AA10, '' AS AA11, '' AS AA12, '' AS AA16, '' AS AA17, '' AS BB15_1, '' AS BB15_2, '' AS BB15_3, '' AS BB21, GG01, GG30_1, GG30_2, '' AS LNAM, '' AS LCDE, '' AS LADR
                 FROM WRGALL
-                WHERE (GI03='$rm01') AND (GI04_1='$rm02') AND (GI04_2='$rm03') AND (GG00='B') AND (GS_TYPE IN ('A', 'D', 'M', 'N'))
+                WHERE (GS03='$rm01') AND (GS04_1='$rm02') AND (GS04_2='$rm03') AND (GG00='B') AND (GS_TYPE IN ('A', 'D', 'M', 'N'))
                 UNION
                 SELECT 'M' AS DEPT, '4' AS SEQ, MS_TYPE AS TYPE, MM48 AS AA48, MM49 AS AA49, '' AS AA45, '' AS AA46, MM01 AS BB01, MM13 AS BB09, '' AS RM34, '' AS BB05, '' AS RM09, '' AS AA08, '' AS AA09, '' AS AA10, '' AS AA11, '' AS AA12, '' AS AA16, '' AS AA17, '' AS BB15_1, '' AS BB15_2, '' AS BB15_3, '' AS BB21, '' AS GG01, '' AS GG30_1, '' AS GG30_2, LNAM, LCDE, LADR
                 FROM SRLNID, WRMNGR
-                WHERE (MI03='$rm01') AND (MI04_1='$rm02') AND (MI04_2='$rm03') AND (MM00='B') AND (MS_TYPE IN ('A', 'D', 'M', 'N')) AND LIDN=MM13
+                WHERE (MS03='$rm01') AND (MS04_1='$rm02') AND (MS04_2='$rm03') AND (MM00='B') AND (MS_TYPE IN ('A', 'D', 'M', 'N')) AND LIDN=MM13
                 ORDER BY AA48, AA49, BB01, SEQ, DEPT";
         
         $rows = $this->query($sql);
@@ -486,15 +486,15 @@ final class TaxExportAI001 {
                 UNION
                 SELECT 'B' AS DEPT, '2' AS SEQ, BS_TYPE AS TYPE, BA48 AS AA48, BA49 AS AA49, '' AS AA45, '' AS AA46, BB01, BB09, BB07 AS RM34, BB05, BB06 AS RM09, '' AS AA08, '' AS AA09, '' AS AA10, '' AS AA11, '' AS AA12, '' AS AA16, '' AS AA17, BB15_1, TO_CHAR(BB15_2) AS BB15_2, TO_CHAR(BB15_3) AS BB15_3, TO_CHAR(BB21) AS BB21, '' AS GG01, '' AS GG30_1, '' AS GG30_2, '' AS LNAM, '' AS LCDE, '' AS LADR
                 FROM WRBLOW
-                WHERE (BI03='$rm01') AND (BI04_1='$rm02') AND (BI04_2='$rm03') AND (BS_TYPE IN ('A', 'D', 'M', 'N'))
+                WHERE (BS03='$rm01') AND (BS04_1='$rm02') AND (BS04_2='$rm03') AND (BS_TYPE IN ('A', 'D', 'M', 'N'))
                 UNION
                 SELECT 'G' AS DEPT, '3' AS SEQ, GS_TYPE AS TYPE, GG48 AS AA48, GG49 AS AA49, '' AS AA45, '' AS AA46, GG01 AS BB01, '' AS BB09, '' AS RM34, '' AS BB05, '' AS RM09, '' AS AA08, '' AS AA09, '' AS AA10, '' AS AA11, '' AS AA12, '' AS AA16, '' AS AA17, '' AS BB15_1, '' AS BB15_2, '' AS BB15_3, '' AS BB21, GG01, GG30_1, GG30_2, '' AS LNAM, '' AS LCDE, '' AS LADR
                 FROM WRGALL
-                WHERE (GI03='$rm01') AND (GI04_1='$rm02') AND (GI04_2='$rm03') AND (GG00='B') AND (GS_TYPE IN ('A', 'D', 'M', 'N'))
+                WHERE (GS03='$rm01') AND (GS04_1='$rm02') AND (GS04_2='$rm03') AND (GG00='B') AND (GS_TYPE IN ('A', 'D', 'M', 'N'))
                 UNION
                 SELECT 'M' AS DEPT, '4' AS SEQ, MS_TYPE AS TYPE, MM48 AS AA48, MM49 AS AA49, '' AS AA45, '' AS AA46, MM01 AS BB01, MM13 AS BB09, '' AS RM34, '' AS BB05, '' AS RM09, '' AS AA08, '' AS AA09, '' AS AA10, '' AS AA11, '' AS AA12, '' AS AA16, '' AS AA17, '' AS BB15_1, '' AS BB15_2, '' AS BB15_3, '' AS BB21, '' AS GG01, '' AS GG30_1, '' AS GG30_2, LNAM, LCDE, LADR
                 FROM SRLNID, WRMNGR
-                WHERE (MI03='$rm01') AND (MI04_1='$rm02') AND (MI04_2='$rm03') AND (MM00='B') AND (MS_TYPE IN ('A', 'D', 'M', 'N')) AND LIDN=MM13
+                WHERE (MS03='$rm01') AND (MS04_1='$rm02') AND (MS04_2='$rm03') AND (MM00='B') AND (MS_TYPE IN ('A', 'D', 'M', 'N')) AND LIDN=MM13
                 ORDER BY AA48, AA49, BB01, SEQ, DEPT";
         
         $rows = $this->query($sql);
@@ -552,7 +552,7 @@ final class TaxExportAI001 {
                 UNION
                 SELECT 'B' AS DEPT, '1' AS SEQ, LS_TYPE AS TYPE, '' AS AA48, '' AS AA49, '' AS AA45, '' AS AA46, '' AS BB01, LIDN AS BB09, '' AS RM34, '' AS BB05, '' AS RM09, '' AS AA08, '' AS AA09, '' AS AA10, '' AS AA11, '' AS AA12, '' AS AA16, '' AS AA17, '' AS BB15_1, '' AS BB15_2, '' AS BB15_3, '' AS BB21, LNAM, LCDE, LADR
                 FROM WRLNID
-                WHERE (LI03='$rm01') AND (LI04_1='$rm02') AND (LI04_2='$rm03') AND (LS_TYPE IN ('A', 'D', 'M', 'N'))
+                WHERE (LS03='$rm01') AND (LS04_1='$rm02') AND (LS04_2='$rm03') AND (LS_TYPE IN ('A', 'D', 'M', 'N'))
                 ORDER BY SEQ, AA48, AA49, BB09";
         
         $rows = $this->query($sql);
@@ -641,7 +641,7 @@ final class TaxExportAI001 {
             // [qry7_BAD1] WRMNGR
             $sqlM = "SELECT MM00, MM48, MM49, MM01, MM13, MS_TYPE
                      FROM WRMNGR
-                     WHERE (MI03='$rm01') AND (MI04_1='$rm02') AND (MI04_2='$rm03')
+                     WHERE (MS03='$rm01') AND (MS04_1='$rm02') AND (MS04_2='$rm03')
                        AND (MM00='B') AND (MM48='$saa48') AND (MM49='$saa49') AND (MM01='$sbb01')
                        AND (MS_TYPE IN ('A','D','M','N'))";
             $mRows = $this->query($sqlM);

@@ -289,7 +289,7 @@ final class TaxExportRCD0102 {
                     $dd46 = '';
                     $dd09 = '';
                     if ($ipType === 'D') {
-                        $sqlW = "SELECT DD46, DD09 FROM WRDBID WHERE DI03=:rm01 AND DI04_1=:rm02 AND DI04_2=:rm03 AND DD48=:dd48 AND DD49=:dd49 AND DS_TYPE='D'";
+                        $sqlW = "SELECT DD46, DD09 FROM WRDBID WHERE DS03=:rm01 AND DS04_1=:rm02 AND DS04_2=:rm03 AND DD48=:dd48 AND DD49=:dd49 AND DS_TYPE='D'";
                         $wRows = $this->query($sqlW, [':rm01' => $rm01, ':rm02' => $rm02, ':rm03' => $rm03, ':dd48' => $dd48, ':dd49' => $dd49]);
                         if (!empty($wRows[0])) {
                             $dd46 = trim($wRows[0]['DD46'] ?? '');
@@ -302,7 +302,7 @@ final class TaxExportRCD0102 {
                             $dd46 = trim($sRows[0]['DD46'] ?? '');
                             $dd09 = trim($sRows[0]['DD09'] ?? '');
                         } else {
-                            $sqlW = "SELECT DD46, DD09 FROM WRDBID WHERE DI03=:rm01 AND DI04_1=:rm02 AND DI04_2=:rm03 AND DD48=:dd48 AND DD49=:dd49";
+                            $sqlW = "SELECT DD46, DD09 FROM WRDBID WHERE DS03=:rm01 AND DS04_1=:rm02 AND DS04_2=:rm03 AND DD48=:dd48 AND DD49=:dd49";
                             $wRows = $this->query($sqlW, [':rm01' => $rm01, ':rm02' => $rm02, ':rm03' => $rm03, ':dd48' => $dd48, ':dd49' => $dd49]);
                             if (!empty($wRows[0])) {
                                 $dd46 = trim($wRows[0]['DD46'] ?? '');
@@ -379,7 +379,7 @@ final class TaxExportRCD0102 {
                         $dd46 = trim($sRows[0]['DD46'] ?? '');
                         $dd09 = trim($sRows[0]['DD09'] ?? '');
                     } else {
-                        $sqlW = "SELECT DD46, DD09 FROM WRDBID WHERE DI03=:rm01 AND DI04_1=:rm02 AND DI04_2=:rm03 AND DD48=:dd48 AND DD49=:dd49";
+                        $sqlW = "SELECT DD46, DD09 FROM WRDBID WHERE DS03=:rm01 AND DS04_1=:rm02 AND DS04_2=:rm03 AND DD48=:dd48 AND DD49=:dd49";
                         $wRows = $this->query($sqlW, [':rm01' => $rm01, ':rm02' => $rm02, ':rm03' => $rm03, ':dd48' => $dd48, ':dd49' => $dd49]);
                         if (!empty($wRows[0])) {
                             $dd46 = trim($wRows[0]['DD46'] ?? '');
@@ -452,7 +452,7 @@ final class TaxExportRCD0102 {
                         // 先查「原」狀態 (WREBOW ES_TYPE IN ('M','D'))
                         $sqlOrigE = "SELECT ES_TYPE, EE09, EE15_1, EE15_2, EE15_3, EE06, EE07, EE05 " .
                                     "FROM WREBOW " .
-                                    "WHERE EI03=:rm01 AND EI04_1=:rm02 AND EI04_2=:rm03 AND ED48=:ed48 AND ED49=:ed49 AND EE01=:ee01 AND ES_TYPE IN ('M','D') " .
+                                    "WHERE ES03=:rm01 AND ES04_1=:rm02 AND ES04_2=:rm03 AND ED48=:ed48 AND ED49=:ed49 AND EE01=:ee01 AND ES_TYPE IN ('M','D') " .
                                     "ORDER BY EE01";
                         $origERows = $this->query($sqlOrigE, [
                             ':rm01' => $rm01, ':rm02' => $rm02, ':rm03' => $rm03,
@@ -485,7 +485,7 @@ final class TaxExportRCD0102 {
                         // 再查「現」狀態 (WREBOW ES_TYPE IN ('A','N'))
                         $sqlCurrE = "SELECT ES_TYPE, EE09, EE15_1, EE15_2, EE15_3 " .
                                     "FROM WREBOW " .
-                                    "WHERE EI03=:rm01 AND EI04_1=:rm02 AND EI04_2=:rm03 AND ED48=:ed48 AND ED49=:ed49 AND EE01=:ee01 AND ES_TYPE IN ('A','N') " .
+                                    "WHERE ES03=:rm01 AND ES04_1=:rm02 AND ES04_2=:rm03 AND ED48=:ed48 AND ED49=:ed49 AND EE01=:ee01 AND ES_TYPE IN ('A','N') " .
                                     "ORDER BY EE01";
                         $currERows = $this->query($sqlCurrE, [
                             ':rm01' => $rm01, ':rm02' => $rm02, ':rm03' => $rm03,
@@ -520,7 +520,7 @@ final class TaxExportRCD0102 {
 
             // 區塊 3：統編/住址更正案件 (WRLNID)
             $sqlWrln = "SELECT LIDN, LNAM, LADR, LS_TYPE FROM WRLNID " .
-                       "WHERE LI03=:rm01 AND LI04_1=:rm02 AND LI04_2=:rm03 AND LS_TYPE IN ('M','D','N','A') " .
+                       "WHERE LS03=:rm01 AND LS04_1=:rm02 AND LS04_2=:rm03 AND LS_TYPE IN ('M','D','N','A') " .
                        "ORDER BY LS_TYPE";
             $wrlnRows = $this->query($sqlWrln, [':rm01' => $rm01, ':rm02' => $rm02, ':rm03' => $rm03]);
             if (!empty($wrlnRows)) {
@@ -563,7 +563,7 @@ final class TaxExportRCD0102 {
             $mngItemIdx = 1;
             $sqlMng = "SELECT MM00, MS_TYPE, MM13, MM01 " .
                       "FROM WRMNGR " .
-                      "WHERE MI03=:rm01 AND MI04_1=:rm02 AND MI04_2=:rm03 AND MM00='E' " .
+                      "WHERE MS03=:rm01 AND MS04_1=:rm02 AND MS04_2=:rm03 AND MM00='E' " .
                       "ORDER BY MM48, MM49, MM01, MS_TYPE";
             $mngRows = $this->query($sqlMng, [':rm01' => $rm01, ':rm02' => $rm02, ':rm03' => $rm03]);
 
@@ -741,15 +741,10 @@ final class TaxExportRCD0102 {
         if ($userId === '') {
             return '';
         }
-        $sql1 = "SELECT user_name FROM sysauth1 WHERE user_id = :uid";
-        $rows = $this->query($sql1, [':uid' => $userId]);
+        $sql1 = "SELECT user_name FROM sysauth1 WHERE user_id = :bv_uid";
+        $rows = $this->query($sql1, [':bv_uid' => $userId]);
         if (!empty($rows[0]['USER_NAME'])) {
             return trim($rows[0]['USER_NAME']);
-        }
-        $sql2 = "SELECT user_name FROM VSYSAUTH WHERE user_id = :uid";
-        $rows2 = $this->query($sql2, [':uid' => $userId]);
-        if (!empty($rows2[0]['USER_NAME'])) {
-            return trim($rows2[0]['USER_NAME']);
         }
         return $userId;
     }
@@ -786,7 +781,7 @@ final class TaxExportRCD0102 {
             return ($name !== '' ? $name . ' ' : '') . $numer . '/' . $denom;
         }
         if ($ee15_1 === 'Z') {
-            $sqlZ = "SELECT GG30_2 FROM WRGALL WHERE GI03=:rm01 AND GI04_1=:rm02 AND GI04_2=:rm03 AND GG00=:dept AND GG30_1='99'";
+            $sqlZ = "SELECT GG30_2 FROM WRGALL WHERE GS03=:rm01 AND GS04_1=:rm02 AND GS04_2=:rm03 AND GG00=:dept AND GG30_1='99'";
             $zRows = $this->query($sqlZ, [':rm01' => $rm01, ':rm02' => $rm02, ':rm03' => $rm03, ':dept' => $dept]);
             if (!empty($zRows[0]['GG30_2'])) {
                 return ($name !== '' ? $name . ' ' : '') . trim($zRows[0]['GG30_2']);
@@ -916,7 +911,20 @@ final class TaxExportRCD0102 {
         }
 
         $wrapper = new OraDBWrapper();
-        return $wrapper->getRawRows($sql, $params);
+        if (!$wrapper->reachable()) {
+            throw new RuntimeException('無法連線至地籍資料庫。');
+        }
+
+        $db = $wrapper->getDB();
+        $db->parse($sql);
+        if (!empty($params)) {
+            foreach ($params as $k => &$v) {
+                $db->bind($k, $v);
+            }
+            unset($v);
+        }
+        $db->execute();
+        return $db->fetchAll(true);
     }
 
     /**
