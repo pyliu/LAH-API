@@ -19,13 +19,13 @@ final class TaxExportBatch {
 
     public static function reports(): array {
         return [
-            'RCD0101_LOCAL'  => ['name' => '地籍異動通知書（本所）', 'extension' => 'pdf', 'source' => '本所承辦案件', 'supported' => true],
-            'RCD0101_REMOTE' => ['name' => '地籍異動通知書（他所）', 'extension' => 'pdf', 'source' => '他所承辦本所案件', 'supported' => true],
-            'RCD0102_LOCAL'  => ['name' => '建物異動通知書（本所）', 'extension' => 'pdf', 'source' => '本所承辦案件', 'supported' => true],
-            'RCD0102_REMOTE' => ['name' => '建物異動通知書（他所）', 'extension' => 'pdf', 'source' => '他所承辦本所案件', 'supported' => true],
-            'AI001'          => ['name' => '地籍異動資料', 'extension' => 'txt', 'source' => '本所及他所承辦本所案件', 'supported' => true],
-            'AI002'          => ['name' => '地價異動資料', 'extension' => 'txt', 'source' => '本所及他所承辦本所案件', 'supported' => true],
-            'AI037'          => ['name' => '建物異動資料', 'extension' => 'txt', 'source' => '本所及他所承辦本所案件', 'supported' => true]
+            'RCD0101_LOCAL'  => ['name' => '地籍異動通知書（本所）', 'extension' => 'pdf', 'source' => '本所承辦案件', 'supported' => true, 'exporter' => 'TaxExportRcd0101'],
+            'RCD0101_REMOTE' => ['name' => '地籍異動通知書（他所）', 'extension' => 'pdf', 'source' => '他所承辦本所案件', 'supported' => true, 'exporter' => 'TaxExportRcd0101'],
+            'RCD0102_LOCAL'  => ['name' => '建物異動通知書（本所）', 'extension' => 'pdf', 'source' => '本所承辦案件', 'supported' => true, 'exporter' => 'TaxExportRcd0102'],
+            'RCD0102_REMOTE' => ['name' => '建物異動通知書（他所）', 'extension' => 'pdf', 'source' => '他所承辦本所案件', 'supported' => true, 'exporter' => 'TaxExportRcd0102'],
+            'AI001'          => ['name' => '地籍異動資料', 'extension' => 'txt', 'source' => '本所及他所承辦本所案件', 'supported' => true, 'exporter' => 'TaxExportAI001'],
+            'AI002'          => ['name' => '地價異動資料', 'extension' => 'txt', 'source' => '本所及他所承辦本所案件', 'supported' => true, 'exporter' => 'TaxExportAI002'],
+            'AI037'          => ['name' => '建物異動資料', 'extension' => 'txt', 'source' => '本所及他所承辦本所案件', 'supported' => true, 'exporter' => 'TaxExportAI037']
         ];
     }
 
@@ -109,15 +109,31 @@ final class TaxExportBatch {
             $temporary = $path . '/' . $code . '.part';
 
             try {
-                if ($batch['mock']) {
-                    $result = $this->mockFile($temporary, $item, $batch);
+                if ($this->provider !== null) {
+                    if (method_exists($this->provider, 'advance')) {
+                        $result = $this->provider->advance($item, $batch, $temporary, function ($source) use (&$item, &$batch, $path) {
+                            $item['source_job'] = $source;
+                            $this->save($path, $batch);
+                        });
+                    } elseif (method_exists($this->provider, 'export')) {
+                        $result = $this->provider->export($temporary, $item, $batch);
+                    } else {
+                        throw new RuntimeException('無效的產製提供者。');
+                    }
                 } else {
-                    require_once __DIR__ . '/TaxExportPortal.class.php';
-                    $portal = $this->provider ?: new TaxExportPortal($path);
-                    $result = $portal->advance($item, $batch, $temporary, function ($source) use (&$item, &$batch, $path) {
-                        $item['source_job'] = $source;
-                        $this->save($path, $batch);
-                    });
+                    $exporterClass = $item['exporter'] ?? (self::reports()[$code]['exporter'] ?? null);
+                    if ($exporterClass) {
+                        $exporterFile = __DIR__ . '/' . $exporterClass . '.class.php';
+                        if (is_file($exporterFile)) {
+                            require_once $exporterFile;
+                        }
+                    }
+                    if ($exporterClass && class_exists($exporterClass)) {
+                        $exporter = new $exporterClass();
+                        $result = $exporter->export($temporary, $item, $batch);
+                    } else {
+                        $result = $this->mockFile($temporary, $item, $batch);
+                    }
                 }
                 if (!in_array($result['state'], ['pending', 'success', 'empty'], true)) {
                     throw new RuntimeException('產製結果狀態錯誤。');
@@ -355,33 +371,38 @@ final class TaxExportBatch {
     }
 
     private function mockAi001(string $path, array $batch): array {
+        $file = __DIR__ . '/TaxExportAI001.class.php';
+        if (is_file($file)) {
+            require_once $file;
+        }
+        if (class_exists('TaxExportAI001')) {
+            $exporter = new TaxExportAI001();
+            return $exporter->export($path, ['code' => 'AI001'], array_merge($batch, ['mock' => true]));
+        }
+
         $padBytes = function (string $s, int $targetLen): string {
             $len = strlen($s);
             return $len < $targetLen ? $s . str_repeat(' ', $targetLen - $len) : substr($s, 0, $targetLen);
         };
         $lines = [];
-        // 本所承辦案件 (A 記錄 167 位元組, B 記錄 207 位元組)
-        $a1 = $padBytes("115A1HA000001A1010021019400004811510271151029HA        4646", 167);
+        // 本所承辦案件 (A 記錄 169 位元組, B 記錄 227 位元組)
+        $a1 = $padBytes("115A1HA000001A1010021019400004811510271151029HA        4646", 169);
         $name1 = mb_convert_encoding('本所測試者', 'CP950', 'UTF-8');
         $addr1 = mb_convert_encoding('桃園市桃園區復興路１號', 'CP950', 'UTF-8');
-        $b1 = $padBytes("115A1HA000001B0A123456789               " . $name1 . str_repeat(' ', 20) . $addr1, 207);
+        $b1 = $padBytes("115A1HA000001B0A123456789               " . $name1 . str_repeat(' ', 20) . $addr1, 227);
 
         // 他所承辦本所案件
-        $a2 = $padBytes("115U1HA000002A1010021019400004811510271151029HA        4646", 167);
+        $a2 = $padBytes("115U1HA000002A1010021019400004811510271151029HA        4646", 169);
         $name2 = mb_convert_encoding('他所測試者', 'CP950', 'UTF-8');
         $addr2 = mb_convert_encoding('桃園市中壢區中央路２號', 'CP950', 'UTF-8');
-        $b2 = $padBytes("115U1HA000002B0B987654321               " . $name2 . str_repeat(' ', 20) . $addr2, 207);
+        $b2 = $padBytes("115U1HA000002B0B987654321               " . $name2 . str_repeat(' ', 20) . $addr2, 227);
 
-        $lines[] = $a1;
-        $lines[] = $b1;
-        $lines[] = $a2;
-        $lines[] = $b2;
-
+        $lines = [$a1, $b1, $a2, $b2];
         $count = count($lines);
         $tag = "##### TAG #####\xA6\x40\xB2\xA3\xBB\x73 " . $count . " \xB5\xA7\xB8\xEA\xAE\xC6";
         $lines[] = $tag;
 
-        file_put_contents($path, implode("\r\n", $lines) . "\r\n");
+        file_put_contents($path, implode("\n", $lines));
         return ['state' => 'success', 'message' => '已完成，共 ' . $count . ' 筆'];
     }
 }
