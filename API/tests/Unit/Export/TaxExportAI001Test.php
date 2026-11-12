@@ -11,7 +11,13 @@ if (!file_exists($incPath)) {
     $incPath = dirname(__DIR__, 2) . '/include/api/TaxExportAI001.class.php';
 }
 if (!file_exists($incPath)) {
+    $incPath = dirname(__DIR__, 3) . '/include/api/TaxExportAI001.class.php';
+}
+if (!file_exists($incPath)) {
     $incPath = dirname(__DIR__, 3) . '/www/include/api/TaxExportAI001.class.php';
+}
+if (!file_exists($incPath)) {
+    $incPath = dirname(__DIR__, 4) . '/www/include/api/TaxExportAI001.class.php';
 }
 require_once $incPath;
 
