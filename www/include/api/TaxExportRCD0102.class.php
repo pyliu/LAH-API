@@ -39,7 +39,7 @@ final class TaxExportRCD0102 {
      * MOCK 模式產製合成通知書 PDF
      */
     private function exportMock(string $path, array $item, array $batch): array {
-        $pdf = new TaxExportPdfWriter('L', 'mm', 'A4');
+        $pdf = new TaxExportPdfWriter('L', 'pt', 'A4');
         $code = $item['code'] ?? 'RCD0102_LOCAL';
         $isRemote = ($code === 'RCD0102_REMOTE');
 
@@ -55,6 +55,7 @@ final class TaxExportRCD0102 {
             'office' => $officeName,
             'rec_no' => ($isRemote ? '桃跨' : '桃資') . ' 字 第 000001 號',
             'change_date' => self::formatRocDateLong($endRoc),
+            'page_text' => '共 2 頁 第 1 頁',
             'buildings' => [
                 [
                     'item' => 1,
@@ -62,7 +63,11 @@ final class TaxExportRCD0102 {
                     'town' => '桃園區',
                     'section' => '中路段',
                     'land_no' => '101',
-                    'addr' => '桃園市桃園區中山路100號'
+                    'addr' => '桃園市桃園區中山路100號',
+                    'cause' => '買賣',
+                    'cause_date' => self::formatRocDate($beginRoc),
+                    'reg_date' => self::formatRocDate($endRoc),
+                    'remark' => ''
                 ],
                 [
                     'item' => 2,
@@ -70,7 +75,11 @@ final class TaxExportRCD0102 {
                     'town' => '桃園區',
                     'section' => '中路段',
                     'land_no' => '101-1',
-                    'addr' => '桃園市桃園區中山路100號'
+                    'addr' => '桃園市桃園區中山路100號',
+                    'cause' => '買賣',
+                    'cause_date' => self::formatRocDate($beginRoc),
+                    'reg_date' => self::formatRocDate($endRoc),
+                    'remark' => ''
                 ]
             ],
             'owners' => [
@@ -102,7 +111,7 @@ final class TaxExportRCD0102 {
             'auditor2' => '林複審'
         ];
 
-        $this->drawNoticePage($pdf, $caseData1);
+        $this->drawOfficialNoticePage($pdf, $caseData1);
 
         // 產製第 2 頁案件 (展示多案件分頁能力與管理機關表)
         $caseData2 = [
@@ -110,6 +119,7 @@ final class TaxExportRCD0102 {
             'office' => $officeName,
             'rec_no' => ($isRemote ? '桃跨' : '桃資') . ' 字 第 000002 號',
             'change_date' => self::formatRocDateLong($endRoc),
+            'page_text' => '共 2 頁 第 2 頁',
             'buildings' => [
                 [
                     'item' => 1,
@@ -117,7 +127,11 @@ final class TaxExportRCD0102 {
                     'town' => $isRemote ? '中壢區' : '桃園區',
                     'section' => $isRemote ? '青埔段' : '大興段',
                     'land_no' => '202-1',
-                    'addr' => $isRemote ? '桃園市中壢區高鐵南路二段1號' : '桃園市桃園區大興西路二段50號'
+                    'addr' => $isRemote ? '桃園市中壢區高鐵南路二段1號' : '桃園市桃園區大興西路二段50號',
+                    'cause' => '贈與',
+                    'cause_date' => self::formatRocDate($beginRoc),
+                    'reg_date' => self::formatRocDate($endRoc),
+                    'remark' => ''
                 ]
             ],
             'owners' => [
@@ -157,7 +171,7 @@ final class TaxExportRCD0102 {
             'auditor2' => '周複審'
         ];
 
-        $this->drawNoticePage($pdf, $caseData2);
+        $this->drawOfficialNoticePage($pdf, $caseData2);
 
         $pdf->Output('F', $path);
         return ['state' => 'success', 'message' => '已完成'];
@@ -222,8 +236,8 @@ final class TaxExportRCD0102 {
             return ['state' => 'empty', 'message' => '無資料'];
         }
 
-        $pdf = new TaxExportPdfWriter('L', 'mm', 'A4');
-        $validCasesCount = 0;
+        $pdf = new TaxExportPdfWriter('L', 'pt', 'A4');
+        $validCases = [];
 
         foreach ($mainRows as $case) {
             $rm01 = trim($case['RM01'] ?? '');
@@ -259,12 +273,18 @@ final class TaxExportRCD0102 {
             $recNo = ($wordName !== '' ? $wordName : $rm02) . ' 字 第 ' . $rm03 . ' 號';
             $changeDateStr = self::formatRocDateLong($rm07_1);
 
-            // 1. 第一表格：建物標示及基地坐落表 (TrdbidBody)
+            $causeName = $this->getKeyn('06', $rm09);
+            if ($causeName === '') {
+                $causeName = $rm09;
+            }
+            $causeDateStr = self::formatRocDate($rm34);
+            $regDateStr = self::formatRocDate($rm33);
+
+            // 1. 第一表格：建物標示及基地坐落表
             $buildingsData = [];
             $bldItemIdx = 1;
 
             if ($countD > 0) {
-                // 區塊 1：建物標示部有異動
                 $sqlBld = "SELECT DISTINCT IIKEY, IP_TYPE FROM TRINDX " .
                           "WHERE II03=:rm01 AND II04_1=:rm02 AND II04_2=:rm03 AND II00='D' AND IP_TYPE IN ('M','D','A','N') " .
                           "ORDER BY IIKEY, IP_TYPE";
@@ -338,7 +358,11 @@ final class TaxExportRCD0102 {
                                 'town' => $townName,
                                 'section' => $baseSecName !== '' ? $baseSecName : $ha48,
                                 'land_no' => self::formatLandNo($ha49),
-                                'addr' => $dd09
+                                'addr' => $dd09,
+                                'cause' => $causeName,
+                                'cause_date' => $causeDateStr,
+                                'reg_date' => $regDateStr,
+                                'remark' => ''
                             ];
                         }
                     } else {
@@ -348,7 +372,11 @@ final class TaxExportRCD0102 {
                             'town' => $townName,
                             'section' => $bldSectionName !== '' ? $bldSectionName : $dd48,
                             'land_no' => '(空白)',
-                            'addr' => $dd09
+                            'addr' => $dd09,
+                            'cause' => $causeName,
+                            'cause_date' => $causeDateStr,
+                            'reg_date' => $regDateStr,
+                            'remark' => ''
                         ];
                     }
 
@@ -413,7 +441,11 @@ final class TaxExportRCD0102 {
                                 'town' => $townName,
                                 'section' => $baseSecName !== '' ? $baseSecName : $ha48,
                                 'land_no' => self::formatLandNo($ha49),
-                                'addr' => $dd09
+                                'addr' => $dd09,
+                                'cause' => $causeName,
+                                'cause_date' => $causeDateStr,
+                                'reg_date' => $regDateStr,
+                                'remark' => ''
                             ];
                         }
                     } else {
@@ -423,7 +455,11 @@ final class TaxExportRCD0102 {
                             'town' => $townName,
                             'section' => $bldSectionName !== '' ? $bldSectionName : $dd48,
                             'land_no' => '(空白)',
-                            'addr' => $dd09
+                            'addr' => $dd09,
+                            'cause' => $causeName,
+                            'cause_date' => $causeDateStr,
+                            'reg_date' => $regDateStr,
+                            'remark' => ''
                         ];
                     }
                 }
@@ -492,7 +528,6 @@ final class TaxExportRCD0102 {
                             ':ed48' => $ed48, ':ed49' => $ed49, ':ee01' => $ee01
                         ]);
 
-                        $causeName = $this->getKeyn('06', $rm09);
                         foreach ($currERows as $ce) {
                             $ee09 = trim($ce['EE09'] ?? '');
                             $lnid = $this->queryLnid($ee09);
@@ -509,9 +544,9 @@ final class TaxExportRCD0102 {
                                 'id_no' => $ee09,
                                 'scope' => $scope,
                                 'addr' => $lnid['LADR'] ?? '',
-                                'cause' => $causeName !== '' ? $causeName : $rm09,
-                                'cause_date' => self::formatRocDate($rm34),
-                                'reg_date' => self::formatRocDate($rm33)
+                                'cause' => $causeName,
+                                'cause_date' => $causeDateStr,
+                                'reg_date' => $regDateStr
                             ];
                         }
                     }
@@ -524,7 +559,6 @@ final class TaxExportRCD0102 {
                        "ORDER BY LS_TYPE";
             $wrlnRows = $this->query($sqlWrln, [':rm01' => $rm01, ':rm02' => $rm02, ':rm03' => $rm03]);
             if (!empty($wrlnRows)) {
-                $causeName = $this->getKeyn('06', $rm09);
                 foreach ($wrlnRows as $wl) {
                     $lsType = trim($wl['LS_TYPE'] ?? '');
                     $typeStr = in_array($lsType, ['M', 'D'], true) ? '原' : '現';
@@ -535,16 +569,15 @@ final class TaxExportRCD0102 {
                         'id_no' => trim($wl['LIDN'] ?? ''),
                         'scope' => '',
                         'addr' => trim($wl['LADR'] ?? ''),
-                        'cause' => $causeName !== '' ? $causeName : $rm09,
-                        'cause_date' => self::formatRocDate($rm34),
-                        'reg_date' => self::formatRocDate($rm33)
+                        'cause' => $causeName,
+                        'cause_date' => $causeDateStr,
+                        'reg_date' => $regDateStr
                     ];
                 }
             }
 
             // 若該案件無所有權部異動 (countE == 0 且無更正案件)，依規格補上一筆空白列
             if (empty($ownersData)) {
-                $causeName = $this->getKeyn('06', $rm09);
                 $ownersData[] = [
                     'item' => 1,
                     'type' => '',
@@ -552,9 +585,9 @@ final class TaxExportRCD0102 {
                     'id_no' => '(空白)',
                     'scope' => '',
                     'addr' => '(空白)',
-                    'cause' => $causeName !== '' ? $causeName : $rm09,
-                    'cause_date' => self::formatRocDate($rm34),
-                    'reg_date' => self::formatRocDate($rm33)
+                    'cause' => $causeName,
+                    'cause_date' => $causeDateStr,
+                    'reg_date' => $regDateStr
                 ];
             }
 
@@ -581,8 +614,7 @@ final class TaxExportRCD0102 {
                 ];
             }
 
-            // 組裝此案件資料並繪製整頁
-            $caseData = [
+            $validCases[] = [
                 'title' => $fullOfficeTitle,
                 'office' => $displayOffice,
                 'rec_no' => $recNo,
@@ -593,16 +625,19 @@ final class TaxExportRCD0102 {
                 'auditor1' => $name01,
                 'auditor2' => $name02
             ];
-
-            $this->drawNoticePage($pdf, $caseData);
-            $validCasesCount++;
         }
 
-        if ($validCasesCount === 0) {
+        if (empty($validCases)) {
             if (is_file($path)) {
                 unlink($path);
             }
             return ['state' => 'empty', 'message' => '無資料'];
+        }
+
+        $totalPages = count($validCases);
+        foreach ($validCases as $idx => $caseData) {
+            $caseData['page_text'] = '共 ' . $totalPages . ' 頁 第 ' . ($idx + 1) . ' 頁';
+            $this->drawOfficialNoticePage($pdf, $caseData);
         }
 
         $pdf->Output('F', $path);
@@ -610,128 +645,157 @@ final class TaxExportRCD0102 {
     }
 
     /**
-     * 繪製單一案件建物異動通知書頁面 (A4 橫向 297mm x 210mm)
+     * 繪製正式公務版建物異動通知書 (標準 A4 橫向 842 x 595 pt)
      */
-    public function drawNoticePage(TaxExportPdfWriter $pdf, array $data): void {
+    public function drawOfficialNoticePage(TaxExportPdfWriter $pdf, array $data): void {
         $pdf->AddPage('L', 'A4');
 
-        $startX = 10;
-        $totalWidth = 277;
+        $startX = 20;
+        $totalW = 802;
 
-        // 1. 頂部大標題
-        $pdf->SetXY($startX, 10);
-        $pdf->SetFont('Big5', 'B', 15);
-        $pdf->cellZh($totalWidth, 8, $data['title'] ?? '地政事務所建物異動通知書', 0, 1, 'C');
+        // 1. 頁首右上角頁碼
+        $pageText = $data['page_text'] ?? '共 1 頁 第 1 頁';
+        $pdf->drawCell(720, 18, 102, 12, $pageText, 'R', 8, 0);
 
-        // 2. 收件字號與異動日期列
-        $pdf->SetFont('Big5', '', 9.5);
-        $pdf->SetX($startX);
-        $pdf->cellZh(140, 6, '收件字號：' . ($data['rec_no'] ?? ''), 0, 0, 'L');
-        $pdf->cellZh(137, 6, '異動日期：' . ($data['change_date'] ?? ''), 0, 1, 'R');
+        // 2. 頂部大標題
+        $title = $data['title'] ?? '桃園市桃園地政事務所 建物異動通知書';
+        $pdf->drawCell($startX, 34, $totalW, 24, $title, 'C', 14, 0);
 
-        // 3. 第一表格：建物標示及基地坐落表
-        $pdf->SetFont('Big5', 'B', 10);
-        $pdf->cellZh($totalWidth, 5.5, '【建物標示及基地坐落表】', 0, 1, 'L');
+        // 3. 右上角收件日期字號盒 (X=545, Y=38, W=277, H=36)
+        $boxX = 545;
+        $boxY = 38;
+        $boxW = 277;
+        $labelW = 55;
+        $valW = $boxW - $labelW * 2; // 167
 
-        // 標示及坐落表頭 (6 欄，寬度 12, 28, 25, 35, 27, 150 = 277mm)
-        $pdf->SetFont('Big5', 'B', 8.5);
-        $pdf->SetFillColor(240, 240, 240);
-        $pdf->cellZh(12, 5.5, '項次', 1, 0, 'C', true);
-        $pdf->cellZh(28, 5.5, '建號', 1, 0, 'C', true);
-        $pdf->cellZh(25, 5.5, '鄉鎮市區', 1, 0, 'C', true);
-        $pdf->cellZh(35, 5.5, '段小段', 1, 0, 'C', true);
-        $pdf->cellZh(27, 5.5, '地號', 1, 0, 'C', true);
-        $pdf->cellZh(150, 5.5, '建物門牌', 1, 1, 'C', true);
+        $pdf->drawCell($boxX, $boxY, $labelW, 36, '收件', 'C', 8.5, 1);
+        $pdf->drawCell($boxX + $labelW, $boxY, $labelW, 18, '日期', 'C', 8, 1);
+        $pdf->drawCell($boxX + $labelW * 2, $boxY, $valW, 18, $data['change_date'] ?? '', 'C', 8, 1);
 
-        // 標示及坐落資料列
-        $pdf->SetFont('Big5', '', 8);
+        $pdf->drawCell($boxX + $labelW, $boxY + 18, $labelW, 18, '字號', 'C', 8, 1);
+        $pdf->drawCell($boxX + $labelW * 2, $boxY + 18, $valW, 18, $data['rec_no'] ?? '', 'C', 8, 1);
+
+        // 4. 第一主區塊【建物標示及基地坐落情形】
+        $curY = 80;
+        // 表頭第 1 列 (大類)
+        $pdf->drawCell($startX, $curY, 28 + 60, 16, '建物建號', 'C', 8, 1);
+        $pdf->drawCell($startX + 88, $curY, 55 + 95 + 82, 16, '基地坐落', 'C', 8.5, 1);
+        $pdf->drawCell($startX + 320, $curY, 242, 16, '建物門牌', 'C', 8.5, 1);
+        $pdf->drawCell($startX + 562, $curY, 240, 16, '登記原因及日期', 'C', 8.5, 1);
+        $curY += 16;
+
+        // 表頭第 2 列 (明細欄位)
+        $pdf->drawCell($startX, $curY, 28, 18, '項次', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 28, $curY, 60, 18, '建號', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 88, $curY, 55, 18, '鄉鎮市區', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 143, $curY, 95, 18, '段小段', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 238, $curY, 82, 18, '地號', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 320, $curY, 242, 18, '門牌', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 562, $curY, 60, 18, '登記原因', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 622, $curY, 60, 18, "原因發生\n日期", 'C', 6.5, 1);
+        $pdf->drawCell($startX + 682, $curY, 60, 18, '登記日期', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 742, $curY, 60, 18, '備註', 'C', 7.5, 1);
+        $curY += 18;
+
+        // 建物資料列
         $buildings = $data['buildings'] ?? [];
         if (empty($buildings)) {
-            $pdf->cellZh($totalWidth, 5, '（無建物標示及基地坐落異動資料）', 1, 1, 'C');
+            $pdf->drawCell($startX, $curY, $totalW, 16, '（無建物標示及基地坐落異動資料）', 'C', 8, 1);
+            $curY += 16;
         } else {
             foreach ($buildings as $bld) {
-                $pdf->cellZh(12, 5, (string)($bld['item'] ?? ''), 1, 0, 'C');
-                $pdf->cellZh(28, 5, (string)($bld['build_no'] ?? ''), 1, 0, 'C');
-                $pdf->cellZh(25, 5, (string)($bld['town'] ?? ''), 1, 0, 'C');
-                $pdf->cellZh(35, 5, (string)($bld['section'] ?? ''), 1, 0, 'L');
-                $pdf->cellZh(27, 5, (string)($bld['land_no'] ?? ''), 1, 0, 'C');
-                $pdf->cellZh(150, 5, (string)($bld['addr'] ?? ''), 1, 1, 'L');
+                $bH = 16;
+                $pdf->drawCell($startX, $curY, 28, $bH, (string)($bld['item'] ?? 1), 'C', 7.5, 1);
+                $pdf->drawCell($startX + 28, $curY, 60, $bH, (string)($bld['build_no'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawCell($startX + 88, $curY, 55, $bH, (string)($bld['town'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawCell($startX + 143, $curY, 95, $bH, (string)($bld['section'] ?? ''), 'L', 7.5, 1);
+                $pdf->drawCell($startX + 238, $curY, 82, $bH, (string)($bld['land_no'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawCell($startX + 320, $curY, 242, $bH, (string)($bld['addr'] ?? ''), 'L', 7, 1);
+                $pdf->drawCell($startX + 562, $curY, 60, $bH, (string)($bld['cause'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawCell($startX + 622, $curY, 60, $bH, (string)($bld['cause_date'] ?? ''), 'C', 7, 1);
+                $pdf->drawCell($startX + 682, $curY, 60, $bH, (string)($bld['reg_date'] ?? ''), 'C', 7, 1);
+                $pdf->drawCell($startX + 742, $curY, 60, $bH, (string)($bld['remark'] ?? ''), 'C', 7, 1);
+                $curY += $bH;
             }
         }
+        $curY += 6;
 
-        // 4. 第二表格：建物所有權部異動表
-        $pdf->Ln(2);
-        $pdf->SetFont('Big5', 'B', 10);
-        $pdf->cellZh($totalWidth, 5.5, '【建物所有權部異動表】', 0, 1, 'L');
+        // 5. 第二主區塊【所有權部異動情形】
+        $pdf->drawCell($startX, $curY, $totalW, 16, '所有權部異動情形', 'C', 9, 1);
+        $curY += 16;
 
-        // 所有權部表頭 (9 欄，寬度 12, 12, 38, 28, 32, 75, 28, 26, 26 = 277mm)
-        $pdf->SetFont('Big5', 'B', 8.5);
-        $pdf->cellZh(12, 5.5, '項次', 1, 0, 'C', true);
-        $pdf->cellZh(12, 5.5, '別', 1, 0, 'C', true);
-        $pdf->cellZh(38, 5.5, '所有權人姓名', 1, 0, 'C', true);
-        $pdf->cellZh(28, 5.5, '統一編號', 1, 0, 'C', true);
-        $pdf->cellZh(32, 5.5, '權利範圍', 1, 0, 'C', true);
-        $pdf->cellZh(75, 5.5, '住址', 1, 0, 'C', true);
-        $pdf->cellZh(28, 5.5, '登記原因', 1, 0, 'C', true);
-        $pdf->cellZh(26, 5.5, '原因發生日期', 1, 0, 'C', true);
-        $pdf->cellZh(26, 5.5, '登記日期', 1, 1, 'C', true);
+        // 表頭 (9 欄: 28, 25, 115, 80, 70, 210, 90, 92, 92 = 802)
+        $pdf->drawCell($startX, $curY, 28, 20, '項次', 'C', 8, 1);
+        $pdf->drawCell($startX + 28, $curY, 25, 20, '區分', 'C', 8, 1);
+        $pdf->drawCell($startX + 53, $curY, 115, 20, '姓名或名稱', 'C', 8, 1);
+        $pdf->drawCell($startX + 168, $curY, 80, 20, '統一編號', 'C', 8, 1);
+        $pdf->drawCell($startX + 248, $curY, 70, 20, '權利範圍', 'C', 8, 1);
+        $pdf->drawCell($startX + 318, $curY, 210, 20, '住址', 'C', 8, 1);
+        $pdf->drawCell($startX + 528, $curY, 90, 20, '登記原因', 'C', 8, 1);
+        $pdf->drawCell($startX + 618, $curY, 92, 20, '原因發生日期', 'C', 7.5, 1);
+        $pdf->drawCell($startX + 710, $curY, 92, 20, '登記日期', 'C', 7.5, 1);
+        $curY += 20;
 
-        // 所有權部資料列
-        $pdf->SetFont('Big5', '', 8);
         $owners = $data['owners'] ?? [];
         if (empty($owners)) {
-            $pdf->cellZh($totalWidth, 5, '（無建物所有權部異動資料）', 1, 1, 'C');
+            $pdf->drawCell($startX, $curY, $totalW, 16, '（無所有權部異動資料）', 'C', 8, 1);
+            $curY += 16;
         } else {
-            foreach ($owners as $own) {
-                $pdf->cellZh(12, 5, (string)($own['item'] ?? ''), 1, 0, 'C');
-                $pdf->cellZh(12, 5, (string)($own['type'] ?? ''), 1, 0, 'C');
-                $pdf->cellZh(38, 5, (string)($own['name'] ?? ''), 1, 0, 'L');
-                $pdf->cellZh(28, 5, (string)($own['id_no'] ?? ''), 1, 0, 'C');
-                $pdf->cellZh(32, 5, (string)($own['scope'] ?? ''), 1, 0, 'L');
-                $pdf->cellZh(75, 5, (string)($own['addr'] ?? ''), 1, 0, 'L');
-                $pdf->cellZh(28, 5, (string)($own['cause'] ?? ''), 1, 0, 'C');
-                $pdf->cellZh(26, 5, (string)($own['cause_date'] ?? ''), 1, 0, 'C');
-                $pdf->cellZh(26, 5, (string)($own['reg_date'] ?? ''), 1, 1, 'C');
+            foreach ($owners as $ow) {
+                $oH = 16;
+                $pdf->drawCell($startX, $curY, 28, $oH, (string)($ow['item'] ?? 1), 'C', 8, 1);
+                $pdf->drawCell($startX + 28, $curY, 25, $oH, (string)($ow['type'] ?? ''), 'C', 8, 1);
+                $pdf->drawCell($startX + 53, $curY, 115, $oH, (string)($ow['name'] ?? ''), 'L', 7.5, 1);
+                $pdf->drawCell($startX + 168, $curY, 80, $oH, (string)($ow['id_no'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawCell($startX + 248, $curY, 70, $oH, (string)($ow['scope'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawCell($startX + 318, $curY, 210, $oH, (string)($ow['addr'] ?? ''), 'L', 7, 1);
+                $pdf->drawCell($startX + 528, $curY, 90, $oH, (string)($ow['cause'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawCell($startX + 618, $curY, 92, $oH, (string)($ow['cause_date'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawCell($startX + 710, $curY, 92, $oH, (string)($ow['reg_date'] ?? ''), 'C', 7.5, 1);
+                $curY += $oH;
             }
         }
+        $curY += 6;
 
-        // 5. 第三表格：管理機關表
+        // 6. 第三主區塊【管理機關異動情形】
+        $pdf->drawCell($startX, $curY, $totalW, 16, '管理機關異動情形', 'C', 9, 1);
+        $curY += 16;
+
+        $pdf->drawCell($startX, $curY, 28, 18, '項次', 'C', 8, 1);
+        $pdf->drawCell($startX + 28, $curY, 25, 18, '區分', 'C', 8, 1);
+        $pdf->drawCell($startX + 53, $curY, 180, 18, '姓名或名稱', 'C', 8, 1);
+        $pdf->drawCell($startX + 233, $curY, 100, 18, '統一編號', 'C', 8, 1);
+        $pdf->drawCell($startX + 333, $curY, 469, 18, '住址', 'C', 8, 1);
+        $curY += 18;
+
         $managers = $data['managers'] ?? [];
-        if (!empty($managers)) {
-            $pdf->Ln(2);
-            $pdf->SetFont('Big5', 'B', 10);
-            $pdf->cellZh($totalWidth, 5.5, '【管理機關】', 0, 1, 'L');
-
-            // 管理機關表頭 (5 欄，寬度 12, 12, 65, 38, 150 = 277mm)
-            $pdf->SetFont('Big5', 'B', 8.5);
-            $pdf->cellZh(12, 5.5, '項次', 1, 0, 'C', true);
-            $pdf->cellZh(12, 5.5, '別', 1, 0, 'C', true);
-            $pdf->cellZh(65, 5.5, '管理者名稱', 1, 0, 'C', true);
-            $pdf->cellZh(38, 5.5, '統一編號', 1, 0, 'C', true);
-            $pdf->cellZh(150, 5.5, '住址', 1, 1, 'C', true);
-
-            $pdf->SetFont('Big5', '', 8);
-            foreach ($managers as $mng) {
-                $pdf->cellZh(12, 5, (string)($mng['item'] ?? ''), 1, 0, 'C');
-                $pdf->cellZh(12, 5, (string)($mng['type'] ?? ''), 1, 0, 'C');
-                $pdf->cellZh(65, 5, (string)($mng['name'] ?? ''), 1, 0, 'L');
-                $pdf->cellZh(38, 5, (string)($mng['id_no'] ?? ''), 1, 0, 'C');
-                $pdf->cellZh(150, 5, (string)($mng['addr'] ?? ''), 1, 1, 'L');
+        if (empty($managers)) {
+            $pdf->drawCell($startX, $curY, $totalW, 16, '（無管理機關異動資料）', 'C', 8, 1);
+            $curY += 16;
+        } else {
+            foreach ($managers as $mg) {
+                $mH = 16;
+                $pdf->drawCell($startX, $curY, 28, $mH, (string)($mg['item'] ?? 1), 'C', 8, 1);
+                $pdf->drawCell($startX + 28, $curY, 25, $mH, (string)($mg['type'] ?? ''), 'C', 8, 1);
+                $pdf->drawCell($startX + 53, $curY, 180, $mH, (string)($mg['name'] ?? ''), 'L', 7.5, 1);
+                $pdf->drawCell($startX + 233, $curY, 100, $mH, (string)($mg['id_no'] ?? ''), 'C', 7.5, 1);
+                $pdf->drawCell($startX + 333, $curY, 469, $mH, (string)($mg['addr'] ?? ''), 'L', 7.5, 1);
+                $curY += $mH;
             }
         }
 
-        // 6. 底部核章區 (固定於頁面底部 Y=192)
-        $pdf->SetY(192);
-        $pdf->SetFont('Big5', '', 9);
-        $officeLabel = '填發機關：' . ($data['office'] ?? '桃園') . '地政事務所';
-        $aud1Label = '初審：' . ($data['auditor1'] ?? '');
-        $aud2Label = '複審：' . ($data['auditor2'] ?? '');
+        // 7. 頁尾核章欄 (固定於右下方)
+        $aud1 = !empty($data['auditor1']) ? $data['auditor1'] : '';
+        $aud2 = !empty($data['auditor2']) ? $data['auditor2'] : '';
+        $pdf->drawCell(620, 560, 202, 14, '發給人員：' . $aud1, 'L', 8.5, 0);
+        $pdf->drawCell(620, 574, 202, 14, '校對人員：' . $aud2, 'L', 8.5, 0);
+    }
 
-        $pdf->cellZh(65, 8, $officeLabel, 1, 0, 'L');
-        $pdf->cellZh(53, 8, $aud1Label, 1, 0, 'L');
-        $pdf->cellZh(53, 8, $aud2Label, 1, 0, 'L');
-        $pdf->cellZh(53, 8, '課長：', 1, 0, 'L');
-        $pdf->cellZh(53, 8, '主任：', 1, 1, 'L');
+    /**
+     * 舊介面相容方法
+     */
+    public function drawNoticePage(TaxExportPdfWriter $pdf, array $data): void {
+        $this->drawOfficialNoticePage($pdf, $data);
     }
 
     /**
@@ -870,9 +934,23 @@ final class TaxExportRCD0102 {
      * 7 碼民國日期轉斜線格式 (YYY/MM/DD)
      */
     public static function formatRocDate(string $roc): string {
-        $roc = trim($roc);
-        if (strlen($roc) === 7) {
-            return substr($roc, 0, 3) . '/' . substr($roc, 3, 2) . '/' . substr($roc, 5, 2);
+        $clean = preg_replace('/[^0-9]/', '', $roc);
+        if (strlen($clean) >= 7) {
+            return substr($clean, 0, 3) . '/' . substr($clean, 3, 2) . '/' . substr($clean, 5, 2);
+        }
+        return $roc;
+    }
+
+    /**
+     * 7 碼民國日期轉短格式 (YY 年 MM 月 DD 日)
+     */
+    public static function formatRocDateShort(string $roc): string {
+        $clean = preg_replace('/[^0-9]/', '', $roc);
+        if (strlen($clean) >= 7) {
+            $y = (int)substr($clean, 0, 3);
+            $m = (int)substr($clean, 3, 2);
+            $d = (int)substr($clean, 5, 2);
+            return $y . ' 年 ' . $m . ' 月 ' . $d . ' 日';
         }
         return $roc;
     }
@@ -881,22 +959,26 @@ final class TaxExportRCD0102 {
      * 7 碼民國日期轉「中華民國 YYY 年 MM 月 DD 日」長格式
      */
     public static function formatRocDateLong(string $roc): string {
-        $roc = trim($roc);
-        if (strlen($roc) === 7) {
-            $y = (int)substr($roc, 0, 3);
-            $m = (int)substr($roc, 3, 2);
-            $d = (int)substr($roc, 5, 2);
+        $clean = preg_replace('/[^0-9]/', '', $roc);
+        if (strlen($clean) >= 7) {
+            $y = (int)substr($clean, 0, 3);
+            $m = (int)substr($clean, 3, 2);
+            $d = (int)substr($clean, 5, 2);
             return '中華民國 ' . $y . ' 年 ' . $m . ' 月 ' . $d . ' 日';
         }
         return $roc;
     }
 
     /**
-     * 執行 SQL 查詢
+     * 執行 SQL 查詢 (保證欄位值轉為純淨 UTF-8)
      */
     private function query(string $sql, array $params = []): array {
         if ($this->dbSelector !== null) {
-            return call_user_func($this->dbSelector, $sql, $params);
+            $rawRows = call_user_func($this->dbSelector, $sql, $params);
+            if (!is_array($rawRows)) {
+                return [];
+            }
+            return self::normalizeRowsUtf8($rawRows);
         }
 
         if (!class_exists('OraDBWrapper')) {
@@ -924,7 +1006,30 @@ final class TaxExportRCD0102 {
             unset($v);
         }
         $db->execute();
-        return $db->fetchAll(true);
+        $rows = $db->fetchAll(true);
+        if (!is_array($rows)) {
+            return [];
+        }
+        return self::normalizeRowsUtf8($rows);
+    }
+
+    /**
+     * 將資料列陣列中的所有字串欄位轉為純淨 UTF-8
+     */
+    private static function normalizeRowsUtf8(array $rows): array {
+        $clean = [];
+        foreach ($rows as $r) {
+            if (!is_array($r)) {
+                $clean[] = $r;
+                continue;
+            }
+            $item = [];
+            foreach ($r as $k => $v) {
+                $item[$k] = TaxExportPdfWriter::ensureUtf8($v);
+            }
+            $clean[] = $item;
+        }
+        return $clean;
     }
 
     /**

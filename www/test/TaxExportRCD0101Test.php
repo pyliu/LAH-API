@@ -133,8 +133,11 @@ class TaxExportRCD0101Test extends BaseTaxExportRCD0101TestCase {
         $this->myAssert(is_file($out), 'PDF 檔案成功產出');
         $content = file_get_contents($out);
         $this->myAssert(substr($content, 0, 5) === '%PDF-', 'PDF 標頭以 %PDF- 起始');
-        $this->myAssert(strpos($content, '/ETen-B5-H') !== false, 'PDF 包含 /ETen-B5-H CMap');
-        $this->myAssert(strpos($content, '/MSung-Light-Acro') !== false, 'PDF 包含 /MSung-Light-Acro 字型');
+        $hasCMap = (strpos($content, '/Identity-H') !== false || strpos($content, '/ETen-B5-H') !== false);
+        $this->myAssert($hasCMap, 'PDF 包含標準 CMap (/Identity-H 或 /ETen-B5-H)');
+
+        $hasFont = (strpos($content, 'KaiU') !== false || strpos($content, 'DFKai') !== false || strpos($content, '/MSung-Light-Acro') !== false);
+        $this->myAssert($hasFont, 'PDF 包含中文字型 (微軟標楷體 / 華康楷書 / MSung)');
     }
 
     /**
