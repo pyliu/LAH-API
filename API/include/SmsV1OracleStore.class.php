@@ -837,6 +837,127 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
     }
 
     /**
+     * 回報單筆派送結果（POST /queue/report）
+     *
+     * @param array<string, mixed> $identity
+     * @param bool $success
+     * @param string $msg
+     * @param int $maxRetries
+     * @param string|null $errorDesc
+     * @return array<string, mixed>
+     */
+    public function reportQueueItem(
+        array $identity,
+        bool $success,
+        string $msg = '',
+        int $maxRetries = 0,
+        ?string $errorDesc = null
+    ): array {
+        $now = new \DateTimeImmutable('now');
+        $nowDate = SmsV1Encoding::getRocDate($now);
+        $nowTime = SmsV1Encoding::getTimeHhmmss($now);
+
+        $ms03 = (string)($identity['ms03'] ?? '');
+        $ms04_1 = (string)($identity['ms04_1'] ?? '');
+        $ms04_2 = (string)($identity['ms04_2'] ?? '');
+        $ms30 = (string)($identity['ms30'] ?? '');
+        $msType = (string)($identity['ms_type'] ?? '');
+        $ms14 = (string)($identity['ms14'] ?? '');
+        $msMail = (string)($identity['ms_mail'] ?? '');
+        $isEmail = ($msMail !== '');
+        $isGov = ($ms30 === 'y' || $ms30 === 'z');
+        $govExt = is_array($identity['gov_ext'] ?? null) ? $identity['gov_ext'] : array();
+
+        $whereParts = array(
+            "MS03 = :ms03",
+            "MS04_1 = :ms04_1",
+            "MS04_2 = :ms04_2",
+            "MS30 = :ms30",
+            "NVL(MS_TYPE, 'R') = :ms_type",
+        );
+        $whereBinds = array(
+            ':ms03' => $ms03,
+            ':ms04_1' => $ms04_1,
+            ':ms04_2' => $ms04_2,
+            ':ms30' => $ms30,
+            ':ms_type' => $msType,
+        );
+
+        if ($isEmail) {
+            $whereParts[] = "MS_MAIL = :ms_mail";
+            $whereBinds[':ms_mail'] = $msMail;
+        } else {
+            $whereParts[] = "MS14 = :ms14";
+            $whereBinds[':ms14'] = $ms14;
+        }
+
+        if ($isGov) {
+            $whereParts[] = "APP_ID = :app_id";
+            $whereParts[] = "NVL(GOV_ID, 'X') = NVL(:gov_id, 'X')";
+            $whereParts[] = "CC00 = :cc00";
+            $whereParts[] = "CC48 = :cc48";
+            $whereParts[] = "CC49 = :cc49";
+            $whereParts[] = "APP_SEQ = :app_seq";
+            $whereParts[] = "NVL(GOV_OID, 'X') = NVL(:gov_oid, 'X')";
+            $whereBinds[':app_id'] = (string)($govExt['app_id'] ?? '');
+            $whereBinds[':gov_id'] = (string)($govExt['gov_id'] ?? '');
+            $whereBinds[':cc00'] = (string)($govExt['cc00'] ?? '');
+            $whereBinds[':cc48'] = (string)($govExt['cc48'] ?? '');
+            $whereBinds[':cc49'] = (string)($govExt['cc49'] ?? '');
+            $whereBinds[':app_seq'] = (string)($govExt['app_seq'] ?? '');
+            $whereBinds[':gov_oid'] = (string)($govExt['gov_oid'] ?? '');
+        }
+
+        $whereClause = implode(' AND ', $whereParts);
+
+        $rows = $this->queryRaw("SELECT MS32 FROM SSMSWAIT WHERE {$whereClause}", $whereBinds);
+        if (empty($rows)) {
+            return array('action' => 'not_found');
+        }
+
+        $currentRetry = (int)trim(SmsV1Encoding::fromOracleEncoding((string)($rows[0]['MS32'] ?? '0')));
+
+        if ($success === false && $currentRetry < $maxRetries) {
+            $nextRetry = $currentRetry + 1;
+            $updSql = "UPDATE SSMSWAIT SET MS32 = :next_ms32 WHERE {$whereClause}";
+            $updBinds = array_merge(array(':next_ms32' => (string)$nextRetry), $whereBinds);
+            $this->executePlSqlBlock(array($updSql), $updBinds);
+
+            return array(
+                'action' => 'retry_incremented',
+                'retry_count' => $nextRetry,
+            );
+        }
+
+        $ms31 = $success ? 'S' : 'F';
+        $channelCol = $isEmail ? 'MS_MAIL' : 'MS14';
+        $channelBind = $isEmail ? ':ms_mail' : ':ms14';
+
+        $cols = "MS03, MS04_1, MS04_2, MS07_1, MS07_2, {$channelCol}, MS30, MS31, MS_TYPE, MS_NOTE";
+        $vals = ":ms03, :ms04_1, :ms04_2, :ms07_1, :ms07_2, {$channelBind}, :ms30, :ms31, :ms_type, :ms_note";
+
+        $txBinds = $whereBinds;
+        $txBinds[':ms07_1'] = $nowDate;
+        $txBinds[':ms07_2'] = $nowTime;
+        $txBinds[':ms31'] = $ms31;
+        $txBinds[':ms_note'] = SmsV1Encoding::toOracleEncoding($msg);
+
+        if ($isGov) {
+            $cols .= ", APP_SEQ, APP_ID, GOV_ID, CC00, CC48, CC49, GOV_OID";
+            $vals .= ", :app_seq, :app_id, :gov_id, :cc00, :cc48, :cc49, :gov_oid";
+        }
+
+        $insertLogSql = "INSERT INTO SSMSLOG ({$cols}) VALUES ({$vals})";
+        $deleteWaitSql = "DELETE FROM SSMSWAIT WHERE {$whereClause}";
+
+        $this->executePlSqlBlock(array($insertLogSql, $deleteWaitSql), $txBinds);
+
+        return array(
+            'action' => $success ? 'logged_success_and_removed' : 'logged_failure_and_removed',
+        );
+    }
+
+    /**
      * 執行單一查詢並回傳原始 Oracle 位元組資料列
      *
      * @param string $sql

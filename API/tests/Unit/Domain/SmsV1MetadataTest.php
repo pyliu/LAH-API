@@ -291,6 +291,15 @@ class SmsV1MetadataTest extends TestCase {
             public function getPendingQueue(): array {
                 return array('site_id' => '', 'items' => array());
             }
+            public function reportQueueItem(
+                array $identity,
+                bool $success,
+                string $msg = '',
+                int $maxRetries = 0,
+                ?string $errorDesc = null
+            ): array {
+                return array('action' => 'not_found');
+            }
         };
         $router = new SmsV1Router(new SmsV1Service($failingStore));
 

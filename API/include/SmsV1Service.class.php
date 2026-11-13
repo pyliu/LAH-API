@@ -1,5 +1,6 @@
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1Encoding.class.php');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1QueueHelper.class.php');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1StoreInterface.class.php');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1MockStore.class.php');
 
@@ -107,6 +108,36 @@ class SmsV1Service {
         return array(
             'site_id' => (string)($result['site_id'] ?? ''),
             'items' => is_array($result['items'] ?? null) ? $result['items'] : array(),
+        );
+    }
+
+    /**
+     * 回報單筆派送結果（POST /queue/report）
+     *
+     * @param array<string, mixed> $identity
+     * @param bool $success
+     * @param string $msg
+     * @param int $maxRetries
+     * @param string|null $errorDesc
+     * @return array<string, mixed>
+     */
+    public function reportQueueItem(
+        array $identity,
+        bool $success,
+        string $msg = '',
+        int $maxRetries = 0,
+        ?string $errorDesc = null
+    ): array {
+        if ($maxRetries < 0) {
+            throw new \InvalidArgumentException('Invalid max_retries: expected non-negative integer.');
+        }
+        $normalizedIdentity = SmsV1QueueHelper::normalizeReportIdentity($identity);
+        return $this->store->reportQueueItem(
+            $normalizedIdentity,
+            $success,
+            $msg,
+            $maxRetries,
+            $errorDesc
         );
     }
 
