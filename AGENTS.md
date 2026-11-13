@@ -30,3 +30,16 @@
   - **強制 MOCK 模式**：除非取得人工明確授權，否則 `www/.env` 中的 `MOCK=true` 嚴禁改為 `false` 或註解。
 - **共用 SQLite 資料庫與目錄**：
   - 兩軌一律共用 [`www/assets/db/*.db`](./www/assets/db/)、`www/log/`、`www/export/` 與 `www/import/`；**嚴禁在 `API/` 建立資料庫複本**，防止狀態漂移。
+
+---
+
+## 3. 本機執行環境、測試入口與 Schema 參考
+
+- **PHP 執行檔**：
+  - PHP 7.4（對應 `www/`）：`d:\DEV\PHP7\php.exe`
+  - PHP 8.5（對應 `API/`）：`d:\DEV\PHP85\php.exe`
+- **測試入口**：
+  - 全量測試套件：於 `API/` 目錄執行 `phpunit`（定義於 `API/composer.json` 與 `API/phpunit.xml`；`API/tests/index.php` 為防存取守衛，非測試入口）。
+  - 免 PHPUnit 獨立單檔測試：直接執行 `API/tests/Unit/Export/TaxExportRCD0101Test.php`、`TaxExportRCD0102Test.php` 與 `TaxExportBatchIntegrationTest.php`（建議同時以 PHP 7.4 與 PHP 8.5 執行）。
+- **資料庫欄位參考**：
+  - 撰寫地方稅務局產製 SQL 或 Mock 測試夾具前，先查閱 [`docs/oracle-tax-schema.md`](./docs/oracle-tax-schema.md) 核對實際 Oracle 9i 欄位。

@@ -107,8 +107,18 @@ final class TaxExportBatch {
             $item['message'] = '產製中';
             $this->save($path, $batch);
             $temporary = $path . '/' . $code . '.part';
+            $errorHandlerActive = false;
 
             try {
+                // 將底層 OraDB 等觸發之 E_USER_ERROR 轉為 ErrorException，確保 PHP 7.4/8.5 皆可被捕捉記錄
+                set_error_handler(static function (int $severity, string $message, string $file, int $line): bool {
+                    if ($severity === E_USER_ERROR || $severity === E_RECOVERABLE_ERROR) {
+                        throw new ErrorException($message, 0, $severity, $file, $line);
+                    }
+                    return false;
+                });
+                $errorHandlerActive = true;
+
                 if ($this->provider !== null) {
                     if (method_exists($this->provider, 'advance')) {
                         $result = $this->provider->advance($item, $batch, $temporary, function ($source) use (&$item, &$batch, $path) {
@@ -157,6 +167,9 @@ final class TaxExportBatch {
                     Logger::getInstance()->error('Tax export ' . $id . ' ' . $code . ': ' . $error->getMessage());
                 }
             } finally {
+                if ($errorHandlerActive) {
+                    restore_error_handler();
+                }
                 if (is_file($temporary)) {
                     unlink($temporary);
                 }
