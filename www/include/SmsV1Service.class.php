@@ -45,4 +45,83 @@ class SmsV1Service {
             'county_name' => (string)($meta['county_name'] ?? ''),
         );
     }
+
+    /**
+     * 查詢三表紀錄並附加 MS_TYPE / MS30 / MS31 中文狀態對照
+     *
+     * @param string $table main|wait|log
+     * @param int $limit
+     * @return array{table: string, limit: int, count: int, records: array<int, array<string, string>>}
+     */
+    public function getRecords(string $table = 'main', int $limit = 200): array {
+        $normalizedTable = strtolower(trim($table));
+        if (!in_array($normalizedTable, array('main', 'wait', 'log'), true)) {
+            throw new \InvalidArgumentException('Invalid table parameter. Allowed values: main, wait, log.');
+        }
+        if ($limit < 1) {
+            throw new \InvalidArgumentException('Limit must be a positive integer.');
+        }
+
+        $rows = $this->store->getRecords($normalizedTable, $limit);
+        $records = array();
+        foreach ($rows as $row) {
+            $msType = trim((string)($row['ms_type'] ?? ''));
+            $ms30 = trim((string)($row['ms30'] ?? ''));
+            $ms31 = trim((string)($row['ms31'] ?? ''));
+
+            $row['ms_type_label'] = self::mapMsTypeLabel($msType);
+            $row['ms30_label'] = self::mapMs30Label($ms30);
+            $row['ms31_label'] = $normalizedTable === 'log' ? self::mapMs31Label($ms31) : '';
+            $records[] = $row;
+        }
+
+        return array(
+            'table' => $normalizedTable,
+            'limit' => $limit,
+            'count' => count($records),
+            'records' => $records,
+        );
+    }
+
+    public static function mapMsTypeLabel(string $code): string {
+        static $map = array(
+            'M' => '產權通知',
+            'O' => '其他',
+            'R' => '登記',
+            'S' => '複丈',
+            'W' => '指定送達處所',
+        );
+        $trimmed = trim($code);
+        return $map[$trimmed] ?? '';
+    }
+
+    public static function mapMs30Label(string $code): string {
+        static $map = array(
+            '0' => '待傳送',
+            'I' => '補正',
+            'D' => '駁回',
+            'F' => '結案',
+            'C' => '延期複丈',
+            '2' => '未辦繼承通知',
+            'X' => '產權審核結果通知',
+            'Y' => '產權收件通知',
+            'Z' => '產權異動完成通知',
+            'y' => '產權收件通知(工輔法)',
+            'z' => '產權異動完成通知(工輔法)',
+            '7' => '調案',
+            '8' => '異議連繫',
+            '9' => '跨所代收',
+        );
+        $trimmed = trim($code);
+        return $map[$trimmed] ?? '';
+    }
+
+    public static function mapMs31Label(string $code): string {
+        static $map = array(
+            'S' => '成功',
+            'F' => '失敗',
+        );
+        $trimmed = trim($code);
+        return $map[$trimmed] ?? '';
+    }
 }

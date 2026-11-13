@@ -49,6 +49,48 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
     }
 
     /**
+     * 查詢三表佇列或歷史紀錄（Oracle 9i ROWNUM 子查詢分頁，回傳 UTF-8 欄位）
+     *
+     * @param string $table main|wait|log
+     * @param int $limit
+     * @return array<int, array<string, string>>
+     */
+    public function getRecords(string $table, int $limit = 200): array {
+        if ($limit < 1) {
+            throw new \InvalidArgumentException('Limit must be a positive integer.');
+        }
+
+        switch ($table) {
+            case 'main':
+                $innerSql = "SELECT * FROM SSMSMAIN WHERE MS_TYPE = 'M' ORDER BY MS07_1 || MS07_2 DESC";
+                break;
+            case 'wait':
+                $innerSql = "SELECT * FROM SSMSWAIT WHERE MS_TYPE IN ('M', 'W', 'O') ORDER BY MS07_1 || MS07_2 DESC";
+                break;
+            case 'log':
+                $innerSql = "SELECT * FROM SSMSLOG WHERE MS_TYPE IN ('M', 'W', 'O') ORDER BY MS07_1 || MS07_2 DESC";
+                break;
+            default:
+                throw new \InvalidArgumentException('Invalid table parameter. Allowed values: main, wait, log.');
+        }
+
+        $sql = "SELECT * FROM ({$innerSql}) WHERE ROWNUM <= :bv_limit";
+        $rows = $this->queryRaw($sql, array(':bv_limit' => $limit));
+
+        $normalized = array();
+        foreach ($rows as $row) {
+            $item = array();
+            foreach ($row as $key => $value) {
+                $lowerKey = strtolower(SmsV1Encoding::fromOracleEncoding((string)$key));
+                $decoded = $value === null ? '' : SmsV1Encoding::fromOracleEncoding((string)$value);
+                $item[$lowerKey] = rtrim($decoded);
+            }
+            $normalized[] = $item;
+        }
+        return $normalized;
+    }
+
+    /**
      * 執行單一查詢並回傳原始 Oracle 位元組資料列
      *
      * @param string $sql
