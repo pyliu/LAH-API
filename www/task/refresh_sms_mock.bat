@@ -1,0 +1,1 @@
+php.exe capture_sms_mock_snapshot.php --allow-live-readonly

@@ -265,8 +265,7 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
     private function getUserCaseQueries(): array {
         $usrSubquery = "(SELECT LIDN, LNAM, REPLY_MOBILE, MOBILE, MOBILE2, REPLY_EMAIL, EMAIL, EMAIL2
                          FROM SSMS_USERINFO_M
-                         WHERE (REPLY_MOBILE = '1' OR REPLY_EMAIL = '1') AND SMS_FLAG = 'Y'
-                         ORDER BY LIDN) USR";
+                         WHERE (REPLY_MOBILE = '1' OR REPLY_EMAIL = '1') AND SMS_FLAG = 'Y') USR";
         $k5501Subquery = "(SELECT * FROM SRKEYN WHERE KCDE_1 = '55' AND KCDE_2 = '01')";
 
         return array(
@@ -355,7 +354,8 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
                             AND ((RM99 IS NULL) OR (RM99 = 'Y' AND RM100 = SUBSTR(KRMK, 1, 2)))
                             AND S.BB09 = USR.LIDN
                             AND II03 = RM01 AND II04_1 = RM02 AND II04_2 = RM03
-                            AND II00 = 'R' AND SUBSTR(IIKEY, 1, 13) || II_DATA = 'C' || S.BA48 || S.BA49 || S.BB01",
+                            AND II00 = 'R' AND SUBSTR(T.IIKEY, 1, 1) = 'C'
+                            AND S.BA48 = SUBSTR(T.IIKEY, 2, 4) AND S.BA49 = SUBSTR(T.IIKEY, 6, 8) AND S.BB01 = T.II_DATA",
             ),
             array(
                 'name' => 'SQL_F',
@@ -372,7 +372,8 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
                             AND ((RM99 IS NULL) OR (RM99 = 'Y' AND RM100 = SUBSTR(KRMK, 1, 2)))
                             AND S.EE09 = USR.LIDN
                             AND II03 = RM01 AND II04_1 = RM02 AND II04_2 = RM03
-                            AND II00 = 'R' AND SUBSTR(IIKEY, 1, 13) || II_DATA = 'F' || S.ED48 || S.ED49 || S.EE01",
+                            AND II00 = 'R' AND SUBSTR(T.IIKEY, 1, 1) = 'F'
+                            AND S.ED48 = SUBSTR(T.IIKEY, 2, 4) AND S.ED49 = SUBSTR(T.IIKEY, 6, 8) AND S.EE01 = T.II_DATA",
             ),
         );
     }
