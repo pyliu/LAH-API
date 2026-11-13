@@ -32,6 +32,9 @@ class SmsV1Router {
             '/metadata' => array(
                 'GET' => 'handleGetMetadata',
             ),
+            '/cases/sync' => array(
+                'POST' => 'handlePostCasesSync',
+            ),
         );
 
         if (!isset($routes[$normalizedPath])) {
@@ -88,6 +91,33 @@ class SmsV1Router {
         return array(
             'status' => 200,
             'body' => $this->service->getMetadata(),
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $query
+     * @param string $rawBody
+     * @return array{status: int, body: array<string, mixed>}
+     */
+    private function handlePostCasesSync(array $query, string $rawBody): array {
+        $targetDate = null;
+        $trimmed = trim($rawBody);
+        if ($trimmed !== '') {
+            $payload = json_decode($trimmed, true);
+            if (json_last_error() !== JSON_ERROR_NONE || !is_array($payload)) {
+                throw new \InvalidArgumentException('Invalid JSON request body.');
+            }
+            if (array_key_exists('target_date_yyy_mm_dd', $payload) && $payload['target_date_yyy_mm_dd'] !== null) {
+                if (!is_string($payload['target_date_yyy_mm_dd'])) {
+                    throw new \InvalidArgumentException('Invalid target_date_yyy_mm_dd: expected 7-digit ROC date YYYMMDD.');
+                }
+                $targetDate = $payload['target_date_yyy_mm_dd'];
+            }
+        }
+
+        return array(
+            'status' => 200,
+            'body' => $this->service->syncCases($targetDate),
         );
     }
 

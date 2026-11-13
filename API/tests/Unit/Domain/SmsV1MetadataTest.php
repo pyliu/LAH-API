@@ -274,6 +274,9 @@ class SmsV1MetadataTest extends TestCase {
             public function getMetadata(): array {
                 throw new \RuntimeException('ORA-01017: invalid username/password; secret_pwd=1234');
             }
+            public function syncCases(string $targetDate): array {
+                return array();
+            }
         };
         $router = new SmsV1Router(new SmsV1Service($failingStore));
 

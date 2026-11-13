@@ -10,4 +10,12 @@ interface SmsV1StoreInterface {
      * @return array{site_id: string, office_name: string, county_name: string}
      */
     public function getMetadata(): array;
+
+    /**
+     * 掃描指定民國日期案件並寫入 SSMSMAIN（含三表去重與交易保護）
+     *
+     * @param string $targetDate 7 碼民國日期 YYYMMDD
+     * @return array{target_date: string, user_cases_scanned: int, user_notifications_inserted: int, gov_cases_scanned: int, gov_notifications_inserted: int}
+     */
+    public function syncCases(string $targetDate): array;
 }

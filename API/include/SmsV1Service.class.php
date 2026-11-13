@@ -1,4 +1,5 @@
 <?php
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1Encoding.class.php');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1StoreInterface.class.php');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1MockStore.class.php');
 
@@ -43,6 +44,28 @@ class SmsV1Service {
             'site_id' => (string)($meta['site_id'] ?? ''),
             'office_name' => (string)($meta['office_name'] ?? ''),
             'county_name' => (string)($meta['county_name'] ?? ''),
+        );
+    }
+
+    /**
+     * 觸發案件掃描與三表去重入列（POST /cases/sync）
+     *
+     * @param string|null $targetDate 選填 7 碼民國日期 YYYMMDD
+     * @return array{target_date: string, user_cases_scanned: int, user_notifications_inserted: int, gov_cases_scanned: int, gov_notifications_inserted: int}
+     */
+    public function syncCases(?string $targetDate = null): array {
+        $resolvedDate = $targetDate === null ? SmsV1Encoding::getRocDate() : trim($targetDate);
+        if (!SmsV1Encoding::isValidRocDate($resolvedDate)) {
+            throw new \InvalidArgumentException('Invalid target_date_yyy_mm_dd: expected 7-digit ROC date YYYMMDD.');
+        }
+
+        $result = $this->store->syncCases($resolvedDate);
+        return array(
+            'target_date' => (string)($result['target_date'] ?? $resolvedDate),
+            'user_cases_scanned' => (int)($result['user_cases_scanned'] ?? 0),
+            'user_notifications_inserted' => (int)($result['user_notifications_inserted'] ?? 0),
+            'gov_cases_scanned' => (int)($result['gov_cases_scanned'] ?? 0),
+            'gov_notifications_inserted' => (int)($result['gov_notifications_inserted'] ?? 0),
         );
     }
 }
