@@ -111,4 +111,20 @@ class SmsV1Encoding {
         $target = $dt !== null ? $dt : new \DateTimeImmutable('now');
         return $target->format('His');
     }
+
+    /**
+     * 檢核是否為有效的 7 碼民國日期（YYYMMDD）
+     *
+     * @param string $rocDate
+     * @return bool
+     */
+    public static function isValidRocDate(string $rocDate): bool {
+        if (!preg_match('/^\d{7}$/', $rocDate)) {
+            return false;
+        }
+        $year = (int)substr($rocDate, 0, 3) + 1911;
+        $month = (int)substr($rocDate, 3, 2);
+        $day = (int)substr($rocDate, 5, 2);
+        return checkdate($month, $day, $year);
+    }
 }

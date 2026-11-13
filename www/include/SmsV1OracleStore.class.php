@@ -1,4 +1,5 @@
 <?php
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1CaseSyncHelper.class.php');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1Encoding.class.php');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1StoreInterface.class.php');
 
@@ -46,6 +47,450 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
             'office_name' => $officeName,
             'county_name' => $countyName,
         );
+    }
+
+    /**
+     * 掃描指定民國日期案件並寫入 SSMSMAIN（Oracle 9i Bind Variables + CP950 轉碼 + PL/SQL 原子交易）
+     *
+     * @param string $targetDate
+     * @return array{target_date: string, user_cases_scanned: int, user_notifications_inserted: int, gov_cases_scanned: int, gov_notifications_inserted: int}
+     */
+    public function syncCases(string $targetDate): array {
+        $targetYear = substr($targetDate, 0, 3);
+        $srkeynCache = array();
+
+        $lookupStaticSrkeyn = function (string $k1, string $k2): ?string {
+            $rows = $this->queryRaw(
+                "SELECT KCNT FROM SRKEYN WHERE KCDE_1 = '{$k1}' AND KCDE_2 = '{$k2}'"
+            );
+            if (empty($rows)) {
+                return null;
+            }
+            return trim(SmsV1Encoding::fromOracleEncoding((string)($rows[0]['KCNT'] ?? '')));
+        };
+
+        $lookupParamSrkeyn = function (string $k1, string $k2) use (&$srkeynCache): string {
+            $cacheKey = $k1 . "\0" . $k2;
+            if (array_key_exists($cacheKey, $srkeynCache)) {
+                return $srkeynCache[$cacheKey];
+            }
+            $rows = $this->queryRaw(
+                "SELECT KCNT FROM SRKEYN WHERE KCDE_1 = :kcde_1 AND KCDE_2 = :kcde_2",
+                array(':kcde_1' => $k1, ':kcde_2' => $k2)
+            );
+            $val = empty($rows) ? '' : trim(SmsV1Encoding::fromOracleEncoding((string)($rows[0]['KCNT'] ?? '')));
+            $srkeynCache[$cacheKey] = $val;
+            return $val;
+        };
+
+        $maLo = (string)($lookupStaticSrkeyn('55', '01') ?? '');
+        $county = (string)($lookupStaticSrkeyn('66', '01') ?? '');
+        $k5502Raw = $lookupStaticSrkeyn('55', '02');
+        $k5502 = $k5502Raw !== null ? ($k5502Raw . '地政') : '';
+        $remark = (string)($lookupStaticSrkeyn('SMS', '01') ?? '');
+
+        $userCasesScanned = 0;
+        $userNotificationsInserted = 0;
+        $govCasesScanned = 0;
+        $govNotificationsInserted = 0;
+
+        $insertStatements = array();
+        $insertBinds = array();
+        $bindIdx = 0;
+
+        $seenUserSms = array();
+        $seenUserMail = array();
+        $seenGov = array();
+
+        // 一般民眾 6 組查詢（SQL_A ~ SQL_F）
+        foreach ($this->getUserCaseQueries() as $querySpec) {
+            $binds = $querySpec['has_year']
+                ? array(':target_year' => $targetYear, ':target_date' => $targetDate)
+                : array(':target_date' => $targetDate);
+            $rows = $this->queryRaw($querySpec['sql'], $binds);
+
+            foreach ($rows as $row) {
+                $userCasesScanned++;
+                $ms30 = trim((string)($row['MS30'] ?? ''));
+                $rm01 = trim((string)($row['RM01'] ?? ''));
+                $rm02 = trim((string)($row['RM02'] ?? ''));
+                $rm03 = trim((string)($row['RM03'] ?? ''));
+                $rm09 = trim((string)($row['RM09'] ?? ''));
+                $t07_1 = trim((string)($row['T07_1'] ?? ''));
+                $t07_2 = trim((string)($row['T07_2'] ?? ''));
+                $replyMobile = trim((string)($row['REPLY_MOBILE'] ?? ''));
+                $replyEmail = trim((string)($row['REPLY_EMAIL'] ?? ''));
+
+                $chtWord = $lookupParamSrkeyn('04', $rm02);
+                $chtRm09 = $lookupParamSrkeyn('06', $rm09);
+                $msNote = SmsV1CaseSyncHelper::buildUserNote($ms30, $rm01, $chtWord, $rm03, $chtRm09, $t07_1, $remark);
+
+                foreach (SmsV1CaseSyncHelper::expandUserContactPairs($row) as $pair) {
+                    if ($replyMobile === '1' && $pair['mobile'] !== '') {
+                        $smsKey = $rm01 . '|' . $rm02 . '|' . $rm03 . '|' . $ms30 . '|' . $pair['mobile'];
+                        if (!isset($seenUserSms[$smsKey]) && !$this->existsUserSmsInThreeTables($rm01, $rm02, $rm03, $ms30, $pair['mobile'])) {
+                            $seenUserSms[$smsKey] = true;
+                            $p = ':bv_u' . $bindIdx++;
+                            $insertStatements[] = "INSERT INTO SSMSMAIN (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS_TYPE, MS_NOTE)
+                                                   VALUES ({$p}_ms03, {$p}_ms04_1, {$p}_ms04_2, {$p}_ms07_1, {$p}_ms07_2, {$p}_ms14, {$p}_ms30, 'M', {$p}_note)";
+                            $insertBinds["{$p}_ms03"] = $rm01;
+                            $insertBinds["{$p}_ms04_1"] = $rm02;
+                            $insertBinds["{$p}_ms04_2"] = $rm03;
+                            $insertBinds["{$p}_ms07_1"] = $t07_1;
+                            $insertBinds["{$p}_ms07_2"] = $t07_2;
+                            $insertBinds["{$p}_ms14"] = $pair['mobile'];
+                            $insertBinds["{$p}_ms30"] = $ms30;
+                            $insertBinds["{$p}_note"] = SmsV1Encoding::toOracleEncoding($msNote);
+                            $userNotificationsInserted++;
+                        }
+                    }
+
+                    if ($replyEmail === '1' && $pair['email'] !== '') {
+                        $mailKey = $rm01 . '|' . $rm02 . '|' . $rm03 . '|' . $ms30 . '|' . $pair['email'];
+                        if (!isset($seenUserMail[$mailKey]) && !$this->existsUserMailInThreeTables($rm01, $rm02, $rm03, $ms30, $pair['email'])) {
+                            $seenUserMail[$mailKey] = true;
+                            $p = ':bv_m' . $bindIdx++;
+                            $insertStatements[] = "INSERT INTO SSMSMAIN (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS_MAIL, MS30, MS_TYPE, MS_NOTE)
+                                                   VALUES ({$p}_ms03, {$p}_ms04_1, {$p}_ms04_2, {$p}_ms07_1, {$p}_ms07_2, {$p}_mail, {$p}_ms30, 'M', {$p}_note)";
+                            $insertBinds["{$p}_ms03"] = $rm01;
+                            $insertBinds["{$p}_ms04_1"] = $rm02;
+                            $insertBinds["{$p}_ms04_2"] = $rm03;
+                            $insertBinds["{$p}_ms07_1"] = $t07_1;
+                            $insertBinds["{$p}_ms07_2"] = $t07_2;
+                            $insertBinds["{$p}_mail"] = $pair['email'];
+                            $insertBinds["{$p}_ms30"] = $ms30;
+                            $insertBinds["{$p}_note"] = SmsV1Encoding::toOracleEncoding($k5502 . $msNote);
+                            $userNotificationsInserted++;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 機關通報 2 組查詢（SQL_A 'y'、SQL_C 'z'）
+        foreach ($this->getGovCaseQueries() as $querySpec) {
+            $binds = $querySpec['has_year']
+                ? array(':target_year' => $targetYear, ':target_date' => $targetDate)
+                : array(':target_date' => $targetDate);
+            $rows = $this->queryRaw($querySpec['sql'], $binds);
+
+            foreach ($rows as $row) {
+                $govCasesScanned++;
+                $ms30 = trim((string)($row['MS30'] ?? ''));
+                $rm01 = trim((string)($row['RM01'] ?? ''));
+                $rm02 = trim((string)($row['RM02'] ?? ''));
+                $rm03 = trim((string)($row['RM03'] ?? ''));
+                $rm09 = trim((string)($row['RM09'] ?? ''));
+                $t07_1 = trim((string)($row['T07_1'] ?? ''));
+                $t07_2 = trim((string)($row['T07_2'] ?? ''));
+                $appSeq = trim((string)($row['APP_SEQ'] ?? ''));
+                $appId = trim((string)($row['APP_ID'] ?? ''));
+                $govId = trim((string)($row['GOV_ID'] ?? ''));
+                $cc00 = trim((string)($row['CC00'] ?? ''));
+                $cc48 = trim((string)($row['CC48'] ?? ''));
+                $cc49 = trim((string)($row['CC49'] ?? ''));
+                $govOid = trim((string)($row['GOV_OID'] ?? ''));
+                $emailRaw = (string)($row['EMAIL'] ?? '');
+
+                $chtWord = $lookupParamSrkeyn('04', $rm02);
+                $chtRm09 = $lookupParamSrkeyn('06', $rm09);
+                $chtCc48 = $lookupParamSrkeyn('48', $cc48);
+
+                $msNote = SmsV1CaseSyncHelper::buildGovNote(
+                    $ms30,
+                    $county,
+                    $chtCc48,
+                    $cc00,
+                    $cc49,
+                    $rm01,
+                    $chtWord,
+                    $rm03,
+                    $chtRm09,
+                    $t07_1,
+                    $maLo
+                );
+                $msNoteOra = SmsV1Encoding::toOracleEncoding($msNote);
+
+                $govKey = $rm01 . '|' . $rm02 . '|' . $rm03 . '|' . $ms30 . '|' . $appSeq . '|' . $appId
+                    . '|' . ($govOid === '' ? ('ID:' . $govId) : ('OID:' . $govOid))
+                    . '|' . $cc00 . '|' . $cc48 . '|' . $cc49 . '|' . $msNote;
+
+                if (!isset($seenGov[$govKey]) && !$this->existsGovInThreeTables($rm01, $rm02, $rm03, $ms30, $appSeq, $appId, $govId, $govOid, $cc00, $cc48, $cc49, $msNoteOra)) {
+                    $seenGov[$govKey] = true;
+                    foreach (SmsV1CaseSyncHelper::splitGovEmails($emailRaw) as $mail) {
+                        $p = ':bv_g' . $bindIdx++;
+                        $insertStatements[] = "INSERT INTO SSMSMAIN (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS_MAIL, MS30, MS_TYPE, MS_NOTE,
+                                                                     APP_SEQ, APP_ID, GOV_ID, CC00, CC48, CC49, GOV_OID)
+                                               VALUES ({$p}_ms03, {$p}_ms04_1, {$p}_ms04_2, {$p}_ms07_1, {$p}_ms07_2, {$p}_mail, {$p}_ms30, 'M', {$p}_note,
+                                                       {$p}_app_seq, {$p}_app_id, {$p}_gov_id, {$p}_cc00, {$p}_cc48, {$p}_cc49, {$p}_gov_oid)";
+                        $insertBinds["{$p}_ms03"] = $rm01;
+                        $insertBinds["{$p}_ms04_1"] = $rm02;
+                        $insertBinds["{$p}_ms04_2"] = $rm03;
+                        $insertBinds["{$p}_ms07_1"] = $t07_1;
+                        $insertBinds["{$p}_ms07_2"] = $t07_2;
+                        $insertBinds["{$p}_mail"] = $mail;
+                        $insertBinds["{$p}_ms30"] = $ms30;
+                        $insertBinds["{$p}_note"] = $msNoteOra;
+                        $insertBinds["{$p}_app_seq"] = $appSeq;
+                        $insertBinds["{$p}_app_id"] = $appId;
+                        $insertBinds["{$p}_gov_id"] = $govId;
+                        $insertBinds["{$p}_cc00"] = $cc00;
+                        $insertBinds["{$p}_cc48"] = $cc48;
+                        $insertBinds["{$p}_cc49"] = $cc49;
+                        $insertBinds["{$p}_gov_oid"] = $govOid;
+                        $govNotificationsInserted++;
+                    }
+                }
+            }
+        }
+
+        if (!empty($insertStatements)) {
+            $this->executePlSqlBlock($insertStatements, $insertBinds);
+        }
+
+        return array(
+            'target_date' => $targetDate,
+            'user_cases_scanned' => $userCasesScanned,
+            'user_notifications_inserted' => $userNotificationsInserted,
+            'gov_cases_scanned' => $govCasesScanned,
+            'gov_notifications_inserted' => $govNotificationsInserted,
+        );
+    }
+
+    /**
+     * @return array<int, array{name: string, has_year: bool, sql: string}>
+     */
+    private function getUserCaseQueries(): array {
+        $usrSubquery = "(SELECT LIDN, LNAM, REPLY_MOBILE, MOBILE, MOBILE2, REPLY_EMAIL, EMAIL, EMAIL2
+                         FROM SSMS_USERINFO_M
+                         WHERE (REPLY_MOBILE = '1' OR REPLY_EMAIL = '1') AND SMS_FLAG = 'Y'
+                         ORDER BY LIDN) USR";
+        $k5501Subquery = "(SELECT * FROM SRKEYN WHERE KCDE_1 = '55' AND KCDE_2 = '01')";
+
+        return array(
+            array(
+                'name' => 'SQL_A',
+                'has_year' => true,
+                'sql' => "SELECT 'Y' MS30, A.RM01, A.RM02, A.RM03, RM09, B.RM_ID MSID, RM07_1 T07_1, RM07_2 T07_2,
+                                 DECODE(RM99, NULL, SUBSTR(KRMK, 1, 2), RM101) TLAND,
+                                 LNAM, REPLY_MOBILE, MOBILE, MOBILE2, REPLY_EMAIL, EMAIL, EMAIL2
+                          FROM SCRSMS A, SSMS_CODE04, SSMS_CODE06, {$k5501Subquery}, SCRSMS_RM1821 B, {$usrSubquery}
+                          WHERE A.RM01 = :target_year
+                            AND A.RM02 = COD04
+                            AND ((RM99 IS NULL) OR (RM99 = 'Y' AND RM100 = SUBSTR(KRMK, 1, 2)))
+                            AND SUBSTR(A.RM03, 6, 1) = '0'
+                            AND RM32 IS NOT NULL
+                            AND RM07_1 = :target_date
+                            AND B.RM01 = A.RM01 AND B.RM02 = A.RM02 AND B.RM03 = A.RM03
+                            AND B.RM_TYPE = '18' AND B.RM_ID = USR.LIDN
+                            AND RM09 = COD06 AND ITEMS = '0'",
+            ),
+            array(
+                'name' => 'SQL_B',
+                'has_year' => true,
+                'sql' => "SELECT 'Y' MS30, A.RM01, A.RM02, A.RM03, RM09, B.RM_ID MSID, RM07_1 T07_1, RM07_2 T07_2,
+                                 DECODE(RM99, NULL, SUBSTR(KRMK, 1, 2), RM101) TLAND,
+                                 LNAM, REPLY_MOBILE, MOBILE, MOBILE2, REPLY_EMAIL, EMAIL, EMAIL2
+                          FROM SCRSMS A, SSMS_CODE04, SSMS_CODE06, {$k5501Subquery}, SCRSMS_RM1821 B, {$usrSubquery}
+                          WHERE A.RM01 = :target_year
+                            AND A.RM02 = COD04
+                            AND SUBSTR(A.RM03, 6, 1) = '0'
+                            AND ((RM99 IS NULL) OR (RM99 = 'Y' AND RM100 = SUBSTR(KRMK, 1, 2)))
+                            AND RM32 IS NOT NULL
+                            AND RM07_1 = :target_date
+                            AND B.RM01 = A.RM01 AND B.RM02 = A.RM02 AND B.RM03 = A.RM03
+                            AND B.RM_TYPE = '21' AND B.RM_ID = USR.LIDN
+                            AND RM09 = COD06 AND ITEMS = '1'",
+            ),
+            array(
+                'name' => 'SQL_C',
+                'has_year' => false,
+                'sql' => "SELECT 'Z' MS30, RM01, RM02, RM03, RM09, IS09 MSID, RM56_1 T07_1, RM56_2 T07_2,
+                                 DECODE(RM99, NULL, SUBSTR(KRMK, 1, 2), RM101) TLAND,
+                                 LNAM, REPLY_MOBILE, MOBILE, MOBILE2, REPLY_EMAIL, EMAIL, EMAIL2
+                          FROM TRINDX, SRSINDX, SCRSMS, SSMS_CODE04, SSMS_CODE06, {$k5501Subquery}, {$usrSubquery}
+                          WHERE RM02 = COD04
+                            AND SUBSTR(RM03, 6, 1) = '0'
+                            AND RM09 = COD06 AND ITEMS = '0'
+                            AND RM56_1 = :target_date
+                            AND ((RM99 IS NULL) OR (RM99 = 'Y' AND RM100 = SUBSTR(KRMK, 1, 2)))
+                            AND IS03 = RM01 AND IS04_1 = RM02 AND IS04_2 = RM03
+                            AND IS00 IN ('B', 'E') AND IS09 = USR.LIDN
+                            AND II03(+) = IS03 AND II04_1(+) = IS04_1 AND II04_2(+) = IS04_2
+                            AND II00(+) = IS00 AND II_DATA(+) = 'N'
+                            AND IIKEY(+) = DECODE(IS00, 'B', 'C', 'E', 'F', IS00) || IS48 || IS49 || IS01",
+            ),
+            array(
+                'name' => 'SQL_D',
+                'has_year' => false,
+                'sql' => "SELECT 'Z' MS30, RM01, RM02, RM03, RM09, IS09 MSID, RM56_1 T07_1, RM56_2 T07_2,
+                                 DECODE(RM99, NULL, SUBSTR(KRMK, 1, 2), RM101) TLAND,
+                                 LNAM, REPLY_MOBILE, MOBILE, MOBILE2, REPLY_EMAIL, EMAIL, EMAIL2
+                          FROM TRINDX, SRSINDX, SCRSMS, SSMS_CODE04, SSMS_CODE06, {$k5501Subquery}, {$usrSubquery}
+                          WHERE RM02 = COD04
+                            AND SUBSTR(RM03, 6, 1) = '0'
+                            AND RM09 = COD06 AND ITEMS = '1'
+                            AND RM56_1 = :target_date
+                            AND ((RM99 IS NULL) OR (RM99 = 'Y' AND RM100 = SUBSTR(KRMK, 1, 2)))
+                            AND IS03 = RM01 AND IS04_1 = RM02 AND IS04_2 = RM03
+                            AND IS00 IN ('B', 'E') AND IS09 = USR.LIDN
+                            AND II03 = IS03 AND II04_1 = IS04_1 AND II04_2 = IS04_2
+                            AND II00 = IS00 AND II_DATA = 'M'
+                            AND IIKEY = DECODE(IS00, 'B', 'C', 'E', 'F', IS00) || IS48 || IS49 || IS01",
+            ),
+            array(
+                'name' => 'SQL_E',
+                'has_year' => false,
+                'sql' => "SELECT 'Z' MS30, RM01, RM02, RM03, RM09, S.BB09 MSID, RM56_1 T07_1, RM56_2 T07_2,
+                                 DECODE(RM99, NULL, SUBSTR(KRMK, 1, 2), RM101) TLAND,
+                                 LNAM, REPLY_MOBILE, MOBILE, MOBILE2, REPLY_EMAIL, EMAIL, EMAIL2
+                          FROM TRINDX T, SRBLOW S, SCRSMS, SSMS_CODE04, SSMS_CODE06, {$k5501Subquery}, {$usrSubquery}
+                          WHERE RM01 = SUBSTR(RM07_1, 1, 3)
+                            AND RM02 = COD04
+                            AND SUBSTR(RM03, 6, 1) = '0'
+                            AND RM09 = COD06 AND ITEMS = '1'
+                            AND RM56_1 = :target_date
+                            AND ((RM99 IS NULL) OR (RM99 = 'Y' AND RM100 = SUBSTR(KRMK, 1, 2)))
+                            AND S.BB09 = USR.LIDN
+                            AND II03 = RM01 AND II04_1 = RM02 AND II04_2 = RM03
+                            AND II00 = 'R' AND SUBSTR(IIKEY, 1, 13) || II_DATA = 'C' || S.BA48 || S.BA49 || S.BB01",
+            ),
+            array(
+                'name' => 'SQL_F',
+                'has_year' => false,
+                'sql' => "SELECT 'Z' MS30, RM01, RM02, RM03, RM09, S.EE09 MSID, RM56_1 T07_1, RM56_2 T07_2,
+                                 DECODE(RM99, NULL, SUBSTR(KRMK, 1, 2), RM101) TLAND,
+                                 LNAM, REPLY_MOBILE, MOBILE, MOBILE2, REPLY_EMAIL, EMAIL, EMAIL2
+                          FROM TRINDX T, SREBOW S, SCRSMS, SSMS_CODE04, SSMS_CODE06, {$k5501Subquery}, {$usrSubquery}
+                          WHERE RM01 = SUBSTR(RM07_1, 1, 3)
+                            AND RM02 = COD04
+                            AND SUBSTR(RM03, 6, 1) = '0'
+                            AND RM09 = COD06 AND ITEMS = '1'
+                            AND RM56_1 = :target_date
+                            AND ((RM99 IS NULL) OR (RM99 = 'Y' AND RM100 = SUBSTR(KRMK, 1, 2)))
+                            AND S.EE09 = USR.LIDN
+                            AND II03 = RM01 AND II04_1 = RM02 AND II04_2 = RM03
+                            AND II00 = 'R' AND SUBSTR(IIKEY, 1, 13) || II_DATA = 'F' || S.ED48 || S.ED49 || S.EE01",
+            ),
+        );
+    }
+
+    /**
+     * @return array<int, array{name: string, has_year: bool, sql: string}>
+     */
+    private function getGovCaseQueries(): array {
+        $govSubquery = "(SELECT a.GOV_ID, a.CC00, a.CC48, a.CC49, b.GOV_NAME, b.EMAIL, b.APP_ID, b.APP_SEQ, b.GOV_OID
+                         FROM SSMS_GOVINFO_D a, SMS_GOVINFO_M b
+                         WHERE a.APP_SEQ = b.APP_SEQ AND NVL(b.APP_STOP, 'N') <> 'Y') GOVINFO";
+
+        return array(
+            array(
+                'name' => 'G_SQL_A',
+                'has_year' => true,
+                'sql' => "SELECT 'y' MS30, A.RM01, A.RM02, A.RM03, RM09, RM07_1 T07_1, RM07_2 T07_2,
+                                 DECODE(RM99, NULL, SUBSTR(KRMK, 1, 2), RM101) TLAND,
+                                 GOVINFO.GOV_ID, GOVINFO.CC00, GOVINFO.CC48, GOVINFO.CC49,
+                                 GOVINFO.GOV_NAME, GOVINFO.EMAIL, GOVINFO.APP_ID, GOVINFO.APP_SEQ, GOVINFO.GOV_OID
+                          FROM SCRSMS A, SSMS_CODE06, SRKEYN, SCRSMS_RM1215 B, {$govSubquery}
+                          WHERE A.RM01 = :target_year
+                            AND KCDE_1 = '55' AND KCDE_2 = '01'
+                            AND ((RM99 IS NULL) OR (RM99 = 'Y' AND RM100 = SUBSTR(KRMK, 1, 2)))
+                            AND SUBSTR(A.RM03, 6, 1) = '0'
+                            AND RM32 IS NOT NULL
+                            AND RM07_1 = :target_date
+                            AND B.RM01 = A.RM01 AND B.RM02 = A.RM02 AND B.RM03 = A.RM03
+                            AND B.RM00 = GOVINFO.CC00 AND B.RM11 = GOVINFO.CC48 AND B.RM1215 = GOVINFO.CC49
+                            AND RM09 = COD06 AND ITEMS = '2'",
+            ),
+            array(
+                'name' => 'G_SQL_C',
+                'has_year' => false,
+                'sql' => "SELECT 'z' MS30, RM01, RM02, RM03, RM09, RM56_1 T07_1, RM56_2 T07_2,
+                                 DECODE(RM99, NULL, SUBSTR(KRMK, 1, 2), RM101) TLAND,
+                                 GOVINFO.GOV_ID, GOVINFO.CC00, GOVINFO.CC48, GOVINFO.CC49,
+                                 GOVINFO.GOV_NAME, GOVINFO.EMAIL, GOVINFO.APP_ID, GOVINFO.APP_SEQ, GOVINFO.GOV_OID
+                          FROM SRSINDX, SCRSMS, SSMS_CODE06, SRKEYN, {$govSubquery}
+                          WHERE SUBSTR(RM03, 6, 1) = '0'
+                            AND RM09 = COD06 AND ITEMS = '2'
+                            AND RM56_1 = :target_date
+                            AND KCDE_1 = '55' AND KCDE_2 = '01'
+                            AND ((RM99 IS NULL) OR (RM99 = 'Y' AND RM100 = SUBSTR(KRMK, 1, 2)))
+                            AND IS03 = RM01 AND IS04_1 = RM02 AND IS04_2 = RM03
+                            AND ((GOVINFO.CC00 = 'C' AND IS00 IN ('A', 'B', 'C')) OR (GOVINFO.CC00 = 'F' AND IS00 IN ('D', 'E', 'F')))
+                            AND IS48 = GOVINFO.CC48 AND IS49 = GOVINFO.CC49",
+            ),
+        );
+    }
+
+    private function existsUserSmsInThreeTables(string $ms03, string $ms04_1, string $ms04_2, string $ms30, string $ms14): bool {
+        $sql = "SELECT 'X' S30 FROM SSMSMAIN WHERE MS03 = :ms03 AND MS04_1 = :ms04_1 AND MS04_2 = :ms04_2 AND MS30 = :ms30 AND MS14 = :ms14
+                UNION ALL
+                SELECT 'X' S30 FROM SSMSWAIT WHERE MS03 = :ms03 AND MS04_1 = :ms04_1 AND MS04_2 = :ms04_2 AND MS30 = :ms30 AND MS14 = :ms14
+                UNION ALL
+                SELECT 'X' S30 FROM SSMSLOG  WHERE MS03 = :ms03 AND MS04_1 = :ms04_1 AND MS04_2 = :ms04_2 AND MS30 = :ms30 AND MS14 = :ms14";
+        $rows = $this->queryRaw($sql, array(
+            ':ms03' => $ms03,
+            ':ms04_1' => $ms04_1,
+            ':ms04_2' => $ms04_2,
+            ':ms30' => $ms30,
+            ':ms14' => $ms14,
+        ));
+        return !empty($rows);
+    }
+
+    private function existsUserMailInThreeTables(string $ms03, string $ms04_1, string $ms04_2, string $ms30, string $msMail): bool {
+        $sql = "SELECT 'X' S30 FROM SSMSMAIN WHERE MS03 = :ms03 AND MS04_1 = :ms04_1 AND MS04_2 = :ms04_2 AND MS30 = :ms30 AND MS_MAIL = :ms_mail
+                UNION ALL
+                SELECT 'X' S30 FROM SSMSWAIT WHERE MS03 = :ms03 AND MS04_1 = :ms04_1 AND MS04_2 = :ms04_2 AND MS30 = :ms30 AND MS_MAIL = :ms_mail
+                UNION ALL
+                SELECT 'X' S30 FROM SSMSLOG  WHERE MS03 = :ms03 AND MS04_1 = :ms04_1 AND MS04_2 = :ms04_2 AND MS30 = :ms30 AND MS_MAIL = :ms_mail";
+        $rows = $this->queryRaw($sql, array(
+            ':ms03' => $ms03,
+            ':ms04_1' => $ms04_1,
+            ':ms04_2' => $ms04_2,
+            ':ms30' => $ms30,
+            ':ms_mail' => $msMail,
+        ));
+        return !empty($rows);
+    }
+
+    private function existsGovInThreeTables(
+        string $ms03,
+        string $ms04_1,
+        string $ms04_2,
+        string $ms30,
+        string $appSeq,
+        string $appId,
+        string $govId,
+        string $govOid,
+        string $cc00,
+        string $cc48,
+        string $cc49,
+        string $msNoteOra
+    ): bool {
+        $govCond = $govOid === '' ? 'GOV_ID = :gov_key' : 'GOV_OID = :gov_key';
+        $where = "MS03 = :ms03 AND MS04_1 = :ms04_1 AND MS04_2 = :ms04_2 AND MS30 = :ms30
+                  AND APP_SEQ = :app_seq AND APP_ID = :app_id AND {$govCond}
+                  AND CC00 = :cc00 AND CC48 = :cc48 AND CC49 = :cc49 AND MS_NOTE = :ms_note";
+        $sql = "SELECT 'X' S30 FROM SSMSMAIN WHERE {$where}
+                UNION
+                SELECT 'X' S30 FROM SSMSWAIT WHERE {$where}
+                UNION
+                SELECT 'X' S30 FROM SSMSLOG  WHERE {$where}";
+        $rows = $this->queryRaw($sql, array(
+            ':ms03' => $ms03,
+            ':ms04_1' => $ms04_1,
+            ':ms04_2' => $ms04_2,
+            ':ms30' => $ms30,
+            ':app_seq' => $appSeq,
+            ':app_id' => $appId,
+            ':gov_key' => $govOid === '' ? $govId : $govOid,
+            ':cc00' => $cc00,
+            ':cc48' => $cc48,
+            ':cc49' => $cc49,
+            ':ms_note' => $msNoteOra,
+        ));
+        return !empty($rows);
     }
 
     /**
@@ -127,7 +572,7 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
             return;
         }
 
-        $plsql = "BEGIN\n" . implode("\n", $cleaned) . "\nEND;";
+        $plsql = "BEGIN\n" . implode("\n", $cleaned) . "\nEXCEPTION\n  WHEN OTHERS THEN\n    ROLLBACK;\n    RAISE;\nEND;";
         $db = $this->requireReachableDb();
         $db->parse($plsql);
         foreach ($binds as $key => $value) {
