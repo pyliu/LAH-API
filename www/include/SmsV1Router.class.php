@@ -35,6 +35,9 @@ class SmsV1Router {
             '/cases/sync' => array(
                 'POST' => 'handlePostCasesSync',
             ),
+            '/queue/enqueue' => array(
+                'POST' => 'handlePostQueueEnqueue',
+            ),
             '/records' => array(
                 'GET' => 'handleGetRecords',
             ),
@@ -121,6 +124,49 @@ class SmsV1Router {
         return array(
             'status' => 200,
             'body' => $this->service->syncCases($targetDate),
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $query
+     * @param string $rawBody
+     * @return array{status: int, body: array<string, mixed>}
+     */
+    private function handlePostQueueEnqueue(array $query, string $rawBody): array {
+        $flags = array(
+            'check_register_a' => true,
+            'check_register_b' => true,
+            'check_register_c' => true,
+            'check_register_d' => true,
+        );
+
+        $trimmed = trim($rawBody);
+        if ($trimmed !== '') {
+            if ($trimmed[0] !== '{') {
+                throw new \InvalidArgumentException('Invalid JSON request body.');
+            }
+            $payload = json_decode($trimmed, true);
+            if (json_last_error() !== JSON_ERROR_NONE || !is_array($payload)) {
+                throw new \InvalidArgumentException('Invalid JSON request body.');
+            }
+            foreach ($flags as $key => $defaultVal) {
+                if (array_key_exists($key, $payload)) {
+                    if (!is_bool($payload[$key])) {
+                        throw new \InvalidArgumentException("Invalid {$key}: expected boolean.");
+                    }
+                    $flags[$key] = $payload[$key];
+                }
+            }
+        }
+
+        return array(
+            'status' => 200,
+            'body' => $this->service->enqueueQueue(
+                $flags['check_register_a'],
+                $flags['check_register_b'],
+                $flags['check_register_c'],
+                $flags['check_register_d']
+            ),
         );
     }
 

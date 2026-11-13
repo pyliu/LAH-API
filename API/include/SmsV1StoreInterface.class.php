@@ -27,4 +27,20 @@ interface SmsV1StoreInterface {
      * @return array<int, array<string, string>>
      */
     public function getRecords(string $table, int $limit = 200): array;
+
+    /**
+     * 依 TTSearchTimer 邏輯將 SSMSMAIN 待處理紀錄在單一交易內搬移至 SSMSWAIT
+     *
+     * @param bool $checkRegisterA 是否處理補正通知（sType = 'I'）
+     * @param bool $checkRegisterB 是否處理駁回通知（sType = 'D'）
+     * @param bool $checkRegisterC 是否處理結案通知（sType = 'F'）
+     * @param bool $checkRegisterD 是否處理延期複丈通知（sType = 'C'）
+     * @return array{moved_to_wait_count: int, deleted_from_main_count: int}
+     */
+    public function enqueueQueue(
+        bool $checkRegisterA = true,
+        bool $checkRegisterB = true,
+        bool $checkRegisterC = true,
+        bool $checkRegisterD = true
+    ): array;
 }

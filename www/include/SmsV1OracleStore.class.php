@@ -1,6 +1,7 @@
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1CaseSyncHelper.class.php');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1Encoding.class.php');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1QueueHelper.class.php');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1StoreInterface.class.php');
 
 /**
@@ -491,6 +492,209 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
             ':ms_note' => $msNoteOra,
         ));
         return !empty($rows);
+    }
+
+    /**
+     * 依 TTSearchTimer 邏輯將 SSMSMAIN 待處理紀錄在單一交易內搬移至 SSMSWAIT
+     *
+     * @param bool $checkRegisterA
+     * @param bool $checkRegisterB
+     * @param bool $checkRegisterC
+     * @param bool $checkRegisterD
+     * @return array{moved_to_wait_count: int, deleted_from_main_count: int}
+     */
+    public function enqueueQueue(
+        bool $checkRegisterA = true,
+        bool $checkRegisterB = true,
+        bool $checkRegisterC = true,
+        bool $checkRegisterD = true
+    ): array {
+        $now = new \DateTimeImmutable('now');
+        $nowDate = SmsV1Encoding::getRocDate($now);
+        $nowTime = SmsV1Encoding::getTimeHhmmss($now);
+
+        $rows = $this->queryRaw(
+            "SELECT MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, NVL(MS_TYPE, 'R') AS MS_TYPE,
+                    MS_NOTE, MS_MAIL, APP_SEQ, APP_ID, GOV_ID, CC00, CC48, CC49, GOV_OID
+             FROM SSMSMAIN
+             WHERE NVL(MS_TYPE, 'R') IN ('M', 'R', 'S', '2')
+             ORDER BY MS07_1, MS07_2"
+        );
+
+        $scrsmsSql = "SELECT DECODE(RM30, 'I', 'I',
+                                    'F', DECODE(RM31, 'A', 'F', 'D', 'D', 'B', 'X', 'C', 'X', '0'),
+                                    'N', DECODE(RM31, 'A', 'F', 'D', 'D', 'B', 'X', 'C', 'X', '0'),
+                                    '0') AS RM30
+                      FROM SCRSMS
+                      WHERE RM01 = :ms03 AND RM02 = :ms04_1 AND RM03 = :ms04_2";
+
+        $scmsmsSql = "SELECT DECODE(MM23, NULL, DECODE(MM22, 'B', 'I', 'C', 'C', '0'),
+                                    'A', 'F', 'C', 'D', 'B', 'X', 'X') AS RM30
+                      FROM SCMSMS
+                      WHERE MM01 = :ms03 AND MM02 = :ms04_1 AND MM03 = :ms04_2";
+
+        $statements = array();
+        $binds = array();
+        $bindIdx = 0;
+        $movedToWaitCount = 0;
+        $deletedFromMainCount = 0;
+
+        foreach ($rows as $row) {
+            $ms03 = trim((string)($row['MS03'] ?? ''));
+            $ms04_1 = trim((string)($row['MS04_1'] ?? ''));
+            $ms04_2 = trim((string)($row['MS04_2'] ?? ''));
+            $ms14 = trim((string)($row['MS14'] ?? ''));
+            $ms30 = trim((string)($row['MS30'] ?? ''));
+            $msType = trim((string)($row['MS_TYPE'] ?? 'R'));
+            if ($msType === '') {
+                $msType = 'R';
+            }
+            $msNoteRaw = (string)($row['MS_NOTE'] ?? '');
+            $msMail = trim((string)($row['MS_MAIL'] ?? ''));
+            $appSeq = trim((string)($row['APP_SEQ'] ?? ''));
+            $appId = trim((string)($row['APP_ID'] ?? ''));
+            $govId = trim((string)($row['GOV_ID'] ?? ''));
+            $cc00 = trim((string)($row['CC00'] ?? ''));
+            $cc48 = trim((string)($row['CC48'] ?? ''));
+            $cc49 = trim((string)($row['CC49'] ?? ''));
+            $govOid = trim((string)($row['GOV_OID'] ?? ''));
+
+            $sType = '';
+            if ($msType === 'R') {
+                $subRows = $this->queryRaw($scrsmsSql, array(
+                    ':ms03' => $ms03,
+                    ':ms04_1' => $ms04_1,
+                    ':ms04_2' => $ms04_2,
+                ));
+                foreach ($subRows as $subRow) {
+                    $sType = trim((string)($subRow['RM30'] ?? ''));
+                }
+            } elseif ($msType === 'S') {
+                $subRows = $this->queryRaw($scmsmsSql, array(
+                    ':ms03' => $ms03,
+                    ':ms04_1' => $ms04_1,
+                    ':ms04_2' => $ms04_2,
+                ));
+                foreach ($subRows as $subRow) {
+                    $sType = trim((string)($subRow['RM30'] ?? ''));
+                }
+            }
+
+            $action = SmsV1QueueHelper::resolveAction(
+                $msType,
+                $ms30,
+                $sType,
+                $checkRegisterA,
+                $checkRegisterB,
+                $checkRegisterC,
+                $checkRegisterD
+            );
+
+            if (!$action['insert_wait'] && $action['main_action'] === 'none') {
+                continue;
+            }
+
+            $p = ':bq' . $bindIdx++;
+            $binds["{$p}_m03"] = $ms03;
+            $binds["{$p}_m041"] = $ms04_1;
+            $binds["{$p}_m042"] = $ms04_2;
+            $binds["{$p}_m14"] = $ms14;
+            $binds["{$p}_m30"] = $ms30;
+            $binds["{$p}_typ"] = $msType;
+
+            if ($action['insert_wait']) {
+                $binds["{$p}_071"] = $nowDate;
+                $binds["{$p}_072"] = $nowTime;
+                $binds["{$p}_w30"] = $action['wait_ms30'];
+
+                if ($action['wait_mode'] === 'm_gov') {
+                    $binds["{$p}_not"] = $msNoteRaw;
+                    $binds["{$p}_mal"] = $msMail;
+                    $binds["{$p}_seq"] = $appSeq;
+                    $binds["{$p}_aid"] = $appId;
+                    $binds["{$p}_gid"] = $govId;
+                    $binds["{$p}_c00"] = $cc00;
+                    $binds["{$p}_c48"] = $cc48;
+                    $binds["{$p}_c49"] = $cc49;
+                    $binds["{$p}_oid"] = $govOid;
+                    $statements[] = "INSERT INTO SSMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32, MS_TYPE, MS_NOTE, MS_MAIL,
+                                                           APP_SEQ, APP_ID, GOV_ID, CC00, CC48, CC49, GOV_OID)
+                                     VALUES ({$p}_m03, {$p}_m041, {$p}_m042, {$p}_071, {$p}_072, {$p}_m14, {$p}_w30, '0', {$p}_typ, {$p}_not, {$p}_mal,
+                                             {$p}_seq, {$p}_aid, {$p}_gid, {$p}_c00, {$p}_c48, {$p}_c49, {$p}_oid)";
+                } elseif ($action['wait_mode'] === 'm_general') {
+                    $binds["{$p}_not"] = $msNoteRaw;
+                    $binds["{$p}_mal"] = $msMail;
+                    $statements[] = "INSERT INTO SSMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32, MS_TYPE, MS_NOTE, MS_MAIL)
+                                     VALUES ({$p}_m03, {$p}_m041, {$p}_m042, {$p}_071, {$p}_072, {$p}_m14, {$p}_w30, '0', {$p}_typ, {$p}_not, {$p}_mal)";
+                } elseif ($action['wait_mode'] === 'type2') {
+                    $binds["{$p}_not"] = $msNoteRaw;
+                    $statements[] = "INSERT INTO SSMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32, MS_TYPE, MS_NOTE)
+                                     VALUES ({$p}_m03, {$p}_m041, {$p}_m042, {$p}_071, {$p}_072, {$p}_m14, {$p}_w30, '0', {$p}_typ, {$p}_not)";
+                } else {
+                    $statements[] = "INSERT INTO SSMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32, MS_TYPE)
+                                     VALUES ({$p}_m03, {$p}_m041, {$p}_m042, {$p}_071, {$p}_072, {$p}_m14, {$p}_w30, '0', {$p}_typ)";
+                }
+                $movedToWaitCount++;
+            }
+
+            if ($action['main_action'] === 'update_ms30') {
+                $binds["{$p}_n30"] = $action['new_main_ms30'];
+                $statements[] = "UPDATE SSMSMAIN
+                                 SET MS30 = {$p}_n30
+                                 WHERE MS03 = {$p}_m03 AND MS04_1 = {$p}_m041 AND MS04_2 = {$p}_m042
+                                   AND NVL(MS14, 'X') = NVL({$p}_m14, 'X')
+                                   AND NVL(MS_TYPE, 'R') = {$p}_typ
+                                   AND NVL(MS30, 'X') = NVL({$p}_m30, 'X')";
+            } elseif ($action['main_action'] === 'delete_legacy') {
+                $statements[] = "DELETE FROM SSMSMAIN
+                                 WHERE MS03 = {$p}_m03 AND MS04_1 = {$p}_m041 AND MS04_2 = {$p}_m042
+                                   AND NVL(MS14, 'X') = NVL({$p}_m14, 'X')
+                                   AND NVL(MS_TYPE, 'R') = {$p}_typ
+                                   AND NVL(MS30, 'X') = NVL({$p}_m30, 'X')";
+                $deletedFromMainCount++;
+            } elseif ($action['main_action'] === 'delete_m') {
+                $binds["{$p}_mal"] = $msMail;
+                $statements[] = "DELETE FROM SSMSMAIN
+                                 WHERE MS03 = {$p}_m03 AND MS04_1 = {$p}_m041 AND MS04_2 = {$p}_m042
+                                   AND NVL(MS14, 'X') = NVL({$p}_m14, 'X')
+                                   AND NVL(MS_TYPE, 'R') = {$p}_typ
+                                   AND NVL(MS_MAIL, 'X') = NVL({$p}_mal, 'X')
+                                   AND NVL(MS30, 'X') = NVL({$p}_m30, 'X')";
+                $deletedFromMainCount++;
+            } elseif ($action['main_action'] === 'delete_gov') {
+                $binds["{$p}_mal"] = $msMail;
+                $binds["{$p}_seq"] = $appSeq;
+                $binds["{$p}_aid"] = $appId;
+                $binds["{$p}_gid"] = $govId;
+                $binds["{$p}_c00"] = $cc00;
+                $binds["{$p}_c48"] = $cc48;
+                $binds["{$p}_c49"] = $cc49;
+                $binds["{$p}_oid"] = $govOid;
+                $statements[] = "DELETE FROM SSMSMAIN
+                                 WHERE MS03 = {$p}_m03 AND MS04_1 = {$p}_m041 AND MS04_2 = {$p}_m042
+                                   AND NVL(APP_ID, 'X') = NVL({$p}_aid, 'X')
+                                   AND NVL(MS14, 'X') = NVL({$p}_m14, 'X')
+                                   AND NVL(MS_TYPE, 'R') = {$p}_typ
+                                   AND NVL(MS_MAIL, 'X') = NVL({$p}_mal, 'X')
+                                   AND NVL(GOV_ID, 'X') = NVL({$p}_gid, 'X')
+                                   AND NVL(CC00, 'X') = NVL({$p}_c00, 'X')
+                                   AND NVL(CC48, 'X') = NVL({$p}_c48, 'X')
+                                   AND NVL(CC49, 'X') = NVL({$p}_c49, 'X')
+                                   AND (({$p}_seq IS NULL AND APP_SEQ IS NULL) OR APP_SEQ = {$p}_seq)
+                                   AND NVL(GOV_OID, 'X') = NVL({$p}_oid, 'X')
+                                   AND NVL(MS30, 'X') = NVL({$p}_m30, 'X')";
+                $deletedFromMainCount++;
+            }
+        }
+
+        if (!empty($statements)) {
+            $this->executePlSqlBlock($statements, $binds);
+        }
+
+        return array(
+            'moved_to_wait_count' => $movedToWaitCount,
+            'deleted_from_main_count' => $deletedFromMainCount,
+        );
     }
 
     /**

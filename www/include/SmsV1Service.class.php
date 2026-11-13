@@ -70,6 +70,34 @@ class SmsV1Service {
     }
 
     /**
+     * 將 SSMSMAIN 待處理紀錄搬移至 SSMSWAIT（POST /queue/enqueue）
+     *
+     * @param bool $checkRegisterA
+     * @param bool $checkRegisterB
+     * @param bool $checkRegisterC
+     * @param bool $checkRegisterD
+     * @return array{moved_to_wait_count: int, deleted_from_main_count: int}
+     */
+    public function enqueueQueue(
+        bool $checkRegisterA = true,
+        bool $checkRegisterB = true,
+        bool $checkRegisterC = true,
+        bool $checkRegisterD = true
+    ): array {
+        $result = $this->store->enqueueQueue(
+            $checkRegisterA,
+            $checkRegisterB,
+            $checkRegisterC,
+            $checkRegisterD
+        );
+
+        return array(
+            'moved_to_wait_count' => (int)($result['moved_to_wait_count'] ?? 0),
+            'deleted_from_main_count' => (int)($result['deleted_from_main_count'] ?? 0),
+        );
+    }
+
+    /**
      * 查詢三表紀錄並附加 MS_TYPE / MS30 / MS31 中文狀態對照
      *
      * @param string $table main|wait|log

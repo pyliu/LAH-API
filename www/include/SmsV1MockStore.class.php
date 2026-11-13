@@ -3,6 +3,8 @@ if (!defined('DB_DIR') && !defined('ROOT_DIR')) {
     require_once(__DIR__ . DIRECTORY_SEPARATOR . 'GlobalConstants.inc.php');
 }
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1CaseSyncHelper.class.php');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1Encoding.class.php');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1QueueHelper.class.php');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'SmsV1StoreInterface.class.php');
 
 /**
@@ -581,6 +583,320 @@ class SmsV1MockStore implements SmsV1StoreInterface {
     }
 
     /**
+     * 依 TTSearchTimer 邏輯將 SSMSMAIN 待處理紀錄在單一交易內搬移至 SSMSWAIT
+     *
+     * @param bool $checkRegisterA
+     * @param bool $checkRegisterB
+     * @param bool $checkRegisterC
+     * @param bool $checkRegisterD
+     * @return array{moved_to_wait_count: int, deleted_from_main_count: int}
+     */
+    public function enqueueQueue(
+        bool $checkRegisterA = true,
+        bool $checkRegisterB = true,
+        bool $checkRegisterC = true,
+        bool $checkRegisterD = true
+    ): array {
+        $pdo = $this->getPdo();
+        $now = new \DateTimeImmutable('now');
+        $nowDate = SmsV1Encoding::getRocDate($now);
+        $nowTime = SmsV1Encoding::getTimeHhmmss($now);
+        $inTx = false;
+
+        try {
+            $pdo->exec('BEGIN IMMEDIATE');
+            $inTx = true;
+
+            $selectStmt = $pdo->query(
+                "SELECT MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30,
+                        COALESCE(NULLIF(MS_TYPE, ''), 'R') AS MS_TYPE,
+                        MS_NOTE, MS_MAIL, APP_SEQ, APP_ID, GOV_ID, CC00, CC48, CC49, GOV_OID
+                 FROM SSMSMAIN
+                 WHERE COALESCE(NULLIF(MS_TYPE, ''), 'R') IN ('M', 'R', 'S', '2')
+                 ORDER BY MS07_1, MS07_2"
+            );
+            $rows = $selectStmt ? $selectStmt->fetchAll(\PDO::FETCH_ASSOC) : array();
+
+            $scrsmsStmt = $pdo->prepare(
+                "SELECT CASE RM30
+                            WHEN 'I' THEN 'I'
+                            WHEN 'F' THEN CASE RM31 WHEN 'A' THEN 'F' WHEN 'D' THEN 'D' WHEN 'B' THEN 'X' WHEN 'C' THEN 'X' ELSE '0' END
+                            WHEN 'N' THEN CASE RM31 WHEN 'A' THEN 'F' WHEN 'D' THEN 'D' WHEN 'B' THEN 'X' WHEN 'C' THEN 'X' ELSE '0' END
+                            ELSE '0'
+                        END AS RM30
+                 FROM SCRSMS
+                 WHERE RM01 = :ms03 AND RM02 = :ms04_1 AND RM03 = :ms04_2"
+            );
+            $scmsmsStmt = $pdo->prepare(
+                "SELECT CASE
+                            WHEN MM23 IS NULL OR MM23 = '' THEN
+                                CASE MM22 WHEN 'B' THEN 'I' WHEN 'C' THEN 'C' ELSE '0' END
+                            WHEN MM23 = 'A' THEN 'F'
+                            WHEN MM23 = 'C' THEN 'D'
+                            WHEN MM23 = 'B' THEN 'X'
+                            ELSE 'X'
+                        END AS RM30
+                 FROM SCMSMS
+                 WHERE MM01 = :ms03 AND MM02 = :ms04_1 AND MM03 = :ms04_2"
+            );
+
+            $movedToWaitCount = 0;
+            $deletedFromMainCount = 0;
+
+            foreach ($rows as $row) {
+                $ms03 = trim((string)($row['MS03'] ?? ''));
+                $ms04_1 = trim((string)($row['MS04_1'] ?? ''));
+                $ms04_2 = trim((string)($row['MS04_2'] ?? ''));
+                $ms14 = trim((string)($row['MS14'] ?? ''));
+                $ms30 = trim((string)($row['MS30'] ?? ''));
+                $msType = trim((string)($row['MS_TYPE'] ?? 'R'));
+                if ($msType === '') {
+                    $msType = 'R';
+                }
+                $msNote = (string)($row['MS_NOTE'] ?? '');
+                $msMail = trim((string)($row['MS_MAIL'] ?? ''));
+                $appSeq = trim((string)($row['APP_SEQ'] ?? ''));
+                $appId = trim((string)($row['APP_ID'] ?? ''));
+                $govId = trim((string)($row['GOV_ID'] ?? ''));
+                $cc00 = trim((string)($row['CC00'] ?? ''));
+                $cc48 = trim((string)($row['CC48'] ?? ''));
+                $cc49 = trim((string)($row['CC49'] ?? ''));
+                $govOid = trim((string)($row['GOV_OID'] ?? ''));
+
+                $sType = '';
+                if ($msType === 'R') {
+                    $scrsmsStmt->execute(array(':ms03' => $ms03, ':ms04_1' => $ms04_1, ':ms04_2' => $ms04_2));
+                    $subRows = $scrsmsStmt->fetchAll(\PDO::FETCH_ASSOC);
+                    foreach ($subRows as $subRow) {
+                        $sType = trim((string)($subRow['RM30'] ?? ''));
+                    }
+                } elseif ($msType === 'S') {
+                    $scmsmsStmt->execute(array(':ms03' => $ms03, ':ms04_1' => $ms04_1, ':ms04_2' => $ms04_2));
+                    $subRows = $scmsmsStmt->fetchAll(\PDO::FETCH_ASSOC);
+                    foreach ($subRows as $subRow) {
+                        $sType = trim((string)($subRow['RM30'] ?? ''));
+                    }
+                }
+
+                $action = SmsV1QueueHelper::resolveAction(
+                    $msType,
+                    $ms30,
+                    $sType,
+                    $checkRegisterA,
+                    $checkRegisterB,
+                    $checkRegisterC,
+                    $checkRegisterD
+                );
+
+                if ($action['insert_wait']) {
+                    $this->insertWaitRowInMock(
+                        $pdo,
+                        $action['wait_mode'],
+                        $ms03,
+                        $ms04_1,
+                        $ms04_2,
+                        $nowDate,
+                        $nowTime,
+                        $ms14,
+                        $action['wait_ms30'],
+                        $msType,
+                        $msNote,
+                        $msMail,
+                        $appSeq,
+                        $appId,
+                        $govId,
+                        $cc00,
+                        $cc48,
+                        $cc49,
+                        $govOid
+                    );
+                    $movedToWaitCount++;
+                }
+
+                if ($action['main_action'] === 'update_ms30') {
+                    $updStmt = $pdo->prepare(
+                        "UPDATE SSMSMAIN
+                         SET MS30 = :new_ms30
+                         WHERE MS03 = :ms03 AND MS04_1 = :ms04_1 AND MS04_2 = :ms04_2
+                           AND COALESCE(NULLIF(MS14, ''), 'X') = COALESCE(NULLIF(:ms14, ''), 'X')
+                           AND COALESCE(NULLIF(MS_TYPE, ''), 'R') = :ms_type
+                           AND COALESCE(NULLIF(MS30, ''), 'X') = COALESCE(NULLIF(:ms30, ''), 'X')"
+                    );
+                    $updStmt->execute(array(
+                        ':new_ms30' => $action['new_main_ms30'],
+                        ':ms03' => $ms03,
+                        ':ms04_1' => $ms04_1,
+                        ':ms04_2' => $ms04_2,
+                        ':ms14' => $ms14,
+                        ':ms_type' => $msType,
+                        ':ms30' => $ms30,
+                    ));
+                } elseif ($action['main_action'] === 'delete_legacy') {
+                    $delStmt = $pdo->prepare(
+                        "DELETE FROM SSMSMAIN
+                         WHERE MS03 = :ms03 AND MS04_1 = :ms04_1 AND MS04_2 = :ms04_2
+                           AND COALESCE(NULLIF(MS14, ''), 'X') = COALESCE(NULLIF(:ms14, ''), 'X')
+                           AND COALESCE(NULLIF(MS_TYPE, ''), 'R') = :ms_type
+                           AND COALESCE(NULLIF(MS30, ''), 'X') = COALESCE(NULLIF(:ms30, ''), 'X')"
+                    );
+                    $delStmt->execute(array(
+                        ':ms03' => $ms03,
+                        ':ms04_1' => $ms04_1,
+                        ':ms04_2' => $ms04_2,
+                        ':ms14' => $ms14,
+                        ':ms_type' => $msType,
+                        ':ms30' => $ms30,
+                    ));
+                    $deletedFromMainCount += $delStmt->rowCount();
+                } elseif ($action['main_action'] === 'delete_m') {
+                    $delStmt = $pdo->prepare(
+                        "DELETE FROM SSMSMAIN
+                         WHERE MS03 = :ms03 AND MS04_1 = :ms04_1 AND MS04_2 = :ms04_2
+                           AND COALESCE(NULLIF(MS14, ''), 'X') = COALESCE(NULLIF(:ms14, ''), 'X')
+                           AND COALESCE(NULLIF(MS_TYPE, ''), 'R') = :ms_type
+                           AND COALESCE(NULLIF(MS_MAIL, ''), 'X') = COALESCE(NULLIF(:ms_mail, ''), 'X')
+                           AND COALESCE(NULLIF(MS30, ''), 'X') = COALESCE(NULLIF(:ms30, ''), 'X')"
+                    );
+                    $delStmt->execute(array(
+                        ':ms03' => $ms03,
+                        ':ms04_1' => $ms04_1,
+                        ':ms04_2' => $ms04_2,
+                        ':ms14' => $ms14,
+                        ':ms_type' => $msType,
+                        ':ms_mail' => $msMail,
+                        ':ms30' => $ms30,
+                    ));
+                    $deletedFromMainCount += $delStmt->rowCount();
+                } elseif ($action['main_action'] === 'delete_gov') {
+                    $delStmt = $pdo->prepare(
+                        "DELETE FROM SSMSMAIN
+                         WHERE MS03 = :ms03 AND MS04_1 = :ms04_1 AND MS04_2 = :ms04_2
+                           AND COALESCE(NULLIF(APP_ID, ''), 'X') = COALESCE(NULLIF(:app_id, ''), 'X')
+                           AND COALESCE(NULLIF(MS14, ''), 'X') = COALESCE(NULLIF(:ms14, ''), 'X')
+                           AND COALESCE(NULLIF(MS_TYPE, ''), 'R') = :ms_type
+                           AND COALESCE(NULLIF(MS_MAIL, ''), 'X') = COALESCE(NULLIF(:ms_mail, ''), 'X')
+                           AND COALESCE(NULLIF(GOV_ID, ''), 'X') = COALESCE(NULLIF(:gov_id, ''), 'X')
+                           AND COALESCE(NULLIF(CC00, ''), 'X') = COALESCE(NULLIF(:cc00, ''), 'X')
+                           AND COALESCE(NULLIF(CC48, ''), 'X') = COALESCE(NULLIF(:cc48, ''), 'X')
+                           AND COALESCE(NULLIF(CC49, ''), 'X') = COALESCE(NULLIF(:cc49, ''), 'X')
+                           AND COALESCE(NULLIF(APP_SEQ, ''), 'X') = COALESCE(NULLIF(:app_seq, ''), 'X')
+                           AND COALESCE(NULLIF(GOV_OID, ''), 'X') = COALESCE(NULLIF(:gov_oid, ''), 'X')
+                           AND COALESCE(NULLIF(MS30, ''), 'X') = COALESCE(NULLIF(:ms30, ''), 'X')"
+                    );
+                    $delStmt->execute(array(
+                        ':ms03' => $ms03,
+                        ':ms04_1' => $ms04_1,
+                        ':ms04_2' => $ms04_2,
+                        ':app_id' => $appId,
+                        ':ms14' => $ms14,
+                        ':ms_type' => $msType,
+                        ':ms_mail' => $msMail,
+                        ':gov_id' => $govId,
+                        ':cc00' => $cc00,
+                        ':cc48' => $cc48,
+                        ':cc49' => $cc49,
+                        ':app_seq' => $appSeq,
+                        ':gov_oid' => $govOid,
+                        ':ms30' => $ms30,
+                    ));
+                    $deletedFromMainCount += $delStmt->rowCount();
+                }
+            }
+
+            $pdo->exec('COMMIT');
+            $inTx = false;
+
+            return array(
+                'moved_to_wait_count' => $movedToWaitCount,
+                'deleted_from_main_count' => $deletedFromMainCount,
+            );
+        } catch (\Throwable $e) {
+            if ($inTx) {
+                try {
+                    $pdo->exec('ROLLBACK');
+                } catch (\Throwable $ignored) {
+                }
+            }
+            throw $e;
+        }
+    }
+
+    private function insertWaitRowInMock(
+        \PDO $pdo,
+        string $waitMode,
+        string $ms03,
+        string $ms04_1,
+        string $ms04_2,
+        string $nowDate,
+        string $nowTime,
+        string $ms14,
+        string $waitMs30,
+        string $msType,
+        string $msNote,
+        string $msMail,
+        string $appSeq,
+        string $appId,
+        string $govId,
+        string $cc00,
+        string $cc48,
+        string $cc49,
+        string $govOid
+    ): void {
+        if ($waitMode === 'm_gov') {
+            $stmt = $pdo->prepare(
+                "INSERT INTO SSMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32, MS_TYPE, MS_NOTE, MS_MAIL,
+                                       APP_SEQ, APP_ID, GOV_ID, CC00, CC48, CC49, GOV_OID)
+                 VALUES (:ms03, :ms04_1, :ms04_2, :ms07_1, :ms07_2, :ms14, :ms30, '0', :ms_type, :ms_note, :ms_mail,
+                         :app_seq, :app_id, :gov_id, :cc00, :cc48, :cc49, :gov_oid)"
+            );
+            $stmt->execute(array(
+                ':ms03' => $ms03, ':ms04_1' => $ms04_1, ':ms04_2' => $ms04_2,
+                ':ms07_1' => $nowDate, ':ms07_2' => $nowTime, ':ms14' => $ms14,
+                ':ms30' => $waitMs30, ':ms_type' => $msType, ':ms_note' => $msNote, ':ms_mail' => $msMail,
+                ':app_seq' => $appSeq, ':app_id' => $appId, ':gov_id' => $govId,
+                ':cc00' => $cc00, ':cc48' => $cc48, ':cc49' => $cc49, ':gov_oid' => $govOid,
+            ));
+            return;
+        }
+
+        if ($waitMode === 'm_general') {
+            $stmt = $pdo->prepare(
+                "INSERT INTO SSMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32, MS_TYPE, MS_NOTE, MS_MAIL)
+                 VALUES (:ms03, :ms04_1, :ms04_2, :ms07_1, :ms07_2, :ms14, :ms30, '0', :ms_type, :ms_note, :ms_mail)"
+            );
+            $stmt->execute(array(
+                ':ms03' => $ms03, ':ms04_1' => $ms04_1, ':ms04_2' => $ms04_2,
+                ':ms07_1' => $nowDate, ':ms07_2' => $nowTime, ':ms14' => $ms14,
+                ':ms30' => $waitMs30, ':ms_type' => $msType, ':ms_note' => $msNote, ':ms_mail' => $msMail,
+            ));
+            return;
+        }
+
+        if ($waitMode === 'type2') {
+            $stmt = $pdo->prepare(
+                "INSERT INTO SSMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32, MS_TYPE, MS_NOTE)
+                 VALUES (:ms03, :ms04_1, :ms04_2, :ms07_1, :ms07_2, :ms14, :ms30, '0', :ms_type, :ms_note)"
+            );
+            $stmt->execute(array(
+                ':ms03' => $ms03, ':ms04_1' => $ms04_1, ':ms04_2' => $ms04_2,
+                ':ms07_1' => $nowDate, ':ms07_2' => $nowTime, ':ms14' => $ms14,
+                ':ms30' => $waitMs30, ':ms_type' => $msType, ':ms_note' => $msNote,
+            ));
+            return;
+        }
+
+        $stmt = $pdo->prepare(
+            "INSERT INTO SSMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32, MS_TYPE)
+             VALUES (:ms03, :ms04_1, :ms04_2, :ms07_1, :ms07_2, :ms14, :ms30, '0', :ms_type)"
+        );
+        $stmt->execute(array(
+            ':ms03' => $ms03, ':ms04_1' => $ms04_1, ':ms04_2' => $ms04_2,
+            ':ms07_1' => $nowDate, ':ms07_2' => $nowTime, ':ms14' => $ms14,
+            ':ms30' => $waitMs30, ':ms_type' => $msType,
+        ));
+    }
+
+    /**
      * 查詢三表佇列或歷史紀錄（依 MS07_1 || MS07_2 DESC 排序並限制筆數）
      *
      * @param string $table main|wait|log
@@ -731,6 +1047,13 @@ class SmsV1MockStore implements SmsV1StoreInterface {
                 RM99 TEXT,
                 RM100 TEXT,
                 RM101 TEXT
+            )",
+            "CREATE TABLE IF NOT EXISTS SCMSMS (
+                MM01 TEXT,
+                MM02 TEXT,
+                MM03 TEXT,
+                MM22 TEXT,
+                MM23 TEXT
             )",
             "CREATE TABLE IF NOT EXISTS SCRSMS_RM1821 (
                 RM01 TEXT,

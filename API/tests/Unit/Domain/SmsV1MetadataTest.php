@@ -280,6 +280,14 @@ class SmsV1MetadataTest extends TestCase {
             public function getRecords(string $table, int $limit = 200): array {
                 throw new \RuntimeException('ORA-01017: invalid username/password; secret_pwd=1234');
             }
+            public function enqueueQueue(
+                bool $checkRegisterA = true,
+                bool $checkRegisterB = true,
+                bool $checkRegisterC = true,
+                bool $checkRegisterD = true
+            ): array {
+                return array('moved_to_wait_count' => 0, 'deleted_from_main_count' => 0);
+            }
         };
         $router = new SmsV1Router(new SmsV1Service($failingStore));
 
