@@ -940,6 +940,107 @@ class SmsV1MockStore implements SmsV1StoreInterface {
         return $normalized;
     }
 
+    /**
+     * 查詢 SSMSWAIT 待發送任務清單並組裝完整 UTF-8 subject / msg
+     *
+     * @return array{site_id: string, items: array<int, array<string, mixed>>}
+     */
+    public function getPendingQueue(): array {
+        $pdo = $this->getPdo();
+        $meta = $this->getMetadata();
+
+        $stmt = $pdo->query(
+            "SELECT MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32,
+                    COALESCE(NULLIF(MS_TYPE, ''), 'R') AS MS_TYPE,
+                    MS_MAIL, MS_NOTE, APP_SEQ, APP_ID, GOV_ID, CC00, CC48, CC49, GOV_OID
+             FROM SSMSWAIT
+             WHERE MS_TYPE IN ('M', 'W', 'O')
+             ORDER BY MS07_1, MS07_2"
+        );
+        $rows = $stmt ? $stmt->fetchAll(\PDO::FETCH_ASSOC) : array();
+        if (!is_array($rows)) {
+            $rows = array();
+        }
+
+        $rkeynCache = array();
+        $lookupRkeyn = function (string $k1, string $k2) use ($pdo, &$rkeynCache): string {
+            $cacheKey = $k1 . "\0" . $k2;
+            if (array_key_exists($cacheKey, $rkeynCache)) {
+                return $rkeynCache[$cacheKey];
+            }
+            $q = $pdo->prepare('SELECT KCNT FROM SRKEYN WHERE KCDE_1 = :k1 AND KCDE_2 = :k2 LIMIT 1');
+            $q->execute(array(':k1' => $k1, ':k2' => $k2));
+            $val = $q->fetchColumn();
+            $rkeynCache[$cacheKey] = $val === false ? '' : rtrim((string)$val);
+            return $rkeynCache[$cacheKey];
+        };
+
+        $emailSubCache = array();
+        $lookupEmailSub = function (string $appSeq) use ($pdo, &$emailSubCache): string {
+            if (array_key_exists($appSeq, $emailSubCache)) {
+                return $emailSubCache[$appSeq];
+            }
+            $emailSub = '';
+            $q = $pdo->prepare('SELECT EMAIL_SUB FROM SSMS_GOVINFO_M WHERE APP_SEQ = :app_seq LIMIT 1');
+            $q->execute(array(':app_seq' => $appSeq));
+            $val = $q->fetchColumn();
+            if ($val !== false && $val !== null && rtrim((string)$val) !== '') {
+                $emailSub = rtrim((string)$val);
+            } else {
+                $q2 = $pdo->prepare('SELECT EMAIL_SUB FROM SMS_GOVINFO_M WHERE APP_SEQ = :app_seq LIMIT 1');
+                $q2->execute(array(':app_seq' => $appSeq));
+                $val2 = $q2->fetchColumn();
+                if ($val2 !== false && $val2 !== null) {
+                    $emailSub = rtrim((string)$val2);
+                }
+            }
+            $emailSubCache[$appSeq] = $emailSub;
+            return $emailSub;
+        };
+
+        $normalizedRows = array();
+        foreach ($rows as $row) {
+            $normalized = array();
+            foreach ($row as $key => $value) {
+                $lowerKey = strtolower((string)$key);
+                $normalized[$lowerKey] = $value === null ? '' : rtrim((string)$value);
+            }
+            $normalizedRows[] = $normalized;
+        }
+
+        $items = SmsV1QueueHelper::assemblePendingItems(
+            $normalizedRows,
+            function (string $ms04_1) use ($lookupRkeyn): string {
+                return $lookupRkeyn('04', $ms04_1);
+            },
+            $lookupEmailSub,
+            function (string $ms03, string $ms04_1, string $ms04_2) use ($pdo): array {
+                $uName = '';
+                $md13_1 = null;
+                $md13_2 = null;
+                $qScmsds = $pdo->prepare('SELECT MD04, MD13_1, MD13_2 FROM SCMSDS WHERE MD01 = :md01 AND MD02 = :md02 AND MD03 = :md03');
+                $qScmsds->execute(array(':md01' => $ms03, ':md02' => $ms04_1, ':md03' => $ms04_2));
+                $scmsdsRows = $qScmsds->fetchAll(\PDO::FETCH_ASSOC);
+                foreach ($scmsdsRows as $scmsdsRow) {
+                    $md13_1 = str_pad(trim((string)($scmsdsRow['MD13_1'] ?? '')), 7, ' ');
+                    $md13_2 = str_pad(trim((string)($scmsdsRow['MD13_2'] ?? '')), 6, ' ');
+                    $qAuth = $pdo->prepare('SELECT USER_NAME FROM SSYSAUTH1 WHERE USER_ID = :uid');
+                    $qAuth->execute(array(':uid' => trim((string)($scmsdsRow['MD04'] ?? ''))));
+                    $authRows = $qAuth->fetchAll(\PDO::FETCH_ASSOC);
+                    foreach ($authRows as $authRow) {
+                        $uName = rtrim((string)($authRow['USER_NAME'] ?? ''));
+                    }
+                }
+                return array('u_name' => $uName, 'md13_1' => $md13_1, 'md13_2' => $md13_2);
+            }
+        );
+
+        return array(
+            'site_id' => $meta['site_id'],
+            'items' => $items,
+        );
+    }
+
     private function initialize(): void {
         if ($this->dbPath !== ':memory:') {
             $dir = dirname($this->dbPath);
@@ -1128,17 +1229,44 @@ class SmsV1MockStore implements SmsV1StoreInterface {
                 GOV_NAME TEXT,
                 EMAIL TEXT,
                 APP_STOP TEXT,
-                GOV_OID TEXT
+                GOV_OID TEXT,
+                EMAIL_SUB TEXT
             )",
             "CREATE TABLE IF NOT EXISTS SSMS_GOVINFO_M (
                 APP_SEQ TEXT,
                 EMAIL_SUB TEXT
+            )",
+            "CREATE TABLE IF NOT EXISTS SCMSDS (
+                MD01 TEXT,
+                MD02 TEXT,
+                MD03 TEXT,
+                MD04 TEXT,
+                MD13_1 TEXT,
+                MD13_2 TEXT
+            )",
+            "CREATE TABLE IF NOT EXISTS SSYSAUTH1 (
+                USER_ID TEXT,
+                USER_NAME TEXT
             )"
         );
 
         foreach ($ddlStatements as $ddl) {
             $this->pdo->exec($ddl);
         }
+
+        $this->ensureColumnExists('SMS_GOVINFO_M', 'EMAIL_SUB', 'TEXT');
+        $this->ensureColumnExists('SSMS_GOVINFO_M', 'EMAIL_SUB', 'TEXT');
+    }
+
+    private function ensureColumnExists(string $table, string $column, string $definition): void {
+        $stmt = $this->pdo->query("PRAGMA table_info({$table})");
+        $columns = $stmt ? $stmt->fetchAll(\PDO::FETCH_ASSOC) : array();
+        foreach ($columns as $col) {
+            if (strcasecmp((string)($col['name'] ?? ''), $column) === 0) {
+                return;
+            }
+        }
+        $this->pdo->exec("ALTER TABLE {$table} ADD COLUMN {$column} {$definition}");
     }
 
     private function seedDefaultSrkeynFixtures(): void {

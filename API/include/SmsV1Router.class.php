@@ -38,6 +38,9 @@ class SmsV1Router {
             '/queue/enqueue' => array(
                 'POST' => 'handlePostQueueEnqueue',
             ),
+            '/queue/pending' => array(
+                'GET' => 'handleGetQueuePending',
+            ),
             '/records' => array(
                 'GET' => 'handleGetRecords',
             ),
@@ -167,6 +170,18 @@ class SmsV1Router {
                 $flags['check_register_c'],
                 $flags['check_register_d']
             ),
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $query
+     * @param string $rawBody
+     * @return array{status: int, body: array<string, mixed>}
+     */
+    private function handleGetQueuePending(array $query, string $rawBody): array {
+        return array(
+            'status' => 200,
+            'body' => $this->service->getPendingQueue(),
         );
     }
 
