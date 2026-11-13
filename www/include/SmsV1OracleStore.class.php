@@ -60,17 +60,7 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
         $targetYear = substr($targetDate, 0, 3);
         $srkeynCache = array();
 
-        $lookupStaticSrkeyn = function (string $k1, string $k2): ?string {
-            $rows = $this->queryRaw(
-                "SELECT KCNT FROM SRKEYN WHERE KCDE_1 = '{$k1}' AND KCDE_2 = '{$k2}'"
-            );
-            if (empty($rows)) {
-                return null;
-            }
-            return trim(SmsV1Encoding::fromOracleEncoding((string)($rows[0]['KCNT'] ?? '')));
-        };
-
-        $lookupParamSrkeyn = function (string $k1, string $k2) use (&$srkeynCache): string {
+        $lookupParamSrkeyn = function (string $k1, string $k2) use (&$srkeynCache): ?string {
             $cacheKey = $k1 . "\0" . $k2;
             if (array_key_exists($cacheKey, $srkeynCache)) {
                 return $srkeynCache[$cacheKey];
@@ -79,24 +69,23 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
                 "SELECT KCNT FROM SRKEYN WHERE KCDE_1 = :kcde_1 AND KCDE_2 = :kcde_2",
                 array(':kcde_1' => $k1, ':kcde_2' => $k2)
             );
-            $val = empty($rows) ? '' : trim(SmsV1Encoding::fromOracleEncoding((string)($rows[0]['KCNT'] ?? '')));
+            $val = empty($rows) ? null : trim(SmsV1Encoding::fromOracleEncoding((string)($rows[0]['KCNT'] ?? '')));
             $srkeynCache[$cacheKey] = $val;
             return $val;
         };
 
-        $maLo = (string)($lookupStaticSrkeyn('55', '01') ?? '');
-        $county = (string)($lookupStaticSrkeyn('66', '01') ?? '');
-        $k5502Raw = $lookupStaticSrkeyn('55', '02');
+        $maLo = (string)($lookupParamSrkeyn('55', '01') ?? '');
+        $county = (string)($lookupParamSrkeyn('66', '01') ?? '');
+        $k5502Raw = $lookupParamSrkeyn('55', '02');
         $k5502 = $k5502Raw !== null ? ($k5502Raw . '地政') : '';
-        $remark = (string)($lookupStaticSrkeyn('SMS', '01') ?? '');
+        $remark = (string)($lookupParamSrkeyn('SMS', '01') ?? '');
 
         $userCasesScanned = 0;
         $userNotificationsInserted = 0;
         $govCasesScanned = 0;
         $govNotificationsInserted = 0;
 
-        $insertStatements = array();
-        $insertBinds = array();
+        $insertOperations = array();
         $bindIdx = 0;
 
         $seenUserSms = array();
@@ -122,8 +111,8 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
                 $replyMobile = trim((string)($row['REPLY_MOBILE'] ?? ''));
                 $replyEmail = trim((string)($row['REPLY_EMAIL'] ?? ''));
 
-                $chtWord = $lookupParamSrkeyn('04', $rm02);
-                $chtRm09 = $lookupParamSrkeyn('06', $rm09);
+                $chtWord = (string)($lookupParamSrkeyn('04', $rm02) ?? '');
+                $chtRm09 = (string)($lookupParamSrkeyn('06', $rm09) ?? '');
                 $msNote = SmsV1CaseSyncHelper::buildUserNote($ms30, $rm01, $chtWord, $rm03, $chtRm09, $t07_1, $remark);
 
                 foreach (SmsV1CaseSyncHelper::expandUserContactPairs($row) as $pair) {
@@ -132,16 +121,20 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
                         if (!isset($seenUserSms[$smsKey]) && !$this->existsUserSmsInThreeTables($rm01, $rm02, $rm03, $ms30, $pair['mobile'])) {
                             $seenUserSms[$smsKey] = true;
                             $p = ':bv_u' . $bindIdx++;
-                            $insertStatements[] = "INSERT INTO SSMSMAIN (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS_TYPE, MS_NOTE)
-                                                   VALUES ({$p}_ms03, {$p}_ms04_1, {$p}_ms04_2, {$p}_ms07_1, {$p}_ms07_2, {$p}_ms14, {$p}_ms30, 'M', {$p}_note)";
-                            $insertBinds["{$p}_ms03"] = $rm01;
-                            $insertBinds["{$p}_ms04_1"] = $rm02;
-                            $insertBinds["{$p}_ms04_2"] = $rm03;
-                            $insertBinds["{$p}_ms07_1"] = $t07_1;
-                            $insertBinds["{$p}_ms07_2"] = $t07_2;
-                            $insertBinds["{$p}_ms14"] = $pair['mobile'];
-                            $insertBinds["{$p}_ms30"] = $ms30;
-                            $insertBinds["{$p}_note"] = SmsV1Encoding::toOracleEncoding($msNote);
+                            $insertOperations[] = array(
+                                'sql' => "INSERT INTO SSMSMAIN (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS_TYPE, MS_NOTE)
+                                          VALUES ({$p}_ms03, {$p}_ms04_1, {$p}_ms04_2, {$p}_ms07_1, {$p}_ms07_2, {$p}_ms14, {$p}_ms30, 'M', {$p}_note)",
+                                'binds' => array(
+                                    "{$p}_ms03" => $rm01,
+                                    "{$p}_ms04_1" => $rm02,
+                                    "{$p}_ms04_2" => $rm03,
+                                    "{$p}_ms07_1" => $t07_1,
+                                    "{$p}_ms07_2" => $t07_2,
+                                    "{$p}_ms14" => $pair['mobile'],
+                                    "{$p}_ms30" => $ms30,
+                                    "{$p}_note" => SmsV1Encoding::toOracleEncoding($msNote),
+                                ),
+                            );
                             $userNotificationsInserted++;
                         }
                     }
@@ -151,16 +144,20 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
                         if (!isset($seenUserMail[$mailKey]) && !$this->existsUserMailInThreeTables($rm01, $rm02, $rm03, $ms30, $pair['email'])) {
                             $seenUserMail[$mailKey] = true;
                             $p = ':bv_m' . $bindIdx++;
-                            $insertStatements[] = "INSERT INTO SSMSMAIN (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS_MAIL, MS30, MS_TYPE, MS_NOTE)
-                                                   VALUES ({$p}_ms03, {$p}_ms04_1, {$p}_ms04_2, {$p}_ms07_1, {$p}_ms07_2, {$p}_mail, {$p}_ms30, 'M', {$p}_note)";
-                            $insertBinds["{$p}_ms03"] = $rm01;
-                            $insertBinds["{$p}_ms04_1"] = $rm02;
-                            $insertBinds["{$p}_ms04_2"] = $rm03;
-                            $insertBinds["{$p}_ms07_1"] = $t07_1;
-                            $insertBinds["{$p}_ms07_2"] = $t07_2;
-                            $insertBinds["{$p}_mail"] = $pair['email'];
-                            $insertBinds["{$p}_ms30"] = $ms30;
-                            $insertBinds["{$p}_note"] = SmsV1Encoding::toOracleEncoding($k5502 . $msNote);
+                            $insertOperations[] = array(
+                                'sql' => "INSERT INTO SSMSMAIN (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS_MAIL, MS30, MS_TYPE, MS_NOTE)
+                                          VALUES ({$p}_ms03, {$p}_ms04_1, {$p}_ms04_2, {$p}_ms07_1, {$p}_ms07_2, {$p}_mail, {$p}_ms30, 'M', {$p}_note)",
+                                'binds' => array(
+                                    "{$p}_ms03" => $rm01,
+                                    "{$p}_ms04_1" => $rm02,
+                                    "{$p}_ms04_2" => $rm03,
+                                    "{$p}_ms07_1" => $t07_1,
+                                    "{$p}_ms07_2" => $t07_2,
+                                    "{$p}_mail" => $pair['email'],
+                                    "{$p}_ms30" => $ms30,
+                                    "{$p}_note" => SmsV1Encoding::toOracleEncoding($k5502 . $msNote),
+                                ),
+                            );
                             $userNotificationsInserted++;
                         }
                     }
@@ -193,9 +190,9 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
                 $govOid = trim((string)($row['GOV_OID'] ?? ''));
                 $emailRaw = (string)($row['EMAIL'] ?? '');
 
-                $chtWord = $lookupParamSrkeyn('04', $rm02);
-                $chtRm09 = $lookupParamSrkeyn('06', $rm09);
-                $chtCc48 = $lookupParamSrkeyn('48', $cc48);
+                $chtWord = (string)($lookupParamSrkeyn('04', $rm02) ?? '');
+                $chtRm09 = (string)($lookupParamSrkeyn('06', $rm09) ?? '');
+                $chtCc48 = (string)($lookupParamSrkeyn('48', $cc48) ?? '');
 
                 $msNote = SmsV1CaseSyncHelper::buildGovNote(
                     $ms30,
@@ -220,33 +217,37 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
                     $seenGov[$govKey] = true;
                     foreach (SmsV1CaseSyncHelper::splitGovEmails($emailRaw) as $mail) {
                         $p = ':bv_g' . $bindIdx++;
-                        $insertStatements[] = "INSERT INTO SSMSMAIN (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS_MAIL, MS30, MS_TYPE, MS_NOTE,
-                                                                     APP_SEQ, APP_ID, GOV_ID, CC00, CC48, CC49, GOV_OID)
-                                               VALUES ({$p}_ms03, {$p}_ms04_1, {$p}_ms04_2, {$p}_ms07_1, {$p}_ms07_2, {$p}_mail, {$p}_ms30, 'M', {$p}_note,
-                                                       {$p}_app_seq, {$p}_app_id, {$p}_gov_id, {$p}_cc00, {$p}_cc48, {$p}_cc49, {$p}_gov_oid)";
-                        $insertBinds["{$p}_ms03"] = $rm01;
-                        $insertBinds["{$p}_ms04_1"] = $rm02;
-                        $insertBinds["{$p}_ms04_2"] = $rm03;
-                        $insertBinds["{$p}_ms07_1"] = $t07_1;
-                        $insertBinds["{$p}_ms07_2"] = $t07_2;
-                        $insertBinds["{$p}_mail"] = $mail;
-                        $insertBinds["{$p}_ms30"] = $ms30;
-                        $insertBinds["{$p}_note"] = $msNoteOra;
-                        $insertBinds["{$p}_app_seq"] = $appSeq;
-                        $insertBinds["{$p}_app_id"] = $appId;
-                        $insertBinds["{$p}_gov_id"] = $govId;
-                        $insertBinds["{$p}_cc00"] = $cc00;
-                        $insertBinds["{$p}_cc48"] = $cc48;
-                        $insertBinds["{$p}_cc49"] = $cc49;
-                        $insertBinds["{$p}_gov_oid"] = $govOid;
+                        $insertOperations[] = array(
+                            'sql' => "INSERT INTO SSMSMAIN (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS_MAIL, MS30, MS_TYPE, MS_NOTE,
+                                                            APP_SEQ, APP_ID, GOV_ID, CC00, CC48, CC49, GOV_OID)
+                                      VALUES ({$p}_ms03, {$p}_ms04_1, {$p}_ms04_2, {$p}_ms07_1, {$p}_ms07_2, {$p}_mail, {$p}_ms30, 'M', {$p}_note,
+                                              {$p}_app_seq, {$p}_app_id, {$p}_gov_id, {$p}_cc00, {$p}_cc48, {$p}_cc49, {$p}_gov_oid)",
+                            'binds' => array(
+                                "{$p}_ms03" => $rm01,
+                                "{$p}_ms04_1" => $rm02,
+                                "{$p}_ms04_2" => $rm03,
+                                "{$p}_ms07_1" => $t07_1,
+                                "{$p}_ms07_2" => $t07_2,
+                                "{$p}_mail" => $mail,
+                                "{$p}_ms30" => $ms30,
+                                "{$p}_note" => $msNoteOra,
+                                "{$p}_app_seq" => $appSeq,
+                                "{$p}_app_id" => $appId,
+                                "{$p}_gov_id" => $govId,
+                                "{$p}_cc00" => $cc00,
+                                "{$p}_cc48" => $cc48,
+                                "{$p}_cc49" => $cc49,
+                                "{$p}_gov_oid" => $govOid,
+                            ),
+                        );
                         $govNotificationsInserted++;
                     }
                 }
             }
         }
 
-        if (!empty($insertStatements)) {
-            $this->executePlSqlBlock($insertStatements, $insertBinds);
+        if (!empty($insertOperations)) {
+            $this->executePlSqlStatementsInChunks($insertOperations);
         }
 
         return array(
@@ -469,14 +470,17 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
         string $cc49,
         string $msNoteOra
     ): bool {
-        $govCond = $govOid === '' ? 'GOV_ID = :gov_key' : 'GOV_OID = :gov_key';
+        $govKey = $govOid === '' ? $govId : $govOid;
+        $govCond = $govOid === ''
+            ? "NVL(GOV_ID, 'X') = NVL(:gov_key, 'X')"
+            : "NVL(GOV_OID, 'X') = NVL(:gov_key, 'X')";
         $where = "MS03 = :ms03 AND MS04_1 = :ms04_1 AND MS04_2 = :ms04_2 AND MS30 = :ms30
-                  AND APP_SEQ = :app_seq AND APP_ID = :app_id AND {$govCond}
+                  AND APP_SEQ = :app_seq AND NVL(APP_ID, 'X') = NVL(:app_id, 'X') AND {$govCond}
                   AND CC00 = :cc00 AND CC48 = :cc48 AND CC49 = :cc49 AND MS_NOTE = :ms_note";
         $sql = "SELECT 'X' S30 FROM SSMSMAIN WHERE {$where}
-                UNION
+                UNION ALL
                 SELECT 'X' S30 FROM SSMSWAIT WHERE {$where}
-                UNION
+                UNION ALL
                 SELECT 'X' S30 FROM SSMSLOG  WHERE {$where}";
         $rows = $this->queryRaw($sql, array(
             ':ms03' => $ms03,
@@ -485,7 +489,7 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
             ':ms30' => $ms30,
             ':app_seq' => $appSeq,
             ':app_id' => $appId,
-            ':gov_key' => $govOid === '' ? $govId : $govOid,
+            ':gov_key' => $govKey,
             ':cc00' => $cc00,
             ':cc48' => $cc48,
             ':cc49' => $cc49,
@@ -533,8 +537,7 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
                       FROM SCMSMS
                       WHERE MM01 = :ms03 AND MM02 = :ms04_1 AND MM03 = :ms04_2";
 
-        $statements = array();
-        $binds = array();
+        $operations = array();
         $bindIdx = 0;
         $movedToWaitCount = 0;
         $deletedFromMainCount = 0;
@@ -595,66 +598,69 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
             }
 
             $p = ':bq' . $bindIdx++;
-            $binds["{$p}_m03"] = $ms03;
-            $binds["{$p}_m041"] = $ms04_1;
-            $binds["{$p}_m042"] = $ms04_2;
-            $binds["{$p}_m14"] = $ms14;
-            $binds["{$p}_m30"] = $ms30;
-            $binds["{$p}_typ"] = $msType;
+            $opStatements = array();
+            $opBinds = array(
+                "{$p}_m03" => $ms03,
+                "{$p}_m041" => $ms04_1,
+                "{$p}_m042" => $ms04_2,
+                "{$p}_m14" => $ms14,
+                "{$p}_m30" => $ms30,
+                "{$p}_typ" => $msType,
+            );
 
             if ($action['insert_wait']) {
-                $binds["{$p}_071"] = $nowDate;
-                $binds["{$p}_072"] = $nowTime;
-                $binds["{$p}_w30"] = $action['wait_ms30'];
+                $opBinds["{$p}_071"] = $nowDate;
+                $opBinds["{$p}_072"] = $nowTime;
+                $opBinds["{$p}_w30"] = $action['wait_ms30'];
 
                 if ($action['wait_mode'] === 'm_gov') {
-                    $binds["{$p}_not"] = $msNoteRaw;
-                    $binds["{$p}_mal"] = $msMail;
-                    $binds["{$p}_seq"] = $appSeq;
-                    $binds["{$p}_aid"] = $appId;
-                    $binds["{$p}_gid"] = $govId;
-                    $binds["{$p}_c00"] = $cc00;
-                    $binds["{$p}_c48"] = $cc48;
-                    $binds["{$p}_c49"] = $cc49;
-                    $binds["{$p}_oid"] = $govOid;
-                    $statements[] = "INSERT INTO SSMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32, MS_TYPE, MS_NOTE, MS_MAIL,
+                    $opBinds["{$p}_not"] = $msNoteRaw;
+                    $opBinds["{$p}_mal"] = $msMail;
+                    $opBinds["{$p}_seq"] = $appSeq;
+                    $opBinds["{$p}_aid"] = $appId;
+                    $opBinds["{$p}_gid"] = $govId;
+                    $opBinds["{$p}_c00"] = $cc00;
+                    $opBinds["{$p}_c48"] = $cc48;
+                    $opBinds["{$p}_c49"] = $cc49;
+                    $opBinds["{$p}_oid"] = $govOid;
+                    $opStatements[] = "INSERT INTO SSMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32, MS_TYPE, MS_NOTE, MS_MAIL,
                                                            APP_SEQ, APP_ID, GOV_ID, CC00, CC48, CC49, GOV_OID)
                                      VALUES ({$p}_m03, {$p}_m041, {$p}_m042, {$p}_071, {$p}_072, {$p}_m14, {$p}_w30, '0', {$p}_typ, {$p}_not, {$p}_mal,
                                              {$p}_seq, {$p}_aid, {$p}_gid, {$p}_c00, {$p}_c48, {$p}_c49, {$p}_oid)";
                 } elseif ($action['wait_mode'] === 'm_general') {
-                    $binds["{$p}_not"] = $msNoteRaw;
-                    $binds["{$p}_mal"] = $msMail;
-                    $statements[] = "INSERT INTO SSMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32, MS_TYPE, MS_NOTE, MS_MAIL)
+                    $opBinds["{$p}_not"] = $msNoteRaw;
+                    $opBinds["{$p}_mal"] = $msMail;
+                    $opStatements[] = "INSERT INTO SSMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32, MS_TYPE, MS_NOTE, MS_MAIL)
                                      VALUES ({$p}_m03, {$p}_m041, {$p}_m042, {$p}_071, {$p}_072, {$p}_m14, {$p}_w30, '0', {$p}_typ, {$p}_not, {$p}_mal)";
                 } elseif ($action['wait_mode'] === 'type2') {
-                    $binds["{$p}_not"] = $msNoteRaw;
-                    $statements[] = "INSERT INTO SSMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32, MS_TYPE, MS_NOTE)
+                    $opBinds["{$p}_not"] = $msNoteRaw;
+                    $opStatements[] = "INSERT INTO SSMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32, MS_TYPE, MS_NOTE)
                                      VALUES ({$p}_m03, {$p}_m041, {$p}_m042, {$p}_071, {$p}_072, {$p}_m14, {$p}_w30, '0', {$p}_typ, {$p}_not)";
                 } else {
-                    $statements[] = "INSERT INTO SSMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32, MS_TYPE)
+                    $opStatements[] = "INSERT INTO SSMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32, MS_TYPE)
                                      VALUES ({$p}_m03, {$p}_m041, {$p}_m042, {$p}_071, {$p}_072, {$p}_m14, {$p}_w30, '0', {$p}_typ)";
                 }
                 $movedToWaitCount++;
             }
 
             if ($action['main_action'] === 'update_ms30') {
-                $binds["{$p}_n30"] = $action['new_main_ms30'];
-                $statements[] = "UPDATE SSMSMAIN
+                $opBinds["{$p}_n30"] = $action['new_main_ms30'];
+                $opStatements[] = "UPDATE SSMSMAIN
                                  SET MS30 = {$p}_n30
                                  WHERE MS03 = {$p}_m03 AND MS04_1 = {$p}_m041 AND MS04_2 = {$p}_m042
                                    AND NVL(MS14, 'X') = NVL({$p}_m14, 'X')
                                    AND NVL(MS_TYPE, 'R') = {$p}_typ
                                    AND NVL(MS30, 'X') = NVL({$p}_m30, 'X')";
             } elseif ($action['main_action'] === 'delete_legacy') {
-                $statements[] = "DELETE FROM SSMSMAIN
+                $opStatements[] = "DELETE FROM SSMSMAIN
                                  WHERE MS03 = {$p}_m03 AND MS04_1 = {$p}_m041 AND MS04_2 = {$p}_m042
                                    AND NVL(MS14, 'X') = NVL({$p}_m14, 'X')
                                    AND NVL(MS_TYPE, 'R') = {$p}_typ
                                    AND NVL(MS30, 'X') = NVL({$p}_m30, 'X')";
                 $deletedFromMainCount++;
             } elseif ($action['main_action'] === 'delete_m') {
-                $binds["{$p}_mal"] = $msMail;
-                $statements[] = "DELETE FROM SSMSMAIN
+                $opBinds["{$p}_mal"] = $msMail;
+                $opStatements[] = "DELETE FROM SSMSMAIN
                                  WHERE MS03 = {$p}_m03 AND MS04_1 = {$p}_m041 AND MS04_2 = {$p}_m042
                                    AND NVL(MS14, 'X') = NVL({$p}_m14, 'X')
                                    AND NVL(MS_TYPE, 'R') = {$p}_typ
@@ -662,15 +668,15 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
                                    AND NVL(MS30, 'X') = NVL({$p}_m30, 'X')";
                 $deletedFromMainCount++;
             } elseif ($action['main_action'] === 'delete_gov') {
-                $binds["{$p}_mal"] = $msMail;
-                $binds["{$p}_seq"] = $appSeq;
-                $binds["{$p}_aid"] = $appId;
-                $binds["{$p}_gid"] = $govId;
-                $binds["{$p}_c00"] = $cc00;
-                $binds["{$p}_c48"] = $cc48;
-                $binds["{$p}_c49"] = $cc49;
-                $binds["{$p}_oid"] = $govOid;
-                $statements[] = "DELETE FROM SSMSMAIN
+                $opBinds["{$p}_mal"] = $msMail;
+                $opBinds["{$p}_seq"] = $appSeq;
+                $opBinds["{$p}_aid"] = $appId;
+                $opBinds["{$p}_gid"] = $govId;
+                $opBinds["{$p}_c00"] = $cc00;
+                $opBinds["{$p}_c48"] = $cc48;
+                $opBinds["{$p}_c49"] = $cc49;
+                $opBinds["{$p}_oid"] = $govOid;
+                $opStatements[] = "DELETE FROM SSMSMAIN
                                  WHERE MS03 = {$p}_m03 AND MS04_1 = {$p}_m041 AND MS04_2 = {$p}_m042
                                    AND NVL(APP_ID, 'X') = NVL({$p}_aid, 'X')
                                    AND NVL(MS14, 'X') = NVL({$p}_m14, 'X')
@@ -685,10 +691,17 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
                                    AND NVL(MS30, 'X') = NVL({$p}_m30, 'X')";
                 $deletedFromMainCount++;
             }
+
+            if (!empty($opStatements)) {
+                $operations[] = array(
+                    'statements' => $opStatements,
+                    'binds' => $opBinds,
+                );
+            }
         }
 
-        if (!empty($statements)) {
-            $this->executePlSqlBlock($statements, $binds);
+        if (!empty($operations)) {
+            $this->executePlSqlStatementsInChunks($operations);
         }
 
         return array(
@@ -798,35 +811,15 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
             $normalizedRows[] = $normalized;
         }
 
+        $userNameCache = array();
         $items = SmsV1QueueHelper::assemblePendingItems(
             $normalizedRows,
             function (string $ms04_1) use ($lookupRkeyn): string {
                 return $lookupRkeyn('04', $ms04_1);
             },
             $lookupEmailSub,
-            function (string $ms03, string $ms04_1, string $ms04_2): array {
-                $uName = '';
-                $md13_1 = null;
-                $md13_2 = null;
-                $scmsdsRows = $this->queryRaw(
-                    "SELECT MD04, RPAD(MD13_1, 7, ' ') AS MD13_1, RPAD(MD13_2, 6, ' ') AS MD13_2
-                     FROM SCMSDS
-                     WHERE MD01 = :md01 AND MD02 = :md02 AND MD03 = :md03",
-                    array(':md01' => $ms03, ':md02' => $ms04_1, ':md03' => $ms04_2)
-                );
-                foreach ($scmsdsRows as $scmsdsRow) {
-                    $md13_1 = SmsV1Encoding::fromOracleEncoding((string)($scmsdsRow['MD13_1'] ?? ''));
-                    $md13_2 = SmsV1Encoding::fromOracleEncoding((string)($scmsdsRow['MD13_2'] ?? ''));
-                    $md04 = trim(SmsV1Encoding::fromOracleEncoding((string)($scmsdsRow['MD04'] ?? '')));
-                    $authRows = $this->queryRaw(
-                        "SELECT USER_NAME FROM SSYSAUTH1 WHERE USER_ID = :user_id",
-                        array(':user_id' => $md04)
-                    );
-                    foreach ($authRows as $authRow) {
-                        $uName = rtrim(SmsV1Encoding::fromOracleEncoding((string)($authRow['USER_NAME'] ?? '')));
-                    }
-                }
-                return array('u_name' => $uName, 'md13_1' => $md13_1, 'md13_2' => $md13_2);
+            function (string $ms03, string $ms04_1, string $ms04_2) use (&$userNameCache): array {
+                return $this->lookupSurveyMetaCached($ms03, $ms04_1, $ms04_2, $userNameCache);
             }
         );
 
@@ -834,6 +827,52 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
             'site_id' => $meta['site_id'],
             'items' => $items,
         );
+    }
+
+    /**
+     * 查詢測量員姓名（具本地快取）與延期複丈日期時間
+     *
+     * @param string $ms03
+     * @param string $ms04_1
+     * @param string $ms04_2
+     * @param array<string, string> $userNameCache
+     * @return array{u_name: string, md13_1: ?string, md13_2: ?string}
+     */
+    private function lookupSurveyMetaCached(
+        string $ms03,
+        string $ms04_1,
+        string $ms04_2,
+        array &$userNameCache
+    ): array {
+        $uName = '';
+        $md13_1 = null;
+        $md13_2 = null;
+        $scmsdsRows = $this->queryRaw(
+            "SELECT MD04, RPAD(MD13_1, 7, ' ') AS MD13_1, RPAD(MD13_2, 6, ' ') AS MD13_2
+             FROM SCMSDS
+             WHERE MD01 = :md01 AND MD02 = :md02 AND MD03 = :md03",
+            array(':md01' => $ms03, ':md02' => $ms04_1, ':md03' => $ms04_2)
+        );
+        foreach ($scmsdsRows as $scmsdsRow) {
+            $md13_1 = SmsV1Encoding::fromOracleEncoding((string)($scmsdsRow['MD13_1'] ?? ''));
+            $md13_2 = SmsV1Encoding::fromOracleEncoding((string)($scmsdsRow['MD13_2'] ?? ''));
+            $md04 = trim(SmsV1Encoding::fromOracleEncoding((string)($scmsdsRow['MD04'] ?? '')));
+            if ($md04 !== '') {
+                if (!array_key_exists($md04, $userNameCache)) {
+                    $authRows = $this->queryRaw(
+                        "SELECT USER_NAME FROM SSYSAUTH1 WHERE USER_ID = :user_id",
+                        array(':user_id' => $md04)
+                    );
+                    $cachedName = '';
+                    foreach ($authRows as $authRow) {
+                        $cachedName = rtrim(SmsV1Encoding::fromOracleEncoding((string)($authRow['USER_NAME'] ?? '')));
+                    }
+                    $userNameCache[$md04] = $cachedName;
+                }
+                $uName = $userNameCache[$md04];
+            }
+        }
+        return array('u_name' => $uName, 'md13_1' => $md13_1, 'md13_2' => $md13_2);
     }
 
     /**
@@ -897,7 +936,7 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
             $whereParts[] = "CC00 = :cc00";
             $whereParts[] = "CC48 = :cc48";
             $whereParts[] = "CC49 = :cc49";
-            $whereParts[] = "APP_SEQ = :app_seq";
+            $whereParts[] = "TO_CHAR(APP_SEQ) = :app_seq";
             $whereParts[] = "NVL(GOV_OID, 'X') = NVL(:gov_oid, 'X')";
             $whereBinds[':app_id'] = (string)($govExt['app_id'] ?? '');
             $whereBinds[':gov_id'] = (string)($govExt['gov_id'] ?? '');
@@ -965,14 +1004,72 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
      * @return array<int, array<string, mixed>>
      */
     public function queryRaw(string $sql, array $binds = array()): array {
-        $db = $this->requireReachableDb();
-        $db->parse($sql);
-        foreach ($binds as $key => $value) {
-            $db->bind($key, $value);
+        return $this->runWithOraErrorGuard(function () use ($sql, $binds): array {
+            $db = $this->requireReachableDb();
+            $db->parse($sql);
+            foreach ($binds as $key => $value) {
+                $db->bind($key, $value);
+            }
+            $db->execute();
+            $rows = $db->fetchAll(true);
+            return is_array($rows) ? $rows : array();
+        });
+    }
+
+    /**
+     * 分批執行原子交易 PL/SQL 區塊，避免單日大量 DML 語句觸發 Oracle 9i PLS-00123 或橋接 payload 過大。
+     * 每個 operation 可為 array('sql' => string, 'binds' => array) 或 array('statements' => array<int, string>, 'binds' => array)，
+     * 確保同一筆邏輯操作的多條 DML 不會被拆散到不同批次。
+     *
+     * @param array<int, array{sql?: string, statements?: array<int, string>, binds?: array<string, mixed>}> $operations
+     * @param int $chunkSize 每批上限 DML 筆數（預設 40）
+     */
+    public function executePlSqlStatementsInChunks(array $operations, int $chunkSize = 40): void {
+        if ($chunkSize < 1) {
+            throw new \InvalidArgumentException('Chunk size must be a positive integer.');
         }
-        $db->execute();
-        $rows = $db->fetchAll(true);
-        return is_array($rows) ? $rows : array();
+
+        $batchStatements = array();
+        $batchBinds = array();
+
+        foreach ($operations as $operation) {
+            $rawStatements = array();
+            if (isset($operation['statements']) && is_array($operation['statements'])) {
+                $rawStatements = $operation['statements'];
+            } elseif (isset($operation['sql'])) {
+                $rawStatements = array((string)$operation['sql']);
+            }
+
+            $opStatements = array();
+            foreach ($rawStatements as $stmt) {
+                $trimmed = rtrim(trim((string)$stmt), "; \t\n\r\0\x0B");
+                if ($trimmed !== '') {
+                    $opStatements[] = $trimmed;
+                }
+            }
+            if (empty($opStatements)) {
+                continue;
+            }
+
+            $opBinds = isset($operation['binds']) && is_array($operation['binds']) ? $operation['binds'] : array();
+
+            if (!empty($batchStatements) && (count($batchStatements) + count($opStatements)) > $chunkSize) {
+                $this->executePlSqlBlock($batchStatements, $batchBinds);
+                $batchStatements = array();
+                $batchBinds = array();
+            }
+
+            foreach ($opStatements as $stmt) {
+                $batchStatements[] = $stmt;
+            }
+            foreach ($opBinds as $key => $value) {
+                $batchBinds[$key] = $value;
+            }
+        }
+
+        if (!empty($batchStatements)) {
+            $this->executePlSqlBlock($batchStatements, $batchBinds);
+        }
     }
 
     /**
@@ -995,12 +1092,39 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
         }
 
         $plsql = "BEGIN\n" . implode("\n", $cleaned) . "\nEXCEPTION\n  WHEN OTHERS THEN\n    ROLLBACK;\n    RAISE;\nEND;";
-        $db = $this->requireReachableDb();
-        $db->parse($plsql);
-        foreach ($binds as $key => $value) {
-            $db->bind($key, $value);
+        $this->runWithOraErrorGuard(function () use ($plsql, $binds): void {
+            $db = $this->requireReachableDb();
+            $db->parse($plsql);
+            foreach ($binds as $key => $value) {
+                $db->bind($key, $value);
+            }
+            $db->execute();
+        });
+    }
+
+    /**
+     * 將 www/ OraDB 的 E_USER_ERROR 轉拋為 RuntimeException，避免繞過 SmsV1Router try/catch
+     *
+     * @param callable $callback
+     * @return mixed
+     */
+    private function runWithOraErrorGuard(callable $callback) {
+        $previousHandler = null;
+        $previousHandler = set_error_handler(function ($severity, $message, $file = '', $line = 0) use (&$previousHandler) {
+            if ($severity === E_USER_ERROR) {
+                throw new \RuntimeException(html_entity_decode((string)$message, ENT_QUOTES, 'UTF-8'));
+            }
+            if ($previousHandler !== null) {
+                return call_user_func($previousHandler, $severity, $message, $file, $line);
+            }
+            return false;
+        });
+
+        try {
+            return $callback();
+        } finally {
+            restore_error_handler();
         }
-        $db->execute();
     }
 
     private function getWrapper(): OraDBWrapper {

@@ -309,4 +309,79 @@ class SmsV1MetadataTest extends TestCase {
         $this->assertStringNotContainsString('secret_pwd', $res['body']['message']);
         $this->assertStringNotContainsString('ORA-01017', $res['body']['message']);
     }
+
+    public function testWwwOracleStoreConvertsUserErrorToRuntimeExceptionAndMasks500(): void {
+        $repoRoot = dirname(__DIR__, 4);
+        $wwwInc = $repoRoot . DIRECTORY_SEPARATOR . 'www' . DIRECTORY_SEPARATOR . 'include';
+        $script = <<<'PHP'
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+define('ROOT_DIR', sys_get_temp_dir());
+define('DB_DIR', sys_get_temp_dir());
+if (!class_exists('OraDB', false)) {
+    class OraDB {}
+}
+if (!class_exists('OraDBWrapper', false)) {
+    class OraDBWrapper {}
+}
+require_once %s . DIRECTORY_SEPARATOR . 'SmsV1Router.class.php';
+require_once %s . DIRECTORY_SEPARATOR . 'SmsV1OracleStore.class.php';
+
+$prevCalled = 0;
+set_error_handler(function ($severity, $message) use (&$prevCalled) {
+    if ($severity === E_USER_WARNING) {
+        $prevCalled++;
+    }
+    return true;
+});
+
+$fakeDb = new class extends OraDB {
+    public function parse($str) {
+        trigger_error('ORA-12154: TNS secret_db_detail', E_USER_ERROR);
+    }
+};
+$fakeWrapper = new class($fakeDb) extends OraDBWrapper {
+    private $fakeDb;
+    public function __construct($fakeDb) { $this->fakeDb = $fakeDb; }
+    public function reachable() { return true; }
+    public function getDB() { return $this->fakeDb; }
+};
+
+$router = new SmsV1Router(new SmsV1Service(new SmsV1OracleStore($fakeWrapper)));
+$res = $router->dispatch('GET', '/metadata', [], '');
+trigger_error('after_guard_warning', E_USER_WARNING);
+
+echo json_encode(['res' => $res, 'prev_called' => $prevCalled]);
+PHP;
+        $code = sprintf(
+            $script,
+            var_export($wwwInc, true),
+            var_export($wwwInc, true)
+        );
+        $tmpScript = tempnam(sys_get_temp_dir(), 'www_ora_guard_');
+        $this->assertIsString($tmpScript);
+        file_put_contents($tmpScript, "<?php\n" . $code);
+        try {
+            $cmd = escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($tmpScript);
+            $output = shell_exec($cmd);
+        } finally {
+            @unlink($tmpScript);
+        }
+        $this->assertIsString($output);
+        $decoded = json_decode($output, true);
+        $this->assertIsArray($decoded, 'Subprocess output: ' . $output);
+        $this->assertSame(500, $decoded['res']['status']);
+        $this->assertSame('Internal Server Error', $decoded['res']['body']['error']);
+        $this->assertStringNotContainsString('ORA-12154', $decoded['res']['body']['message']);
+        $this->assertStringNotContainsString('secret_db_detail', $decoded['res']['body']['message']);
+        $this->assertSame(1, $decoded['prev_called']);
+    }
+
+    public function testSmsV1ApiEntryPointSubstitutesInvalidUtf8Safely(): void {
+        $payload = ['text' => "正常中文\xFF\xFE尾端"];
+        $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        $this->assertIsString($json);
+        $decoded = json_decode($json, true);
+        $this->assertIsArray($decoded);
+        $this->assertStringContainsString('正常中文', $decoded['text']);
+    }
 }

@@ -607,18 +607,6 @@ Alias /lah-api "C:/AppServ/LAH-API"
     ProxySet timeout=300 retry=1
 </Proxy>
 
-# =====================================================================
-# SMS v1 REST API Rewrite (/api/v1/sms/(.*) -> sms_v1_api.php/$1)
-# =====================================================================
-<IfModule rewrite_module>
-    RewriteEngine On
-    # 預設轉導至 PHP 8.5 FastCGI 軌道 (/LAH-API/v1/sms_v1_api.php)
-    RewriteRule ^/api/v1/sms/(.*)$ /LAH-API/v1/sms_v1_api.php/$1 [PT,QSA,L]
-    RewriteRule ^/LAH-API/v1/sms/(.*)$ /LAH-API/v1/sms_v1_api.php/$1 [PT,QSA,L]
-    # 若需改由 PHP 7 舊版軌道 (www/api/sms_v1_api.php) 處理，可改用：
-    # RewriteRule ^/api/v1/sms/(.*)$ /api/sms_v1_api.php/$1 [PT,QSA,L]
-</IfModule>
-
 # 資安弱點防護：隱藏 Apache 版本與錯誤頁面簽名
 ServerTokens Prod
 ServerSignature Off
@@ -661,6 +649,19 @@ ServerSignature Off
     Require all denied
 </Directory>
 # === End PHP2Shell Mitigation ===
+
+# =====================================================================
+# SMS v1 REST API Rewrite (/api/v1/sms/(.*) -> sms_v1_api.php/$1)
+# （必須置於 PHP2Shell Mitigation 之後，避免 [L] 標記繞過 %ad 阻擋規則）
+# =====================================================================
+<IfModule rewrite_module>
+    RewriteEngine On
+    # 預設轉導至 PHP 8.5 FastCGI 軌道 (/LAH-API/v1/sms_v1_api.php)
+    RewriteRule ^/api/v1/sms/(.*)$ /LAH-API/v1/sms_v1_api.php/$1 [PT,QSA,L]
+    RewriteRule ^/LAH-API/v1/sms/(.*)$ /LAH-API/v1/sms_v1_api.php/$1 [PT,QSA,L]
+    # 若需改由 PHP 7 舊版軌道 (www/api/sms_v1_api.php) 處理，可改用：
+    # RewriteRule ^/api/v1/sms/(.*)$ /api/sms_v1_api.php/$1 [PT,QSA,L]
+</IfModule>
 
 # === Sensitive Files Deny (.env / SQLite / dot-dir) ===
 <FilesMatch "(?i)^\.(?!env\.example$)">

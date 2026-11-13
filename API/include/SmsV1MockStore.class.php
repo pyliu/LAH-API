@@ -455,9 +455,12 @@ class SmsV1MockStore implements SmsV1StoreInterface {
         string $cc49,
         string $msNote
     ): bool {
-        $govCond = $govOid === '' ? 'GOV_ID = :gov_key' : 'GOV_OID = :gov_key';
+        $govKey = $govOid === '' ? $govId : $govOid;
+        $govCond = $govOid === ''
+            ? "COALESCE(NULLIF(GOV_ID, ''), 'X') = :gov_key"
+            : "COALESCE(NULLIF(GOV_OID, ''), 'X') = :gov_key";
         $where = "MS03 = :ms03 AND MS04_1 = :ms04_1 AND MS04_2 = :ms04_2 AND MS30 = :ms30
-                  AND APP_SEQ = :app_seq AND APP_ID = :app_id AND {$govCond}
+                  AND APP_SEQ = :app_seq AND COALESCE(NULLIF(APP_ID, ''), 'X') = :app_id AND {$govCond}
                   AND CC00 = :cc00 AND CC48 = :cc48 AND CC49 = :cc49 AND MS_NOTE = :ms_note";
         $sql = "SELECT 1 FROM SSMSMAIN WHERE {$where}
                 UNION ALL
@@ -472,8 +475,8 @@ class SmsV1MockStore implements SmsV1StoreInterface {
             ':ms04_2' => $ms04_2,
             ':ms30' => $ms30,
             ':app_seq' => $appSeq,
-            ':app_id' => $appId,
-            ':gov_key' => $govOid === '' ? $govId : $govOid,
+            ':app_id' => $appId === '' ? 'X' : $appId,
+            ':gov_key' => $govKey === '' ? 'X' : $govKey,
             ':cc00' => $cc00,
             ':cc48' => $cc48,
             ':cc49' => $cc49,
@@ -1008,13 +1011,14 @@ class SmsV1MockStore implements SmsV1StoreInterface {
             $normalizedRows[] = $normalized;
         }
 
+        $userNameCache = array();
         $items = SmsV1QueueHelper::assemblePendingItems(
             $normalizedRows,
             function (string $ms04_1) use ($lookupRkeyn): string {
                 return $lookupRkeyn('04', $ms04_1);
             },
             $lookupEmailSub,
-            function (string $ms03, string $ms04_1, string $ms04_2) use ($pdo): array {
+            function (string $ms03, string $ms04_1, string $ms04_2) use ($pdo, &$userNameCache): array {
                 $uName = '';
                 $md13_1 = null;
                 $md13_2 = null;
@@ -1022,13 +1026,23 @@ class SmsV1MockStore implements SmsV1StoreInterface {
                 $qScmsds->execute(array(':md01' => $ms03, ':md02' => $ms04_1, ':md03' => $ms04_2));
                 $scmsdsRows = $qScmsds->fetchAll(\PDO::FETCH_ASSOC);
                 foreach ($scmsdsRows as $scmsdsRow) {
-                    $md13_1 = str_pad(trim((string)($scmsdsRow['MD13_1'] ?? '')), 7, ' ');
-                    $md13_2 = str_pad(trim((string)($scmsdsRow['MD13_2'] ?? '')), 6, ' ');
-                    $qAuth = $pdo->prepare('SELECT USER_NAME FROM SSYSAUTH1 WHERE USER_ID = :uid');
-                    $qAuth->execute(array(':uid' => trim((string)($scmsdsRow['MD04'] ?? ''))));
-                    $authRows = $qAuth->fetchAll(\PDO::FETCH_ASSOC);
-                    foreach ($authRows as $authRow) {
-                        $uName = rtrim((string)($authRow['USER_NAME'] ?? ''));
+                    $rawMd13_1 = trim((string)($scmsdsRow['MD13_1'] ?? ''));
+                    $rawMd13_2 = trim((string)($scmsdsRow['MD13_2'] ?? ''));
+                    $md13_1 = $rawMd13_1 !== '' ? str_pad($rawMd13_1, 7, ' ') : null;
+                    $md13_2 = $rawMd13_2 !== '' ? str_pad($rawMd13_2, 6, ' ') : null;
+                    $md04 = trim((string)($scmsdsRow['MD04'] ?? ''));
+                    if ($md04 !== '') {
+                        if (!array_key_exists($md04, $userNameCache)) {
+                            $qAuth = $pdo->prepare('SELECT USER_NAME FROM SSYSAUTH1 WHERE USER_ID = :uid');
+                            $qAuth->execute(array(':uid' => $md04));
+                            $authRows = $qAuth->fetchAll(\PDO::FETCH_ASSOC);
+                            $cachedName = '';
+                            foreach ($authRows as $authRow) {
+                                $cachedName = rtrim((string)($authRow['USER_NAME'] ?? ''));
+                            }
+                            $userNameCache[$md04] = $cachedName;
+                        }
+                        $uName = $userNameCache[$md04];
                     }
                 }
                 return array('u_name' => $uName, 'md13_1' => $md13_1, 'md13_2' => $md13_2);

@@ -565,4 +565,129 @@ class SmsV1QueuePendingTest extends TestCase {
         $this->assertSame('台端於地政事務所申請115年HA01字第000555號一案複丈延期至115年12月01日14時30分辦理,謝謝您,再見', $items[0]['msg']);
         $this->assertSame('台端於地政事務所申請115年HA01字第000556號一案經查尚需要補正,請於接到本通知後速洽測量員張測量員,謝謝您,再見', $items[1]['msg']);
     }
+
+    public function testTypeOPreservesExtraHashCharactersAndScmsdsNullFallsBackToDefaultDate(): void {
+        // 1) MS_TYPE='O' with multiple '#' characters in MS_NOTE
+        $assembledO = \SmsV1QueueHelper::assemblePendingMessage(
+            '115', 'HA01', '000777', '9', 'O',
+            '跨所主旨#第一段#案件編號#123<br>請查照',
+            '桃資'
+        );
+        $this->assertSame('跨所主旨', $assembledO['subject']);
+        $this->assertSame("第一段#案件編號#123\n請查照", $assembledO['msg']);
+
+        // 2) SCMSDS NULL / blank MD13_1 and MD13_2 fallback in MockStore getPendingQueue
+        $store = new SmsV1MockStore($this->createTempDbPath());
+        $pdo = $store->getPdo();
+        $pdo->exec("INSERT INTO SCMSDS (MD01, MD02, MD03, MD04, MD13_1, MD13_2) VALUES ('115', 'HA01', '000888', 'U002', NULL, NULL)");
+        $pdo->exec("INSERT INTO SSYSAUTH1 (USER_ID, USER_NAME) VALUES ('U002', '林測量員')");
+        $itemsNull = \SmsV1QueueHelper::assemblePendingItems(
+            [[
+                'ms03' => '115', 'ms04_1' => 'HA01', 'ms04_2' => '000888',
+                'ms30' => 'C', 'ms_type' => 'S', 'ms14' => '0911000333',
+                'ms_mail' => '', 'ms32' => '0', 'ms_note' => '',
+            ]],
+            fn(string $ms04_1): string => '桃資',
+            fn(string $appSeq): string => '',
+            function (string $ms03, string $ms04_1, string $ms04_2) use ($pdo): array {
+                $q = $pdo->prepare('SELECT MD04, MD13_1, MD13_2 FROM SCMSDS WHERE MD01 = :m1 AND MD02 = :m2 AND MD03 = :m3');
+                $q->execute([':m1' => $ms03, ':m2' => $ms04_1, ':m3' => $ms04_2]);
+                $r = $q->fetch(\PDO::FETCH_ASSOC);
+                $raw1 = trim((string)($r['MD13_1'] ?? ''));
+                $raw2 = trim((string)($r['MD13_2'] ?? ''));
+                return [
+                    'u_name' => '林測量員',
+                    'md13_1' => $raw1 !== '' ? str_pad($raw1, 7, ' ') : null,
+                    'md13_2' => $raw2 !== '' ? str_pad($raw2, 6, ' ') : null,
+                ];
+            }
+        );
+        $this->assertSame('台端於地政事務所申請115年桃資字第000888號一案複丈延期至098年05月25日13時辦理,謝謝您,再見', $itemsNull[0]['msg']);
+
+        // 3) Blank string MD13_1/MD13_2 (e.g. '       ') must also fall back
+        $assembledBlank = \SmsV1QueueHelper::assemblePendingMessage(
+            '115', 'HA01', '000889', 'C', 'S', '', '桃資', '', '林測量員', '       ', '      '
+        );
+        $this->assertSame('台端於地政事務所申請115年桃資字第000889號一案複丈延期至098年05月25日13時辦理,謝謝您,再見', $assembledBlank['msg']);
+    }
+
+    public function testOracleStoreGetPendingQueueCachesSsysauth1UserName(): void {
+        $fakeDb = new class extends \OraDB {
+            public int $authQueryCount = 0;
+            private string $currentSql = '';
+            /** @var array<string, mixed> */
+            private array $currentBinds = [];
+
+            public function __construct() {}
+            public function __destruct() {}
+            public function close() {}
+            public function parse($str) {
+                $this->currentSql = (string)$str;
+                $this->currentBinds = [];
+            }
+            public function bind($bind_var, $real_var) {
+                $this->currentBinds[(string)$bind_var] = $real_var;
+            }
+            public function execute() {
+                if (str_contains($this->currentSql, 'FROM SSYSAUTH1')) {
+                    $this->authQueryCount++;
+                }
+                return true;
+            }
+            public function fetchAll($raw = false) {
+                $sql = $this->currentSql;
+                if (str_contains($sql, 'FROM SRKEYN')) {
+                    return [['KCDE_1' => '55', 'KCDE_2' => '01', 'KCNT' => 'Test', 'KRMK' => 'HA']];
+                }
+                if (str_contains($sql, 'FROM SSMSWAIT')) {
+                    return [
+                        [
+                            'MS03' => '115', 'MS04_1' => 'HA01', 'MS04_2' => '000001',
+                            'MS07_1' => '1151113', 'MS07_2' => '090000',
+                            'MS14' => '0911111111', 'MS30' => 'I', 'MS32' => '0',
+                            'MS_TYPE' => 'S', 'MS_MAIL' => null, 'MS_NOTE' => '',
+                            'APP_SEQ' => null, 'APP_ID' => null, 'GOV_ID' => null,
+                            'CC00' => null, 'CC48' => null, 'CC49' => null, 'GOV_OID' => null,
+                        ],
+                        [
+                            'MS03' => '115', 'MS04_1' => 'HA01', 'MS04_2' => '000002',
+                            'MS07_1' => '1151113', 'MS07_2' => '090100',
+                            'MS14' => '0922222222', 'MS30' => 'D', 'MS32' => '0',
+                            'MS_TYPE' => 'S', 'MS_MAIL' => null, 'MS_NOTE' => '',
+                            'APP_SEQ' => null, 'APP_ID' => null, 'GOV_ID' => null,
+                            'CC00' => null, 'CC48' => null, 'CC49' => null, 'GOV_OID' => null,
+                        ],
+                    ];
+                }
+                if (str_contains($sql, 'FROM SCMSDS')) {
+                    return [['MD04' => 'U001', 'MD13_1' => null, 'MD13_2' => null]];
+                }
+                if (str_contains($sql, 'FROM SSYSAUTH1')) {
+                    return [['USER_NAME' => SmsV1Encoding::toOracleEncoding('陳測量員')]];
+                }
+                return [];
+            }
+        };
+
+        $fakeWrapper = new class($fakeDb) extends \OraDBWrapper {
+            private $fakeDb;
+            public function __construct($fakeDb) { $this->fakeDb = $fakeDb; }
+            public function __destruct() {}
+            public function reachable() { return true; }
+            public function getDB() { return $this->fakeDb; }
+        };
+
+        // Call assemblePendingItems indirectly through OracleStore::getPendingQueue or via reflection on closure?
+        // Wait: SSMSWAIT in getPendingQueue filters ('M', 'W', 'O'), so let's verify SSYSAUTH1 caching via Reflection or direct SCMSDS test
+        $store = new SmsV1OracleStore($fakeWrapper);
+        $this->assertSame(0, $fakeDb->authQueryCount);
+        $ref = new \ReflectionClass($store);
+        $method = $ref->getMethod('lookupSurveyMetaCached');
+        $cache = [];
+        $r1 = $method->invokeArgs($store, ['115', 'HA01', '000001', &$cache]);
+        $r2 = $method->invokeArgs($store, ['115', 'HA01', '000002', &$cache]);
+        $this->assertSame('陳測量員', $r1['u_name']);
+        $this->assertSame('陳測量員', $r2['u_name']);
+        $this->assertSame(1, $fakeDb->authQueryCount);
+    }
 }
