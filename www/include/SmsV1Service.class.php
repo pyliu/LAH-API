@@ -98,6 +98,19 @@ class SmsV1Service {
     }
 
     /**
+     * 查詢待發送任務清單（GET /queue/pending）
+     *
+     * @return array{site_id: string, items: array<int, array<string, mixed>>}
+     */
+    public function getPendingQueue(): array {
+        $result = $this->store->getPendingQueue();
+        return array(
+            'site_id' => (string)($result['site_id'] ?? ''),
+            'items' => is_array($result['items'] ?? null) ? $result['items'] : array(),
+        );
+    }
+
+    /**
      * 查詢三表紀錄並附加 MS_TYPE / MS30 / MS31 中文狀態對照
      *
      * @param string $table main|wait|log

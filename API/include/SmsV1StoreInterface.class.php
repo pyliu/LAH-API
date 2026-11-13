@@ -43,4 +43,11 @@ interface SmsV1StoreInterface {
         bool $checkRegisterC = true,
         bool $checkRegisterD = true
     ): array;
+
+    /**
+     * 查詢 SSMSWAIT 待發送任務清單並組裝完整 UTF-8 subject / msg
+     *
+     * @return array{site_id: string, items: array<int, array<string, mixed>>}
+     */
+    public function getPendingQueue(): array;
 }

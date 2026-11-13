@@ -740,6 +740,103 @@ class SmsV1OracleStore implements SmsV1StoreInterface {
     }
 
     /**
+     * 查詢 SSMSWAIT 待發送任務清單並組裝完整 UTF-8 subject / msg
+     *
+     * @return array{site_id: string, items: array<int, array<string, mixed>>}
+     */
+    public function getPendingQueue(): array {
+        $meta = $this->getMetadata();
+        $rows = $this->queryRaw(
+            "SELECT MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS14, MS30, MS32,
+                    NVL(MS_TYPE, 'R') AS MS_TYPE, MS_MAIL, MS_NOTE,
+                    APP_SEQ, APP_ID, GOV_ID, CC00, CC48, CC49, GOV_OID
+             FROM SSMSWAIT
+             WHERE MS_TYPE IN ('M', 'W', 'O')
+             ORDER BY MS07_1, MS07_2"
+        );
+
+        $rkeynCache = array();
+        $lookupRkeyn = function (string $k1, string $k2) use (&$rkeynCache): string {
+            $cacheKey = $k1 . "\0" . $k2;
+            if (array_key_exists($cacheKey, $rkeynCache)) {
+                return $rkeynCache[$cacheKey];
+            }
+            $res = $this->queryRaw(
+                "SELECT KCNT FROM SRKEYN WHERE KCDE_1 = :kcde_1 AND KCDE_2 = :kcde_2",
+                array(':kcde_1' => $k1, ':kcde_2' => $k2)
+            );
+            $val = empty($res) ? '' : rtrim(SmsV1Encoding::fromOracleEncoding((string)($res[0]['KCNT'] ?? '')));
+            $rkeynCache[$cacheKey] = $val;
+            return $val;
+        };
+
+        $emailSubCache = array();
+        $lookupEmailSub = function (string $appSeq) use (&$emailSubCache): string {
+            if (array_key_exists($appSeq, $emailSubCache)) {
+                return $emailSubCache[$appSeq];
+            }
+            $res = $this->queryRaw(
+                "SELECT EMAIL_SUB FROM SSMS_GOVINFO_M WHERE APP_SEQ = :app_seq",
+                array(':app_seq' => $appSeq)
+            );
+            $emailSub = '';
+            foreach ($res as $subRow) {
+                $emailSub = rtrim(SmsV1Encoding::fromOracleEncoding((string)($subRow['EMAIL_SUB'] ?? '')));
+            }
+            $emailSubCache[$appSeq] = $emailSub;
+            return $emailSub;
+        };
+
+        $normalizedRows = array();
+        foreach ($rows as $row) {
+            $normalized = array();
+            foreach ($row as $key => $value) {
+                $lowerKey = strtolower(SmsV1Encoding::fromOracleEncoding((string)$key));
+                $decoded = $value === null ? '' : SmsV1Encoding::fromOracleEncoding((string)$value);
+                $normalized[$lowerKey] = rtrim($decoded);
+            }
+            $normalizedRows[] = $normalized;
+        }
+
+        $items = SmsV1QueueHelper::assemblePendingItems(
+            $normalizedRows,
+            function (string $ms04_1) use ($lookupRkeyn): string {
+                return $lookupRkeyn('04', $ms04_1);
+            },
+            $lookupEmailSub,
+            function (string $ms03, string $ms04_1, string $ms04_2): array {
+                $uName = '';
+                $md13_1 = null;
+                $md13_2 = null;
+                $scmsdsRows = $this->queryRaw(
+                    "SELECT MD04, RPAD(MD13_1, 7, ' ') AS MD13_1, RPAD(MD13_2, 6, ' ') AS MD13_2
+                     FROM SCMSDS
+                     WHERE MD01 = :md01 AND MD02 = :md02 AND MD03 = :md03",
+                    array(':md01' => $ms03, ':md02' => $ms04_1, ':md03' => $ms04_2)
+                );
+                foreach ($scmsdsRows as $scmsdsRow) {
+                    $md13_1 = SmsV1Encoding::fromOracleEncoding((string)($scmsdsRow['MD13_1'] ?? ''));
+                    $md13_2 = SmsV1Encoding::fromOracleEncoding((string)($scmsdsRow['MD13_2'] ?? ''));
+                    $md04 = trim(SmsV1Encoding::fromOracleEncoding((string)($scmsdsRow['MD04'] ?? '')));
+                    $authRows = $this->queryRaw(
+                        "SELECT USER_NAME FROM SSYSAUTH1 WHERE USER_ID = :user_id",
+                        array(':user_id' => $md04)
+                    );
+                    foreach ($authRows as $authRow) {
+                        $uName = rtrim(SmsV1Encoding::fromOracleEncoding((string)($authRow['USER_NAME'] ?? '')));
+                    }
+                }
+                return array('u_name' => $uName, 'md13_1' => $md13_1, 'md13_2' => $md13_2);
+            }
+        );
+
+        return array(
+            'site_id' => $meta['site_id'],
+            'items' => $items,
+        );
+    }
+
+    /**
      * 執行單一查詢並回傳原始 Oracle 位元組資料列
      *
      * @param string $sql

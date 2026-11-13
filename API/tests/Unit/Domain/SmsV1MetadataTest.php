@@ -288,6 +288,9 @@ class SmsV1MetadataTest extends TestCase {
             ): array {
                 return array('moved_to_wait_count' => 0, 'deleted_from_main_count' => 0);
             }
+            public function getPendingQueue(): array {
+                return array('site_id' => '', 'items' => array());
+            }
         };
         $router = new SmsV1Router(new SmsV1Service($failingStore));
 
