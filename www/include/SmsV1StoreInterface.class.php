@@ -50,4 +50,22 @@ interface SmsV1StoreInterface {
      * @return array{site_id: string, items: array<int, array<string, mixed>>}
      */
     public function getPendingQueue(): array;
+
+    /**
+     * 回報單筆派送結果（POST /queue/report）
+     *
+     * @param array<string, mixed> $identity 已正規化之 RecordIdentity
+     * @param bool $success 是否派送成功
+     * @param string $msg UTF-8 訊息本文（寫入 SSMSLOG.MS_NOTE 時使用）
+     * @param int $maxRetries 最大重試次數（>= 0）
+     * @param string|null $errorDesc 失敗描述（選填）
+     * @return array<string, mixed>
+     */
+    public function reportQueueItem(
+        array $identity,
+        bool $success,
+        string $msg = '',
+        int $maxRetries = 0,
+        ?string $errorDesc = null
+    ): array;
 }

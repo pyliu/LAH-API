@@ -41,6 +41,9 @@ class SmsV1Router {
             '/queue/pending' => array(
                 'GET' => 'handleGetQueuePending',
             ),
+            '/queue/report' => array(
+                'POST' => 'handlePostQueueReport',
+            ),
             '/records' => array(
                 'GET' => 'handleGetRecords',
             ),
@@ -182,6 +185,46 @@ class SmsV1Router {
         return array(
             'status' => 200,
             'body' => $this->service->getPendingQueue(),
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $query
+     * @param string $rawBody
+     * @return array{status: int, body: array<string, mixed>}
+     */
+    private function handlePostQueueReport(array $query, string $rawBody): array {
+        $trimmed = trim($rawBody);
+        if ($trimmed === '' || $trimmed[0] !== '{') {
+            throw new \InvalidArgumentException('Invalid JSON request body.');
+        }
+        $payload = json_decode($trimmed, true);
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($payload)) {
+            throw new \InvalidArgumentException('Invalid JSON request body.');
+        }
+
+        $validated = SmsV1QueueHelper::validateReportRequest($payload);
+        $result = $this->service->reportQueueItem(
+            $validated['identity'],
+            $validated['success'],
+            $validated['msg'],
+            $validated['max_retries'],
+            $validated['error_desc']
+        );
+
+        if (($result['action'] ?? '') === 'not_found') {
+            return array(
+                'status' => 404,
+                'body' => array(
+                    'error' => 'Not Found',
+                    'message' => 'Target record not found in SSMSWAIT.',
+                ),
+            );
+        }
+
+        return array(
+            'status' => 200,
+            'body' => $result,
         );
     }
 

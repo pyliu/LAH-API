@@ -1044,6 +1044,204 @@ class SmsV1MockStore implements SmsV1StoreInterface {
         );
     }
 
+    /**
+     * 回報單筆派送結果（POST /queue/report）
+     *
+     * @param array<string, mixed> $identity
+     * @param bool $success
+     * @param string $msg
+     * @param int $maxRetries
+     * @param string|null $errorDesc
+     * @return array<string, mixed>
+     */
+    public function reportQueueItem(
+        array $identity,
+        bool $success,
+        string $msg = '',
+        int $maxRetries = 0,
+        ?string $errorDesc = null
+    ): array {
+        $pdo = $this->getPdo();
+        $now = new \DateTimeImmutable('now');
+        $nowDate = SmsV1Encoding::getRocDate($now);
+        $nowTime = SmsV1Encoding::getTimeHhmmss($now);
+        $inTx = false;
+
+        $ms03 = (string)($identity['ms03'] ?? '');
+        $ms04_1 = (string)($identity['ms04_1'] ?? '');
+        $ms04_2 = (string)($identity['ms04_2'] ?? '');
+        $ms30 = (string)($identity['ms30'] ?? '');
+        $msType = (string)($identity['ms_type'] ?? '');
+        $ms14 = (string)($identity['ms14'] ?? '');
+        $msMail = (string)($identity['ms_mail'] ?? '');
+        $isEmail = ($msMail !== '');
+        $isGov = ($ms30 === 'y' || $ms30 === 'z');
+        $govExt = is_array($identity['gov_ext'] ?? null) ? $identity['gov_ext'] : array();
+
+        $whereParts = array(
+            "MS03 = :ms03",
+            "MS04_1 = :ms04_1",
+            "MS04_2 = :ms04_2",
+            "MS30 = :ms30",
+            "COALESCE(NULLIF(MS_TYPE, ''), 'R') = :ms_type",
+        );
+        $whereBinds = array(
+            ':ms03' => $ms03,
+            ':ms04_1' => $ms04_1,
+            ':ms04_2' => $ms04_2,
+            ':ms30' => $ms30,
+            ':ms_type' => $msType,
+        );
+
+        if ($isEmail) {
+            $whereParts[] = "MS_MAIL = :ms_mail";
+            $whereBinds[':ms_mail'] = $msMail;
+        } else {
+            $whereParts[] = "MS14 = :ms14";
+            $whereBinds[':ms14'] = $ms14;
+        }
+
+        if ($isGov) {
+            $whereParts[] = "APP_ID = :app_id";
+            $whereParts[] = "COALESCE(NULLIF(GOV_ID, ''), 'X') = COALESCE(NULLIF(:gov_id, ''), 'X')";
+            $whereParts[] = "CC00 = :cc00";
+            $whereParts[] = "CC48 = :cc48";
+            $whereParts[] = "CC49 = :cc49";
+            $whereParts[] = "APP_SEQ = :app_seq";
+            $whereParts[] = "COALESCE(NULLIF(GOV_OID, ''), 'X') = COALESCE(NULLIF(:gov_oid, ''), 'X')";
+            $whereBinds[':app_id'] = (string)($govExt['app_id'] ?? '');
+            $whereBinds[':gov_id'] = (string)($govExt['gov_id'] ?? '');
+            $whereBinds[':cc00'] = (string)($govExt['cc00'] ?? '');
+            $whereBinds[':cc48'] = (string)($govExt['cc48'] ?? '');
+            $whereBinds[':cc49'] = (string)($govExt['cc49'] ?? '');
+            $whereBinds[':app_seq'] = (string)($govExt['app_seq'] ?? '');
+            $whereBinds[':gov_oid'] = (string)($govExt['gov_oid'] ?? '');
+        }
+
+        $whereClause = implode(' AND ', $whereParts);
+
+        try {
+            $pdo->exec('BEGIN IMMEDIATE');
+            $inTx = true;
+
+            $selectStmt = $pdo->prepare("SELECT MS32 FROM SSMSWAIT WHERE {$whereClause} LIMIT 1");
+            $selectStmt->execute($whereBinds);
+            $ms32Raw = $selectStmt->fetchColumn();
+            if ($ms32Raw === false) {
+                $pdo->exec('COMMIT');
+                $inTx = false;
+                return array('action' => 'not_found');
+            }
+
+            $currentRetry = (int)trim((string)($ms32Raw ?? '0'));
+
+            if ($success === false && $currentRetry < $maxRetries) {
+                $nextRetry = $currentRetry + 1;
+                $updBinds = array_merge(array(':next_ms32' => (string)$nextRetry), $whereBinds);
+                $updStmt = $pdo->prepare("UPDATE SSMSWAIT SET MS32 = :next_ms32 WHERE {$whereClause}");
+                $updStmt->execute($updBinds);
+
+                $pdo->exec('COMMIT');
+                $inTx = false;
+
+                return array(
+                    'action' => 'retry_incremented',
+                    'retry_count' => $nextRetry,
+                );
+            }
+
+            $ms31 = $success ? 'S' : 'F';
+            $this->insertSmsLogInMock(
+                $pdo,
+                $ms31,
+                $ms03,
+                $ms04_1,
+                $ms04_2,
+                $nowDate,
+                $nowTime,
+                $ms14,
+                $msMail,
+                $ms30,
+                $msType,
+                $msg,
+                $isGov,
+                $govExt
+            );
+
+            $delStmt = $pdo->prepare("DELETE FROM SSMSWAIT WHERE {$whereClause}");
+            $delStmt->execute($whereBinds);
+
+            $pdo->exec('COMMIT');
+            $inTx = false;
+
+            return array(
+                'action' => $success ? 'logged_success_and_removed' : 'logged_failure_and_removed',
+            );
+        } catch (\Throwable $e) {
+            if ($inTx) {
+                try {
+                    $pdo->exec('ROLLBACK');
+                } catch (\Throwable $ignored) {
+                }
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $govExt
+     */
+    private function insertSmsLogInMock(
+        \PDO $pdo,
+        string $ms31,
+        string $ms03,
+        string $ms04_1,
+        string $ms04_2,
+        string $nowDate,
+        string $nowTime,
+        string $ms14,
+        string $msMail,
+        string $ms30,
+        string $msType,
+        string $msg,
+        bool $isGov,
+        array $govExt
+    ): void {
+        $isEmail = ($msMail !== '');
+        $channelCol = $isEmail ? 'MS_MAIL' : 'MS14';
+        $channelBind = $isEmail ? ':ms_mail' : ':ms14';
+
+        $cols = "MS03, MS04_1, MS04_2, MS07_1, MS07_2, {$channelCol}, MS30, MS31, MS_TYPE, MS_NOTE";
+        $vals = ":ms03, :ms04_1, :ms04_2, :ms07_1, :ms07_2, {$channelBind}, :ms30, :ms31, :ms_type, :ms_note";
+        $binds = array(
+            ':ms03' => $ms03,
+            ':ms04_1' => $ms04_1,
+            ':ms04_2' => $ms04_2,
+            ':ms07_1' => $nowDate,
+            ':ms07_2' => $nowTime,
+            $channelBind => $isEmail ? $msMail : $ms14,
+            ':ms30' => $ms30,
+            ':ms31' => $ms31,
+            ':ms_type' => $msType,
+            ':ms_note' => $msg,
+        );
+
+        if ($isGov) {
+            $cols .= ", APP_SEQ, APP_ID, GOV_ID, CC00, CC48, CC49, GOV_OID";
+            $vals .= ", :app_seq, :app_id, :gov_id, :cc00, :cc48, :cc49, :gov_oid";
+            $binds[':app_seq'] = (string)($govExt['app_seq'] ?? '');
+            $binds[':app_id'] = (string)($govExt['app_id'] ?? '');
+            $binds[':gov_id'] = (string)($govExt['gov_id'] ?? '');
+            $binds[':cc00'] = (string)($govExt['cc00'] ?? '');
+            $binds[':cc48'] = (string)($govExt['cc48'] ?? '');
+            $binds[':cc49'] = (string)($govExt['cc49'] ?? '');
+            $binds[':gov_oid'] = (string)($govExt['gov_oid'] ?? '');
+        }
+
+        $stmt = $pdo->prepare("INSERT INTO SSMSLOG ({$cols}) VALUES ({$vals})");
+        $stmt->execute($binds);
+    }
+
     private function initialize(): void {
         if ($this->dbPath !== ':memory:') {
             $dir = dirname($this->dbPath);

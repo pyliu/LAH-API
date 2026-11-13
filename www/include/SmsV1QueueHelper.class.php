@@ -330,4 +330,156 @@ class SmsV1QueueHelper {
         }
         return $items;
     }
+
+    /**
+     * 驗證並正規化 POST /queue/report 請求酬載
+     *
+     * @param array<string, mixed> $payload
+     * @return array{identity: array<string, mixed>, success: bool, msg: string, max_retries: int, error_desc: ?string}
+     */
+    public static function validateReportRequest(array $payload): array {
+        if (!isset($payload['identity']) || !is_array($payload['identity']) || !self::isAssocArray($payload['identity'])) {
+            throw new \InvalidArgumentException('Missing or invalid identity object.');
+        }
+
+        $identity = self::normalizeReportIdentity($payload['identity']);
+
+        if (!array_key_exists('success', $payload) || !is_bool($payload['success'])) {
+            throw new \InvalidArgumentException('Invalid success: expected boolean.');
+        }
+        $success = $payload['success'];
+
+        $msg = '';
+        if (array_key_exists('msg', $payload) && $payload['msg'] !== null) {
+            if (!is_string($payload['msg'])) {
+                throw new \InvalidArgumentException('Invalid msg: expected string or null.');
+            }
+            $msg = $payload['msg'];
+        }
+
+        $maxRetries = 0;
+        if (array_key_exists('max_retries', $payload) && $payload['max_retries'] !== null) {
+            if (!is_int($payload['max_retries']) || $payload['max_retries'] < 0) {
+                throw new \InvalidArgumentException('Invalid max_retries: expected non-negative integer.');
+            }
+            $maxRetries = $payload['max_retries'];
+        } elseif ($success === false) {
+            throw new \InvalidArgumentException('Invalid max_retries: expected non-negative integer.');
+        }
+
+        $errorDesc = null;
+        if (array_key_exists('error_desc', $payload) && $payload['error_desc'] !== null) {
+            if (!is_string($payload['error_desc'])) {
+                throw new \InvalidArgumentException('Invalid error_desc: expected string or null.');
+            }
+            $errorDesc = $payload['error_desc'];
+        }
+
+        return array(
+            'identity' => $identity,
+            'success' => $success,
+            'msg' => $msg,
+            'max_retries' => $maxRetries,
+            'error_desc' => $errorDesc,
+        );
+    }
+
+    /**
+     * 驗證並正規化 RecordIdentity 複合主鍵
+     *
+     * @param array<string, mixed> $identity
+     * @return array<string, mixed>
+     */
+    public static function normalizeReportIdentity(array $identity): array {
+        $requiredKeys = array('ms03', 'ms04_1', 'ms04_2', 'ms30', 'ms_type');
+        $normalized = array();
+        foreach ($requiredKeys as $key) {
+            if (!array_key_exists($key, $identity) || !is_string($identity[$key])) {
+                throw new \InvalidArgumentException("Invalid identity.{$key}: expected non-empty string.");
+            }
+            $val = trim($identity[$key]);
+            if ($val === '') {
+                throw new \InvalidArgumentException("Invalid identity.{$key}: expected non-empty string.");
+            }
+            $normalized[$key] = $val;
+        }
+
+        $ms14 = '';
+        if (array_key_exists('ms14', $identity) && $identity['ms14'] !== null) {
+            if (!is_string($identity['ms14'])) {
+                throw new \InvalidArgumentException('Invalid identity.ms14: expected string or null.');
+            }
+            $ms14 = trim($identity['ms14']);
+        }
+
+        $msMail = '';
+        if (array_key_exists('ms_mail', $identity) && $identity['ms_mail'] !== null) {
+            if (!is_string($identity['ms_mail'])) {
+                throw new \InvalidArgumentException('Invalid identity.ms_mail: expected string or null.');
+            }
+            $msMail = trim($identity['ms_mail']);
+        }
+
+        if ($ms14 === '' && $msMail === '') {
+            throw new \InvalidArgumentException('Either identity.ms14 or identity.ms_mail must be non-empty.');
+        }
+
+        $ms30 = $normalized['ms30'];
+        $isGov = ($ms30 === 'y' || $ms30 === 'z');
+        $govExt = null;
+
+        if ($isGov) {
+            if (!isset($identity['gov_ext']) || !is_array($identity['gov_ext']) || !self::isAssocArray($identity['gov_ext'])) {
+                throw new \InvalidArgumentException('Missing or invalid identity.gov_ext for government notification.');
+            }
+            $rawGov = $identity['gov_ext'];
+            $govExt = array();
+            foreach (array('app_seq', 'app_id', 'cc00', 'cc48', 'cc49') as $govKey) {
+                if (!array_key_exists($govKey, $rawGov) || !is_string($rawGov[$govKey])) {
+                    throw new \InvalidArgumentException("Invalid identity.gov_ext.{$govKey}: expected non-empty string.");
+                }
+                $govVal = trim($rawGov[$govKey]);
+                if ($govVal === '') {
+                    throw new \InvalidArgumentException("Invalid identity.gov_ext.{$govKey}: expected non-empty string.");
+                }
+                $govExt[$govKey] = $govVal;
+            }
+            foreach (array('gov_id', 'gov_oid') as $optGovKey) {
+                $optVal = '';
+                if (array_key_exists($optGovKey, $rawGov) && $rawGov[$optGovKey] !== null) {
+                    if (!is_string($rawGov[$optGovKey])) {
+                        throw new \InvalidArgumentException("Invalid identity.gov_ext.{$optGovKey}: expected string or null.");
+                    }
+                    $optVal = trim($rawGov[$optGovKey]);
+                }
+                $govExt[$optGovKey] = $optVal;
+            }
+        } elseif (array_key_exists('gov_ext', $identity) && $identity['gov_ext'] !== null && !is_array($identity['gov_ext'])) {
+            throw new \InvalidArgumentException('Invalid identity.gov_ext.');
+        }
+
+        return array(
+            'ms03' => $normalized['ms03'],
+            'ms04_1' => $normalized['ms04_1'],
+            'ms04_2' => $normalized['ms04_2'],
+            'ms30' => $ms30,
+            'ms_type' => $normalized['ms_type'],
+            'ms14' => $ms14,
+            'ms_mail' => $msMail,
+            'gov_ext' => $govExt,
+        );
+    }
+
+    /**
+     * PHP 7.3 相容關聯陣列判斷（排除空陣列與純數字索引 list）
+     *
+     * @param array<mixed, mixed> $arr
+     * @return bool
+     */
+    private static function isAssocArray(array $arr): bool {
+        if (empty($arr)) {
+            return false;
+        }
+        return array_keys($arr) !== range(0, count($arr) - 1);
+    }
 }
