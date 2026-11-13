@@ -115,6 +115,9 @@ class SmsV1Router {
         $targetDate = null;
         $trimmed = trim($rawBody);
         if ($trimmed !== '') {
+            if ($trimmed[0] !== '{') {
+                throw new \InvalidArgumentException('Invalid JSON request body.');
+            }
             $payload = json_decode($trimmed, true);
             if (json_last_error() !== JSON_ERROR_NONE || !is_array($payload)) {
                 throw new \InvalidArgumentException('Invalid JSON request body.');
@@ -259,6 +262,9 @@ class SmsV1Router {
             } else {
                 throw new \InvalidArgumentException('Invalid limit parameter. Must be a positive integer.');
             }
+        }
+        if ($limit < 1 || $limit > 5000) {
+            throw new \InvalidArgumentException('Invalid limit parameter. Must be between 1 and 5000.');
         }
 
         return array(

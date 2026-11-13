@@ -132,13 +132,25 @@ class SmsV1Service {
             throw new \InvalidArgumentException('Invalid max_retries: expected non-negative integer.');
         }
         $normalizedIdentity = SmsV1QueueHelper::normalizeReportIdentity($identity);
-        return $this->store->reportQueueItem(
+        $result = $this->store->reportQueueItem(
             $normalizedIdentity,
             $success,
             $msg,
             $maxRetries,
             $errorDesc
         );
+        if ($success === false && $errorDesc !== null && $errorDesc !== '') {
+            if (class_exists('Logger', false)) {
+                try {
+                    $caseRef = $normalizedIdentity['ms03'] . '-' . $normalizedIdentity['ms04_1'] . '-' . $normalizedIdentity['ms04_2'];
+                    Logger::getInstance()->warning(
+                        __METHOD__ . " [{$caseRef}] dispatch failed (action=" . ($result['action'] ?? '') . "): {$errorDesc}"
+                    );
+                } catch (\Throwable $ignored) {
+                }
+            }
+        }
+        return $result;
     }
 
     /**
@@ -153,8 +165,8 @@ class SmsV1Service {
         if (!in_array($normalizedTable, array('main', 'wait', 'log'), true)) {
             throw new \InvalidArgumentException('Invalid table parameter. Allowed values: main, wait, log.');
         }
-        if ($limit < 1) {
-            throw new \InvalidArgumentException('Limit must be a positive integer.');
+        if ($limit < 1 || $limit > 5000) {
+            throw new \InvalidArgumentException('Limit must be between 1 and 5000.');
         }
 
         $rows = $this->store->getRecords($normalizedTable, $limit);

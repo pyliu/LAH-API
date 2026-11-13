@@ -167,7 +167,10 @@ class SmsV1QueueHelper {
                 ? '已辦畢,需要領件者請至登記櫃台領件,謝謝您,再見'
                 : '測量業務已辦畢,如另需辦理登記業務者已移案處理中,謝謝您,再見';
         } elseif ($ms30 === 'C') {
-            if ($md13_1 !== null && strlen($md13_1) >= 7 && $md13_2 !== null && strlen($md13_2) >= 4) {
+            if (
+                $md13_1 !== null && trim($md13_1) !== '' && strlen($md13_1) >= 7
+                && $md13_2 !== null && trim($md13_2) !== '' && strlen($md13_2) >= 4
+            ) {
                 $msg .= '複丈延期至'
                     . substr($md13_1, 0, 3) . '年'
                     . substr($md13_1, 3, 2) . '月'
@@ -198,7 +201,7 @@ class SmsV1QueueHelper {
 
         if ($msType === 'O') {
             if ($ms30 === '7' || $ms30 === '8' || $ms30 === '9') {
-                $parts = explode('#', $msNote);
+                $parts = explode('#', $msNote, 2);
                 $subject = $parts[0] ?? '';
                 $msg = isset($parts[1]) ? str_replace('<br>', "\n", $parts[1]) : '';
             }
@@ -443,6 +446,9 @@ class SmsV1QueueHelper {
                     throw new \InvalidArgumentException("Invalid identity.gov_ext.{$govKey}: expected non-empty string.");
                 }
                 $govExt[$govKey] = $govVal;
+            }
+            if (preg_match('/^\d+$/', $govExt['app_seq']) !== 1) {
+                throw new \InvalidArgumentException('Invalid identity.gov_ext.app_seq: expected numeric string.');
             }
             foreach (array('gov_id', 'gov_oid') as $optGovKey) {
                 $optVal = '';

@@ -91,6 +91,9 @@ class SmsV1QueueReportTest extends TestCase {
             json_encode(['identity' => $this->baseIdentity(['ms30' => 'y', 'ms14' => '', 'ms_mail' => 'g@gov.tw', 'gov_ext' => null]), 'success' => true, 'max_retries' => 3]), // gov missing gov_ext
             json_encode(['identity' => $this->baseIdentity(['ms30' => 'z', 'ms14' => '', 'ms_mail' => 'g@gov.tw', 'gov_ext' => []]), 'success' => true, 'max_retries' => 3]),
             json_encode(['identity' => $this->baseIdentity(['ms30' => 'y', 'ms14' => '', 'ms_mail' => 'g@gov.tw', 'gov_ext' => ['app_seq' => '1']]), 'success' => true, 'max_retries' => 3]), // incomplete gov_ext
+            json_encode(['identity' => $this->baseIdentity(['ms30' => 'y', 'ms14' => '', 'ms_mail' => 'g@gov.tw', 'gov_ext' => ['app_seq' => 'abc', 'app_id' => 'GOV01', 'gov_id' => 'G01', 'cc00' => 'C', 'cc48' => '0101', 'cc49' => '00010000', 'gov_oid' => '']]), 'success' => true, 'max_retries' => 3]), // non-numeric app_seq
+            json_encode(['identity' => $this->baseIdentity(['ms30' => 'y', 'ms14' => '', 'ms_mail' => 'g@gov.tw', 'gov_ext' => ['app_seq' => '12a', 'app_id' => 'GOV01', 'gov_id' => 'G01', 'cc00' => 'C', 'cc48' => '0101', 'cc49' => '00010000', 'gov_oid' => '']]), 'success' => true, 'max_retries' => 3]), // non-numeric app_seq
+            json_encode(['identity' => $this->baseIdentity(['ms30' => 'y', 'ms14' => '', 'ms_mail' => 'g@gov.tw', 'gov_ext' => ['app_seq' => '-1', 'app_id' => 'GOV01', 'gov_id' => 'G01', 'cc00' => 'C', 'cc48' => '0101', 'cc49' => '00010000', 'gov_oid' => '']]), 'success' => true, 'max_retries' => 3]), // negative app_seq
             json_encode(['identity' => $this->baseIdentity(['ms14' => 12345]), 'success' => true]),
             json_encode(['identity' => $this->baseIdentity(['ms_mail' => ['a@b.c']]), 'success' => true]),
             json_encode(['identity' => $this->baseIdentity(), 'success' => false, 'max_retries' => -1]), // negative max_retries
@@ -517,6 +520,7 @@ class SmsV1QueueReportTest extends TestCase {
         $this->assertCount(2, $fakeDb->executed);
         $this->assertStringContainsString("NVL(GOV_ID, 'X') = NVL(:gov_id, 'X')", $fakeDb->executed[0]['sql']);
         $this->assertStringContainsString("NVL(GOV_OID, 'X') = NVL(:gov_oid, 'X')", $fakeDb->executed[0]['sql']);
+        $this->assertStringContainsString("TO_CHAR(APP_SEQ) = :app_seq", $fakeDb->executed[0]['sql']);
         $this->assertStringContainsString('UPDATE SSMSWAIT SET MS32 = :next_ms32', $fakeDb->executed[1]['sql']);
         $this->assertSame('2', $fakeDb->executed[1]['binds'][':next_ms32']);
 
@@ -553,5 +557,68 @@ class SmsV1QueueReportTest extends TestCase {
         $this->assertSame(404, $resMissing['status']);
         $this->assertSame('Not Found', $resMissing['body']['error']);
         $this->assertCount(1, $fakeDb->executed);
+    }
+
+    public function testServiceLogsWarningWhenReportQueueItemFailsWithErrorDesc(): void {
+        $ref = new \ReflectionClass(\Logger::class);
+        $prop = $ref->getProperty('_instance');
+        $originalInstance = $prop->getValue();
+
+        $spyLogger = new class {
+            /** @var array<int, string> */
+            public array $warnings = [];
+            public function warning($message): void {
+                $this->warnings[] = (string)$message;
+            }
+        };
+        // Wrap via an anonymous Logger subclass if $_instance requires Logger; check type first:
+        $loggerSub = new class($spyLogger) extends \Logger {
+            private $spy;
+            public function __construct($spy) { $this->spy = $spy; }
+            public function __destruct() {}
+            public function warning($message) { $this->spy->warning($message); }
+        };
+
+        $prop->setValue(null, $loggerSub);
+        try {
+            $fakeStore = new class implements \SmsV1StoreInterface {
+                public function getMetadata(): array { return []; }
+                public function syncCases(string $targetDate): array { return []; }
+                public function getRecords(string $table, int $limit = 200): array { return []; }
+                public function enqueueQueue(bool $a = true, bool $b = true, bool $c = true, bool $d = true): array { return []; }
+                public function getPendingQueue(): array { return ['site_id' => '', 'items' => []]; }
+                public function reportQueueItem(array $identity, bool $success, string $msg = '', int $maxRetries = 0, ?string $errorDesc = null): array {
+                    return ['action' => 'retry_incremented', 'retry_count' => 1];
+                }
+            };
+            $svc = new SmsV1Service($fakeStore);
+            $svc->reportQueueItem(
+                $this->baseIdentity(),
+                false,
+                '失敗訊息',
+                3,
+                'SMTP connection timeout'
+            );
+            $svc->reportQueueItem(
+                $this->baseIdentity(),
+                true,
+                '成功訊息',
+                3,
+                'ignored_on_success'
+            );
+            $svc->reportQueueItem(
+                $this->baseIdentity(),
+                false,
+                '失敗訊息',
+                3,
+                ''
+            );
+        } finally {
+            $prop->setValue(null, $originalInstance);
+        }
+
+        $this->assertCount(1, $spyLogger->warnings);
+        $this->assertStringContainsString('SMTP connection timeout', $spyLogger->warnings[0]);
+        $this->assertStringContainsString('115-HA01-001230', $spyLogger->warnings[0]);
     }
 }

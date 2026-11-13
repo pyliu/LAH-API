@@ -291,11 +291,15 @@ class SmsV1RecordsTest extends TestCase {
             $this->assertSame('Bad Request', $res['body']['error']);
         }
 
-        foreach (['0', '-1', 'abc', '12.5', ''] as $badLimit) {
+        foreach (['0', '-1', '5001', '99999', 'abc', '12.5', ''] as $badLimit) {
             $res = $router->dispatch('GET', '/records', ['table' => 'main', 'limit' => $badLimit], '');
             $this->assertSame(400, $res['status'], "Expected 400 for limit={$badLimit}");
             $this->assertSame('Bad Request', $res['body']['error']);
         }
+
+        $resMaxOk = $router->dispatch('GET', '/records', ['table' => 'main', 'limit' => '5000'], '');
+        $this->assertSame(200, $resMaxOk['status']);
+        $this->assertSame(5000, $resMaxOk['body']['limit']);
 
         $res405 = $router->dispatch('POST', '/records', ['table' => 'main'], '');
         $this->assertSame(405, $res405['status']);

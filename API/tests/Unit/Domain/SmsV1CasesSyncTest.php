@@ -75,6 +75,9 @@ class SmsV1CasesSyncTest extends TestCase {
 
         $invalidPayloads = [
             'not-json',
+            '[]',
+            '"1151113"',
+            '123',
             '{"target_date_yyy_mm_dd": ""}',
             '{"target_date_yyy_mm_dd": "20261113"}',
             '{"target_date_yyy_mm_dd": "115111"}',
@@ -380,20 +383,21 @@ class SmsV1CasesSyncTest extends TestCase {
             }
             public function fetchAll($raw = false) {
                 $sql = $this->currentSql;
-                if (str_starts_with($sql, 'SELECT KCNT FROM SRKEYN') && str_contains($sql, "KCDE_1 = '55'") && str_contains($sql, "KCDE_2 = '02'")) {
-                    return [['KCNT' => SmsV1Encoding::toOracleEncoding('桃園')]];
-                }
-                if (str_starts_with($sql, 'SELECT KCNT FROM SRKEYN') && str_contains($sql, "KCDE_1 = '55'") && str_contains($sql, "KCDE_2 = '01'")) {
-                    return [['KCNT' => SmsV1Encoding::toOracleEncoding('桃園地政事務所'), 'KRMK' => 'HA']];
-                }
-                if (str_starts_with($sql, 'SELECT KCNT FROM SRKEYN') && str_contains($sql, "KCDE_1 = '66'") && str_contains($sql, "KCDE_2 = '01'")) {
-                    return [['KCNT' => SmsV1Encoding::toOracleEncoding('桃園市')]];
-                }
-                if (str_starts_with($sql, 'SELECT KCNT FROM SRKEYN') && str_contains($sql, "KCDE_1 = 'SMS'")) {
-                    return [['KCNT' => '']];
-                }
                 if (str_starts_with($sql, 'SELECT KCNT FROM SRKEYN') && str_contains($sql, ':kcde_1')) {
                     $k1 = (string)($this->currentBinds[':kcde_1'] ?? '');
+                    $k2 = (string)($this->currentBinds[':kcde_2'] ?? '');
+                    if ($k1 === '55' && $k2 === '02') {
+                        return [['KCNT' => SmsV1Encoding::toOracleEncoding('桃園')]];
+                    }
+                    if ($k1 === '55' && $k2 === '01') {
+                        return [['KCNT' => SmsV1Encoding::toOracleEncoding('桃園地政事務所'), 'KRMK' => 'HA']];
+                    }
+                    if ($k1 === '66' && $k2 === '01') {
+                        return [['KCNT' => SmsV1Encoding::toOracleEncoding('桃園市')]];
+                    }
+                    if ($k1 === 'SMS' && $k2 === '01') {
+                        return [['KCNT' => '']];
+                    }
                     if ($k1 === '04') {
                         return [['KCNT' => SmsV1Encoding::toOracleEncoding('桃資')]];
                     }
@@ -520,5 +524,162 @@ class SmsV1CasesSyncTest extends TestCase {
         // First insert must have been rolled back
         $count = (int)$pdo->query("SELECT COUNT(*) FROM SSMSMAIN")->fetchColumn();
         $this->assertSame(0, $count);
+    }
+
+    public function testSyncGovCasesDeduplicatesWhenGovIdGovOidAndAppIdAreEmptyOrNull(): void {
+        $store = new SmsV1MockStore($this->createTempDbPath());
+        $pdo = $store->getPdo();
+
+        $pdo->exec("INSERT INTO SRKEYN (KCDE_1, KCDE_2, KCNT, KRMK) VALUES ('04', 'HA01', '桃資', '')");
+        $pdo->exec("INSERT INTO SRKEYN (KCDE_1, KCDE_2, KCNT, KRMK) VALUES ('06', '01', '買賣', '')");
+        $pdo->exec("INSERT INTO SRKEYN (KCDE_1, KCDE_2, KCNT, KRMK) VALUES ('48', '0101', '桃園段', '')");
+        $pdo->exec("INSERT INTO SSMS_CODE06 (COD06, ITEMS) VALUES ('01', '2')");
+
+        // Gov case with NULL/empty APP_ID, GOV_ID, and GOV_OID
+        $pdo->exec("INSERT INTO SMS_GOVINFO_M (APP_SEQ, APP_ID, GOV_NAME, EMAIL, APP_STOP, GOV_OID) VALUES
+            ('10', '', '匿名機關', 'anon@gov.tw', 'N', NULL)");
+        $pdo->exec("INSERT INTO SSMS_GOVINFO_D (APP_SEQ, GOV_ID, CC00, CC48, CC49) VALUES
+            ('10', NULL, 'C', '0101', '00090001')");
+
+        $pdo->exec("INSERT INTO SCRSMS (RM01, RM02, RM03, RM07_1, RM07_2, RM09, RM32)
+                    VALUES ('115', 'HA01', '009010', '1151113', '091000', '01', '1')");
+        $pdo->exec("INSERT INTO SCRSMS_RM1215 (RM01, RM02, RM03, RM00, RM11, RM1215)
+                    VALUES ('115', 'HA01', '009010', 'C', '0101', '00090001')");
+
+        $first = $store->syncCases('1151113');
+        $this->assertSame(1, $first['gov_notifications_inserted']);
+
+        // Second sync must deduplicate despite empty/NULL GOV_ID, GOV_OID, and APP_ID
+        $second = $store->syncCases('1151113');
+        $this->assertSame(0, $second['gov_notifications_inserted']);
+        $this->assertSame(1, (int)$pdo->query("SELECT COUNT(*) FROM SSMSMAIN")->fetchColumn());
+    }
+
+    public function testOracleStoreSyncCasesUsesNvlUnionAllAndChunksPlSqlBlocks(): void {
+        $fakeDb = new class extends \OraDB {
+            /** @var array<int, array{sql: string, binds: array<string, mixed>}> */
+            public array $executed = [];
+            private string $currentSql = '';
+            /** @var array<string, mixed> */
+            private array $currentBinds = [];
+
+            public function __construct() {}
+            public function __destruct() {}
+            public function close() {}
+            public function parse($str) {
+                $this->currentSql = (string)$str;
+                $this->currentBinds = [];
+            }
+            public function bind($bind_var, $real_var) {
+                $this->currentBinds[(string)$bind_var] = $real_var;
+            }
+            public function execute() {
+                $this->executed[] = [
+                    'sql' => $this->currentSql,
+                    'binds' => $this->currentBinds,
+                ];
+                return true;
+            }
+            public function fetchAll($raw = false) {
+                $sql = $this->currentSql;
+                if (str_starts_with($sql, 'SELECT KCNT FROM SRKEYN') && str_contains($sql, ':kcde_1')) {
+                    $k1 = (string)($this->currentBinds[':kcde_1'] ?? '');
+                    $k2 = (string)($this->currentBinds[':kcde_2'] ?? '');
+                    if ($k1 === '55' && $k2 === '01') {
+                        return [['KCNT' => SmsV1Encoding::toOracleEncoding('桃園地政事務所')]];
+                    }
+                    if ($k1 === '66' && $k2 === '01') {
+                        return [['KCNT' => SmsV1Encoding::toOracleEncoding('桃園市')]];
+                    }
+                    if ($k1 === '55' && $k2 === '02') {
+                        return [['KCNT' => SmsV1Encoding::toOracleEncoding('桃園')]];
+                    }
+                    if ($k1 === 'SMS') {
+                        return [['KCNT' => '']];
+                    }
+                    return [['KCNT' => SmsV1Encoding::toOracleEncoding('代碼')]];
+                }
+                if (str_contains($sql, "B.RM_TYPE = '18'")) {
+                    $rows = [];
+                    for ($i = 1; $i <= 45; $i++) {
+                        $rows[] = [
+                            'MS30' => 'Y',
+                            'RM01' => '115',
+                            'RM02' => 'HA01',
+                            'RM03' => sprintf('%06d', $i),
+                            'RM09' => '01',
+                            'MSID' => 'A' . sprintf('%09d', $i),
+                            'T07_1' => '1151113',
+                            'T07_2' => '093000',
+                            'TLAND' => 'HA',
+                            'LNAM' => SmsV1Encoding::toOracleEncoding('測試'),
+                            'REPLY_MOBILE' => '1',
+                            'MOBILE' => '0912' . sprintf('%06d', $i),
+                            'MOBILE2' => '',
+                            'REPLY_EMAIL' => '0',
+                            'EMAIL' => '',
+                            'EMAIL2' => '',
+                        ];
+                    }
+                    return $rows;
+                }
+                if (str_contains($sql, 'SCRSMS_RM1215')) {
+                    return [[
+                        'MS30' => 'y',
+                        'RM01' => '115',
+                        'RM02' => 'HA01',
+                        'RM03' => '009999',
+                        'RM09' => '01',
+                        'T07_1' => '1151113',
+                        'T07_2' => '091000',
+                        'TLAND' => 'HA',
+                        'GOV_ID' => '',
+                        'CC00' => 'C',
+                        'CC48' => '0101',
+                        'CC49' => '00010002',
+                        'GOV_NAME' => SmsV1Encoding::toOracleEncoding('機關'),
+                        'EMAIL' => 'g@gov.tw',
+                        'APP_ID' => '',
+                        'APP_SEQ' => '1',
+                        'GOV_OID' => '',
+                    ]];
+                }
+                return [];
+            }
+        };
+
+        $fakeWrapper = new class($fakeDb) extends \OraDBWrapper {
+            private $fakeDb;
+            public function __construct($fakeDb) { $this->fakeDb = $fakeDb; }
+            public function __destruct() {}
+            public function reachable() { return true; }
+            public function getDB() { return $this->fakeDb; }
+        };
+
+        $store = new SmsV1OracleStore($fakeWrapper);
+        $res = $store->syncCases('1151113');
+
+        $this->assertSame(45, $res['user_notifications_inserted']);
+        $this->assertSame(1, $res['gov_notifications_inserted']);
+
+        // Verify gov dedup SQL uses NVL + UNION ALL (no plain UNION)
+        $govDedupQueries = array_values(array_filter(
+            $fakeDb->executed,
+            fn(array $e): bool => str_contains($e['sql'], 'APP_SEQ = :app_seq')
+        ));
+        $this->assertCount(1, $govDedupQueries);
+        $govSql = $govDedupQueries[0]['sql'];
+        $this->assertStringContainsString("NVL(GOV_ID, 'X') = NVL(:gov_key, 'X')", $govSql);
+        $this->assertStringContainsString("NVL(APP_ID, 'X') = NVL(:app_id, 'X')", $govSql);
+        $this->assertStringContainsString('UNION ALL', $govSql);
+        $this->assertDoesNotMatchRegularExpression('/\bUNION\b(?!\s+ALL)/', $govSql);
+
+        // Verify 46 inserts were chunked into 2 PL/SQL blocks (40 + 6) with exact per-chunk binds
+        $plsqlExecs = array_values(array_filter($fakeDb->executed, fn(array $e): bool => str_starts_with($e['sql'], 'BEGIN')));
+        $this->assertCount(2, $plsqlExecs);
+        $this->assertSame(40, substr_count($plsqlExecs[0]['sql'], 'INSERT INTO SSMSMAIN'));
+        $this->assertSame(6, substr_count($plsqlExecs[1]['sql'], 'INSERT INTO SSMSMAIN'));
+        $this->assertCount(40 * 8, $plsqlExecs[0]['binds']);
+        $this->assertCount(5 * 8 + 15, $plsqlExecs[1]['binds']);
     }
 }

@@ -16,8 +16,16 @@ if (!is_string($rawBody)) {
 $router = new SmsV1Router();
 $result = $router->dispatch($method, $path, $query, $rawBody);
 
+$json = json_encode($result['body'], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+if ($json === false) {
+    $status = 500;
+    $json = '{"error":"Internal Server Error","message":"Failed to encode SMS API response."}';
+} else {
+    $status = $result['status'];
+}
+
 if (!headers_sent()) {
-    http_response_code($result['status']);
+    http_response_code($status);
     header('Content-Type: application/json; charset=utf-8');
 }
-echo json_encode($result['body'], JSON_UNESCAPED_UNICODE);
+echo $json;

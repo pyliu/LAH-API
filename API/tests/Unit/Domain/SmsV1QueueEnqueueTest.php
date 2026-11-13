@@ -421,4 +421,70 @@ class SmsV1QueueEnqueueTest extends TestCase {
         $this->assertContains('GOV01', $binds);
         $this->assertContains('2.16.886.101', $binds);
     }
+
+    public function testOracleStoreEnqueueChunksPlSqlBlocksWithoutSplittingRowPairs(): void {
+        $fakeDb = new class extends \OraDB {
+            /** @var array<int, array{sql: string, binds: array<string, mixed>}> */
+            public array $executed = [];
+            private string $currentSql = '';
+            /** @var array<string, mixed> */
+            private array $currentBinds = [];
+
+            public function __construct() {}
+            public function __destruct() {}
+            public function close() {}
+            public function parse($str) {
+                $this->currentSql = (string)$str;
+                $this->currentBinds = [];
+            }
+            public function bind($bind_var, $real_var) {
+                $this->currentBinds[(string)$bind_var] = $real_var;
+            }
+            public function execute() {
+                $this->executed[] = [
+                    'sql' => $this->currentSql,
+                    'binds' => $this->currentBinds,
+                ];
+                return true;
+            }
+            public function fetchAll($raw = false) {
+                if (str_contains($this->currentSql, 'FROM SSMSMAIN')) {
+                    $rows = [];
+                    for ($i = 1; $i <= 25; $i++) {
+                        $rows[] = [
+                            'MS03' => '115', 'MS04_1' => 'HA01', 'MS04_2' => sprintf('%06d', $i),
+                            'MS07_1' => '1151113', 'MS07_2' => sprintf('%06d', $i),
+                            'MS14' => '0912' . sprintf('%06d', $i), 'MS30' => 'Y', 'MS_TYPE' => 'M',
+                            'MS_NOTE' => SmsV1Encoding::toOracleEncoding('通知' . $i), 'MS_MAIL' => null,
+                            'APP_SEQ' => null, 'APP_ID' => null, 'GOV_ID' => null,
+                            'CC00' => null, 'CC48' => null, 'CC49' => null, 'GOV_OID' => null,
+                        ];
+                    }
+                    return $rows;
+                }
+                return [];
+            }
+        };
+
+        $fakeWrapper = new class($fakeDb) extends \OraDBWrapper {
+            private $fakeDb;
+            public function __construct($fakeDb) { $this->fakeDb = $fakeDb; }
+            public function __destruct() {}
+            public function reachable() { return true; }
+            public function getDB() { return $this->fakeDb; }
+        };
+
+        $store = new SmsV1OracleStore($fakeWrapper);
+        $res = $store->enqueueQueue(true, true, true, true);
+
+        $this->assertSame(['moved_to_wait_count' => 25, 'deleted_from_main_count' => 25], $res);
+
+        // 25 rows * 2 DMLs (INSERT + DELETE) = 50 DMLs -> chunked into 20 rows (40 DMLs) + 5 rows (10 DMLs)
+        $plsqlExecs = array_values(array_filter($fakeDb->executed, fn(array $e): bool => str_starts_with($e['sql'], 'BEGIN')));
+        $this->assertCount(2, $plsqlExecs);
+        $this->assertSame(20, substr_count($plsqlExecs[0]['sql'], 'INSERT INTO SSMSWAIT'));
+        $this->assertSame(20, substr_count($plsqlExecs[0]['sql'], 'DELETE FROM SSMSMAIN'));
+        $this->assertSame(5, substr_count($plsqlExecs[1]['sql'], 'INSERT INTO SSMSWAIT'));
+        $this->assertSame(5, substr_count($plsqlExecs[1]['sql'], 'DELETE FROM SSMSMAIN'));
+    }
 }
