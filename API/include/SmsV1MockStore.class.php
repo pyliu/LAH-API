@@ -577,6 +577,53 @@ class SmsV1MockStore implements SmsV1StoreInterface {
         ));
     }
 
+    /**
+     * 查詢三表佇列或歷史紀錄（依 MS07_1 || MS07_2 DESC 排序並限制筆數）
+     *
+     * @param string $table main|wait|log
+     * @param int $limit
+     * @return array<int, array<string, string>>
+     */
+    public function getRecords(string $table, int $limit = 200): array {
+        if ($limit < 1) {
+            throw new \InvalidArgumentException('Limit must be a positive integer.');
+        }
+
+        switch ($table) {
+            case 'main':
+                $sql = "SELECT * FROM SSMSMAIN WHERE MS_TYPE = 'M' ORDER BY COALESCE(MS07_1, '') || COALESCE(MS07_2, '') DESC LIMIT :limit";
+                break;
+            case 'wait':
+                $sql = "SELECT * FROM SSMSWAIT WHERE MS_TYPE IN ('M', 'W', 'O') ORDER BY COALESCE(MS07_1, '') || COALESCE(MS07_2, '') DESC LIMIT :limit";
+                break;
+            case 'log':
+                $sql = "SELECT * FROM SSMSLOG WHERE MS_TYPE IN ('M', 'W', 'O') ORDER BY COALESCE(MS07_1, '') || COALESCE(MS07_2, '') DESC LIMIT :limit";
+                break;
+            default:
+                throw new \InvalidArgumentException('Invalid table parameter. Allowed values: main, wait, log.');
+        }
+
+        $pdo = $this->getPdo();
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        if (!is_array($rows)) {
+            return array();
+        }
+
+        $normalized = array();
+        foreach ($rows as $row) {
+            $item = array();
+            foreach ($row as $key => $value) {
+                $lowerKey = strtolower((string)$key);
+                $item[$lowerKey] = $value === null ? '' : rtrim((string)$value);
+            }
+            $normalized[] = $item;
+        }
+        return $normalized;
+    }
+
     private function initialize(): void {
         if ($this->dbPath !== ':memory:') {
             $dir = dirname($this->dbPath);

@@ -18,4 +18,13 @@ interface SmsV1StoreInterface {
      * @return array{target_date: string, user_cases_scanned: int, user_notifications_inserted: int, gov_cases_scanned: int, gov_notifications_inserted: int}
      */
     public function syncCases(string $targetDate): array;
+
+    /**
+     * 查詢三表佇列或歷史紀錄（SSMSMAIN / SSMSWAIT / SSMSLOG）
+     *
+     * @param string $table main|wait|log
+     * @param int $limit 最大回傳筆數
+     * @return array<int, array<string, string>>
+     */
+    public function getRecords(string $table, int $limit = 200): array;
 }

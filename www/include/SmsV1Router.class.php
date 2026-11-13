@@ -35,6 +35,9 @@ class SmsV1Router {
             '/cases/sync' => array(
                 'POST' => 'handlePostCasesSync',
             ),
+            '/records' => array(
+                'GET' => 'handleGetRecords',
+            ),
         );
 
         if (!isset($routes[$normalizedPath])) {
@@ -118,6 +121,45 @@ class SmsV1Router {
         return array(
             'status' => 200,
             'body' => $this->service->syncCases($targetDate),
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $query
+     * @param string $rawBody
+     * @return array{status: int, body: array<string, mixed>}
+     */
+    private function handleGetRecords(array $query, string $rawBody): array {
+        $table = 'main';
+        if (array_key_exists('table', $query) && $query['table'] !== null) {
+            if (!is_string($query['table'])) {
+                throw new \InvalidArgumentException('Invalid table parameter. Allowed values: main, wait, log.');
+            }
+            $table = strtolower(trim($query['table']));
+            if ($table === '') {
+                throw new \InvalidArgumentException('Invalid table parameter. Allowed values: main, wait, log.');
+            }
+        }
+
+        $limit = 200;
+        if (array_key_exists('limit', $query) && $query['limit'] !== null) {
+            $rawLimit = $query['limit'];
+            if (is_int($rawLimit)) {
+                $limit = $rawLimit;
+            } elseif (is_string($rawLimit)) {
+                $trimmedLimit = trim($rawLimit);
+                if ($trimmedLimit === '' || preg_match('/^\d+$/', $trimmedLimit) !== 1) {
+                    throw new \InvalidArgumentException('Invalid limit parameter. Must be a positive integer.');
+                }
+                $limit = (int)$trimmedLimit;
+            } else {
+                throw new \InvalidArgumentException('Invalid limit parameter. Must be a positive integer.');
+            }
+        }
+
+        return array(
+            'status' => 200,
+            'body' => $this->service->getRecords($table, $limit),
         );
     }
 
